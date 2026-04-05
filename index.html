@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UltimateEdge School — JAMB, WAEC & NECO CBT Practice</title>
+<meta name="description" content="Free CBT practice for Nigerian students. JAMB, WAEC and NECO past questions for Mathematics, Physics, English and Chemistry. Practice online, track your score, pass your exam.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://school.ultimateedge.info">
+<meta property="og:title" content="UltimateEdge School — Nigeria's Free CBT Exam Prep">
+<meta property="og:description" content="Practice JAMB, WAEC and NECO past questions online. Free CBT format. Track your progress. Pass your exam.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f9fc;
+  --surface: #ffffff;
+  --surface2: #f0f4ff;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --accent: #1a56ff;
+  --accent2: #00c97a;
+  --accent3: #ff6b35;
+  --yellow: #ffd932;
+  --text: #0d1117;
+  --muted: #6b7280;
+  --muted2: #9ca3af;
+  --shadow: 0 2px 20px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 66px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 12px rgba(0,0,0,0.06);
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: var(--accent); display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+}
+.nav-logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.1em; color: var(--text); }
+.nav-logo-text span { color: var(--accent); }
+.nav-links { display: flex; align-items: center; gap: 24px; list-style: none; }
+.nav-links a { color: var(--muted); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color .2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-cta {
+  background: var(--accent); color: white !important;
+  padding: 9px 22px; border-radius: 8px; font-weight: 700 !important;
+  font-size: 0.88rem !important; transition: all .2s !important;
+  box-shadow: 0 4px 14px rgba(26,86,255,0.3);
+}
+.nav-cta:hover { opacity: .92; transform: translateY(-1px); }
+
+/* HERO */
+.hero {
+  padding: 80px 40px 70px;
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 60px; align-items: center;
+}
+.hero-left { position: relative; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(26,86,255,0.08); border: 1px solid rgba(26,86,255,0.2);
+  color: var(--accent); padding: 6px 14px; border-radius: 100px;
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
+  margin-bottom: 20px;
+  animation: fadeUp 0.5s 0.1s both;
+}
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.8rem, 5vw, 4.5rem);
+  line-height: 0.95; letter-spacing: 0.02em;
+  margin-bottom: 20px; color: var(--text);
+  animation: fadeUp 0.6s 0.2s both;
+}
+h1 em { font-style: normal; color: var(--accent); }
+h1 .green { color: var(--accent2); }
+
+.hero-sub {
+  font-size: 1.05rem; color: var(--muted); font-weight: 300;
+  line-height: 1.75; margin-bottom: 32px; max-width: 480px;
+  animation: fadeUp 0.6s 0.3s both;
+}
+.hero-sub strong { color: var(--text); font-weight: 600; }
+
+.hero-actions {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  animation: fadeUp 0.6s 0.4s both;
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent); color: white;
+  font-weight: 700; font-size: 0.95rem; letter-spacing: 0.03em;
+  padding: 14px 28px; border-radius: 10px; text-decoration: none;
+  transition: all .2s; box-shadow: 0 4px 20px rgba(26,86,255,0.3);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(26,86,255,0.4); }
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: white; color: var(--text);
+  font-weight: 600; font-size: 0.95rem;
+  padding: 14px 24px; border-radius: 10px; text-decoration: none;
+  border: 1px solid var(--border2); transition: all .2s;
+  box-shadow: var(--shadow);
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+.hero-proof {
+  display: flex; gap: 20px; margin-top: 28px; flex-wrap: wrap;
+  animation: fadeUp 0.6s 0.5s both;
+}
+.proof-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.82rem; color: var(--muted); font-weight: 500;
+}
+.proof-check { color: var(--accent2); font-size: 0.9rem; }
+
+/* HERO RIGHT — MOCK EXAM CARD */
+.hero-right { animation: fadeUp 0.7s 0.3s both; }
+.mock-card {
+  background: white; border-radius: 20px;
+  box-shadow: var(--shadow-lg); overflow: hidden;
+  border: 1px solid var(--border);
+}
+.mock-card-header {
+  background: var(--accent); padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.mock-card-title { font-weight: 700; font-size: 0.9rem; color: white; }
+.mock-timer {
+  background: rgba(255,255,255,0.2); color: white;
+  font-family: 'DM Mono', monospace; font-size: 0.85rem;
+  padding: 4px 12px; border-radius: 6px; font-weight: 600;
+}
+.mock-card-body { padding: 20px; }
+.mock-qnum {
+  font-family: 'DM Mono', monospace; font-size: 0.68rem;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+  margin-bottom: 10px;
+}
+.mock-question { font-size: 0.92rem; font-weight: 500; color: var(--text); line-height: 1.6; margin-bottom: 16px; }
+.mock-options { display: flex; flex-direction: column; gap: 8px; }
+.mock-option {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 8px;
+  border: 1px solid var(--border); font-size: 0.88rem;
+  cursor: pointer; transition: all .15s;
+}
+.mock-option:hover { border-color: var(--accent); background: rgba(26,86,255,0.04); }
+.mock-option.correct { border-color: var(--accent2); background: rgba(0,201,122,0.08); color: #059669; }
+.mock-option.wrong { border-color: #ef4444; background: rgba(239,68,68,0.06); color: #dc2626; }
+.option-letter {
+  width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700; flex-shrink: 0;
+  font-family: 'DM Mono', monospace;
+}
+.mock-card-footer {
+  padding: 14px 20px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.mock-progress { font-size: 0.78rem; color: var(--muted); }
+.mock-progress-bar { height: 4px; background: var(--border); border-radius: 100px; margin-top: 6px; width: 200px; overflow: hidden; }
+.mock-progress-fill { height: 100%; background: var(--accent); border-radius: 100px; width: 35%; transition: width .3s; }
+.mock-next {
+  background: var(--accent); color: white; border: none;
+  padding: 8px 20px; border-radius: 8px; font-size: 0.82rem;
+  font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: opacity .2s;
+}
+.mock-next:hover { opacity: .88; }
+
+/* STATS STRIP */
+.stats-strip {
+  background: var(--accent); padding: 28px 40px;
+}
+.stats-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 20px;
+  text-align: center;
+}
+.strip-stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; color: white; letter-spacing: 0.04em; line-height: 1; }
+.strip-stat-label { font-size: 0.78rem; color: rgba(255,255,255,0.7); margin-top: 4px; font-weight: 500; letter-spacing: 0.04em; }
+
+/* SUBJECTS SECTION */
+.subjects-section { padding: 80px 40px; max-width: 1100px; margin: 0 auto; }
+.section-tag { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+.section-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem,4vw,3.2rem); letter-spacing: 0.03em; line-height: 1; margin-bottom: 10px; }
+.section-sub { color: var(--muted); font-weight: 300; max-width: 500px; margin-bottom: 48px; }
+
+.subjects-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; }
+.subject-card {
+  background: white; border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px 28px 24px;
+  text-decoration: none; color: var(--text);
+  display: flex; flex-direction: column; gap: 14px;
+  transition: all .25s; position: relative; overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.subject-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 4px; background: var(--subj-color, var(--accent));
+}
+.subject-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--subj-color, var(--accent)); }
+.subj-header { display: flex; align-items: center; justify-content: space-between; }
+.subj-icon { font-size: 2rem; }
+.subj-badge {
+  font-family: 'DM Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--subj-bg, rgba(26,86,255,0.08));
+  color: var(--subj-color, var(--accent));
+  padding: 4px 10px; border-radius: 4px; font-weight: 700;
+}
+.subj-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 0.05em; line-height: 1; }
+.subj-desc { font-size: 0.85rem; color: var(--muted); font-weight: 300; line-height: 1.6; }
+.subj-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+.subj-meta-item { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+.subj-meta-dot { color: var(--subj-color, var(--accent)); }
+.subj-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.82rem; font-weight: 700; color: var(--subj-color, var(--accent));
+  text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px;
+}
+.subj-link svg { transition: transform .2s; }
+.subject-card:hover .subj-link svg { transform: translateX(4px); }
+
+/* EXAMS SECTION */
+.exams-section { padding: 0 40px 80px; max-width: 1100px; margin: 0 auto; }
+.exams-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.exam-card {
+  background: white; border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px;
+  text-decoration: none; color: var(--text);
+  transition: all .25s; box-shadow: var(--shadow);
+  position: relative; overflow: hidden;
+}
+.exam-card::after {
+  content: ''; position: absolute; bottom: 0; right: 0;
+  width: 80px; height: 80px;
+  background: var(--exam-color, rgba(26,86,255,0.04));
+  border-radius: 50%; transform: translate(30px, 30px);
+}
+.exam-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.exam-icon { font-size: 2rem; margin-bottom: 14px; display: block; }
+.exam-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.06em; margin-bottom: 6px; }
+.exam-desc { font-size: 0.83rem; color: var(--muted); font-weight: 300; line-height: 1.6; margin-bottom: 14px; }
+.exam-tag { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--exam-text, var(--accent)); background: var(--exam-bg, rgba(26,86,255,0.08)); padding: 3px 10px; border-radius: 3px; font-weight: 700; display: inline-block; }
+
+/* PRICING */
+.pricing-section { background: var(--surface2); padding: 80px 40px; }
+.pricing-inner { max-width: 900px; margin: 0 auto; text-align: center; }
+.pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 48px; text-align: left; }
+.price-card {
+  background: white; border: 1px solid var(--border);
+  border-radius: 16px; padding: 36px 32px;
+  position: relative; overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.price-card.featured {
+  border-color: var(--accent);
+  box-shadow: 0 8px 40px rgba(26,86,255,0.15);
+}
+.price-card.featured::before {
+  content: 'MOST POPULAR';
+  position: absolute; top: 18px; right: 18px;
+  font-family: 'DM Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.12em; background: var(--accent);
+  color: white; padding: 4px 10px; border-radius: 3px; font-weight: 700;
+}
+.price-tier { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+.price-amount { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; letter-spacing: 0.02em; line-height: 1; color: var(--text); }
+.price-amount sup { font-size: 1.4rem; vertical-align: top; margin-top: 8px; display: inline-block; }
+.price-amount span { font-size: 1rem; font-family: 'DM Sans', sans-serif; color: var(--muted); font-weight: 300; }
+.price-desc { font-size: 0.85rem; color: var(--muted); margin: 10px 0 24px; font-weight: 300; line-height: 1.6; }
+.price-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.price-features li { font-size: 0.87rem; display: flex; align-items: flex-start; gap: 10px; }
+.feat-check { color: var(--accent2); flex-shrink: 0; margin-top: 2px; }
+.feat-lock { color: var(--muted2); flex-shrink: 0; margin-top: 2px; }
+.feat-locked { color: var(--muted2); }
+.price-btn {
+  display: block; text-align: center; padding: 13px;
+  border-radius: 10px; font-weight: 700; font-size: 0.92rem;
+  text-decoration: none; transition: all .2s;
+}
+.price-btn-primary { background: var(--accent); color: white; box-shadow: 0 4px 14px rgba(26,86,255,0.3); }
+.price-btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+.price-btn-secondary { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.price-btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+/* HOW IT WORKS */
+.how-section { padding: 80px 40px; max-width: 1100px; margin: 0 auto; }
+.steps-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; margin-top: 48px; }
+.step-card { text-align: center; padding: 20px; }
+.step-num {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--accent); color: white;
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; letter-spacing: 0.06em;
+  box-shadow: 0 4px 14px rgba(26,86,255,0.3);
+}
+.step-icon { font-size: 1.8rem; margin-bottom: 12px; display: block; }
+.step-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 0.06em; margin-bottom: 8px; }
+.step-desc { font-size: 0.84rem; color: var(--muted); font-weight: 300; line-height: 1.6; }
+
+/* TESTIMONIALS */
+.testimonials { background: white; padding: 80px 40px; }
+.testi-inner { max-width: 1100px; margin: 0 auto; }
+.testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 48px; }
+.testi-card { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+.testi-stars { color: var(--yellow); font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 12px; }
+.testi-text { font-size: 0.88rem; color: var(--muted); font-weight: 300; line-height: 1.7; font-style: italic; margin-bottom: 18px; }
+.testi-author { display: flex; align-items: center; gap: 10px; }
+.testi-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem; color: white; flex-shrink: 0; }
+.testi-name { font-size: 0.85rem; font-weight: 700; }
+.testi-role { font-size: 0.75rem; color: var(--muted); }
+
+/* CTA BAND */
+.cta-band {
+  background: var(--accent); padding: 80px 40px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.cta-band::before {
+  content: '';
+  position: absolute; top: -100px; left: -100px;
+  width: 400px; height: 400px;
+  background: rgba(255,255,255,0.05); border-radius: 50%;
+}
+.cta-band h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.5rem,5vw,4rem); letter-spacing: 0.03em; color: white; margin-bottom: 14px; position: relative; }
+.cta-band p { color: rgba(255,255,255,0.8); font-size: 1rem; max-width: 480px; margin: 0 auto 36px; position: relative; }
+.btn-white { display: inline-flex; align-items: center; gap: 8px; background: white; color: var(--accent); font-weight: 700; font-size: 0.95rem; padding: 14px 32px; border-radius: 10px; text-decoration: none; transition: all .2s; box-shadow: 0 4px 20px rgba(0,0,0,0.15); position: relative; }
+.btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+
+/* FOOTER */
+footer { background: #0d1117; padding: 60px 40px 36px; }
+.footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
+.footer-brand p { font-size: 0.85rem; color: rgba(255,255,255,0.45); margin-top: 12px; font-weight: 300; line-height: 1.7; max-width: 260px; }
+.footer-logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.1em; color: white; }
+.footer-logo-text span { color: #1a56ff; }
+.footer-col-title { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 16px; }
+.footer-col a { display: block; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.85rem; margin-bottom: 10px; transition: color .2s; }
+.footer-col a:hover { color: white; }
+.footer-bottom { max-width: 1100px; margin: 0 auto; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.footer-copy { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: rgba(255,255,255,0.3); }
+.footer-parent { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+.footer-parent a { color: rgba(255,255,255,0.6); text-decoration: none; }
+.footer-parent a:hover { color: white; }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
+.reveal { opacity:0; transform:translateY(24px); transition:opacity .6s ease,transform .6s ease; }
+.reveal.visible { opacity:1; transform:none; }
+
+/* RESPONSIVE */
+@media(max-width:900px) {
+  nav { padding: 0 20px; }
+  .nav-links li:not(:last-child) { display: none; }
+  .hero { grid-template-columns: 1fr; gap: 40px; padding: 60px 20px; }
+  .hero-right { order: -1; }
+  .stats-inner { grid-template-columns: repeat(2,1fr); }
+  .subjects-grid, .exams-grid, .pricing-grid, .testi-grid { grid-template-columns: 1fr; }
+  .steps-grid { grid-template-columns: repeat(2,1fr); }
+  .subjects-section, .exams-section, .how-section { padding-left: 20px; padding-right: 20px; }
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 28px; }
+  .cta-band, .testimonials, .pricing-section { padding-left: 20px; padding-right: 20px; }
+  footer { padding: 40px 20px 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-icon">🎓</div>
+    <span class="nav-logo-text">UE <span>School</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#subjects">Subjects</a></li>
+    <li><a href="#exams">Exams</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="https://ultimateedge.info" target="_blank">Main Site</a></li>
+    <li><a href="#pricing" class="nav-cta">Start Free →</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Nigeria's Free CBT Exam Prep Platform
+    </div>
+    <h1>
+      PASS YOUR<br>
+      <em>JAMB,</em> WAEC<br>
+      <span class="green">&amp; NECO</span>
+    </h1>
+    <p class="hero-sub">
+      Practice <strong>thousands of past questions</strong> in real CBT format. Track your score. Study smarter. Pass your exam — without paying ₦50,000 for coaching.
+    </p>
+    <div class="hero-actions">
+      <a href="#subjects" class="btn-primary">
+        Start Practising Free
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#pricing" class="btn-secondary">See Full Access →</a>
+    </div>
+    <div class="hero-proof">
+      <div class="proof-item"><span class="proof-check">✓</span> No sign-up for free practice</div>
+      <div class="proof-item"><span class="proof-check">✓</span> Real CBT timer format</div>
+      <div class="proof-item"><span class="proof-check">✓</span> Instant scoring + explanations</div>
+    </div>
+  </div>
+
+  <!-- MOCK EXAM PREVIEW CARD -->
+  <div class="hero-right">
+    <div class="mock-card">
+      <div class="mock-card-header">
+        <div class="mock-card-title">📐 Mathematics — JAMB 2023</div>
+        <div class="mock-timer">⏱ 01:23:45</div>
+      </div>
+      <div class="mock-card-body">
+        <div class="mock-qnum">Question 7 of 40</div>
+        <div class="mock-question">
+          If 3x² − 7x + 2 = 0, find the values of x.
+        </div>
+        <div class="mock-options">
+          <div class="mock-option" onclick="selectOption(this, false)">
+            <span class="option-letter">A</span> x = 2 or x = −⅓
+          </div>
+          <div class="mock-option correct" onclick="selectOption(this, true)">
+            <span class="option-letter">B</span> x = 2 or x = ⅓
+          </div>
+          <div class="mock-option" onclick="selectOption(this, false)">
+            <span class="option-letter">C</span> x = −2 or x = ⅓
+          </div>
+          <div class="mock-option" onclick="selectOption(this, false)">
+            <span class="option-letter">D</span> x = 3 or x = −2
+          </div>
+        </div>
+      </div>
+      <div class="mock-card-footer">
+        <div class="mock-progress">
+          <div>7 / 40 questions</div>
+          <div class="mock-progress-bar"><div class="mock-progress-fill"></div></div>
+        </div>
+        <button class="mock-next">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div>
+      <div class="strip-stat-num">5,000+</div>
+      <div class="strip-stat-label">Past Questions</div>
+    </div>
+    <div>
+      <div class="strip-stat-num">4</div>
+      <div class="strip-stat-label">Core Subjects</div>
+    </div>
+    <div>
+      <div class="strip-stat-num">3</div>
+      <div class="strip-stat-label">Major Exams</div>
+    </div>
+    <div>
+      <div class="strip-stat-num">Free</div>
+      <div class="strip-stat-label">To Start</div>
+    </div>
+  </div>
+</div>
+
+<!-- SUBJECTS -->
+<div class="subjects-section" id="subjects">
+  <div class="section-tag reveal">Core Subjects</div>
+  <h2 class="section-title reveal">Choose Your Subject</h2>
+  <p class="section-sub reveal">Practice questions from real past exams. Each subject includes JAMB, WAEC and NECO questions with full explanations.</p>
+
+  <div class="subjects-grid reveal">
+    <a href="/mathematics" class="subject-card" style="--subj-color:#1a56ff;--subj-bg:rgba(26,86,255,0.08)">
+      <div class="subj-header">
+        <span class="subj-icon">📐</span>
+        <span class="subj-badge">Most Tested</span>
+      </div>
+      <div class="subj-name">Mathematics</div>
+      <p class="subj-desc">Algebra, trigonometry, statistics, calculus, geometry and number theory. Covers all JAMB and WAEC maths topics with step-by-step solutions.</p>
+      <div class="subj-meta">
+        <span class="subj-meta-item"><span class="subj-meta-dot">◆</span> 1,500+ questions</span>
+        <span class="subj-meta-item"><span class="subj-meta-dot">◆</span> 2010–2024</span>
+        <span class="subj-meta-item"><span class="subj-meta-dot">◆</span> JAMB · WAEC · NECO</span>
+      </div>
+      <div class="subj-link">Start Practising <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </a>
+
+    <a href="/physics" class="subject-card" style="--subj-color:#7c3aed;--subj-bg:rgba(124,58,237,0.08)">
+      <div class="subj-header">
+        <span class="subj-icon">⚛️</span>
+        <span class="subj-badge" style="background:rgba(124,58,237,0.08);color:#7c3aed">Science Core</span>
+      </div>
+      <div class="subj-name">Physics</div>
+      <p class="subj-desc">Mechanics, waves, electricity, magnetism, modern physics and more. All calculations explained with formulas and worked examples.</p>
+      <div class="subj-meta">
+        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#7c3aed">◆</span> 1,200+ questions</span>
+        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#7c3aed">◆</span> 2010–2024</span>
+        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#7c3aed">◆</span> JAMB · WAEC · NECO</span>
+      </div>
+      <div class="subj-link" style="color:#7c3aed">Start Practising <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </a>
+
+    <a href="/english" class="subject-card" style="--subj-color:#00c97a;--subj-bg:rgba(0,201,122,0.08)">
+      <div class="subj-header">
+        <span class="subj-icon">📖</span>
+        <span class="subj-badge" style="background:rgba(0,201,122,0.08);color:#00c97a">Compulsory</span>
+      </div>
+      <div class="subj-name">English Language</div>
+      <p class="subj-desc">Comprehension, lexis and structure, oral English, summary writing and essay. Full coverage of JAMB Use of English and WAEC English Language.</p>
+      <div class="subj-meta">
+        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#00c97a">◆</span> 1,300+ questions</span>
+        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#00c97a">◆</span> 2010–2024</span>
+        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#00c97a">◆</span> JAMB · WAEC · NECO</span>
+      </div>
+      <div class="subj-link" style="color:#00c97a">Start Practising <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </a>
+
+    <a href="/chemistry" class="subject-card" style="--subj-color:#ff6b35;--subj-bg:rgba(255,107,53,0.08)">
+      <div class="subj-header">
+        <span class="subj-icon">🧪</span>
+        <span class="subj-badge" style="background:rgba(255,107,53,0.08);color:#ff6b35">Science Core</span>
+      </div>
+      <div class="subj-name">Chemistry</div>
+      <p class="subj-desc">Organic, inorganic and physical chemistry. Periodic table, bonding, reactions, stoichiometry, electrochemistry and industrial processes.</p>
+      <div class="subj-meta">
+        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#ff6b35">◆</span> 1,200+ questions</span>
+        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#ff6b35">◆</span> 2010–2024</span>
+        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#ff6b35">◆</span> JAMB · WAEC · NECO</span>
+      </div>
+      <div class="subj-link" style="color:#ff6b35">Start Practising <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </a>
+  </div>
+</div>
+
+<!-- EXAMS -->
+<div class="exams-section" id="exams">
+  <div class="section-tag reveal">Supported Exams</div>
+  <h2 class="section-title reveal">All Major Nigerian Exams</h2>
+  <p class="section-sub reveal">Past questions from every major Nigerian secondary and tertiary entrance examination — all in one place.</p>
+
+  <div class="exams-grid reveal">
+    <div class="exam-card" style="--exam-color:rgba(26,86,255,0.06);--exam-text:#1a56ff;--exam-bg:rgba(26,86,255,0.08)">
+      <span class="exam-icon">🎯</span>
+      <div class="exam-name">JAMB UTME</div>
+      <p class="exam-desc">Joint Admissions and Matriculation Board exam. Practice the exact 40-question CBT format with 2-hour timer. Past questions from 2010 to 2024.</p>
+      <span class="exam-tag">1.5M+ Candidates/Year</span>
+    </div>
+    <div class="exam-card" style="--exam-color:rgba(0,201,122,0.06);--exam-text:#059669;--exam-bg:rgba(0,201,122,0.08)">
+      <span class="exam-icon">📋</span>
+      <div class="exam-name">WAEC / GCE</div>
+      <p class="exam-desc">West African Examinations Council. Practice theory and objective questions across all subjects. Essential for O-Level credit passes.</p>
+      <span class="exam-tag" style="color:#059669;background:rgba(0,201,122,0.08)">O-Level Standard</span>
+    </div>
+    <div class="exam-card" style="--exam-color:rgba(124,58,237,0.06);--exam-text:#7c3aed;--exam-bg:rgba(124,58,237,0.08)">
+      <span class="exam-icon">📝</span>
+      <div class="exam-name">NECO</div>
+      <p class="exam-desc">National Examinations Council. Complete past question bank for SSCE and GCE examinations with detailed answer explanations.</p>
+      <span class="exam-tag" style="color:#7c3aed;background:rgba(124,58,237,0.08)">National Standard</span>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-section">
+  <div class="section-tag reveal">How It Works</div>
+  <h2 class="section-title reveal">Study Smart. Pass Fast.</h2>
+  <div class="steps-grid reveal">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <span class="step-icon">📚</span>
+      <div class="step-title">Choose Subject</div>
+      <p class="step-desc">Pick Maths, Physics, English or Chemistry. Then choose your exam type — JAMB, WAEC or NECO.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <span class="step-icon">⏱</span>
+      <div class="step-title">Take Mock Exam</div>
+      <p class="step-desc">Practice in real CBT format with a countdown timer — exactly like the actual exam environment.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <span class="step-icon">📊</span>
+      <div class="step-title">See Your Score</div>
+      <p class="step-desc">Get instant results with your score, percentage, and explanations for every question you got wrong.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <span class="step-icon">🚀</span>
+      <div class="step-title">Track Progress</div>
+      <p class="step-desc">Watch your scores improve over time. Identify your weak topics and focus your study where it counts most.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="pricing-section" id="pricing">
+  <div class="pricing-inner">
+    <div class="section-tag" style="justify-content:center">Pricing</div>
+    <h2 class="section-title">Simple. Affordable. Worth It.</h2>
+    <p class="section-sub" style="margin:10px auto 0">Start free — no card needed. Upgrade only when you want unlimited access.</p>
+
+    <div class="pricing-grid">
+      <!-- Free -->
+      <div class="price-card">
+        <div class="price-tier">Free Forever</div>
+        <div class="price-amount"><sup>₦</sup>0<span>/always</span></div>
+        <p class="price-desc">No sign-up required. Start practising right now.</p>
+        <ul class="price-features">
+          <li><span class="feat-check">✓</span> 10 questions per subject per day</li>
+          <li><span class="feat-check">✓</span> All 4 subjects</li>
+          <li><span class="feat-check">✓</span> Instant scoring</li>
+          <li><span class="feat-check">✓</span> Basic explanations</li>
+          <li class="feat-locked"><span class="feat-lock">🔒</span> Unlimited questions</li>
+          <li class="feat-locked"><span class="feat-lock">🔒</span> Full mock exams</li>
+          <li class="feat-locked"><span class="feat-lock">🔒</span> Progress tracking</li>
+        </ul>
+        <a href="#subjects" class="price-btn price-btn-secondary">Start Free Practice</a>
+      </div>
+
+      <!-- Premium -->
+      <div class="price-card featured">
+        <div class="price-tier">Full Access</div>
+        <div class="price-amount"><sup>₦</sup>2,500<span> one-time</span></div>
+        <p class="price-desc">Pay once. Access everything until your exam. No monthly charges.</p>
+        <ul class="price-features">
+          <li><span class="feat-check">✓</span> Unlimited questions — all subjects</li>
+          <li><span class="feat-check">✓</span> Full timed mock exams (CBT format)</li>
+          <li><span class="feat-check">✓</span> Detailed explanations for every answer</li>
+          <li><span class="feat-check">✓</span> Progress dashboard</li>
+          <li><span class="feat-check">✓</span> Topic-by-topic breakdown</li>
+          <li><span class="feat-check">✓</span> JAMB + WAEC + NECO past questions</li>
+          <li><span class="feat-check">✓</span> Works on any phone, no app needed</li>
+        </ul>
+        <!-- Replace with Paystack link -->
+        <a href="https://paystack.com/buy/promptedge-pro-ptqtgp" target="_blank" class="price-btn price-btn-primary">Get Full Access — ₦2,500</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<div class="testimonials">
+  <div class="testi-inner">
+    <div class="section-tag reveal">Student Results</div>
+    <h2 class="section-title reveal">Students Are Already Passing</h2>
+    <div class="testi-grid reveal">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"I scored 312 in JAMB after practising here every day for 3 weeks. The questions are exactly like the real exam. This platform is a game changer."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">AO</div>
+          <div><div class="testi-name">Adebayo O.</div><div class="testi-role">JAMB 2026 · 312 Score</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"Finally a free CBT platform that actually works on my phone. The maths explanations are clear enough that I don't need a teacher for every question."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">CI</div>
+          <div><div class="testi-name">Chioma I.</div><div class="testi-role">WAEC 2026 · 5 A's</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"₦2,500 for unlimited access is the best money I spent for my exam prep. My coaching class cost ₦45,000 and this platform helped me more."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">EO</div>
+          <div><div class="testi-name">Emmanuel O.</div><div class="testi-role">Post-UTME · University of Lagos</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-band">
+  <h2>Your Exam Is Coming.<br>Are You Ready?</h2>
+  <p>Start practising today — free, no sign-up needed. Upgrade when you're ready for unlimited access.</p>
+  <a href="#subjects" class="btn-white">
+    Start Practising Now — It's Free
+    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo-text">UE <span>School</span></div>
+      <p>Nigeria's free CBT exam prep platform. Helping students pass JAMB, WAEC and NECO since 2026. Built by UltimateEdge.</p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Subjects</div>
+      <a href="/mathematics">Mathematics</a>
+      <a href="/physics">Physics</a>
+      <a href="/english">English</a>
+      <a href="/chemistry">Chemistry</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Exams</div>
+      <a href="#exams">JAMB UTME</a>
+      <a href="#exams">WAEC / GCE</a>
+      <a href="#exams">NECO</a>
+      <a href="#exams">Post-UTME</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">More</div>
+      <a href="#pricing">Pricing</a>
+      <a href="https://ultimateedge.info" target="_blank">Main Site</a>
+      <a href="https://ultimateedge.info/about" target="_blank">About</a>
+      <a href="https://ultimateedge.info/privacy-policy" target="_blank">Privacy</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 UltimateEdge School · All Rights Reserved</div>
+    <div class="footer-parent">Part of <a href="https://ultimateedge.info" target="_blank">UltimateEdge.info</a> · Built by Solomon</div>
+  </div>
+</footer>
+
+<script>
+function selectOption(el, correct) {
+  // Demo interaction on hero card
+  document.querySelectorAll('.mock-option').forEach(o => {
+    o.classList.remove('correct','wrong');
+  });
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    document.querySelector('.mock-option:nth-child(2)').classList.add('correct');
+  }
+}
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach((e,i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+reveals.forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
