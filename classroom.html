@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classroom — UltimateEdge School</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f7f9fc; --surface:#fff; --surface2:#f0f4ff;
+  --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.14);
+  --accent:#1a56ff; --accent2:#00c97a; --accent3:#ff6b35;
+  --text:#0d1117; --muted:#6b7280; --muted2:#9ca3af;
+  --shadow:0 2px 20px rgba(0,0,0,0.08); --shadow-lg:0 8px 40px rgba(0,0,0,0.12);
+  --math:#1a56ff; --physics:#7c3aed; --english:#00c97a; --chemistry:#ff6b35;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;overflow-x:hidden;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:66px;background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo-icon{width:36px;height:36px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.nav-logo-text{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.1em;color:var(--text);}
+.nav-logo-text span{color:var(--accent);}
+.nav-right{display:flex;align-items:center;gap:16px;}
+.nav-back{color:var(--muted);text-decoration:none;font-size:0.85rem;font-weight:500;display:flex;align-items:center;gap:5px;transition:color .2s;}
+.nav-back:hover{color:var(--text);}
+.nav-cta{background:var(--accent);color:white;padding:9px 22px;border-radius:8px;font-weight:700;font-size:0.88rem;text-decoration:none;box-shadow:0 4px 14px rgba(26,86,255,0.3);transition:all .2s;}
+.nav-cta:hover{opacity:.92;transform:translateY(-1px);}
+
+/* SUBJECT TABS */
+.subject-tabs{background:white;border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.subject-tabs::-webkit-scrollbar{display:none;}
+.subj-tab{display:flex;align-items:center;gap:8px;padding:16px 24px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;font-weight:600;font-size:0.9rem;color:var(--muted);transition:all .2s;text-decoration:none;border-top:none;border-left:none;border-right:none;background:none;font-family:'DM Sans',sans-serif;}
+.subj-tab:hover{color:var(--text);}
+.subj-tab.active{color:var(--tab-color,var(--accent));border-bottom-color:var(--tab-color,var(--accent));}
+.subj-tab-icon{font-size:1.1rem;}
+
+/* CLASSROOM LAYOUT */
+.classroom-layout{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 130px);}
+
+/* SIDEBAR — TOPIC LIST */
+.sidebar{background:white;border-right:1px solid var(--border);overflow-y:auto;position:sticky;top:130px;height:calc(100vh - 130px);}
+.sidebar-header{padding:20px 20px 12px;border-bottom:1px solid var(--border);}
+.sidebar-subject{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.05em;line-height:1;}
+.sidebar-meta{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.sidebar-progress{margin-top:12px;}
+.progress-bar{height:5px;background:var(--border);border-radius:100px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:100px;background:var(--accent);width:20%;transition:width .4s;}
+.progress-label{font-size:0.72rem;color:var(--muted);margin-top:5px;}
+
+.topic-section{padding:12px 0;}
+.topic-section-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted2);padding:6px 20px 4px;}
+.topic-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;}
+.topic-item:hover{background:var(--bg);}
+.topic-item.active{background:var(--surface2);border-left-color:var(--accent);}
+.topic-item.locked{opacity:0.55;cursor:pointer;}
+.topic-status{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;}
+.status-done{background:rgba(0,201,122,0.15);color:var(--accent2);}
+.status-active{background:rgba(26,86,255,0.12);color:var(--accent);}
+.status-lock{background:var(--bg);border:1px solid var(--border);color:var(--muted2);}
+.status-free{background:rgba(26,86,255,0.08);color:var(--accent);border:1px dashed rgba(26,86,255,0.3);}
+.topic-info{flex:1;min-width:0;}
+.topic-name-text{font-size:0.88rem;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topic-detail{font-size:0.72rem;color:var(--muted);margin-top:1px;}
+.topic-badge{font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;font-weight:700;flex-shrink:0;}
+.badge-free{background:rgba(0,201,122,0.12);color:var(--accent2);}
+.badge-lock{background:rgba(0,0,0,0.04);color:var(--muted2);}
+
+/* MAIN CONTENT AREA */
+.main-content{padding:0;overflow-y:auto;}
+
+/* VIDEO PLAYER AREA */
+.video-area{background:#000;position:relative;aspect-ratio:16/9;max-height:420px;}
+.video-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:white;}
+.video-embed{width:100%;height:100%;border:none;display:none;}
+.play-btn-large{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;transition:all .2s;backdrop-filter:blur(4px);}
+.play-btn-large:hover{background:var(--accent);border-color:var(--accent);transform:scale(1.08);}
+.video-label{font-size:0.85rem;color:rgba(255,255,255,0.6);}
+
+/* LOCKED OVERLAY */
+.locked-overlay{position:absolute;inset:0;background:rgba(13,17,23,0.85);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px;backdrop-filter:blur(4px);}
+.locked-overlay.show{display:flex;}
+.lock-icon{font-size:3rem;}
+.lock-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:white;letter-spacing:0.04em;}
+.lock-sub{font-size:0.88rem;color:rgba(255,255,255,0.6);max-width:280px;}
+.unlock-btn{background:var(--accent);color:white;border:none;padding:12px 28px;border-radius:10px;font-weight:700;font-size:0.92rem;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;display:inline-block;transition:all .2s;box-shadow:0 4px 20px rgba(26,86,255,0.4);}
+.unlock-btn:hover{transform:translateY(-2px);opacity:.92;}
+
+/* LESSON INFO */
+.lesson-info{padding:24px 32px;border-bottom:1px solid var(--border);}
+.lesson-tag{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.lesson-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:0.03em;line-height:1.1;margin-bottom:8px;}
+.lesson-meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.lesson-meta-item{display:flex;align-items:center;gap:5px;font-size:0.8rem;color:var(--muted);}
+.lesson-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;}
+.btn-quiz{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:white;font-weight:700;font-size:0.88rem;padding:11px 22px;border-radius:9px;text-decoration:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;box-shadow:0 4px 14px rgba(26,86,255,0.3);}
+.btn-quiz:hover{transform:translateY(-1px);opacity:.92;}
+.btn-next-lesson{display:inline-flex;align-items:center;gap:8px;background:white;color:var(--text);font-weight:600;font-size:0.88rem;padding:11px 22px;border-radius:9px;text-decoration:none;border:1px solid var(--border2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.btn-next-lesson:hover{border-color:var(--accent);color:var(--accent);}
+
+/* LESSON BODY — NOTES */
+.lesson-body{padding:28px 32px;}
+.lesson-section-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.06em;margin-bottom:12px;color:var(--text);}
+.lesson-notes{font-size:0.88rem;color:var(--muted);font-weight:300;line-height:1.8;margin-bottom:24px;}
+.key-points{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:28px;}
+.key-point{display:flex;align-items:flex-start;gap:10px;font-size:0.88rem;color:var(--text);}
+.kp-dot{width:20px;height:20px;border-radius:50%;background:rgba(26,86,255,0.1);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0;margin-top:2px;}
+
+/* FORMULA BOX */
+.formula-box{background:var(--surface2);border:1px solid rgba(26,86,255,0.15);border-radius:12px;padding:20px 24px;margin-bottom:28px;}
+.formula-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.formula-text{font-family:'DM Mono',monospace;font-size:1rem;color:var(--text);font-weight:500;}
+
+/* QUIZ INLINE (for after video) */
+.quiz-section{background:white;border:1px solid var(--border);border-radius:16px;padding:24px;margin-top:24px;}
+.quiz-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.quiz-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.04em;}
+.quiz-count{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;}
+.quiz-question{font-size:0.95rem;font-weight:600;margin-bottom:16px;line-height:1.5;}
+.quiz-options{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.quiz-opt{display:flex;align-items:center;gap:10px;padding:11px 15px;border-radius:9px;border:1.5px solid var(--border);font-size:0.87rem;cursor:pointer;transition:all .15s;}
+.quiz-opt:hover{border-color:var(--accent);background:rgba(26,86,255,0.04);}
+.quiz-opt.correct{border-color:var(--accent2);background:rgba(0,201,122,0.08);color:#059669;}
+.quiz-opt.wrong{border-color:#ef4444;background:rgba(239,68,68,0.06);color:#dc2626;}
+.quiz-opt.selected{border-color:var(--accent);background:rgba(26,86,255,0.05);}
+.opt-ltr{width:26px;height:26px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;font-family:'DM Mono',monospace;}
+.explanation-box{display:none;padding:14px 16px;background:rgba(0,201,122,0.08);border-radius:9px;border-left:3px solid var(--accent2);font-size:0.85rem;color:#047857;margin-bottom:14px;line-height:1.6;}
+.quiz-nav{display:flex;justify-content:space-between;align-items:center;}
+.quiz-btn{padding:10px 22px;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.quiz-btn-primary{background:var(--accent);color:white;border:none;box-shadow:0 3px 10px rgba(26,86,255,0.25);}
+.quiz-btn-secondary{background:white;color:var(--text);border:1px solid var(--border2);}
+.quiz-score-display{display:none;text-align:center;padding:24px;}
+.score-badge{display:inline-flex;align-items:center;justify-content:center;width:80px;height:80px;border-radius:50%;border:4px solid var(--accent);font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--accent);margin:0 auto 12px;}
+.score-msg{font-size:0.9rem;color:var(--muted);margin-bottom:16px;}
+.upsell-strip{background:linear-gradient(135deg,rgba(26,86,255,0.06),rgba(26,86,255,0.02));border:1.5px dashed rgba(26,86,255,0.25);border-radius:12px;padding:16px 20px;text-align:center;margin-top:20px;}
+.upsell-strip strong{font-size:0.85rem;color:var(--accent);display:block;margin-bottom:4px;}
+.upsell-strip p{font-size:0.78rem;color:var(--muted);margin-bottom:12px;}
+.upsell-btn{background:var(--accent);color:white;text-decoration:none;padding:9px 20px;border-radius:8px;font-size:0.82rem;font-weight:700;display:inline-block;transition:opacity .2s;}
+.upsell-btn:hover{opacity:.88;}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:0 20px;}
+  .subject-tabs{padding:0 16px;}
+  .classroom-layout{grid-template-columns:1fr;}
+  .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--border);}
+  .lesson-info{padding:18px 20px;}
+  .lesson-body{padding:20px;}
+}
+@media(max-width:480px){
+  nav{padding:0 16px;height:58px;}
+  .subj-tab{padding:13px 16px;font-size:0.82rem;}
+  .lesson-title{font-size:1.4rem;}
+  .lesson-actions{flex-direction:column;}
+  .btn-quiz,.btn-next-lesson{width:100%;justify-content:center;}
+  .quiz-section{padding:16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon">🎓</div>
+    <span class="nav-logo-text">UE <span>School</span></span>
+  </a>
+  <div class="nav-right">
+    <a href="index.html" class="nav-back">← Home</a>
+    <a href="index.html#pricing" class="nav-cta">Unlock All — ₦2,500</a>
+  </div>
+</nav>
+
+<!-- SUBJECT TABS -->
+<div class="subject-tabs" id="subjectTabs">
+  <button class="subj-tab active" data-subject="mathematics" style="--tab-color:#1a56ff" onclick="switchSubject('mathematics', this)">
+    <span class="subj-tab-icon">📐</span> Mathematics
+  </button>
+  <button class="subj-tab" data-subject="physics" style="--tab-color:#7c3aed" onclick="switchSubject('physics', this)">
+    <span class="subj-tab-icon">⚛️</span> Physics
+  </button>
+  <button class="subj-tab" data-subject="english" style="--tab-color:#00c97a" onclick="switchSubject('english', this)">
+    <span class="subj-tab-icon">📖</span> English Language
+  </button>
+  <button class="subj-tab" data-subject="chemistry" style="--tab-color:#ff6b35" onclick="switchSubject('chemistry', this)">
+    <span class="subj-tab-icon">🧪</span> Chemistry
+  </button>
+</div>
+
+<!-- CLASSROOM LAYOUT -->
+<div class="classroom-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-subject" id="sidebarSubject">Mathematics Syllabus</div>
+      <div class="sidebar-meta" id="sidebarMeta">4 Topics · 1,500+ Questions</div>
+      <div class="sidebar-progress">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-label" id="progressLabel">1 of 8 topics completed</div>
+      </div>
+    </div>
+    <div id="topicList"><!-- populated by JS --></div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content" id="mainContent">
+
+    <!-- VIDEO PLAYER -->
+    <div class="video-area">
+      <div class="video-placeholder" id="videoPlaceholder">
+        <div class="play-btn-large" onclick="playVideo()">▶</div>
+        <div class="video-label" id="videoLabel">Click to play lesson</div>
+      </div>
+      <iframe class="video-embed" id="videoEmbed" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+      <div class="locked-overlay" id="lockedOverlay">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-title">Premium Topic</div>
+        <div class="lock-sub">Unlock all video masterclasses across every subject for just ₦2,500 — one-time payment.</div>
+        <a href="index.html#pricing" class="unlock-btn">Unlock Full Access — ₦2,500</a>
+      </div>
+    </div>
+
+    <!-- LESSON INFO -->
+    <div class="lesson-info">
+      <div class="lesson-tag" id="lessonTag">Mathematics · Algebra</div>
+      <div class="lesson-title" id="lessonTitle">Number Bases & Quadratic Equations</div>
+      <div class="lesson-meta">
+        <span class="lesson-meta-item">🎬 <span id="lessonDuration">14 min</span></span>
+        <span class="lesson-meta-item">📝 <span id="lessonQCount">10 practice questions</span></span>
+        <span class="lesson-meta-item" id="lessonFreeTag" style="color:var(--accent2);font-weight:700;">✓ Free Preview</span>
+      </div>
+      <div class="lesson-actions">
+        <button class="btn-quiz" onclick="scrollToQuiz()">📝 Take Topic Quiz</button>
+        <button class="btn-next-lesson" onclick="nextTopic()">Next Topic →</button>
+      </div>
+    </div>
+
+    <!-- LESSON NOTES -->
+    <div class="lesson-body" id="lessonBody">
+      <div class="lesson-section-title">📌 Key Concepts</div>
+      <p class="lesson-notes" id="lessonNotes">This lesson covers the foundational algebraic concepts tested in JAMB and WAEC. Pay attention to the factorization method and the quadratic formula — these appear in almost every past paper.</p>
+
+      <ul class="key-points" id="keyPoints">
+        <li class="key-point"><span class="kp-dot">1</span> Factorization method: express as (ax + b)(cx + d) = 0</li>
+        <li class="key-point"><span class="kp-dot">2</span> Quadratic formula: x = (−b ± √(b²−4ac)) / 2a</li>
+        <li class="key-point"><span class="kp-dot">3</span> Sum of roots = −b/a · Product of roots = c/a</li>
+        <li class="key-point"><span class="kp-dot">4</span> Number base conversions: always divide by target base repeatedly</li>
+      </ul>
+
+      <div class="formula-box">
+        <div class="formula-label">Key Formula</div>
+        <div class="formula-text" id="formulaText">x = (−b ± √(b²−4ac)) / 2a &nbsp;|&nbsp; where a, b, c are coefficients</div>
+      </div>
+
+      <!-- INLINE QUIZ -->
+      <div class="quiz-section" id="quizSection">
+        <div class="quiz-header">
+          <div class="quiz-title">Topic Quiz</div>
+          <div class="quiz-count" id="quizCount">Question 1 of 3</div>
+        </div>
+        <div id="quizBody"><!-- populated by JS --></div>
+        <div class="quiz-score-display" id="scoreDisplay">
+          <div class="score-badge" id="scoreBadge">0/3</div>
+          <p class="score-msg" id="scoreMsg"></p>
+          <button class="quiz-btn quiz-btn-primary" onclick="retryQuiz()">Retry Quiz</button>
+          <div class="upsell-strip">
+            <strong>🚀 Want more questions like these?</strong>
+            <p>Unlock 1,500+ past questions, full mock exams, and all remaining topics with full explanations.</p>
+            <a href="index.html#pricing" class="upsell-btn">Get Full Access — ₦2,500</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.main-content -->
+</div><!-- /.classroom-layout -->
+
+<script>
+// ═══════════════════════════════════════════
+// CURRICULUM DATA
+// ═══════════════════════════════════════════
+const CURRICULUM = {
+  mathematics: {
+    label: 'Mathematics Syllabus',
+    meta: '8 Topics · 1,500+ Questions',
+    color: '#1a56ff',
+    sections: [
+      {
+        title: 'Number & Algebra',
+        topics: [
+          { id:'math-1', name:'Number Bases & Quadratic Equations', duration:'14 min', qcount:10, free:true, done:true,
+            tag:'Mathematics · Algebra', notes:'This lesson covers foundational algebraic concepts tested in JAMB and WAEC. Pay close attention to the factorization method and the quadratic formula — these appear in almost every past paper.',
+            keyPoints:['Factorization method: express as (ax + b)(cx + d) = 0','Quadratic formula: x = (−b ± √(b²−4ac)) / 2a','Sum of roots = −b/a · Product of roots = c/a','Number base conversions: always divide by target base repeatedly'],
+            formula:'x = (−b ± √(b²−4ac)) / 2a  |  where a, b, c are coefficients',
+            videoUrl:'', // paste YouTube embed URL here e.g. https://www.youtube.com/embed/VIDEO_ID
+            quiz:[
+              {q:'If 3x² − 7x + 2 = 0, find the values of x.',opts:['x=2 or x=1/3','x=2 or x=−1/3','x=−2 or x=1/3','x=3 or x=−2'],ans:0,exp:'Factorize: (3x−1)(x−2)=0. So x=1/3 or x=2. Answer is A.'},
+              {q:'Convert 1101₂ to base 10.',opts:['11','13','15','12'],ans:1,exp:'1×8 + 1×4 + 0×2 + 1×1 = 8+4+0+1 = 13.'},
+              {q:'The sum of roots of 2x² + 5x − 3 = 0 is:',opts:['5/2','−5/2','3/2','−3/2'],ans:1,exp:'Sum of roots = −b/a = −5/2.'}
+            ]
+          },
+          { id:'math-2', name:'Indices, Surds & Logarithms', duration:'18 min', qcount:10, free:false, done:false,
+            tag:'Mathematics · Algebra', notes:'Master the laws of indices and surds. These come up in at least 3 questions in every JAMB paper.',
+            keyPoints:['Law of indices: aᵐ × aⁿ = aᵐ⁺ⁿ','Negative index: a⁻ⁿ = 1/aⁿ','Surd rationalization: multiply by conjugate','Log rule: log(ab) = log a + log b'],
+            formula:'log_a(x) = log(x)/log(a)  |  Change of base formula',
+            videoUrl:'',
+            quiz:[
+              {q:'Simplify: 2³ × 2⁴',opts:['2⁷','2¹²','4⁷','8'],ans:0,exp:'When multiplying same base, add exponents: 2³⁺⁴ = 2⁷.'},
+              {q:'What is log₁₀(1000)?',opts:['2','3','4','10'],ans:1,exp:'log₁₀(1000) = log₁₀(10³) = 3.'},
+              {q:'Rationalize: 1/√5',opts:['√5','√5/5','5/√5','√25'],ans:1,exp:'Multiply top and bottom by √5: √5/(√5×√5) = √5/5.'}
+            ]
+          }
+        ]
+      },
+      {
+        title: 'Geometry & Trigonometry',
+        topics: [
+          { id:'math-3', name:'Trigonometry & Angles', duration:'20 min', qcount:10, free:false, done:false,
+            tag:'Mathematics · Trigonometry', notes:'SOHCAHTOA and the unit circle. Trig identities appear heavily in JAMB.',
+            keyPoints:['sin = opposite/hypotenuse','cos = adjacent/hypotenuse','tan = opposite/adjacent','sin²θ + cos²θ = 1'],
+            formula:'sin²θ + cos²θ = 1  |  tan θ = sin θ / cos θ',
+            videoUrl:'',
+            quiz:[{q:'Find sin 90°.',opts:['0','1','0.5','Undefined'],ans:1,exp:'sin 90° = 1 by definition.'},{q:'What is cos 0°?',opts:['0','1','−1','0.5'],ans:1,exp:'cos 0° = 1.'},{q:'tan 45° equals:',opts:['0','√2','1','1/√2'],ans:2,exp:'tan 45° = sin45°/cos45° = 1.'}]
+          },
+          { id:'math-4', name:'Circle Theorems & Mensuration', duration:'16 min', qcount:10, free:false, done:false,
+            tag:'Mathematics · Geometry', notes:'Circle theorems are high-yield in WAEC. Learn the 7 main theorems.',
+            keyPoints:['Angle in semicircle = 90°','Angles in same segment are equal','Area of circle = πr²','Volume of cylinder = πr²h'],
+            formula:'Area = πr²  |  Circumference = 2πr  |  Arc length = (θ/360)×2πr',
+            videoUrl:'',
+            quiz:[{q:'Area of a circle with radius 7 cm (π=22/7):',opts:['154 cm²','144 cm²','164 cm²','174 cm²'],ans:0,exp:'A = πr² = (22/7)×7² = 154 cm².'},{q:'An angle in a semicircle is always:',opts:['45°','60°','90°','180°'],ans:2,exp:'Angle in a semicircle = 90° (Thales theorem).'},{q:'Volume of cylinder r=3, h=10 (π≈3.14):',opts:['282.6','94.2','188.4','314'],ans:0,exp:'V = πr²h = 3.14×9×10 = 282.6.'}]
+          }
+        ]
+      },
+      {
+        title: 'Calculus',
+        topics: [
+          { id:'math-5', name:'Differentiation', duration:'22 min', qcount:10, free:false, done:false,
+            tag:'Mathematics · Calculus', notes:'Power rule, chain rule, and product rule. Calculus questions are almost guaranteed in JAMB.',
+            keyPoints:['Power rule: d/dx(xⁿ) = nxⁿ⁻¹','Chain rule for composite functions','Product rule: d/dx(uv) = u·v′ + v·u′','Finding stationary points: set dy/dx = 0'],
+            formula:'d/dx(xⁿ) = nxⁿ⁻¹',
+            videoUrl:'',
+            quiz:[{q:'Differentiate y = x³ + 2x',opts:['3x² + 2','3x + 2','x² + 2','3x²'],ans:0,exp:'Power rule: dy/dx = 3x² + 2.'},{q:'dy/dx of y = 5x⁴ is:',opts:['20x³','5x³','4x³','20x⁴'],ans:0,exp:'d/dx(5x⁴) = 5×4×x³ = 20x³.'},{q:'Find the gradient of y=x²+3x at x=2',opts:['7','4','10','5'],ans:0,exp:'dy/dx = 2x+3. At x=2: 2(2)+3 = 7.'}]
+          },
+          { id:'math-6', name:'Integration', duration:'19 min', qcount:10, free:false, done:false,
+            tag:'Mathematics · Calculus', notes:'Integration as the reverse of differentiation. Areas under curves.',
+            keyPoints:['∫xⁿ dx = xⁿ⁺¹/(n+1) + C','Definite integrals give area under curve','∫k dx = kx + C','Integration by substitution'],
+            formula:'∫xⁿ dx = xⁿ⁺¹/(n+1) + C',
+            videoUrl:'',
+            quiz:[{q:'∫3x² dx =',opts:['x³+C','6x+C','3x³+C','x²+C'],ans:0,exp:'∫3x² dx = 3×x³/3 + C = x³ + C.'},{q:'∫6x dx =',opts:['3x²+C','6x²+C','x²+C','12x²+C'],ans:0,exp:'∫6x dx = 6×x²/2 + C = 3x² + C.'},{q:'Evaluate ∫₀² 2x dx',opts:['4','2','8','6'],ans:0,exp:'[x²]₀² = 4 − 0 = 4.'}]
+          }
+        ]
+      },
+      {
+        title: 'Statistics & Probability',
+        topics: [
+          { id:'math-7', name:'Statistics: Mean, Median, Mode', duration:'15 min', qcount:10, free:false, done:false,
+            tag:'Mathematics · Statistics', notes:'Data representation and measures of central tendency. Always comes up in WAEC.',
+            keyPoints:['Mean = sum of values ÷ number of values','Median = middle value when sorted','Mode = most frequent value','Range = highest − lowest'],
+            formula:'Mean (x̄) = Σx / n',
+            videoUrl:'',
+            quiz:[{q:'Mean of 2,4,6,8,10 is:',opts:['5','6','7','8'],ans:1,exp:'Sum=30, n=5, Mean=30/5=6.'},{q:'Mode of 1,2,2,3,4,4,4 is:',opts:['2','3','4','1'],ans:2,exp:'4 appears 3 times — the most frequent.'},{q:'Median of 3,7,1,9,5 is:',opts:['5','7','3','9'],ans:0,exp:'Sorted: 1,3,5,7,9. Middle value = 5.'}]
+          },
+          { id:'math-8', name:'Probability', duration:'17 min', qcount:10, free:false, done:false,
+            tag:'Mathematics · Statistics', notes:'Basic probability, addition and multiplication rules.',
+            keyPoints:['P(A) = favourable outcomes / total outcomes','0 ≤ P(A) ≤ 1','P(A or B) = P(A) + P(B) − P(A and B)','P(A and B) = P(A) × P(B) for independent events'],
+            formula:'P(A) = n(A) / n(S)  |  where S = sample space',
+            videoUrl:'',
+            quiz:[{q:'A die is thrown. P(even number) =',opts:['1/6','1/3','1/2','2/3'],ans:2,exp:'Even numbers: 2,4,6 → 3 out of 6 = 1/2.'},{q:'P(A)=0.3, P(B)=0.4, independent. P(A and B)=',opts:['0.7','0.12','0.1','0.04'],ans:1,exp:'P(A∩B) = P(A)×P(B) = 0.3×0.4 = 0.12.'},{q:'What is P(impossible event)?',opts:['1','0.5','0','Cannot tell'],ans:2,exp:'Probability of an impossible event = 0.'}]
+          }
+        ]
+      }
+    ]
+  },
+  physics: {
+    label: 'Physics Syllabus', meta: '6 Topics · 1,200+ Questions', color: '#7c3aed',
+    sections:[{title:'Mechanics',topics:[
+      {id:'phy-1',name:'Scalars, Vectors & Motion',duration:'16 min',qcount:10,free:true,done:false,tag:'Physics · Mechanics',notes:'Understanding the difference between scalars and vectors is fundamental to all physics problems.',keyPoints:['Scalar: magnitude only (speed, mass, temperature)','Vector: magnitude + direction (velocity, force, displacement)','Equations of motion: v=u+at, s=ut+½at², v²=u²+2as','Resultant vector by Pythagoras for perpendicular vectors'],formula:'v = u + at  |  s = ut + ½at²  |  v² = u² + 2as',videoUrl:'',
+        quiz:[{q:'A car accelerates from rest at 2 m/s² for 5s. Final velocity is:',opts:['5 m/s','10 m/s','15 m/s','20 m/s'],ans:1,exp:'v=u+at=0+(2×5)=10 m/s.'},{q:'Which is a vector quantity?',opts:['Speed','Mass','Temperature','Displacement'],ans:3,exp:'Displacement has magnitude and direction — it is a vector.'},{q:'A ball is thrown up at 20m/s. Time to reach max height (g=10):',opts:['1s','2s','3s','4s'],ans:1,exp:'At max height v=0. t = (v−u)/a = (0−20)/−10 = 2s.'}]
+      },
+      {id:'phy-2',name:'Newton\'s Laws & Forces',duration:'20 min',qcount:10,free:false,done:false,tag:'Physics · Mechanics',notes:"Newton's laws underpin all mechanics. Know all three laws with examples.",keyPoints:["1st Law: object stays at rest/motion unless force acts","2nd Law: F = ma","3rd Law: action and reaction are equal and opposite","Weight W = mg (g ≈ 10 m/s²)"],formula:'F = ma  |  W = mg',videoUrl:'',quiz:[{q:'A 5kg object accelerates at 3m/s². Force applied:',opts:['8N','15N','2N','53N'],ans:1,exp:'F=ma=5×3=15N.'},{q:'Weight of 20kg object (g=10):',opts:['2N','200N','20N','100N'],ans:1,exp:'W=mg=20×10=200N.'},{q:'Newton\'s 3rd law states:',opts:['F=ma','Every action has equal/opposite reaction','Objects stay at rest','Velocity is constant'],ans:1,exp:'3rd law: action and reaction are equal and opposite.'}]}
+    ]},{title:'Waves & Sound',topics:[
+      {id:'phy-3',name:'Wave Properties & Sound',duration:'18 min',qcount:10,free:false,done:false,tag:'Physics · Waves',notes:'Transverse vs longitudinal waves. Speed, frequency, wavelength relationship.',keyPoints:['v = fλ (speed = frequency × wavelength)','Transverse waves: oscillation ⊥ direction of travel','Longitudinal waves: oscillation ∥ direction of travel','Sound cannot travel through vacuum'],formula:'v = fλ  |  T = 1/f',videoUrl:'',quiz:[{q:'Wave speed if f=50Hz, λ=4m:',opts:['200m/s','54m/s','12.5m/s','46m/s'],ans:0,exp:'v=fλ=50×4=200m/s.'},{q:'Sound is a ___ wave.',opts:['Transverse','Electromagnetic','Longitudinal','None'],ans:2,exp:'Sound is longitudinal — particles vibrate parallel to wave direction.'},{q:'Period of wave with f=25Hz:',opts:['0.04s','25s','0.4s','4s'],ans:0,exp:'T=1/f=1/25=0.04s.'}]}
+    ]},{title:'Electricity',topics:[
+      {id:'phy-4',name:'Current, Voltage & Ohm\'s Law',duration:'21 min',qcount:10,free:false,done:false,tag:'Physics · Electricity',notes:"Ohm's Law and circuit fundamentals. High yield in both JAMB and WAEC.",keyPoints:["V = IR (Ohm's Law)","Resistors in series: R_total = R₁+R₂+...","Resistors in parallel: 1/R = 1/R₁+1/R₂+...","Power P = IV = I²R = V²/R"],formula:"V = IR  |  P = IV  |  P = I²R",videoUrl:'',quiz:[{q:'V=12V, R=4Ω. Current I=',opts:['48A','3A','8A','16A'],ans:1,exp:'I=V/R=12/4=3A.'},{q:'Power when I=2A, R=5Ω:',opts:['20W','10W','7W','40W'],ans:0,exp:'P=I²R=4×5=20W.'},{q:'Two 6Ω resistors in parallel give:',opts:['12Ω','6Ω','3Ω','1Ω'],ans:2,exp:'1/R=1/6+1/6=2/6. R=3Ω.'}]}
+    ]}]
+  },
+  english: {
+    label: 'English Language Syllabus', meta: '5 Topics · 1,300+ Questions', color: '#00c97a',
+    sections:[{title:'Lexis & Structure',topics:[
+      {id:'eng-1',name:'Lexis, Register & Word Classes',duration:'15 min',qcount:10,free:true,done:false,tag:'English · Lexis',notes:'Understanding register, word classes and their functions in sentences.',keyPoints:['Noun: names a person, place, thing or idea','Verb: expresses action or state','Adjective: modifies a noun','Register: formal vs informal language'],formula:'Subject + Verb + Object  |  Basic Sentence Structure',videoUrl:'',quiz:[{q:'Identify the noun: "The tall boy ran fast."',opts:['tall','ran','boy','fast'],ans:2,exp:'"Boy" is a noun — it names a person.'},{q:'"She QUICKLY finished her homework." Adverb is:',opts:['She','quickly','finished','homework'],ans:1,exp:'"Quickly" modifies the verb — it is an adverb.'},{q:'Which is a proper noun?',opts:['city','happiness','Lagos','building'],ans:2,exp:'"Lagos" names a specific place — proper noun.'}]},
+      {id:'eng-2',name:'Comprehension & Summary',duration:'20 min',qcount:10,free:false,done:false,tag:'English · Comprehension',notes:'WAEC comprehension technique: read question before passage.',keyPoints:['Read questions before the passage','Find answers in order (they usually follow passage order)','Summary: pick only relevant points','Avoid lifting word-for-word from passage'],formula:'Points × Marks per Point = Total Score',videoUrl:'',quiz:[{q:'In comprehension, you should first:',opts:['Read the passage','Read the questions','Write your answer','None'],ans:1,exp:'Reading questions first guides your reading of the passage.'},{q:'A summary question asks you to:',opts:['Copy the passage','Write your opinion','Identify and restate key points concisely','Analyze the author'],ans:2,exp:'Summaries require identifying and concisely restating key points.'},{q:'Lifting means:',opts:['Paraphrasing','Copying word-for-word from passage','Using synonyms','None'],ans:1,exp:'Lifting = copying word-for-word, which loses marks in WAEC.'}]}
+    ]},{title:'Oral English',topics:[
+      {id:'eng-3',name:'Vowels, Consonants & Stress',duration:'18 min',qcount:10,free:false,done:false,tag:'English · Oral',notes:'JAMB Oral English tests phonetics. Learn vowel sounds and word stress patterns.',keyPoints:['English has 12 pure vowels + 8 diphthongs','Stress falls on different syllables changing meaning','Question words often have rising intonation','Minimal pairs: words differing in one sound'],formula:'/ɪ/ = bit  |  /iː/ = beat  |  /æ/ = bat  |  /ɑː/ = bar',videoUrl:'',quiz:[{q:'Which word has the stress on the first syllable?',opts:['reCORD (v)','REcord (n)','imPORT (v)','preSENT (v)'],ans:1,exp:'"REcord" (noun) stress falls on first syllable.'},{q:'How many vowel sounds in English?',opts:['5','20','12','26'],ans:1,exp:'English has 20 vowel sounds (12 pure + 8 diphthongs).'},{q:'The word "photograph" stress is on:',opts:['pho','to','graph','graph'],ans:0,exp:'"PHOtograph" — stress on first syllable.'}]}
+    ]}]
+  },
+  chemistry: {
+    label: 'Chemistry Syllabus', meta: '6 Topics · 1,200+ Questions', color: '#ff6b35',
+    sections:[{title:'Physical Chemistry',topics:[
+      {id:'chem-1',name:'Atomic Structure & Periodic Table',duration:'17 min',qcount:10,free:true,done:false,tag:'Chemistry · Physical',notes:'The periodic table trends are heavily tested. Know groups and periods and their properties.',keyPoints:['Atomic number = protons = electrons (neutral atom)','Mass number = protons + neutrons','Isotopes: same proton number, different neutron number','Periodic trends: electronegativity increases across period'],formula:'Mass Number = Protons + Neutrons  |  Atomic Number = Protons',videoUrl:'',quiz:[{q:'Atomic number of Carbon (C) is:',opts:['12','6','8','14'],ans:1,exp:'Carbon has 6 protons — atomic number = 6.'},{q:'Isotopes of an element have the same:',opts:['Mass number','Neutron number','Atomic number','All of the above'],ans:2,exp:'Isotopes have same atomic number (protons) but different mass numbers.'},{q:'Electronegativity across a period:',opts:['Decreases','Stays same','Increases','Random'],ans:2,exp:'Electronegativity increases across a period (left to right).'}]},
+      {id:'chem-2',name:'Chemical Bonding',duration:'19 min',qcount:10,free:false,done:false,tag:'Chemistry · Physical',notes:'Ionic, covalent and metallic bonding. WAEC questions often ask bond type and properties.',keyPoints:['Ionic: metal + non-metal, electron transfer','Covalent: non-metal + non-metal, electron sharing','Metallic: positive ions in sea of electrons','Electrovalency = ionic bond valence'],formula:'NaCl: Na⁺ + Cl⁻ = ionic bond  |  H₂O: shared electrons = covalent',videoUrl:'',quiz:[{q:'NaCl is formed by:',opts:['Covalent bonding','Ionic bonding','Metallic bonding','Hydrogen bonding'],ans:1,exp:'NaCl: Na donates electron to Cl — ionic bond.'},{q:'H₂O involves:',opts:['Ionic bonding','Metallic bonding','Covalent bonding','Van der Waals'],ans:2,exp:'Water: O and H share electrons — covalent bond.'},{q:'Which has highest melting point?',opts:['Covalent molecular','Ionic','Metallic Na','None'],ans:1,exp:'Ionic compounds generally have high melting points due to strong electrostatic forces.'}]}
+    ]},{title:'Organic Chemistry',topics:[
+      {id:'chem-3',name:'Hydrocarbons: Alkanes & Alkenes',duration:'22 min',qcount:10,free:false,done:false,tag:'Chemistry · Organic',notes:'Organic chemistry naming and reactions. Alkanes (CₙH₂ₙ₊₂) vs Alkenes (CₙH₂ₙ).',keyPoints:['Alkane: single bond, CₙH₂ₙ₊₂, saturated','Alkene: double bond, CₙH₂ₙ, unsaturated','Bromine water test: alkene decolourizes it','IUPAC naming: count longest carbon chain'],formula:'Alkane: CₙH₂ₙ₊₂  |  Alkene: CₙH₂ₙ  |  Alkyne: CₙH₂ₙ₋₂',videoUrl:'',quiz:[{q:'General formula for alkanes:',opts:['CₙH₂ₙ','CₙH₂ₙ₊₂','CₙH₂ₙ₋₂','CₙH₂ₙ₊₁'],ans:1,exp:'Alkanes: saturated, CₙH₂ₙ₊₂.'},{q:'Bromine water test for alkene:',opts:['No change','Turns blue','Decolourizes','Black precipitate'],ans:2,exp:'Alkenes decolourize bromine water due to addition reaction across double bond.'},{q:'IUPAC name for CH₃−CH₂−CH₃:',opts:['Methane','Ethane','Propane','Butane'],ans:2,exp:'3 carbon chain = prop- + ane = Propane.'}]}
+    ]}]
+  }
+};
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let activeSubject = 'mathematics';
+let activeTopic = null;
+let quizState = { questions:[], current:0, answers:{}, submitted:false };
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Check URL param
+  const params = new URLSearchParams(window.location.search);
+  const subj = params.get('subject');
+  if (subj && CURRICULUM[subj]) {
+    activeSubject = subj;
+    document.querySelectorAll('.subj-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.subject === subj);
+    });
+  }
+  loadSubject(activeSubject);
+});
+
+function switchSubject(subject, el) {
+  activeSubject = subject;
+  document.querySelectorAll('.subj-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadSubject(subject);
+}
+
+function loadSubject(subject) {
+  const data = CURRICULUM[subject];
+  if (!data) return;
+
+  // Update sidebar header
+  document.getElementById('sidebarSubject').textContent = data.label;
+  document.getElementById('sidebarMeta').textContent = data.meta;
+
+  // Build topic list
+  const list = document.getElementById('topicList');
+  list.innerHTML = '';
+  let totalTopics = 0, doneCount = 0;
+
+  data.sections.forEach(section => {
+    const secDiv = document.createElement('div');
+    secDiv.className = 'topic-section';
+    secDiv.innerHTML = `<div class="topic-section-label">${section.title}</div>`;
+    section.topics.forEach(topic => {
+      totalTopics++;
+      if (topic.done) doneCount++;
+      const item = document.createElement('div');
+      item.className = `topic-item ${topic.locked ? 'locked' : ''} ${activeTopic?.id === topic.id ? 'active' : ''}`;
+      item.id = 'ti-' + topic.id;
+      const statusClass = topic.done ? 'status-done' : (topic.free ? 'status-free' : 'status-lock');
+      const statusIcon = topic.done ? '✓' : (topic.free ? '▶' : '🔒');
+      const badgeClass = topic.free ? 'badge-free' : 'badge-lock';
+      const badgeText = topic.free ? 'FREE' : 'UNLOCK';
+      item.innerHTML = `
+        <div class="topic-status ${statusClass}">${statusIcon}</div>
+        <div class="topic-info">
+          <div class="topic-name-text">${topic.name}</div>
+          <div class="topic-detail">${topic.duration} · ${topic.qcount} questions</div>
+        </div>
+        <span class="topic-badge ${badgeClass}">${badgeText}</span>`;
+      item.addEventListener('click', () => openTopic(topic));
+      secDiv.appendChild(item);
+    });
+    list.appendChild(secDiv);
+  });
+
+  // Progress
+  const pct = Math.round((doneCount/totalTopics)*100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${doneCount} of ${totalTopics} topics completed`;
+
+  // Load first free topic by default
+  const firstFree = data.sections[0]?.topics[0];
+  if (firstFree) openTopic(firstFree);
+}
+
+function openTopic(topic) {
+  activeTopic = topic;
+
+  // Update active state in sidebar
+  document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('ti-' + topic.id);
+  if (el) el.classList.add('active');
+
+  // Lesson info
+  document.getElementById('lessonTag').textContent = topic.tag;
+  document.getElementById('lessonTitle').textContent = topic.name;
+  document.getElementById('lessonDuration').textContent = topic.duration;
+  document.getElementById('lessonQCount').textContent = `${topic.qcount} practice questions`;
+  document.getElementById('lessonFreeTag').style.display = topic.free ? 'flex' : 'none';
+  document.getElementById('lessonFreeTag').textContent = topic.free ? '✓ Free Preview' : '';
+
+  // Lesson body
+  document.getElementById('lessonNotes').textContent = topic.notes;
+  document.getElementById('formulaText').textContent = topic.formula;
+  const kpList = document.getElementById('keyPoints');
+  kpList.innerHTML = topic.keyPoints.map((kp,i) => `<li class="key-point"><span class="kp-dot">${i+1}</span>${kp}</li>`).join('');
+
+  // Video
+  const overlay = document.getElementById('lockedOverlay');
+  const placeholder = document.getElementById('videoPlaceholder');
+  const embed = document.getElementById('videoEmbed');
+  embed.style.display = 'none';
+  placeholder.style.display = 'flex';
+  if (topic.free) {
+    overlay.classList.remove('show');
+    document.getElementById('videoLabel').textContent = topic.videoUrl ? 'Click to play lesson' : 'Video coming soon — read notes below';
+  } else {
+    overlay.classList.add('show');
+  }
+
+  // Quiz
+  resetQuiz(topic.quiz);
+  document.getElementById('scoreDisplay').style.display = 'none';
+  document.getElementById('quizBody').style.display = 'block';
+
+  // Scroll to top of main content
+  document.getElementById('mainContent').scrollTo({top:0, behavior:'smooth'});
+}
+
+function playVideo() {
+  if (!activeTopic?.videoUrl) return;
+  const embed = document.getElementById('videoEmbed');
+  embed.src = activeTopic.videoUrl + '?autoplay=1';
+  embed.style.display = 'block';
+  document.getElementById('videoPlaceholder').style.display = 'none';
+}
+
+function scrollToQuiz() {
+  document.getElementById('quizSection').scrollIntoView({behavior:'smooth'});
+}
+
+function nextTopic() {
+  if (!activeSubject || !activeTopic) return;
+  const data = CURRICULUM[activeSubject];
+  const allTopics = data.sections.flatMap(s => s.topics);
+  const idx = allTopics.findIndex(t => t.id === activeTopic.id);
+  const next = allTopics[idx + 1];
+  if (next) openTopic(next);
+}
+
+// ═══════════════════════════════════════════
+// QUIZ ENGINE
+// ═══════════════════════════════════════════
+function resetQuiz(questions) {
+  quizState = { questions, current:0, answers:{}, submitted:false };
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  const { questions, current, answers, submitted } = quizState;
+  const q = questions[current];
+  if (!q) return;
+
+  document.getElementById('quizCount').textContent = `Question ${current+1} of ${questions.length}`;
+
+  const body = document.getElementById('quizBody');
+  body.innerHTML = `
+    <div class="quiz-question">${q.q}</div>
+    <div class="quiz-options">
+      ${q.opts.map((o,i) => {
+        let cls = 'quiz-opt';
+        if (submitted) {
+          if (i === q.ans) cls += ' correct';
+          else if (answers[current] === i) cls += ' wrong';
+        } else if (answers[current] === i) cls += ' selected';
+        return `<div class="${cls}" onclick="selectQuizOpt(${i})">
+          <span class="opt-ltr">${String.fromCharCode(65+i)}</span>${o}
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="explanation-box" id="expBox" style="${submitted ? 'display:block' : 'display:none'}">${q.exp}</div>
+    <div class="quiz-nav">
+      <button class="quiz-btn quiz-btn-secondary" onclick="quizNav(-1)" ${current===0?'style="visibility:hidden"':''}>← Prev</button>
+      <button class="quiz-btn quiz-btn-primary" id="quizMainBtn" onclick="${current===questions.length-1 ? 'submitQuiz()' : 'quizNav(1)'}">
+        ${submitted ? (current===questions.length-1 ? 'See Results' : 'Next →') : (current===questions.length-1 ? 'Submit' : 'Next →')}
+      </button>
+    </div>`;
+}
+
+function selectQuizOpt(i) {
+  if (quizState.submitted) return;
+  quizState.answers[quizState.current] = i;
+  renderQuizQuestion();
+}
+
+function quizNav(dir) {
+  quizState.current = Math.max(0, Math.min(quizState.questions.length-1, quizState.current+dir));
+  renderQuizQuestion();
+}
+
+function submitQuiz() {
+  quizState.submitted = true;
+  let correct = 0;
+  quizState.questions.forEach((q,i) => { if (quizState.answers[i] === q.ans) correct++; });
+  const total = quizState.questions.length;
+
+  renderQuizQuestion(); // show last q with explanation
+
+  // Show score
+  const scoreDisplay = document.getElementById('scoreDisplay');
+  const quizBody = document.getElementById('quizBody');
+  quizBody.style.display = 'none';
+  scoreDisplay.style.display = 'block';
+  document.getElementById('scoreBadge').textContent = `${correct}/${total}`;
+  const pct = Math.round((correct/total)*100);
+  const msg = pct === 100 ? '🎉 Perfect score! You\'ve mastered this topic.' : pct >= 66 ? '👍 Good job! Review the explanations and try again.' : '📚 Keep practicing. Re-watch the video and retry.';
+  document.getElementById('scoreMsg').textContent = msg;
+  document.getElementById('quizCount').textContent = `Score: ${correct}/${total}`;
+}
+
+function retryQuiz() {
+  document.getElementById('scoreDisplay').style.display = 'none';
+  document.getElementById('quizBody').style.display = 'block';
+  resetQuiz(activeTopic.quiz);
+}
+</script>
+</body>
+</html>
