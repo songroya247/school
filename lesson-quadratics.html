@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quadratic Equations — UltimateEdge School</title>
+<link href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,700;1,400&family=Share+Tech+Mono&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{
+  background:#0a0f1a;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  min-height:100vh;
+  font-family:'DM Sans',sans-serif;
+  color:#fff;
+  padding:20px;
+}
+
+/* ── LESSON WRAPPER ── */
+#lessonWrap{
+  width:min(900px,98vw);
+  display:flex; flex-direction:column; gap:0;
+}
+
+/* ── HEADER BAR ── */
+.lesson-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 4px 8px;
+}
+.lesson-subject{
+  font-size:0.7rem; font-weight:700; letter-spacing:2px;
+  text-transform:uppercase; color:#1a56ff;
+  font-family:'Share Tech Mono',monospace;
+}
+.lesson-title-text{
+  font-size:0.85rem; font-weight:600; color:rgba(255,255,255,0.7);
+}
+.lesson-badge{
+  font-family:'Share Tech Mono',monospace;
+  font-size:0.6rem; letter-spacing:1.5px; text-transform:uppercase;
+  padding:4px 10px; border-radius:4px;
+  background:rgba(0,201,122,0.15); color:#00c97a;
+  border:1px solid rgba(0,201,122,0.3);
+}
+
+/* ── CANVAS ── */
+#canvasWrap{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 0 60px rgba(0,0,0,0.8);
+  cursor:pointer;
+}
+canvas#c{ width:100%; height:100%; display:block; }
+
+/* BIG PLAY BUTTON OVERLAY */
+#bigPlay{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.45);
+  transition:opacity .25s;
+  border-radius:10px;
+}
+#bigPlay.hidden{ opacity:0; pointer-events:none; }
+.big-play-circle{
+  width:72px; height:72px; border-radius:50%;
+  background:rgba(26,86,255,0.85);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.8rem;
+  box-shadow:0 0 40px rgba(26,86,255,0.6);
+  transition:transform .2s;
+}
+.big-play-circle:hover{ transform:scale(1.1); }
+
+/* SCENE CAPTION */
+#captionBox{
+  position:absolute; bottom:10px; left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,0.72);
+  backdrop-filter:blur(6px);
+  border-radius:6px;
+  padding:7px 18px;
+  font-size:0.82rem; color:rgba(255,255,255,0.9);
+  max-width:88%; text-align:center;
+  line-height:1.45;
+  border:1px solid rgba(255,255,255,0.08);
+  transition:opacity .3s;
+  pointer-events:none;
+}
+#captionBox.hidden{ opacity:0; }
+
+/* ── VIDEO CONTROLS BAR ── */
+#controls{
+  background:#111827;
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:0 0 10px 10px;
+  padding:10px 16px 12px;
+  display:flex; flex-direction:column; gap:10px;
+}
+
+/* Progress / seek bar */
+.progress-wrap{
+  display:flex; align-items:center; gap:10px;
+}
+.time-label{
+  font-family:'Share Tech Mono',monospace;
+  font-size:0.68rem; color:rgba(255,255,255,0.45);
+  white-space:nowrap; min-width:36px;
+}
+.seek-bar{
+  flex:1; -webkit-appearance:none; appearance:none;
+  height:4px; border-radius:100px;
+  background:rgba(255,255,255,0.12);
+  outline:none; cursor:pointer;
+  accent-color:#1a56ff;
+}
+.seek-bar::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:14px; height:14px; border-radius:50%;
+  background:#1a56ff;
+  box-shadow:0 0 6px rgba(26,86,255,0.7);
+  cursor:pointer;
+}
+
+/* Buttons row */
+.btn-row{
+  display:flex; align-items:center; gap:8px;
+  flex-wrap:wrap;
+}
+.ctrl-btn{
+  display:inline-flex; align-items:center; gap:5px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  color:rgba(255,255,255,0.85);
+  font-family:'Share Tech Mono',monospace;
+  font-size:0.7rem; letter-spacing:1px;
+  padding:7px 14px; border-radius:6px;
+  cursor:pointer; transition:all .18s;
+  white-space:nowrap;
+}
+.ctrl-btn:hover{ background:rgba(255,255,255,0.12); }
+.ctrl-btn.primary{
+  background:rgba(26,86,255,0.2);
+  border-color:rgba(26,86,255,0.5);
+  color:#7ba7ff;
+}
+.ctrl-btn.primary:hover{ background:rgba(26,86,255,0.32); }
+.ctrl-btn.active-speed{
+  background:rgba(26,86,255,0.35);
+  border-color:#1a56ff;
+  color:#fff;
+}
+
+/* Scene dots */
+#scene-dots{
+  display:flex; gap:6px; align-items:center;
+  flex:1; justify-content:center; flex-wrap:wrap;
+}
+.dot{
+  width:8px; height:8px; border-radius:50%;
+  background:rgba(255,255,255,0.18); cursor:pointer;
+  transition:all .2s; border:1px solid rgba(255,255,255,0.08);
+}
+.dot.active{ background:#1a56ff; transform:scale(1.4); }
+.dot:hover{ background:rgba(26,86,255,0.6); }
+
+.scene-label{
+  font-family:'Share Tech Mono',monospace;
+  font-size:0.62rem; color:rgba(255,255,255,0.3);
+  letter-spacing:1px; min-width:70px; text-align:right;
+}
+
+/* Speed buttons */
+.speed-group{ display:flex; gap:4px; align-items:center; }
+.speed-label{
+  font-family:'Share Tech Mono',monospace;
+  font-size:0.62rem; color:rgba(255,255,255,0.35);
+  margin-right:2px;
+}
+
+/* Voice indicator */
+#voiceStatus{
+  font-size:0.65rem; color:rgba(255,255,255,0.3);
+  font-family:'Share Tech Mono',monospace;
+  display:flex; align-items:center; gap:5px;
+  margin-left:auto;
+}
+.voice-dot{
+  width:6px; height:6px; border-radius:50%;
+  background:#00c97a;
+  animation:vblink 1.2s infinite;
+}
+@keyframes vblink{ 0%,100%{opacity:1} 50%{opacity:0.2} }
+#voiceStatus.muted .voice-dot{ background:#6b7280; animation:none; }
+
+@media(max-width:500px){
+  .ctrl-btn{ padding:6px 10px; font-size:0.62rem; }
+  .speed-group .ctrl-btn{ padding:5px 8px; }
+}
+</style>
+</head>
+<body>
+
+<div id="lessonWrap">
+
+  <!-- HEADER -->
+  <div class="lesson-header">
+    <div>
+      <div class="lesson-subject">Mathematics · Algebra</div>
+      <div class="lesson-title-text">Quadratic Equations — JAMB & WAEC Mastery</div>
+    </div>
+    <div class="lesson-badge">FREE LESSON</div>
+  </div>
+
+  <!-- CANVAS + OVERLAYS -->
+  <div id="canvasWrap" onclick="handleCanvasClick()">
+    <canvas id="c"></canvas>
+    <div id="bigPlay">
+      <div class="big-play-circle">▶</div>
+    </div>
+    <div id="captionBox" class="hidden"></div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div id="controls">
+
+    <!-- Progress bar -->
+    <div class="progress-wrap">
+      <span class="time-label" id="timeElapsed">0:00</span>
+      <input type="range" class="seek-bar" id="seekBar" min="0" max="1000" value="0" oninput="onSeek(this.value)">
+      <span class="time-label" id="timeTotal">0:00</span>
+    </div>
+
+    <!-- Buttons row -->
+    <div class="btn-row">
+      <button class="ctrl-btn" onclick="prevScene()">◀ PREV</button>
+      <button class="ctrl-btn primary" id="btnPlay" onclick="togglePlay()">▶ PLAY</button>
+      <button class="ctrl-btn" onclick="nextScene()">NEXT ▶</button>
+
+      <div id="scene-dots"></div>
+      <div class="scene-label" id="sceneLabel">Scene 1 / 6</div>
+
+      <!-- Speed -->
+      <div class="speed-group">
+        <span class="speed-label">SPEED</span>
+        <button class="ctrl-btn" id="sp05" onclick="setSpeed(0.5)">0.5×</button>
+        <button class="ctrl-btn active-speed" id="sp10" onclick="setSpeed(1)">1×</button>
+        <button class="ctrl-btn" id="sp15" onclick="setSpeed(1.5)">1.5×</button>
+        <button class="ctrl-btn" id="sp20" onclick="setSpeed(2)">2×</button>
+      </div>
+
+      <!-- Voice toggle -->
+      <div id="voiceStatus" onclick="toggleVoice()" style="cursor:pointer" title="Toggle narration">
+        <div class="voice-dot"></div>
+        <span id="voiceLabel">VOICE ON</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  CANVAS SETUP
+// ═══════════════════════════════════════════════════════
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const W = 900, H = 506;
+canvas.width = W; canvas.height = H;
+
+// ── Colours ──
+const C = {
+  bg:'#0d1117', accent:'#1a56ff', gold:'#f4a820',
+  green:'#00c97a', red:'#ff6b6b', white:'#f0f0f0',
+  dim:'rgba(240,240,240,0.5)', muted:'rgba(240,240,240,0.28)',
+  cyan:'#58c4dc', purple:'#a78bfa', orange:'#ff6b35',
+  waterLight:'#7de8ff', water:'#1a6ea0', waterDark:'#0a3a55',
+};
+
+// ── Easing ──
+const ease = {
+  out3: t=>1-Math.pow(1-t,3),
+  in3:  t=>t*t*t,
+  inOut:t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,
+  out2: t=>1-(1-t)*(1-t),
+  linear:t=>t,
+};
+
+function lerp(a,b,t){ return a+(b-a)*t; }
+function alpha(hex,a){
+  const h=s=>parseInt(s,16);
+  if(hex.startsWith('rgba')||hex.startsWith('rgb')) return hex;
+  return `rgba(${h(hex.slice(1,3))},${h(hex.slice(3,5))},${h(hex.slice(5,7))},${a})`;
+}
+function seg(t,s,e,fn=ease.out3){
+  if(t<=s)return 0; if(t>=e)return 1;
+  return fn((t-s)/(e-s));
+}
+
+// ── Draw helpers ──
+function rect(x,y,w,h,fill,stroke,sw=2){
+  ctx.beginPath(); ctx.rect(x,y,w,h);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=sw;ctx.stroke();}
+}
+function roundRect(x,y,w,h,r,fill,stroke,sw=2){
+  ctx.beginPath(); ctx.roundRect(x,y,w,h,r);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=sw;ctx.stroke();}
+}
+function circle(x,y,r,fill,stroke,sw=2){
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=sw;ctx.stroke();}
+}
+function line(x1,y1,x2,y2,col,w=2){
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+  ctx.strokeStyle=col;ctx.lineWidth=w;ctx.stroke();
+}
+function arrow(x1,y1,x2,y2,col,w=3,hs=12){
+  const dx=x2-x1,dy=y2-y1,ang=Math.atan2(dy,dx);
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+  ctx.strokeStyle=col;ctx.lineWidth=w;ctx.stroke();
+  ctx.save();ctx.translate(x2,y2);ctx.rotate(ang);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-hs,-hs*.4);ctx.lineTo(-hs,hs*.4);ctx.closePath();
+  ctx.fillStyle=col;ctx.fill();ctx.restore();
+}
+
+function txt(str,x,y,{size=22,color=C.white,align='left',baseline='middle',bold=false,italic=false,font='DM Sans',alpha:a=1}={}){
+  ctx.save();ctx.globalAlpha*=a;
+  ctx.fillStyle=color;ctx.textAlign=align;ctx.textBaseline=baseline;
+  ctx.font=`${italic?'italic ':''}${bold?'bold ':''}${size}px "${font}",sans-serif`;
+  ctx.fillText(str,x,y);ctx.restore();
+}
+function mtxt(str,x,y,opts={}){
+  return txt(str,x,y,{font:'STIX Two Text',...opts});
+}
+function glowTxt(str,x,y,color,size,blur=20){
+  ctx.save();
+  ctx.shadowColor=color;ctx.shadowBlur=blur;
+  ctx.fillStyle=color;ctx.font=`bold ${size}px "STIX Two Text",serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(str,x,y);ctx.restore();
+}
+function drawGrid(a=0.05){
+  ctx.save();ctx.globalAlpha=a;
+  ctx.strokeStyle=C.cyan;ctx.lineWidth=1;
+  const s=50;
+  for(let x=0;x<=W;x+=s){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<=H;y+=s){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.restore();
+}
+function infoBox(x,y,w,h,borderColor,lines,lineColors=[],fs=19){
+  roundRect(x,y,w,h,10,alpha('#000',0.55),borderColor,2);
+  lines.forEach((l,i)=>{
+    const c=lineColors[i]||C.white;
+    mtxt(l,x+w/2,y+h/(lines.length+1)*(i+1),{size:fs,color:c,align:'center'});
+  });
+}
+
+// Highlight box behind text
+function highlight(x,y,w,h,col){
+  roundRect(x-6,y-h/2-4,w+12,h+8,5,alpha(col,0.12),alpha(col,0.35),1.5);
+}
+
+// ═══════════════════════════════════════════════════════
+//  NARRATION SCRIPT  (Edge TTS — Nigerian English)
+//  Each scene has a voiceover string.
+//  We use the Web Speech API as a fallback (Edge TTS
+//  voices must be available on the user's device).
+// ═══════════════════════════════════════════════════════
+const NARRATIONS = [
+  // Scene 1 — Title
+  "Welcome to UltimateEdge School. Today, we are going to master Quadratic Equations — one of the most important topics in JAMB and WAEC Mathematics. By the end of this lesson, you will be able to solve any quadratic equation that appears in your exam.",
+
+  // Scene 2 — What is a Quadratic?
+  "So, what exactly is a quadratic equation? A quadratic equation is any equation of the form: a x squared plus b x plus c equals zero — where a, b, and c are numbers, and a cannot be zero. The highest power of x is 2. That is what makes it quadratic. For example: 3x squared minus 7x plus 2 equals zero. This is a classic JAMB question.",
+
+  // Scene 3 — Factorization Method
+  "The first method is Factorization — and this is the fastest method for JAMB. Here is how it works. Take 3x squared minus 7x plus 2. We need two numbers that multiply to give a times c — that is 3 times 2 equals 6 — and add to give b, which is negative 7. Those numbers are negative 6 and negative 1. We split the middle term and factor by grouping. This gives us the bracket 3x minus 1, times the bracket x minus 2, equals zero. So x equals one-third, or x equals 2.",
+
+  // Scene 4 — Quadratic Formula
+  "The second method is the Quadratic Formula — and this works for EVERY quadratic equation, even when factorization is difficult. The formula is: x equals negative b, plus or minus square root of b squared minus 4ac, all divided by 2a. The expression under the square root is called the Discriminant. If it is positive, there are 2 real roots. If it is zero, there is 1 root. If it is negative, there are no real roots.",
+
+  // Scene 5 — Roots & Relationship
+  "Here is a powerful shortcut that JAMB loves to test. For any quadratic a x squared plus b x plus c, the SUM of roots equals negative b over a. The PRODUCT of roots equals c over a. Memorise these two formulas. They save you from solving the full equation when the question only asks for sum or product.",
+
+  // Scene 6 — Worked JAMB Example
+  "Now let us solve a real JAMB past question together. The question says: If 3x squared minus 7x plus 2 equals zero, find the values of x. Step one — multiply a and c: 3 times 2 is 6. Step two — find factors of 6 that add up to negative 7: those are negative 6 and negative 1. Step three — split and factor: we get x equals 2 or x equals one-third. The answer is option A. Always try factorization first in JAMB — it is the fastest approach.",
+];
+
+// ═══════════════════════════════════════════════════════
+//  TTS ENGINE — Edge Nigerian Voice
+// ═══════════════════════════════════════════════════════
+let voiceOn = true;
+let currentUtterance = null;
+let voiceReady = false;
+let nigerianVoice = null;
+
+function initVoice(){
+  if(!window.speechSynthesis) return;
+  const setVoice = ()=>{
+    const voices = speechSynthesis.getVoices();
+    // Try Edge Nigerian English first
+    nigerianVoice =
+      voices.find(v=>v.name.includes('Ezinne'))          || // Edge Nigerian
+      voices.find(v=>v.name.includes('Adaeze'))          ||
+      voices.find(v=>v.name.includes('Abeo'))            ||
+      voices.find(v=>v.lang==='en-NG')                   || // any en-NG
+      voices.find(v=>v.name.includes('en-NG'))           ||
+      voices.find(v=>v.name.includes('Nigerian'))        ||
+      voices.find(v=>v.name.includes('Zira'))            || // fallback clear US
+      voices.find(v=>v.lang==='en-GB')                   || // British fallback
+      voices.find(v=>v.lang.startsWith('en'))            || // any English
+      null;
+    voiceReady = true;
+  };
+  if(speechSynthesis.getVoices().length>0) setVoice();
+  else speechSynthesis.onvoiceschanged = setVoice;
+}
+
+function speakScene(idx){
+  if(!voiceOn || !window.speechSynthesis) return;
+  stopSpeech();
+  const text = NARRATIONS[idx];
+  if(!text) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate  = playSpeed;        // respects speed control
+  u.pitch = 1.0;
+  u.volume = 1.0;
+  if(nigerianVoice) u.voice = nigerianVoice;
+  currentUtterance = u;
+  speechSynthesis.speak(u);
+}
+
+function stopSpeech(){
+  if(window.speechSynthesis) speechSynthesis.cancel();
+  currentUtterance = null;
+}
+
+function toggleVoice(){
+  voiceOn = !voiceOn;
+  const vs = document.getElementById('voiceStatus');
+  const vl = document.getElementById('voiceLabel');
+  if(voiceOn){
+    vs.classList.remove('muted');
+    vl.textContent='VOICE ON';
+    if(playing) speakScene(sceneIdx);
+  } else {
+    vs.classList.add('muted');
+    vl.textContent='VOICE OFF';
+    stopSpeech();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  ANIMATION ENGINE
+// ═══════════════════════════════════════════════════════
+let sceneIdx   = 0;
+let sceneT     = 0;
+let playing    = false;
+let lastTS     = null;
+let rafId      = null;
+let playSpeed  = 1;
+
+const SCENE_DUR = 9000; // ms per scene at 1×
+const SCENES = [];
+function addScene(fn){ SCENES.push(fn); }
+
+const CAPTIONS = [
+  "Quadratic Equations — JAMB & WAEC Mastery",
+  "Form: ax² + bx + c = 0   (a ≠ 0)",
+  "Factorization: split the middle term and group",
+  "Quadratic Formula: x = (−b ± √(b²−4ac)) / 2a",
+  "Sum of roots = −b/a  ·  Product of roots = c/a",
+  "JAMB Q: 3x² − 7x + 2 = 0  →  x = 2 or x = ⅓",
+];
+
+function totalDuration(){ return SCENES.length * (SCENE_DUR/playSpeed); }
+function elapsed(){ return (sceneIdx*(SCENE_DUR/playSpeed)) + sceneT*(SCENE_DUR/playSpeed); }
+
+function fmtTime(ms){
+  const s=Math.floor(ms/1000);
+  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+function updateProgressUI(){
+  const tot = totalDuration();
+  const el  = elapsed();
+  document.getElementById('seekBar').value = Math.round((el/tot)*1000);
+  document.getElementById('timeElapsed').textContent = fmtTime(el);
+  document.getElementById('timeTotal').textContent   = fmtTime(tot);
+}
+
+function buildDots(){
+  const el=document.getElementById('scene-dots');
+  el.innerHTML='';
+  SCENES.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='dot'+(i===sceneIdx?' active':'');
+    d.onclick=()=>goScene(i);
+    el.appendChild(d);
+  });
+}
+function updateUI(){
+  document.getElementById('sceneLabel').textContent=`Scene ${sceneIdx+1} / ${SCENES.length}`;
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===sceneIdx));
+  document.getElementById('btnPlay').textContent = playing?'⏸ PAUSE':'▶ PLAY';
+  // caption
+  const cap=document.getElementById('captionBox');
+  cap.textContent = CAPTIONS[sceneIdx]||'';
+  cap.classList.toggle('hidden',!playing);
+  // big play
+  document.getElementById('bigPlay').classList.toggle('hidden',playing);
+  updateProgressUI();
+}
+
+function goScene(i, resetT=true){
+  stopSpeech();
+  sceneIdx = Math.max(0,Math.min(SCENES.length-1,i));
+  if(resetT) sceneT=0;
+  lastTS=null;
+  buildDots(); updateUI();
+  if(!playing) renderFrame(sceneT);
+  if(playing) speakScene(sceneIdx);
+}
+function prevScene(){ goScene(sceneIdx-1); }
+function nextScene(){ goScene(sceneIdx+1); }
+
+function togglePlay(){
+  playing=!playing;
+  if(playing){
+    lastTS=null;
+    rafId=requestAnimationFrame(tick);
+    speakScene(sceneIdx);
+  } else {
+    cancelAnimationFrame(rafId);
+    stopSpeech();
+  }
+  updateUI();
+}
+
+function handleCanvasClick(){
+  togglePlay();
+}
+
+function setSpeed(s){
+  playSpeed=s;
+  ['05','10','15','20'].forEach(k=>{
+    document.getElementById('sp'+k).classList.remove('active-speed');
+  });
+  document.getElementById('sp'+String(s).replace('.','').padStart(2,'0')).classList.add('active-speed');
+  // restart speech at new rate
+  if(playing && voiceOn){ stopSpeech(); speakScene(sceneIdx); }
+  updateProgressUI();
+}
+
+function onSeek(val){
+  const frac = val/1000;
+  const total = SCENE_DUR/playSpeed;
+  const globalT = frac * SCENES.length;
+  const newScene = Math.min(Math.floor(globalT), SCENES.length-1);
+  const newT     = globalT - newScene;
+  stopSpeech();
+  sceneIdx = newScene; sceneT = newT; lastTS=null;
+  buildDots(); updateUI();
+  renderFrame(sceneT);
+  if(playing) speakScene(sceneIdx);
+}
+
+function tick(ts){
+  if(!lastTS) lastTS=ts;
+  const dt = (ts-lastTS)*playSpeed;
+  lastTS=ts;
+  sceneT = Math.min(sceneT + dt/SCENE_DUR, 1);
+  renderFrame(sceneT);
+  updateProgressUI();
+  if(sceneT>=1){
+    if(sceneIdx<SCENES.length-1){ goScene(sceneIdx+1); }
+    else { playing=false; updateUI(); stopSpeech(); return; }
+  }
+  if(playing) rafId=requestAnimationFrame(tick);
+}
+
+function renderFrame(t){
+  ctx.clearRect(0,0,W,H);
+  rect(0,0,W,H,C.bg);
+  drawGrid();
+  SCENES[sceneIdx](t);
+}
+
+// ═══════════════════════════════════════════════════════
+//  SCENE 1 — TITLE
+// ═══════════════════════════════════════════════════════
+addScene(function sceneTitle(t){
+  // animated wave bg
+  ctx.save(); ctx.globalAlpha=0.07;
+  for(let i=0;i<5;i++){
+    ctx.beginPath();
+    for(let x=0;x<=W;x+=4){
+      const y=H*0.75+i*30+Math.sin((x/W)*Math.PI*3+t*Math.PI*3+i*1.1)*20;
+      x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle=C.accent;ctx.lineWidth=2;ctx.stroke();
+  }
+  ctx.restore();
+
+  // UE badge
+  const b1=seg(t,0,0.15);
+  ctx.save();ctx.globalAlpha=b1;
+  roundRect(W/2-90,H*0.14,180,30,6,alpha(C.accent,0.15),alpha(C.accent,0.5),1.5);
+  txt('ULTIMATEEDGE SCHOOL',W/2,H*0.155,{size:11,color:C.accent,align:'center',bold:true});
+  ctx.restore();
+
+  // Title lines
+  const t1=seg(t,0.1,0.3);
+  const t2=seg(t,0.22,0.42);
+  const t3=seg(t,0.36,0.54);
+
+  ctx.save();ctx.globalAlpha=t1;
+  glowTxt('QUADRATIC',W/2,H*0.35,C.white,66);
+  ctx.restore();
+
+  ctx.save();ctx.globalAlpha=t2;
+  glowTxt('EQUATIONS',W/2,H*0.49,C.gold,72);
+  ctx.restore();
+
+  ctx.save();ctx.globalAlpha=t3;
+  txt('JAMB · WAEC · NECO  —  Algebra Mastery',W/2,H*0.63,
+    {size:20,color:C.cyan,align:'center',italic:true});
+  ctx.restore();
+
+  // formula hint
+  const t4=seg(t,0.5,0.7);
+  ctx.save();ctx.globalAlpha=t4;
+  roundRect(W/2-200,H*0.72,400,42,8,alpha(C.gold,0.1),C.gold,1.5);
+  mtxt('ax² + bx + c = 0',W/2,H*0.741,{size:24,color:C.gold,align:'center'});
+  ctx.restore();
+
+  if(t>0.88){ctx.globalAlpha=seg(t,0.88,1);rect(0,0,W,H,C.bg);}
+});
+
+// ═══════════════════════════════════════════════════════
+//  SCENE 2 — WHAT IS A QUADRATIC?
+// ═══════════════════════════════════════════════════════
+addScene(function sceneWhat(t){
+  const ma=seg(t,0,0.07);
+  ctx.save();ctx.globalAlpha=ma;
+
+  // Title
+  ctx.save();ctx.globalAlpha=seg(t,0,0.14)*ma;
+  glowTxt('What is a Quadratic Equation?',W/2,42,C.gold,34);
+  ctx.restore();
+
+  // General form box
+  const f1=seg(t,0.1,0.26);
+  ctx.save();ctx.globalAlpha=f1*ma;
+  infoBox(W/2-260,72,520,62,C.accent,
+    ['ax² + bx + c = 0   (where a ≠ 0)'],
+    [C.cyan],24);
+  ctx.restore();
+
+  // Labels: a, b, c
+  const labels=[
+    {label:'a',desc:'Coefficient of x²  (cannot be 0)',x:180,show:0.28,col:C.gold},
+    {label:'b',desc:'Coefficient of x',x:180,show:0.38,col:C.green},
+    {label:'c',desc:'Constant term',x:180,show:0.47,col:C.purple},
+  ];
+  labels.forEach(({label,desc,show,col},i)=>{
+    const a=seg(t,show,show+0.12)*ma;
+    ctx.save();ctx.globalAlpha=a;
+    const y=170+i*58;
+    circle(120,y,18,alpha(col,0.15),col,2);
+    txt(label,120,y,{size:20,color:col,align:'center',bold:true});
+    txt('→',148,y,{size:18,color:C.dim,align:'left'});
+    txt(desc,162,y,{size:17,color:C.white});
+    ctx.restore();
+  });
+
+  // JAMB example
+  const ex=seg(t,0.6,0.76)*ma;
+  ctx.save();ctx.globalAlpha=ex;
+  roundRect(W/2-20,148,W/2+10,210,10,alpha('#000',0.4),C.cyan,1.5);
+  txt('JAMB Example:',W*0.73,168,{size:14,color:C.cyan,align:'center',bold:true});
+  mtxt('3x² − 7x + 2 = 0',W*0.73,208,{size:26,color:C.white,align:'center',bold:true});
+
+  // annotate a=3, b=−7, c=2
+  const anns=[
+    {label:'a = 3',x:W*0.59,y:240,col:C.gold},
+    {label:'b = −7',x:W*0.73,y:240,col:C.green},
+    {label:'c = 2',x:W*0.87,y:240,col:C.purple},
+  ];
+  anns.forEach(({label,x,y,col},i)=>{
+    const aa=seg(t,0.7+i*0.04,0.8+i*0.04)*ma;
+    ctx.save();ctx.globalAlpha=aa;
+    roundRect(x-34,y-12,68,26,5,alpha(col,0.12),col,1.5);
+    txt(label,x,y+1,{size:15,color:col,align:'center',bold:true});
+    ctx.restore();
+  });
+  ctx.restore();
+
+  // why it matters
+  const wh=seg(t,0.82,0.94)*ma;
+  ctx.save();ctx.globalAlpha=wh;
+  infoBox(60,H-74,780,60,C.gold,
+    ['⚡  Quadratics appear in at least 3-5 questions in every JAMB Mathematics paper!'],
+    [C.gold],17);
+  ctx.restore();
+
+  ctx.restore();
+  if(t>0.88){ctx.globalAlpha=seg(t,0.88,1);rect(0,0,W,H,C.bg);}
+});
+
+// ═══════════════════════════════════════════════════════
+//  SCENE 3 — FACTORIZATION
+// ═══════════════════════════════════════════════════════
+addScene(function sceneFactorize(t){
+  const ma=seg(t,0,0.07);
+  ctx.save();ctx.globalAlpha=ma;
+
+  ctx.save();ctx.globalAlpha=seg(t,0,0.13)*ma;
+  glowTxt('Method 1: Factorization',W/2,42,C.gold,36);
+  ctx.restore();
+
+  // Question box
+  const q=seg(t,0.08,0.2)*ma;
+  ctx.save();ctx.globalAlpha=q;
+  infoBox(W/2-240,70,480,54,C.cyan,['Solve:  3x² − 7x + 2 = 0'],[C.white],22);
+  ctx.restore();
+
+  // Steps
+  const steps=[
+    {
+      step:'Step 1', title:'Find a × c',
+      detail:'a × c = 3 × 2 = 6',
+      note:'We need two numbers that multiply to 6',
+      show:0.2, col:C.gold,
+    },
+    {
+      step:'Step 2', title:'Find the pair',
+      detail:'−6 × −1 = 6   ✓   and   −6 + (−1) = −7   ✓',
+      note:'They also add up to b = −7',
+      show:0.34, col:C.green,
+    },
+    {
+      step:'Step 3', title:'Split the middle term',
+      detail:'3x² − 6x − x + 2 = 0',
+      note:'Replace −7x with −6x − x',
+      show:0.48, col:C.cyan,
+    },
+    {
+      step:'Step 4', title:'Factor by grouping',
+      detail:'3x(x − 2) − 1(x − 2) = 0',
+      note:'Take out common factors from each pair',
+      show:0.62, col:C.purple,
+    },
+    {
+      step:'Step 5', title:'Final answer',
+      detail:'(3x − 1)(x − 2) = 0',
+      note:'',
+      show:0.74, col:C.gold,
+    },
+  ];
+
+  steps.forEach(({step,title,detail,note,show,col},i)=>{
+    const a=seg(t,show,show+0.11)*ma;
+    ctx.save();ctx.globalAlpha=a;
+    const y=152+i*54;
+    roundRect(60,y-18,W-120,48,7,alpha(col,0.07),alpha(col,0.25),1.5);
+    txt(`${step}:`,72,y+6,{size:13,color:col,bold:true});
+    txt(title,145,y+6,{size:14,color:C.dim});
+    mtxt(detail,72,y+26,{size:18,color:C.white});
+    if(note) txt(note,W-80,y+6,{size:12,color:C.muted,align:'right'});
+    ctx.restore();
+  });
+
+  // Answer highlight
+  const ans=seg(t,0.84,0.95)*ma;
+  ctx.save();ctx.globalAlpha=ans;
+  roundRect(60,H-60,W-120,50,10,alpha(C.green,0.15),C.green,2);
+  mtxt('∴  x = ⅓   or   x = 2',W/2,H-35,{size:22,color:C.green,align:'center',bold:true});
+  ctx.restore();
+
+  ctx.restore();
+  if(t>0.88){ctx.globalAlpha=seg(t,0.88,1);rect(0,0,W,H,C.bg);}
+});
+
+// ═══════════════════════════════════════════════════════
+//  SCENE 4 — QUADRATIC FORMULA
+// ═══════════════════════════════════════════════════════
+addScene(function sceneFormula(t){
+  const ma=seg(t,0,0.07);
+  ctx.save();ctx.globalAlpha=ma;
+
+  ctx.save();ctx.globalAlpha=seg(t,0,0.13)*ma;
+  glowTxt('Method 2: The Quadratic Formula',W/2,42,C.gold,34);
+  ctx.restore();
+
+  // Formula reveal
+  const f=seg(t,0.1,0.28)*ma;
+  ctx.save();ctx.globalAlpha=f;
+  roundRect(W/2-280,68,560,72,12,alpha(C.accent,0.12),C.accent,2);
+  ctx.shadowColor=C.accent; ctx.shadowBlur=20;
+  mtxt('x = (−b ± √(b² − 4ac)) / 2a',W/2,104,{size:26,color:C.cyan,align:'center',bold:true});
+  ctx.restore();
+
+  // Discriminant breakdown
+  const d=seg(t,0.3,0.44)*ma;
+  ctx.save();ctx.globalAlpha=d;
+  roundRect(W/2-200,154,400,38,8,alpha(C.purple,0.12),C.purple,1.5);
+  txt('Δ = b² − 4ac  (The Discriminant)',W/2,173,{size:17,color:C.purple,align:'center'});
+  ctx.restore();
+
+  // Three discriminant cases
+  const cases=[
+    {cond:'Δ > 0',result:'Two distinct real roots',col:C.green,show:0.45},
+    {cond:'Δ = 0',result:'One repeated real root',col:C.gold,show:0.55},
+    {cond:'Δ < 0',result:'No real roots (complex)',col:C.red,show:0.64},
+  ];
+  cases.forEach(({cond,result,col,show},i)=>{
+    const a=seg(t,show,show+0.11)*ma;
+    ctx.save();ctx.globalAlpha=a;
+    const cx=140+i*220, cy=260;
+    roundRect(cx-90,cy-36,180,72,10,alpha(col,0.1),col,1.5);
+    txt(cond,cx,cy-12,{size:20,color:col,align:'center',bold:true});
+    txt(result,cx,cy+14,{size:13,color:C.dim,align:'center'});
+    // visual dots
+    const nr=cond==='Δ > 0'?2:cond==='Δ = 0'?1:0;
+    for(let j=0;j<2;j++){
+      circle(cx+(j===0?-20:20),cy+36,6,j<nr?col:'transparent',col,2);
+    }
+    ctx.restore();
+  });
+
+  // Apply to our example
+  const ap=seg(t,0.74,0.87)*ma;
+  ctx.save();ctx.globalAlpha=ap;
+  infoBox(60,H-110,W-120,96,C.cyan,[
+    'Apply to  3x² − 7x + 2:   a=3, b=−7, c=2',
+    'Δ = (−7)² − 4(3)(2) = 49 − 24 = 25   →   √25 = 5',
+    'x = (7 ± 5) / 6   →   x = 2  or  x = ⅓',
+  ],[C.dim,C.white,C.gold],17);
+  ctx.restore();
+
+  ctx.restore();
+  if(t>0.88){ctx.globalAlpha=seg(t,0.88,1);rect(0,0,W,H,C.bg);}
+});
+
+// ═══════════════════════════════════════════════════════
+//  SCENE 5 — SUM & PRODUCT OF ROOTS
+// ═══════════════════════════════════════════════════════
+addScene(function sceneRoots(t){
+  const ma=seg(t,0,0.07);
+  ctx.save();ctx.globalAlpha=ma;
+
+  ctx.save();ctx.globalAlpha=seg(t,0,0.13)*ma;
+  glowTxt('Sum & Product of Roots',W/2,42,C.gold,38);
+  ctx.restore();
+
+  // Shortcut badge
+  const sb=seg(t,0.08,0.2)*ma;
+  ctx.save();ctx.globalAlpha=sb;
+  roundRect(W/2-100,68,200,32,6,alpha(C.orange,0.15),C.orange,1.5);
+  txt('⚡ JAMB SHORTCUT',W/2,84,{size:14,color:C.orange,align:'center',bold:true});
+  ctx.restore();
+
+  // Two formula cards
+  const f1=seg(t,0.22,0.38)*ma;
+  const f2=seg(t,0.38,0.54)*ma;
+
+  ctx.save();ctx.globalAlpha=f1;
+  roundRect(80,114,340,150,14,alpha(C.green,0.1),C.green,2);
+  txt('SUM of Roots (α + β)',80+170,140,{size:17,color:C.green,align:'center',bold:true});
+  line(80,158,80+340,158,alpha(C.green,0.3),1);
+  mtxt('α + β = −b / a',80+170,196,{size:30,color:C.white,align:'center'});
+  const ex1='For 3x²−7x+2:  −(−7)/3 = 7/3';
+  txt(ex1,80+170,242,{size:15,color:C.dim,align:'center'});
+  ctx.restore();
+
+  ctx.save();ctx.globalAlpha=f2;
+  roundRect(W-80-340,114,340,150,14,alpha(C.gold,0.1),C.gold,2);
+  txt('PRODUCT of Roots (α · β)',W-80-170,140,{size:17,color:C.gold,align:'center',bold:true});
+  line(W-80-340,158,W-80,158,alpha(C.gold,0.3),1);
+  mtxt('α · β = c / a',W-80-170,196,{size:30,color:C.white,align:'center'});
+  const ex2='For 3x²−7x+2:  2/3';
+  txt(ex2,W-80-170,242,{size:15,color:C.dim,align:'center'});
+  ctx.restore();
+
+  // Verify
+  const v=seg(t,0.58,0.72)*ma;
+  ctx.save();ctx.globalAlpha=v;
+  roundRect(W/2-240,278,480,90,10,alpha('#000',0.4),C.cyan,1.5);
+  txt('Verification  (x = 2 and x = ⅓):',W/2,300,{size:16,color:C.cyan,align:'center'});
+  mtxt('Sum: 2 + ⅓ = 7/3  ✓     Product: 2 × ⅓ = 2/3  ✓',W/2,338,{size:18,color:C.green,align:'center'});
+  ctx.restore();
+
+  // JAMB question type
+  const jq=seg(t,0.78,0.92)*ma;
+  ctx.save();ctx.globalAlpha=jq;
+  infoBox(60,H-62,W-120,52,C.gold,
+    ['JAMB loves to ask: "Find the sum/product of roots" — use these formulas directly. No solving needed!'],
+    [C.gold],15);
+  ctx.restore();
+
+  ctx.restore();
+  if(t>0.88){ctx.globalAlpha=seg(t,0.88,1);rect(0,0,W,H,C.bg);}
+});
+
+// ═══════════════════════════════════════════════════════
+//  SCENE 6 — WORKED JAMB EXAMPLE
+// ═══════════════════════════════════════════════════════
+addScene(function sceneWorked(t){
+  const ma=seg(t,0,0.07);
+  ctx.save();ctx.globalAlpha=ma;
+
+  ctx.save();ctx.globalAlpha=seg(t,0,0.14)*ma;
+  glowTxt('Worked JAMB Example',W/2,42,C.gold,38);
+  ctx.restore();
+
+  // Question
+  const q=seg(t,0.1,0.24)*ma;
+  ctx.save();ctx.globalAlpha=q;
+  infoBox(W/2-300,68,600,58,C.cyan,
+    ['If 3x² − 7x + 2 = 0, find the values of x.'],
+    [C.white],21);
+  ctx.restore();
+
+  // Steps
+  const steps=[
+    {txt:'Step 1: Identify  a=3,  b=−7,  c=2',                   col:C.dim,   show:0.26},
+    {txt:'Step 2: a × c = 3 × 2 = 6',                             col:C.dim,   show:0.34},
+    {txt:'Step 3: Factors of 6 summing to −7  →  −6 and −1',       col:C.cyan,  show:0.42},
+    {txt:'Step 4: 3x² − 6x − x + 2 = 0',                          col:C.white, show:0.50},
+    {txt:'Step 5: 3x(x−2) − 1(x−2) = 0   →   (3x−1)(x−2) = 0',   col:C.white, show:0.58},
+    {txt:'∴   x = ⅓   or   x = 2',                                col:C.green, show:0.66},
+  ];
+  steps.forEach(({txt:s,col,show},i)=>{
+    const a=seg(t,show,show+0.1)*ma;
+    ctx.save();ctx.globalAlpha=a;
+    const y=152+i*50;
+    if(i===5){
+      roundRect(60,y-14,W-120,38,8,alpha(C.green,0.15),C.green,2);
+    }
+    mtxt(s,80,y+6,{size:18,color:col});
+    ctx.restore();
+  });
+
+  // Options panel (JAMB style)
+  const op=seg(t,0.78,0.9)*ma;
+  ctx.save();ctx.globalAlpha=op;
+  roundRect(W-230,148,190,180,10,alpha('#000',0.5),alpha(C.gold,0.5),1.5);
+  txt('JAMB Options',W-135,170,{size:14,color:C.gold,align:'center',bold:true});
+  const opts=[
+    {opt:'A. x=2 or x=⅓', correct:true},
+    {opt:'B. x=2 or x=−⅓',correct:false},
+    {opt:'C. x=−2 or x=⅓',correct:false},
+    {opt:'D. x=3 or x=−2', correct:false},
+  ];
+  opts.forEach(({opt,correct},i)=>{
+    const oa=seg(t,0.78+i*0.025,0.88+i*0.02)*ma;
+    ctx.save();ctx.globalAlpha=oa;
+    const oy=196+i*34;
+    if(correct){
+      roundRect(W-226,oy-12,182,26,5,alpha(C.green,0.2),C.green,1.5);
+      txt('✓',W-214,oy+1,{size:14,color:C.green});
+    }
+    txt(opt,W-200,oy+1,{size:14,color:correct?C.green:C.dim});
+    ctx.restore();
+  });
+  ctx.restore();
+
+  // Summary
+  const sum=seg(t,0.9,1)*ma;
+  ctx.save();ctx.globalAlpha=sum;
+  infoBox(60,H-58,W-120,48,C.green,
+    ['Answer: A ✓   Always try Factorization first — it is the fastest for JAMB!'],
+    [C.green],17);
+  ctx.restore();
+
+  ctx.restore();
+  if(t>0.92){ctx.globalAlpha=seg(t,0.92,1);rect(0,0,W,H,C.bg);}
+});
+
+// ═══════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════
+initVoice();
+buildDots();
+updateUI();
+renderFrame(0);
+
+// Update total time label once DOM is ready
+document.getElementById('timeTotal').textContent = fmtTime(SCENES.length*(SCENE_DUR/playSpeed));
+</script>
+</body>
+</html>
