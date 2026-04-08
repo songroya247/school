@@ -1,291 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Classroom — UltimateEdge School</title>
-
-<!-- 1. GOOGLE FONTS -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-<!-- 2. GLOBAL STYLES (External) -->
-<link rel="stylesheet" href="css/main.css">
-
-<!-- 3. CLASSROOM SPECIFIC STYLES (Layout Only) -->
-<style>
-/* CLASSROOM GRID */
-.classroom-layout { display: grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - 130px); }
-
-/* SIDEBAR */
-.sidebar { background: white; border-right: 1px solid var(--border); overflow-y: auto; position: sticky; top: 130px; height: calc(100vh - 130px); }
-.sidebar-header { padding: 20px 20px 12px; border-bottom: 1px solid var(--border); }
-.sidebar-subject { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.05em; line-height: 1; }
-.sidebar-progress { margin-top: 12px; }
-.progress-bar { height: 5px; background: var(--border); border-radius: 100px; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 100px; background: var(--accent); width: 0%; transition: width .4s; }
-.progress-label { font-size: 0.72rem; color: var(--muted); margin-top: 5px; }
-
-.topic-section-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted2); padding: 15px 20px 5px; }
-.topic-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; border-left: 3px solid transparent; transition: 0.15s; }
-.topic-item:hover { background: var(--bg); }
-.topic-item.active { background: var(--surface2); border-left-color: var(--accent); }
-.topic-status { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0; }
-.status-done { background: rgba(0,201,122,0.15); color: var(--accent2); }
-.status-lock { background: var(--bg); border: 1px solid var(--border); color: var(--muted2); }
-
-/* SUBJECT TABS */
-.subject-tabs { background: white; border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; overflow-x: auto; position: sticky; top: 66px; z-index: 90; }
-.subj-tab { padding: 16px 24px; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; font-weight: 600; font-size: 0.9rem; color: var(--muted); background: none; border-top: none; border-left: none; border-right: none; font-family: 'DM Sans', sans-serif; transition: 0.2s; }
-.subj-tab.active { color: var(--tab-color, var(--accent)); border-bottom-color: var(--tab-color, var(--accent)); }
-
-/* MAIN CONTENT */
-.main-content { padding: 0; overflow-y: auto; }
-.video-area { background: #000; position: relative; aspect-ratio: 16/9; max-height: 420px; }
-.video-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: white; }
-.video-embed { width: 100%; height: 100%; border: none; display: none; }
-.play-btn-large { width: 70px; height: 70px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
-.play-btn-large:hover { transform: scale(1.1); }
-
-.locked-overlay { position: absolute; inset: 0; background: rgba(13,17,23,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; padding: 24px; color: white; z-index: 10; }
-.locked-overlay.show { display: flex; }
-
-.lesson-body { padding: 32px; max-width: 800px; }
-.lesson-tag { font-family: 'DM Mono'; font-size: 0.65rem; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; font-weight: 700; }
-.lesson-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; line-height: 1; margin-bottom: 15px; }
-
-.key-point { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 0.95rem; }
-.kp-dot { width: 22px; height: 22px; border-radius: 50%; background: rgba(26,86,255,0.1); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
-
-.quiz-section { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-top: 30px; box-shadow: var(--shadow); }
-.quiz-opt { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1.5px solid var(--border); border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
-.quiz-opt.selected { border-color: var(--accent); background: rgba(26,86,255,0.05); }
-
-@media(max-width:900px){
-  .classroom-layout { grid-template-columns: 1fr; }
-  .sidebar { position: static; height: auto; border-right: none; }
-  .subject-tabs { padding: 0 20px; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom — UltimateEdge</title>
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .classroom-layout { display: grid; grid-template-columns: 320px 1fr; min-height: 100vh; }
+        .sidebar { background: #fff; border-right: 1px solid var(--border); overflow-y: auto; height: 100vh; position: sticky; top: 0; }
+        .topic-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid var(--border); transition: 0.2s; display: flex; align-items: center; gap: 10px; }
+        .topic-item:hover { background: var(--bg); }
+        .topic-item.active { background: var(--surface2); border-left: 4px solid var(--accent); }
+        .video-area { background: #000; aspect-ratio: 16/9; position: relative; }
+        .video-embed { width: 100%; height: 100%; border: none; display: none; }
+        .locked-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; color: #fff; }
+        .locked-overlay.show { display: flex; }
+        @media (max-width: 768px) { .classroom-layout { grid-template-columns: 1fr; } .sidebar { height: auto; } }
+    </style>
 </head>
 <body>
-
-<!-- NAV -->
-<nav style="position:sticky; top:0; height:66px; background:white; display:flex; align-items:center; justify-content:space-between; padding:0 40px; border-bottom:1px solid var(--border); z-index:100;">
-  <a href="index.html" class="logo">UE <span>School</span></a>
-  <div class="nav-right">
-    <a href="index.html#pricing" style="background:var(--accent); color:white; padding:8px 20px; border-radius:8px; text-decoration:none; font-weight:700; font-size:0.85rem;">Unlock Full Access</a>
-  </div>
-</nav>
-
-<!-- SUBJECT TABS -->
-<div class="subject-tabs" id="subjectTabs">
-  <button class="subj-tab active" data-subject="mathematics" onclick="switchSubject('mathematics', this)">📐 Mathematics</button>
-  <button class="subj-tab" data-subject="physics" style="--tab-color:#7c3aed" onclick="switchSubject('physics', this)">⚛️ Physics</button>
-  <button class="subj-tab" data-subject="english" style="--tab-color:#00c97a" onclick="switchSubject('english', this)">📖 English</button>
-</div>
-
-<!-- CLASSROOM LAYOUT -->
-<div class="classroom-layout">
-  
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-subject" id="sidebarSubject">Syllabus</div>
-      <div class="sidebar-meta" id="sidebarMeta" style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; margin-top: 5px;">Loading topics...</div>
-      <div class="sidebar-progress">
-        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="progress-label" id="progressLabel">0 topics completed</div>
-      </div>
-    </div>
-    <div id="topicList"></div>
-  </aside>
-
-  <!-- MAIN CONTENT -->
-  <main class="main-content" id="mainContent">
-    
-    <!-- VIDEO PLAYER -->
-    <div class="video-area">
-      <div class="video-placeholder" id="videoPlaceholder">
-        <div class="play-btn-large" onclick="playVideo()">▶</div>
-        <div style="font-size: 0.85rem; margin-top: 10px; opacity: 0.7;">Click to play video masterclass</div>
-      </div>
-      <iframe class="video-embed" id="videoEmbed" allowfullscreen allow="autoplay"></iframe>
-      
-      <div class="locked-overlay" id="lockedOverlay">
-        <div style="font-size: 3rem;">🔒</div>
-        <div class="lock-title">Premium Masterclass</div>
-        <p style="font-size: 0.85rem; opacity: 0.8; max-width: 300px;">This topic is for Premium members. Unlock all 200+ lessons for a one-time fee.</p>
-        <a href="index.html#pricing" style="background:var(--accent); color:white; padding:12px 28px; border-radius:10px; text-decoration:none; font-weight:700;">Unlock All — ₦2,500</a>
-      </div>
-    </div>
-
-    <!-- LESSON INFO -->
-    <div class="lesson-info" style="padding: 24px 32px; border-bottom: 1px solid var(--border);">
-      <div class="lesson-tag" id="lessonTag">Mathematics · Algebra</div>
-      <h1 class="lesson-title" id="lessonTitle">Select a topic</h1>
-      <div id="lessonMeta" style="font-size: 0.8rem; color: var(--muted);">Select a lesson from the sidebar to begin learning.</div>
-    </div>
-
-    <!-- LESSON BODY -->
-    <div class="lesson-body">
-      <p id="lessonNotes" style="margin-bottom: 25px; line-height: 1.7; color: var(--text);"></p>
-      <ul id="keyPoints" style="list-style: none; margin-bottom: 30px;"></ul>
-      
-      <div id="quizSection" class="quiz-section" style="display:none">
-        <h3 style="font-family: 'Bebas Neue'; font-size: 1.5rem; margin-bottom: 15px;">Topic Practice Quiz</h3>
-        <div id="quizBody"></div>
-        <button onclick="alert('Mastery access tracks your scores!')" style="background:var(--accent); color:white; border:none; padding:12px 25px; border-radius:8px; font-weight:700; cursor:pointer; margin-top:15px;">Submit Practice</button>
-      </div>
-    </div>
-
-  </main>
-</div>
-
-<script>
-let CURRICULUM = {};
-let activeSubject = 'mathematics';
-let activeTopic = null;
-let userAnswers = {};
-
-// 1. DATA LOADER
-async function loadClassroom() {
-    try {
-        const response = await fetch('data/curriculum.json');
-        CURRICULUM = await response.json();
-        
-        // Auto-detect subject from URL
-        const params = new URLSearchParams(window.location.search);
-        const subjFromUrl = params.get('subject');
-        if(subjFromUrl && CURRICULUM[subjFromUrl]) activeSubject = subjFromUrl;
-
-        loadSubject(activeSubject);
-    } catch (e) {
-        console.error("Database error:", e);
-    }
-}
-
-// 2. SUBJECT SWITCHER
-function switchSubject(subject, el) {
-    activeSubject = subject;
-    document.querySelectorAll('.subj-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    loadSubject(subject);
-}
-
-function loadSubject(subject) {
-    const data = CURRICULUM[subject];
-    if (!data) return;
-
-    document.getElementById('sidebarSubject').textContent = data.label;
-    document.getElementById('sidebarMeta').textContent = data.meta;
-    
-    const list = document.getElementById('topicList');
-    list.innerHTML = '';
-    let total = 0, done = 0;
-
-    data.sections.forEach(section => {
-        const label = document.createElement('div');
-        label.className = 'topic-section-label';
-        label.textContent = section.title;
-        list.appendChild(label);
-
-        section.topics.forEach(topic => {
-            total++; if(topic.done) done++;
-            const item = document.createElement('div');
-            item.className = `topic-item ${!topic.free ? 'locked' : ''} ${activeTopic?.id === topic.id ? 'active' : ''}`;
-            item.innerHTML = `
-                <div class="topic-status ${topic.done ? 'status-done' : 'status-lock'}">${topic.done ? '✓' : (topic.free ? '▶' : '🔒')}</div>
-                <div style="font-weight:600; font-size:0.85rem;">${topic.name}</div>
-            `;
-            item.onclick = () => openTopic(topic);
-            list.appendChild(item);
-        });
-    });
-
-    const pct = Math.round((done/total)*100) || 0;
-    document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('progressLabel').textContent = `${done} of ${total} topics completed`;
-
-    if(data.sections[0]?.topics[0] && !activeTopic) openTopic(data.sections[0].topics[0]);
-}
-
-// 3. LESSON LOADER
-function openTopic(topic) {
-    activeTopic = topic;
-    document.getElementById('lessonTitle').textContent = topic.name;
-    document.getElementById('lessonNotes').textContent = topic.notes || "Notes for this lesson are being updated.";
-    document.getElementById('lessonTag').textContent = `${activeSubject} · ${topic.id}`;
-    
-    const kpList = document.getElementById('keyPoints');
-    kpList.innerHTML = (topic.keyPoints || []).map((kp, i) => `
-        <li class="key-point">
-            <span class="kp-dot">${i+1}</span>
-            <div>${kp}</div>
-        </li>
-    `).join('');
-
-    // Video/Overlay UI
-    const overlay = document.getElementById('lockedOverlay');
-    const placeholder = document.getElementById('videoPlaceholder');
-    const embed = document.getElementById('videoEmbed');
-    
-    embed.style.display = 'none';
-    placeholder.style.display = 'flex';
-    overlay.classList.toggle('show', !topic.free);
-
-    // Quiz UI
-    const quizSec = document.getElementById('quizSection');
-    if(topic.quiz && topic.quiz.length > 0) {
-        quizSec.style.display = 'block';
-        renderQuiz(topic.quiz);
-    } else {
-        quizSec.style.display = 'none';
-    }
-
-    // Update sidebar active state
-    loadSubject(activeSubject);
-    document.getElementById('mainContent').scrollTo({top: 0, behavior: 'smooth'});
-}
-
-function renderQuiz(questions) {
-    const body = document.getElementById('quizBody');
-    body.innerHTML = questions.map((q, i) => `
-        <div style="margin-top:20px">
-            <p style="font-weight:700; font-size:0.9rem; margin-bottom:10px;">${i+1}. ${q.q}</p>
-            ${q.opts.map((opt, oi) => `
-                <div class="quiz-opt ${userAnswers[i] === oi ? 'selected' : ''}" onclick="selectQuizAns(${i}, ${oi})">
-                    <input type="radio" name="q${i}" ${userAnswers[i] === oi ? 'checked' : ''} style="accent-color:var(--accent)">
-                    <span style="font-size:0.85rem;">${opt}</span>
+    <div class="classroom-layout">
+        <aside class="sidebar">
+            <div style="padding: 20px; border-bottom: 1px solid var(--border);">
+                <h2 id="sideSubject" style="font-family: 'Bebas Neue';">Loading...</h2>
+                <div class="progress-bar" style="height:4px; background:#eee; margin-top:10px;">
+                    <div id="progFill" style="height:100%; background:var(--accent); width: 0%;"></div>
                 </div>
-            `).join('')}
-        </div>
-    `).join('');
-}
+            </div>
+            <div id="topicList"></div>
+        </aside>
 
-function selectQuizAns(qIdx, optIdx) {
-    userAnswers[qIdx] = optIdx;
-    renderQuiz(activeTopic.quiz);
-}
+        <main class="main-content">
+            <div class="video-area">
+                <div id="placeholder" style="color:#fff; text-align:center; padding-top:20%;">
+                    <button onclick="playVideo()" style="padding: 15px 30px; border-radius: 50px; background: var(--accent); color: #fff; border: none; cursor: pointer; font-size: 1.2rem;">▶ Start Lesson</button>
+                </div>
+                <iframe id="videoEmbed" class="video-embed" allowfullscreen allow="autoplay"></iframe>
+                <div id="lockOverlay" class="locked-overlay">
+                    <h3>Premium Content 🔒</h3>
+                    <a href="index.html#pricing" style="color: var(--accent);">Upgrade to Unlock</a>
+                </div>
+            </div>
 
-function playVideo() {
-    if (!activeTopic?.videoUrl) return;
-    const embed = document.getElementById('videoEmbed');
-    
-    // Check if it's a local interactive lesson or a YouTube link
-    if (activeTopic.videoUrl.includes('.html')) {
-        embed.src = activeTopic.videoUrl;
-    } else {
-        embed.src = activeTopic.videoUrl + "?autoplay=1";
-    }
-    
-    embed.style.display = 'block';
-    document.getElementById('videoPlaceholder').style.display = 'none';
-}
+            <div style="padding: 30px;">
+                <h1 id="lessonTitle">Select a Topic</h1>
+                <p id="lessonNotes"></p>
+                <ul id="keyPoints"></ul>
+            </div>
+        </main>
+    </div>
 
-// Initial Load
-loadClassroom();
-</script>
+    <script>
+        let data = {};
+        let activeTopic = null;
+
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            const subj = params.get('subject') || 'mathematics';
+            
+            try {
+                const res = await fetch('data/curriculum.json');
+                data = await res.json();
+                renderSidebar(subj);
+            } catch (e) { console.error("Data Load Failed"); }
+        }
+
+        function renderSidebar(subj) {
+            const syllabus = data[subj];
+            document.getElementById('sideSubject').textContent = syllabus.label;
+            const container = document.getElementById('topicList');
+            container.innerHTML = '';
+
+            syllabus.sections.forEach(sec => {
+                sec.topics.forEach(topic => {
+                    const div = document.createElement('div');
+                    div.className = 'topic-item';
+                    div.id = `item-${topic.id}`;
+                    div.innerHTML = `<span>${topic.free ? '▶' : '🔒'}</span> ${topic.name}`;
+                    div.onclick = () => selectTopic(topic);
+                    container.appendChild(div);
+                });
+            });
+        }
+
+        function selectTopic(topic) {
+            activeTopic = topic;
+            document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`item-${topic.id}`).classList.add('active');
+            
+            document.getElementById('lessonTitle').textContent = topic.name;
+            document.getElementById('lessonNotes').textContent = topic.notes;
+            document.getElementById('lockOverlay').classList.toggle('show', !topic.free);
+            document.getElementById('videoEmbed').style.display = 'none';
+            document.getElementById('placeholder').style.display = 'block';
+        }
+
+        function playVideo() {
+            if (!activeTopic) return;
+            const embed = document.getElementById('videoEmbed');
+            embed.src = activeTopic.videoUrl;
+            embed.style.display = 'block';
+            document.getElementById('placeholder').style.display = 'none';
+        }
+
+        init();
+    </script>
 </body>
 </html>
