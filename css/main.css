@@ -1,1 +1,34 @@
-....
+/* GLOBAL THEME Variables */
+:root {
+  --bg: #f7f9fc;
+  --surface: #ffffff;
+  --surface2: #f0f4ff;
+  --border: rgba(0,0,0,0.08);
+  --accent: #1a56ff;
+  --accent2: #00c97a;
+  --accent3: #ff6b35;
+  --text: #0d1117;
+  --muted: #6b7280;
+  --shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* GLOBAL RESET */
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+body { 
+  background: var(--bg); 
+  color: var(--text); 
+  font-family: 'DM Sans', sans-serif; 
+}
+
+/* COMMON NAV LOGO STYLES */
+.logo { 
+  font-family: 'Bebas Neue', sans-serif; 
+  text-decoration: none; 
+  color: var(--text); 
+}
+.logo span { color: var(--accent); }
