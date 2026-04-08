@@ -1,40 +1,450 @@
 {
-  "mathematics": {
-    "label": "Mathematics Syllabus",
-    "meta": "8 Topics · 1,500+ Questions",
-    "color": "#1a56ff",
-    "sections": [
-      {
-        "title": "Number & Algebra",
-        "topics": [
-          {
-            "id": "math-1",
-            "name": "Number Bases & Quadratic Equations",
-            "duration": "14 min",
-            "free": true,
-            "videoUrl": "lessons/quadratics.html",
-            "notes": "Focus on the factorization method and the quadratic formula.",
-            "keyPoints": [
-              "Factorization method: (ax + b)(cx + d) = 0",
-              "Quadratic formula: x = (−b ± √(b²−4ac)) / 2a"
-            ],
-            "quiz": [
-              {
-                "q": "If 3x² − 7x + 2 = 0, find the values of x.",
-                "opts": ["x=2 or x=1/3", "x=2 or x=−1/3", "x=−2 or x=1/3", "x=3 or x=−2"],
-                "ans": 0,
-                "exp": "Factorize to (3x-1)(x-2)=0"
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  "physics": {
-    "label": "Physics Syllabus",
-    "meta": "6 Topics · 1,200+ Questions",
-    "color": "#7c3aed",
-    "sections": []
+  "_readme": "UltimateEdge School — Curriculum Data. To add a lesson: find the subject, add a new object to the topics array inside the right section. The classroom.html player loads this file automatically.",
+  "_version": "1.0.0",
+  "_lastUpdated": "2026-04-08",
+
+  "subjects": {
+
+    "mathematics": {
+      "label": "Mathematics Syllabus",
+      "icon": "📐",
+      "color": "#1a56ff",
+      "badge": "High Probability",
+      "meta": "8 Topics · 1,500+ Questions",
+      "desc": "Master Algebra, Calculus, and Geometry with shortcut formulas used by top students.",
+      "sections": [
+        {
+          "title": "Number & Algebra",
+          "topics": [
+            {
+              "id": "math-1",
+              "name": "Number Bases & Quadratic Equations",
+              "duration": "14 min",
+              "questionCount": 10,
+              "free": true,
+              "done": false,
+              "tag": "Mathematics · Algebra",
+              "videoUrl": "lessons/quadratics.html",
+              "notes": "This lesson covers the foundational algebraic concepts tested in JAMB and WAEC. Pay attention to the factorization method and the quadratic formula — these appear in almost every past paper.",
+              "keyPoints": [
+                "Factorization method: express as (ax + b)(cx + d) = 0",
+                "Quadratic formula: x = (−b ± √(b²−4ac)) / 2a",
+                "Sum of roots = −b/a · Product of roots = c/a",
+                "Number base conversions: always divide by target base repeatedly"
+              ],
+              "formula": "x = (−b ± √(b²−4ac)) / 2a  |  where a, b, c are coefficients",
+              "quizIds": ["math-q1", "math-q2", "math-q3"]
+            },
+            {
+              "id": "math-2",
+              "name": "Indices, Surds & Logarithms",
+              "duration": "18 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "Mathematics · Algebra",
+              "videoUrl": "",
+              "notes": "Master the laws of indices and surds. These come up in at least 3 questions in every JAMB paper.",
+              "keyPoints": [
+                "Law of indices: aᵐ × aⁿ = aᵐ⁺ⁿ",
+                "Negative index: a⁻ⁿ = 1/aⁿ",
+                "Surd rationalization: multiply by conjugate",
+                "Log rule: log(ab) = log a + log b"
+              ],
+              "formula": "log_a(x) = log(x)/log(a)  |  Change of base formula",
+              "quizIds": ["math-q4", "math-q5", "math-q6"]
+            }
+          ]
+        },
+        {
+          "title": "Geometry & Trigonometry",
+          "topics": [
+            {
+              "id": "math-3",
+              "name": "Trigonometry & Angles",
+              "duration": "20 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "Mathematics · Trigonometry",
+              "videoUrl": "",
+              "notes": "SOHCAHTOA and the unit circle. Trig identities appear heavily in JAMB.",
+              "keyPoints": [
+                "sin = opposite/hypotenuse",
+                "cos = adjacent/hypotenuse",
+                "tan = opposite/adjacent",
+                "sin²θ + cos²θ = 1"
+              ],
+              "formula": "sin²θ + cos²θ = 1  |  tan θ = sin θ / cos θ",
+              "quizIds": ["math-q7", "math-q8", "math-q9"]
+            },
+            {
+              "id": "math-4",
+              "name": "Circle Theorems & Mensuration",
+              "duration": "16 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "Mathematics · Geometry",
+              "videoUrl": "",
+              "notes": "Circle theorems are high-yield in WAEC. Learn the 7 main theorems.",
+              "keyPoints": [
+                "Angle in semicircle = 90°",
+                "Angles in same segment are equal",
+                "Area of circle = πr²",
+                "Volume of cylinder = πr²h"
+              ],
+              "formula": "Area = πr²  |  Circumference = 2πr  |  Arc length = (θ/360)×2πr",
+              "quizIds": ["math-q10", "math-q11", "math-q12"]
+            }
+          ]
+        },
+        {
+          "title": "Calculus",
+          "topics": [
+            {
+              "id": "math-5",
+              "name": "Differentiation",
+              "duration": "22 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "Mathematics · Calculus",
+              "videoUrl": "",
+              "notes": "Power rule, chain rule, and product rule. Calculus questions are almost guaranteed in JAMB.",
+              "keyPoints": [
+                "Power rule: d/dx(xⁿ) = nxⁿ⁻¹",
+                "Chain rule for composite functions",
+                "Product rule: d/dx(uv) = u·v′ + v·u′",
+                "Finding stationary points: set dy/dx = 0"
+              ],
+              "formula": "d/dx(xⁿ) = nxⁿ⁻¹",
+              "quizIds": ["math-q13", "math-q14", "math-q15"]
+            },
+            {
+              "id": "math-6",
+              "name": "Integration",
+              "duration": "19 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "Mathematics · Calculus",
+              "videoUrl": "",
+              "notes": "Integration as the reverse of differentiation. Areas under curves.",
+              "keyPoints": [
+                "∫xⁿ dx = xⁿ⁺¹/(n+1) + C",
+                "Definite integrals give area under curve",
+                "∫k dx = kx + C",
+                "Integration by substitution"
+              ],
+              "formula": "∫xⁿ dx = xⁿ⁺¹/(n+1) + C",
+              "quizIds": ["math-q16", "math-q17", "math-q18"]
+            }
+          ]
+        },
+        {
+          "title": "Statistics & Probability",
+          "topics": [
+            {
+              "id": "math-7",
+              "name": "Statistics: Mean, Median, Mode",
+              "duration": "15 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "Mathematics · Statistics",
+              "videoUrl": "",
+              "notes": "Data representation and measures of central tendency. Always comes up in WAEC.",
+              "keyPoints": [
+                "Mean = sum of values ÷ number of values",
+                "Median = middle value when sorted",
+                "Mode = most frequent value",
+                "Range = highest − lowest"
+              ],
+              "formula": "Mean (x̄) = Σx / n",
+              "quizIds": ["math-q19", "math-q20", "math-q21"]
+            },
+            {
+              "id": "math-8",
+              "name": "Probability",
+              "duration": "17 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "Mathematics · Statistics",
+              "videoUrl": "",
+              "notes": "Basic probability, addition and multiplication rules.",
+              "keyPoints": [
+                "P(A) = favourable outcomes / total outcomes",
+                "0 ≤ P(A) ≤ 1",
+                "P(A or B) = P(A) + P(B) − P(A and B)",
+                "P(A and B) = P(A) × P(B) for independent events"
+              ],
+              "formula": "P(A) = n(A) / n(S)  |  where S = sample space",
+              "quizIds": ["math-q22", "math-q23", "math-q24"]
+            }
+          ]
+        }
+      ]
+    },
+
+    "physics": {
+      "label": "Physics Syllabus",
+      "icon": "⚛️",
+      "color": "#7c3aed",
+      "badge": "Concept Focus",
+      "meta": "6 Topics · 1,200+ Questions",
+      "desc": "Learn the principles behind the math so you can solve any Physics problem.",
+      "sections": [
+        {
+          "title": "Mechanics",
+          "topics": [
+            {
+              "id": "phy-1",
+              "name": "Scalars, Vectors & Motion",
+              "duration": "16 min",
+              "questionCount": 10,
+              "free": true,
+              "done": false,
+              "tag": "Physics · Mechanics",
+              "videoUrl": "",
+              "notes": "Understanding the difference between scalars and vectors is fundamental to all physics problems.",
+              "keyPoints": [
+                "Scalar: magnitude only (speed, mass, temperature)",
+                "Vector: magnitude + direction (velocity, force, displacement)",
+                "Equations of motion: v=u+at, s=ut+½at², v²=u²+2as",
+                "Resultant vector by Pythagoras for perpendicular vectors"
+              ],
+              "formula": "v = u + at  |  s = ut + ½at²  |  v² = u² + 2as",
+              "quizIds": ["phy-q1", "phy-q2", "phy-q3"]
+            },
+            {
+              "id": "phy-2",
+              "name": "Newton's Laws & Forces",
+              "duration": "20 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "Physics · Mechanics",
+              "videoUrl": "",
+              "notes": "Newton's laws underpin all mechanics. Know all three laws with examples.",
+              "keyPoints": [
+                "1st Law: object stays at rest/motion unless force acts",
+                "2nd Law: F = ma",
+                "3rd Law: action and reaction are equal and opposite",
+                "Weight W = mg (g ≈ 10 m/s²)"
+              ],
+              "formula": "F = ma  |  W = mg",
+              "quizIds": ["phy-q4", "phy-q5", "phy-q6"]
+            }
+          ]
+        },
+        {
+          "title": "Waves & Sound",
+          "topics": [
+            {
+              "id": "phy-3",
+              "name": "Wave Properties & Sound",
+              "duration": "18 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "Physics · Waves",
+              "videoUrl": "",
+              "notes": "Transverse vs longitudinal waves. Speed, frequency, wavelength relationship.",
+              "keyPoints": [
+                "v = fλ (speed = frequency × wavelength)",
+                "Transverse waves: oscillation ⊥ direction of travel",
+                "Longitudinal waves: oscillation ∥ direction of travel",
+                "Sound cannot travel through vacuum"
+              ],
+              "formula": "v = fλ  |  T = 1/f",
+              "quizIds": ["phy-q7", "phy-q8", "phy-q9"]
+            }
+          ]
+        },
+        {
+          "title": "Electricity",
+          "topics": [
+            {
+              "id": "phy-4",
+              "name": "Current, Voltage & Ohm's Law",
+              "duration": "21 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "Physics · Electricity",
+              "videoUrl": "",
+              "notes": "Ohm's Law and circuit fundamentals. High yield in both JAMB and WAEC.",
+              "keyPoints": [
+                "V = IR (Ohm's Law)",
+                "Resistors in series: R_total = R₁+R₂+...",
+                "Resistors in parallel: 1/R = 1/R₁+1/R₂+...",
+                "Power P = IV = I²R = V²/R"
+              ],
+              "formula": "V = IR  |  P = IV  |  P = I²R",
+              "quizIds": ["phy-q10", "phy-q11", "phy-q12"]
+            }
+          ]
+        }
+      ]
+    },
+
+    "english": {
+      "label": "English Language Syllabus",
+      "icon": "📖",
+      "color": "#00c97a",
+      "badge": "Critical Core",
+      "meta": "5 Topics · 1,300+ Questions",
+      "desc": "Practice Lexis, Oral English, and Comprehension patterns that JAMB and WAEC love.",
+      "sections": [
+        {
+          "title": "Lexis & Structure",
+          "topics": [
+            {
+              "id": "eng-1",
+              "name": "Lexis, Register & Word Classes",
+              "duration": "15 min",
+              "questionCount": 10,
+              "free": true,
+              "done": false,
+              "tag": "English · Lexis",
+              "videoUrl": "",
+              "notes": "Understanding register, word classes and their functions in sentences.",
+              "keyPoints": [
+                "Noun: names a person, place, thing or idea",
+                "Verb: expresses action or state",
+                "Adjective: modifies a noun",
+                "Register: formal vs informal language"
+              ],
+              "formula": "Subject + Verb + Object  |  Basic Sentence Structure",
+              "quizIds": ["eng-q1", "eng-q2", "eng-q3"]
+            },
+            {
+              "id": "eng-2",
+              "name": "Comprehension & Summary",
+              "duration": "20 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "English · Comprehension",
+              "videoUrl": "",
+              "notes": "WAEC comprehension technique: read question before passage.",
+              "keyPoints": [
+                "Read questions before the passage",
+                "Find answers in order (they usually follow passage order)",
+                "Summary: pick only relevant points",
+                "Avoid lifting word-for-word from passage"
+              ],
+              "formula": "Points × Marks per Point = Total Score",
+              "quizIds": ["eng-q4", "eng-q5", "eng-q6"]
+            }
+          ]
+        },
+        {
+          "title": "Oral English",
+          "topics": [
+            {
+              "id": "eng-3",
+              "name": "Vowels, Consonants & Stress",
+              "duration": "18 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "English · Oral",
+              "videoUrl": "",
+              "notes": "JAMB Oral English tests phonetics. Learn vowel sounds and word stress patterns.",
+              "keyPoints": [
+                "English has 12 pure vowels + 8 diphthongs",
+                "Stress falls on different syllables changing meaning",
+                "Question words often have rising intonation",
+                "Minimal pairs: words differing in one sound"
+              ],
+              "formula": "/ɪ/ = bit  |  /iː/ = beat  |  /æ/ = bat  |  /ɑː/ = bar",
+              "quizIds": ["eng-q7", "eng-q8", "eng-q9"]
+            }
+          ]
+        }
+      ]
+    },
+
+    "chemistry": {
+      "label": "Chemistry Syllabus",
+      "icon": "🧪",
+      "color": "#ff6b35",
+      "badge": "Topic Mastery",
+      "meta": "6 Topics · 1,200+ Questions",
+      "desc": "Organic Chemistry made easy. Learn reactions through constant practice with SSCE questions.",
+      "sections": [
+        {
+          "title": "Physical Chemistry",
+          "topics": [
+            {
+              "id": "chem-1",
+              "name": "Atomic Structure & Periodic Table",
+              "duration": "17 min",
+              "questionCount": 10,
+              "free": true,
+              "done": false,
+              "tag": "Chemistry · Physical",
+              "videoUrl": "",
+              "notes": "The periodic table trends are heavily tested. Know groups and periods and their properties.",
+              "keyPoints": [
+                "Atomic number = protons = electrons (neutral atom)",
+                "Mass number = protons + neutrons",
+                "Isotopes: same proton number, different neutron number",
+                "Periodic trends: electronegativity increases across period"
+              ],
+              "formula": "Mass Number = Protons + Neutrons  |  Atomic Number = Protons",
+              "quizIds": ["chem-q1", "chem-q2", "chem-q3"]
+            },
+            {
+              "id": "chem-2",
+              "name": "Chemical Bonding",
+              "duration": "19 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "Chemistry · Physical",
+              "videoUrl": "",
+              "notes": "Ionic, covalent and metallic bonding. WAEC questions often ask bond type and properties.",
+              "keyPoints": [
+                "Ionic: metal + non-metal, electron transfer",
+                "Covalent: non-metal + non-metal, electron sharing",
+                "Metallic: positive ions in sea of electrons",
+                "Electrovalency = ionic bond valence"
+              ],
+              "formula": "NaCl: Na⁺ + Cl⁻ = ionic bond  |  H₂O: shared electrons = covalent",
+              "quizIds": ["chem-q4", "chem-q5", "chem-q6"]
+            }
+          ]
+        },
+        {
+          "title": "Organic Chemistry",
+          "topics": [
+            {
+              "id": "chem-3",
+              "name": "Hydrocarbons: Alkanes & Alkenes",
+              "duration": "22 min",
+              "questionCount": 10,
+              "free": false,
+              "done": false,
+              "tag": "Chemistry · Organic",
+              "videoUrl": "",
+              "notes": "Organic chemistry naming and reactions. Alkanes (CₙH₂ₙ₊₂) vs Alkenes (CₙH₂ₙ).",
+              "keyPoints": [
+                "Alkane: single bond, CₙH₂ₙ₊₂, saturated",
+                "Alkene: double bond, CₙH₂ₙ, unsaturated",
+                "Bromine water test: alkene decolourizes it",
+                "IUPAC naming: count longest carbon chain"
+              ],
+              "formula": "Alkane: CₙH₂ₙ₊₂  |  Alkene: CₙH₂ₙ  |  Alkyne: CₙH₂ₙ₋₂",
+              "quizIds": ["chem-q7", "chem-q8", "chem-q9"]
+            }
+          ]
+        }
+      ]
+    }
+
   }
 }
