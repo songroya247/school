@@ -1,109 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classroom — UltimateEdge</title>
-    <link rel="stylesheet" href="css/main.css">
-    <style>
-        .classroom-layout { display: grid; grid-template-columns: 320px 1fr; min-height: 100vh; }
-        .sidebar { background: #fff; border-right: 1px solid var(--border); overflow-y: auto; height: 100vh; position: sticky; top: 0; }
-        .topic-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid var(--border); transition: 0.2s; display: flex; align-items: center; gap: 10px; }
-        .topic-item:hover { background: var(--bg); }
-        .topic-item.active { background: var(--surface2); border-left: 4px solid var(--accent); }
-        .video-area { background: #000; aspect-ratio: 16/9; position: relative; }
-        .video-embed { width: 100%; height: 100%; border: none; display: none; }
-        .locked-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; color: #fff; }
-        .locked-overlay.show { display: flex; }
-        @media (max-width: 768px) { .classroom-layout { grid-template-columns: 1fr; } .sidebar { height: auto; } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classroom — UltimateEdge School</title>
+<link rel="stylesheet" href="css/main.css">
+<style>
+/* 1. RESTORED ORIGINAL LAYOUT */
+.subject-tabs { background: white; border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; overflow-x: auto; position: sticky; top: 66px; z-index: 90; }
+.subj-tab { padding: 16px 24px; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; font-weight: 600; font-size: 0.9rem; color: var(--muted); background: none; border: none; font-family: inherit; transition: 0.2s; }
+.subj-tab.active { color: var(--tab-color, var(--accent)); border-bottom-color: var(--tab-color, var(--accent)); }
+
+.classroom-layout { display: grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - 130px); }
+
+/* 2. RESTORED SIDEBAR DESIGN */
+.sidebar { background: white; border-right: 1px solid var(--border); overflow-y: auto; position: sticky; top: 130px; height: calc(100vh - 130px); }
+.sidebar-header { padding: 20px 20px 12px; border-bottom: 1px solid var(--border); }
+.sidebar-subject { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.05em; line-height: 1; }
+.progress-bar { height: 5px; background: var(--border); border-radius: 100px; overflow: hidden; margin-top: 12px;}
+.progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width .4s; }
+
+.topic-section-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; text-transform: uppercase; color: var(--muted2); padding: 15px 20px 5px; }
+.topic-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; border-left: 3px solid transparent; transition: 0.15s; }
+.topic-item:hover { background: var(--bg); }
+.topic-item.active { background: var(--surface2); border-left-color: var(--accent); }
+
+/* Status Circles from Screenshot 3 */
+.topic-status { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0; }
+.status-done { background: rgba(0,201,122,0.15); color: var(--accent2); }
+.status-lock { background: var(--bg); border: 1px solid var(--border); color: var(--muted2); }
+.status-active { background: rgba(26,86,255,0.12); color: var(--accent); }
+
+/* 3. RESTORED CONTENT AREA */
+.main-content { padding: 0; overflow-y: auto; }
+.video-area { background: #000; position: relative; aspect-ratio: 16/9; max-height: 420px; }
+.video-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+.video-embed { width: 100%; height: 100%; border: none; display: none; }
+.play-btn-large { width: 72px; height: 72px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; transition: 0.2s; }
+
+.locked-overlay { position: absolute; inset: 0; background: rgba(13,17,23,0.92); display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: white; z-index: 10; backdrop-filter: blur(4px); }
+.locked-overlay.show { display: flex; }
+
+.lesson-body { padding: 32px; max-width: 850px; }
+.lesson-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; margin-bottom: 10px; }
+.kp-dot { width: 22px; height: 22px; border-radius: 50%; background: rgba(26,86,255,0.1); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+
+@media(max-width:900px){ .classroom-layout { grid-template-columns: 1fr; } .sidebar { position: static; height: auto; } }
+</style>
 </head>
 <body>
-    <div class="classroom-layout">
-        <aside class="sidebar">
-            <div style="padding: 20px; border-bottom: 1px solid var(--border);">
-                <h2 id="sideSubject" style="font-family: 'Bebas Neue';">Loading...</h2>
-                <div class="progress-bar" style="height:4px; background:#eee; margin-top:10px;">
-                    <div id="progFill" style="height:100%; background:var(--accent); width: 0%;"></div>
-                </div>
-            </div>
-            <div id="topicList"></div>
-        </aside>
 
-        <main class="main-content">
-            <div class="video-area">
-                <div id="placeholder" style="color:#fff; text-align:center; padding-top:20%;">
-                    <button onclick="playVideo()" style="padding: 15px 30px; border-radius: 50px; background: var(--accent); color: #fff; border: none; cursor: pointer; font-size: 1.2rem;">▶ Start Lesson</button>
-                </div>
-                <iframe id="videoEmbed" class="video-embed" allowfullscreen allow="autoplay"></iframe>
-                <div id="lockOverlay" class="locked-overlay">
-                    <h3>Premium Content 🔒</h3>
-                    <a href="index.html#pricing" style="color: var(--accent);">Upgrade to Unlock</a>
-                </div>
-            </div>
+<nav style="height:66px; background:white; display:flex; align-items:center; justify-content:space-between; padding:0 40px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100;">
+  <a href="index.html" class="logo">UE <span>School</span></a>
+  <a href="index.html#pricing" style="background:var(--accent); color:white; padding:9px 20px; border-radius:8px; text-decoration:none; font-weight:700; font-size:0.85rem;">Unlock All — ₦2,500</a>
+</nav>
 
-            <div style="padding: 30px;">
-                <h1 id="lessonTitle">Select a Topic</h1>
-                <p id="lessonNotes"></p>
-                <ul id="keyPoints"></ul>
-            </div>
-        </main>
+<div class="subject-tabs" id="subjectTabs">
+  <button class="subj-tab active" data-subject="mathematics" onclick="switchSubject('mathematics', this)">📐 Mathematics</button>
+  <button class="subj-tab" data-subject="physics" style="--tab-color:#7c3aed" onclick="switchSubject('physics', this)">⚛️ Physics</button>
+  <button class="subj-tab" data-subject="english" style="--tab-color:#00c97a" onclick="switchSubject('english', this)">📖 English</button>
+  <button class="subj-tab" data-subject="chemistry" style="--tab-color:#ff6b35" onclick="switchSubject('chemistry', this)">🧪 Chemistry</button>
+</div>
+
+<div class="classroom-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-subject" id="sidebarSubject">Syllabus</div>
+      <div class="sidebar-progress">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div id="progressLabel" style="font-size:0.7rem; color:var(--muted); margin-top:5px;">0 topics completed</div>
+      </div>
+    </div>
+    <div id="topicList"></div>
+  </aside>
+
+  <main class="main-content" id="mainContent">
+    <div class="video-area">
+      <div class="video-placeholder" id="videoPlaceholder">
+        <div class="play-btn-large" onclick="playVideo()">▶</div>
+        <p style="margin-top:15px; opacity:0.7;">Click to start masterclass</p>
+      </div>
+      <iframe class="video-embed" id="videoEmbed" allowfullscreen allow="autoplay"></iframe>
+      
+      <div class="locked-overlay" id="lockedOverlay">
+        <div style="font-size:3rem; margin-bottom:10px;">🔒</div>
+        <h2 style="font-family:'Bebas Neue';">Premium Masterclass</h2>
+        <p style="font-size:0.9rem; margin-bottom:20px; opacity:0.8;">Unlock all 200+ lessons for a one-time fee.</p>
+        <a href="index.html#pricing" style="background:var(--accent); color:white; padding:12px 30px; border-radius:10px; text-decoration:none; font-weight:700;">Unlock Full Access</a>
+      </div>
     </div>
 
-    <script>
-        let data = {};
-        let activeTopic = null;
+    <div class="lesson-body">
+      <div id="lessonTag" style="font-family:'DM Mono'; font-size:0.65rem; color:var(--accent); text-transform:uppercase; font-weight:700; margin-bottom:5px;"></div>
+      <h1 class="lesson-title" id="lessonTitle">Select a topic</h1>
+      <p id="lessonNotes" style="line-height:1.7; color:var(--text); margin-bottom:20px;"></p>
+      <ul id="keyPoints" style="list-style:none; padding:0;"></ul>
+    </div>
+  </main>
+</div>
 
-        async function init() {
-            const params = new URLSearchParams(window.location.search);
-            const subj = params.get('subject') || 'mathematics';
-            
-            try {
-                const res = await fetch('data/curriculum.json');
-                data = await res.json();
-                renderSidebar(subj);
-            } catch (e) { console.error("Data Load Failed"); }
-        }
+<script>
+let CURRICULUM = {};
+let activeSubject = 'mathematics';
+let activeTopic = null;
 
-        function renderSidebar(subj) {
-            const syllabus = data[subj];
-            document.getElementById('sideSubject').textContent = syllabus.label;
-            const container = document.getElementById('topicList');
-            container.innerHTML = '';
+async function loadClassroom() {
+    try {
+        const response = await fetch('data/curriculum.json');
+        CURRICULUM = await response.json();
+        
+        const params = new URLSearchParams(window.location.search);
+        const subjFromUrl = params.get('subject');
+        if(subjFromUrl && CURRICULUM[subjFromUrl]) activeSubject = subjFromUrl;
 
-            syllabus.sections.forEach(sec => {
-                sec.topics.forEach(topic => {
-                    const div = document.createElement('div');
-                    div.className = 'topic-item';
-                    div.id = `item-${topic.id}`;
-                    div.innerHTML = `<span>${topic.free ? '▶' : '🔒'}</span> ${topic.name}`;
-                    div.onclick = () => selectTopic(topic);
-                    container.appendChild(div);
-                });
-            });
-        }
+        // Set active tab based on URL
+        document.querySelectorAll('.subj-tab').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.subject === activeSubject);
+        });
 
-        function selectTopic(topic) {
-            activeTopic = topic;
-            document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(`item-${topic.id}`).classList.add('active');
-            
-            document.getElementById('lessonTitle').textContent = topic.name;
-            document.getElementById('lessonNotes').textContent = topic.notes;
-            document.getElementById('lockOverlay').classList.toggle('show', !topic.free);
-            document.getElementById('videoEmbed').style.display = 'none';
-            document.getElementById('placeholder').style.display = 'block';
-        }
+        renderSidebar();
+    } catch (e) { console.error("Database error", e); }
+}
 
-        function playVideo() {
-            if (!activeTopic) return;
-            const embed = document.getElementById('videoEmbed');
-            embed.src = activeTopic.videoUrl;
-            embed.style.display = 'block';
-            document.getElementById('placeholder').style.display = 'none';
-        }
+function switchSubject(subject, el) {
+    activeSubject = subject;
+    document.querySelectorAll('.subj-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderSidebar();
+}
 
-        init();
-    </script>
+function renderSidebar() {
+    const data = CURRICULUM[activeSubject];
+    if (!data) return;
+
+    document.getElementById('sidebarSubject').textContent = data.label;
+    const list = document.getElementById('topicList');
+    list.innerHTML = '';
+    
+    let total = 0, done = 0;
+
+    data.sections.forEach(section => {
+        const label = document.createElement('div');
+        label.className = 'topic-section-label';
+        label.textContent = section.title;
+        list.appendChild(label);
+
+        section.topics.forEach(topic => {
+            total++; if(topic.done) done++;
+            const item = document.createElement('div');
+            item.className = `topic-item ${activeTopic?.id === topic.id ? 'active' : ''}`;
+            item.innerHTML = `
+                <div class="topic-status ${topic.done ? 'status-done' : (topic.free ? 'status-active' : 'status-lock')}">${topic.done ? '✓' : (topic.free ? '▶' : '🔒')}</div>
+                <div style="font-weight:600; font-size:0.85rem; color:var(--text);">${topic.name}</div>
+            `;
+            item.onclick = () => openTopic(topic);
+            list.appendChild(item);
+        });
+    });
+
+    document.getElementById('progressFill').style.width = Math.round((done/total)*100) + '%';
+    document.getElementById('progressLabel').textContent = `${done} of ${total} topics completed`;
+    
+    // Auto-load first topic if none active
+    if(!activeTopic && data.sections[0]?.topics[0]) openTopic(data.sections[0].topics[0]);
+}
+
+function openTopic(topic) {
+    activeTopic = topic;
+    document.getElementById('lessonTitle').textContent = topic.name;
+    document.getElementById('lessonNotes').textContent = topic.notes || "";
+    document.getElementById('lessonTag').textContent = `${activeSubject} · ${topic.id}`;
+    
+    const kpList = document.getElementById('keyPoints');
+    kpList.innerHTML = (topic.keyPoints || []).map((kp, i) => `
+        <li style="display:flex; gap:12px; margin-bottom:10px;">
+            <span class="kp-dot">${i+1}</span>
+            <div style="font-size:0.9rem;">${kp}</div>
+        </li>
+    `).join('');
+
+    document.getElementById('videoEmbed').style.display = 'none';
+    document.getElementById('videoPlaceholder').style.display = 'flex';
+    document.getElementById('lockedOverlay').classList.toggle('show', !topic.free);
+    
+    // Highlight sidebar item without re-rendering everything
+    document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active'));
+    // We re-render the sidebar to keep simple logic for phone editing
+    renderSidebar(); 
+    document.getElementById('mainContent').scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function playVideo() {
+    if (!activeTopic?.videoUrl) return;
+    const embed = document.getElementById('videoEmbed');
+    embed.src = activeTopic.videoUrl + (activeTopic.videoUrl.includes('.html') ? "" : "?autoplay=1");
+    embed.style.display = 'block';
+    document.getElementById('videoPlaceholder').style.display = 'none';
+}
+
+loadClassroom();
+</script>
 </body>
 </html>
