@@ -4,60 +4,57 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CBT Practice Engine — UltimateEdge School</title>
+
+<!-- 1. EXTERNAL RESOURCES -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- 2. GLOBAL STYLES (Your new main.css) -->
+<link rel="stylesheet" href="css/main.css">
+
+<!-- 3. CBT SPECIFIC STYLES -->
 <style>
-:root {
-  --bg: #f7f9fc; --surface: #ffffff; --border: rgba(0,0,0,0.08);
-  --accent: #1a56ff; --green: #00c97a; --red: #ef4444; --yellow: #fbbf24;
-  --text: #0d1117; --muted: #6b7280; --shadow: 0 4px 20px rgba(0,0,0,0.08);
-}
-*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+/* TIMER BAR */
+.timer-bar { background: #0d1117; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 60px; z-index: 90; }
+.timer-val { font-family: 'DM Mono', monospace; font-size: 1.4rem; font-weight: 700; color: #fbbf24; }
 
-/* NAV */
+/* NAV BAR OVERRIDE */
 nav { background: white; border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-.logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; text-decoration: none; color: var(--text); }
-.logo span { color: var(--accent); }
-
-/* TOP TIMER BAR */
-.timer-bar { background: #0d1117; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
-.timer-val { font-family: 'DM Mono', monospace; font-size: 1.4rem; font-weight: 700; color: var(--yellow); }
 
 /* CBT LAYOUT */
 .cbt-container { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 110px); }
 
 /* SIDEBAR / PALETTE */
-.palette-sidebar { background: white; border-right: 1px solid var(--border); padding: 20px; }
+.palette-sidebar { background: white; border-right: 1px solid var(--border); padding: 20px; position: sticky; top: 110px; height: calc(100vh - 110px); overflow-y: auto; }
 .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px; }
-.p-btn { aspect-ratio: 1; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer; font-weight: 700; font-family: 'DM Mono', monospace; transition: 0.2s; }
-.p-btn.active { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px rgba(26,86,255,0.2); }
-.p-btn.answered { background: var(--green); color: white; border-color: var(--green); }
+.p-btn { aspect-ratio: 1; border: 1px solid var(--border); border-radius: 6px; background: white; cursor: pointer; font-weight: 700; font-family: 'DM Mono', monospace; transition: 0.2s; font-size: 0.75rem; }
+.p-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(26,86,255,0.05); }
+.p-btn.answered { background: var(--accent2); color: white; border-color: var(--accent2); }
 
 /* QUESTION AREA */
-.question-area { padding: 40px; }
+.question-area { padding: 40px; max-width: 900px; margin: 0 auto; width: 100%; }
 .q-card { background: white; padding: 30px; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 25px; }
 .q-text { font-size: 1.1rem; font-weight: 600; line-height: 1.6; margin-bottom: 25px; }
 .options-list { display: flex; flex-direction: column; gap: 12px; }
 .option { display: flex; align-items: center; gap: 15px; padding: 15px; border: 1.5px solid var(--border); border-radius: 10px; cursor: pointer; transition: 0.2s; }
 .option:hover { border-color: var(--accent); background: rgba(26,86,255,0.02); }
 .option.selected { border-color: var(--accent); background: rgba(26,86,255,0.05); }
-.opt-letter { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+.opt-letter { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; font-family: 'DM Mono'; }
 .selected .opt-letter { background: var(--accent); color: white; border-color: var(--accent); }
 
-/* BUTTONS */
-.nav-actions { display: flex; justify-content: space-between; }
-.btn { padding: 12px 25px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; transition: 0.2s; }
-.btn-prev { background: white; border: 1px solid var(--border); }
-.btn-next { background: var(--accent); color: white; }
-.btn-submit { background: var(--green); color: white; width: 100%; margin-top: 20px; }
+/* FOOTER ACTIONS */
+.nav-actions { display: flex; justify-content: space-between; gap: 15px; }
+.btn-cbt { padding: 12px 25px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; transition: 0.2s; font-size: 0.9rem; }
+.btn-prev { background: white; border: 1px solid var(--border2); color: var(--text); }
+.btn-next { background: var(--accent); color: white; flex: 1; }
+.btn-submit { background: var(--accent2); color: white; width: 100%; margin-top: 20px; }
 
-/* RESULTS MODAL */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
-.modal-content { background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 100%; text-align: center; }
-.score-big { font-size: 4rem; font-family: 'Bebas Neue', sans-serif; color: var(--accent); margin: 10px 0; }
-.upsell-box { background: var(--bg); border: 2px dashed var(--accent); padding: 15px; border-radius: 10px; margin: 20px 0; }
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 1000; backdrop-filter: blur(5px); }
+.modal-content { background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 100%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+.score-big { font-size: 4rem; font-family: 'Bebas Neue', sans-serif; color: var(--accent); margin: 10px 0; line-height: 1; }
+.upsell-box { background: var(--surface2); border: 2px dashed var(--accent); padding: 15px; border-radius: 12px; margin: 25px 0; text-align: left; }
 
 @media (max-width: 768px) {
     .cbt-container { grid-template-columns: 1fr; }
@@ -68,182 +65,212 @@ nav { background: white; border-bottom: 1px solid var(--border); padding: 0 24px
 </head>
 <body>
 
+<!-- NAVIGATION -->
 <nav>
   <a href="index.html" class="logo">UE <span>School</span></a>
-  <div id="subjectLabel" style="font-weight: 700; color: var(--muted);">Loading Subject...</div>
+  <div id="subjectTitle" style="font-weight: 700; color: var(--muted); text-transform: uppercase; font-size: 0.9rem;">Exam Engine</div>
+  <a href="index.html" style="text-decoration: none; color: var(--red); font-size: 0.8rem; font-weight: 700;">EXIT EXAM</a>
 </nav>
 
+<!-- TIMER & PROGRESS -->
 <div class="timer-bar">
-  <div>Questions: <span id="progressText">0 / 0</span></div>
-  <div class="timer-val" id="timer">00:00:00</div>
-  <div>Prediction: <span id="predictScore" style="color: var(--green); font-weight: 800;">--</span></div>
+  <div style="font-size: 0.8rem; font-weight: 500;">Progress: <span id="progressLabel">0/0</span></div>
+  <div class="timer-val" id="timerDisplay">00:00:00</div>
+  <div style="font-size: 0.8rem; font-weight: 500;">Predictive Score: <span id="predictVal" style="color: #00c97a; font-weight: 800;">--</span></div>
 </div>
 
 <div class="cbt-container">
-  <div class="palette-sidebar">
-    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted);">Question Map</div>
-    <div class="palette-grid" id="palette"></div>
-    <button class="btn btn-submit" onclick="showResults()">Submit Examination</button>
-  </div>
+  <!-- PALETTE SIDEBAR -->
+  <aside class="palette-sidebar">
+    <div style="font-family: 'DM Mono'; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px;">Question Map</div>
+    <div class="palette-grid" id="paletteGrid"></div>
+    <button class="btn-cbt btn-submit" onclick="submitExam()">Submit Final Exam</button>
+  </aside>
 
-  <div class="question-area">
+  <!-- MAIN QUESTION AREA -->
+  <main class="question-area">
     <div class="q-card">
-        <div class="q-text" id="qText">Please wait, loading questions...</div>
-        <div class="options-list" id="qOptions"></div>
+        <div id="qNum" style="font-family: 'DM Mono'; font-size: 0.7rem; color: var(--accent); margin-bottom: 10px; font-weight: 700;">QUESTION 1</div>
+        <div class="q-text" id="qText">Connecting to question bank...</div>
+        <div class="options-list" id="optionsList"></div>
     </div>
+    
     <div class="nav-actions">
-        <button class="btn btn-prev" onclick="changeQ(-1)">← Previous</button>
-        <button class="btn btn-next" onclick="changeQ(1)">Next Question →</button>
+        <button class="btn-cbt btn-prev" onclick="moveQuestion(-1)">← Previous</button>
+        <button class="btn-cbt btn-next" id="nextBtn" onclick="moveQuestion(1)">Next Question →</button>
     </div>
-  </div>
+  </main>
 </div>
 
-<div class="modal" id="resultModal">
+<!-- RESULTS MODAL -->
+<div class="modal-overlay" id="resultsModal">
     <div class="modal-content">
-        <h2 style="font-family: 'Bebas Neue'; font-size: 2rem;">Examination Complete</h2>
-        <div class="score-big" id="finalScore">0%</div>
-        <p id="feedbackMsg">Keep practicing to improve your score!</p>
+        <h2 style="font-family: 'Bebas Neue'; font-size: 2.2rem; letter-spacing: 1px;">Analysis Complete</h2>
+        <div class="score-big" id="finalPercent">0%</div>
+        <p id="resultFeedback" style="color: var(--muted); font-size: 0.9rem;"></p>
+        
         <div class="upsell-box">
-            <strong style="color: var(--accent);">🚀 Want to see your weak topics?</strong>
-            <p style="font-size: 0.8rem; margin-top: 5px;">Unlock the <b>Weakness Tracker</b> and all 5,000+ questions with Premium Access.</p>
-            <a href="index.html#pricing" style="display: block; margin-top: 10px; color: var(--accent); font-weight: 700;">Upgrade Now — ₦2,500</a>
+            <strong style="color: var(--accent); font-size: 0.9rem;">🚀 Identify Your Weak Topics</strong>
+            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--muted);">Premium members get a full topic-by-topic breakdown to know exactly what to study next.</p>
+            <a href="index.html#pricing" style="display: block; margin-top: 10px; color: var(--accent); font-weight: 800; text-decoration: none; font-size: 0.85rem;">Upgrade to Mastery — ₦2,500</a>
         </div>
-        <button class="btn btn-next" onclick="location.reload()">Try Again</button>
-        <button class="btn btn-prev" onclick="location.href='index.html'" style="margin-top: 10px;">Exit to Home</button>
+        
+        <button class="btn-cbt btn-next" onclick="location.reload()" style="width: 100%;">Retake Practice</button>
+        <button class="btn-cbt btn-prev" onclick="location.href='index.html'" style="width: 100%; margin-top: 10px;">Return to Home</button>
     </div>
 </div>
 
 <script>
-let bank = [];
-let exam = [];
-let currentIdx = 0;
+let questionBank = [];
+let activeExam = [];
+let currentIndex = 0;
 let userAnswers = {};
-let timeLeft = 3600; // 1 hour default
+let timerSeconds = 3600; // 1 Hour
 
-// 1. GET DATA
-async function initCBT() {
+// 1. DATA LOADER
+async function loadCBT() {
     try {
-        const params = new URLSearchParams(window.location.search);
-        const subj = params.get('subject') || 'mathematics';
+        // Get subject from URL (e.g. cbt.html?subject=physics)
+        const urlParams = new URLSearchParams(window.location.search);
+        const subject = urlParams.get('subject') || 'mathematics';
         
         const response = await fetch('data/questions.json');
         const data = await response.json();
-        bank = data[subj] || [];
+        questionBank = data[subject] || [];
 
-        if(bank.length === 0) {
-            document.getElementById('qText').innerHTML = "No questions found for this subject.";
+        if (questionBank.length === 0) {
+            document.getElementById('qText').innerHTML = "No questions found for " + subject + ". Check your JSON file.";
             return;
         }
 
-        document.getElementById('subjectLabel').textContent = subj.toUpperCase() + " EXAMINATION";
+        document.getElementById('subjectTitle').textContent = subject + " Examination";
         
-        // Shuffle and take 10 for guest session
-        exam = [...bank].sort(() => Math.random() - 0.5).slice(0, 10);
+        // Prepare 10 random questions for the session
+        activeExam = [...questionBank].sort(() => Math.random() - 0.5).slice(0, 10);
         
-        startTimer();
-        buildPalette();
-        renderQuestion();
-    } catch (e) {
-        console.error(e);
-        document.getElementById('qText').innerHTML = "Error loading database. Check data/questions.json";
+        initTimer();
+        renderPalette();
+        showQuestion();
+    } catch (err) {
+        console.error(err);
+        document.getElementById('qText').innerHTML = "Database Connection Error. Ensure 'data/questions.json' exists.";
     }
 }
 
-// 2. RENDER
-function renderQuestion() {
-    const q = exam[currentIdx];
+// 2. UI RENDERING
+function showQuestion() {
+    const q = activeExam[currentIndex];
+    document.getElementById('qNum').textContent = `QUESTION ${currentIndex + 1} OF ${activeExam.length}`;
     document.getElementById('qText').textContent = q.q;
-    document.getElementById('progressText').textContent = `${currentIdx + 1} / ${exam.length}`;
-    
-    const optionsHtml = q.opts.map((opt, i) => `
-        <div class="option ${userAnswers[currentIdx] === i ? 'selected' : ''}" onclick="selectOpt(${i})">
+    document.getElementById('progressLabel').textContent = `${currentIndex + 1} / ${activeExam.length}`;
+
+    const optionsContainer = document.getElementById('optionsList');
+    optionsContainer.innerHTML = q.opts.map((opt, i) => `
+        <div class="option ${userAnswers[currentIndex] === i ? 'selected' : ''}" onclick="selectAnswer(${i})">
             <div class="opt-letter">${String.fromCharCode(65 + i)}</div>
-            <div class="opt-text">${opt}</div>
+            <div>${opt}</div>
         </div>
     `).join('');
-    
-    document.getElementById('qOptions').innerHTML = optionsHtml;
-    updatePalette();
-    calculatePrediction();
+
+    // Update palette and prediction
+    updatePaletteUI();
+    updatePrediction();
+
+    // Button Logic
+    const nextBtn = document.getElementById('nextBtn');
+    if (currentIndex === activeExam.length - 1) {
+        nextBtn.textContent = "Review / Submit";
+        nextBtn.style.background = "var(--accent2)";
+    } else {
+        nextBtn.textContent = "Next Question →";
+        nextBtn.style.background = "var(--accent)";
+    }
 }
 
-function buildPalette() {
-    const p = document.getElementById('palette');
-    p.innerHTML = exam.map((_, i) => `
-        <button class="p-btn" id="p-btn-${i}" onclick="jumpTo(${i})">${i + 1}</button>
+function renderPalette() {
+    const palette = document.getElementById('paletteGrid');
+    palette.innerHTML = activeExam.map((_, i) => `
+        <button class="p-btn" id="pal-${i}" onclick="jumpTo(${i})">${i + 1}</button>
     `).join('');
 }
 
-function updatePalette() {
-    exam.forEach((_, i) => {
-        const btn = document.getElementById(`p-btn-${i}`);
-        if(!btn) return;
+function updatePaletteUI() {
+    activeExam.forEach((_, i) => {
+        const btn = document.getElementById(`pal-${i}`);
         btn.className = 'p-btn';
-        if(i === currentIdx) btn.classList.add('active');
-        if(userAnswers[i] !== undefined) btn.classList.add('answered');
+        if (i === currentIndex) btn.classList.add('active');
+        if (userAnswers[i] !== undefined) btn.classList.add('answered');
     });
 }
 
-// 3. LOGIC
-function selectOpt(idx) {
-    userAnswers[currentIdx] = idx;
-    renderQuestion();
+// 3. LOGIC & NAVIGATION
+function selectAnswer(index) {
+    userAnswers[currentIndex] = index;
+    showQuestion();
 }
 
-function changeQ(step) {
-    currentIdx = Math.max(0, Math.min(exam.length - 1, currentIdx + step));
-    renderQuestion();
+function moveQuestion(step) {
+    if (currentIndex === activeExam.length - 1 && step === 1) {
+        alert("You have reached the end. Use the side palette to review or click Submit.");
+        return;
+    }
+    currentIndex = Math.max(0, Math.min(activeExam.length - 1, currentIndex + step));
+    showQuestion();
 }
 
-function jumpTo(i) {
-    currentIdx = i;
-    renderQuestion();
+function jumpTo(index) {
+    currentIndex = index;
+    showQuestion();
 }
 
-function startTimer() {
-    const timerEl = document.getElementById('timer');
+function initTimer() {
+    const display = document.getElementById('timerDisplay');
     const interval = setInterval(() => {
-        timeLeft--;
-        const h = Math.floor(timeLeft / 3600);
-        const m = Math.floor((timeLeft % 3600) / 60);
-        const s = timeLeft % 60;
-        timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        timerSeconds--;
+        let h = Math.floor(timerSeconds / 3600);
+        let m = Math.floor((timerSeconds % 3600) / 60);
+        let s = timerSeconds % 60;
+        display.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
         
-        if(timeLeft < 300) timerEl.style.color = "var(--red)";
-        if(timeLeft <= 0) { clearInterval(interval); showResults(); }
+        if (timerSeconds < 300) display.style.color = "var(--red)";
+        if (timerSeconds <= 0) { clearInterval(interval); submitExam(); }
     }, 1000);
 }
 
-function calculatePrediction() {
-    let correct = 0;
-    let answeredCount = Object.keys(userAnswers).length;
-    if(answeredCount === 0) return;
+function updatePrediction() {
+    const answeredIndices = Object.keys(userAnswers);
+    if (answeredIndices.length === 0) return;
 
-    Object.keys(userAnswers).forEach(idx => {
-        if(userAnswers[idx] === exam[idx].ans) correct++;
+    let correctCount = 0;
+    answeredIndices.forEach(idx => {
+        if (userAnswers[idx] === activeExam[idx].ans) correctCount++;
     });
 
-    const score = Math.round((correct / exam.length) * 400);
-    document.getElementById('predictVal')?.textContent = score; // If you add this to UI
+    // Predict JAMB score (Correct / Total * 400)
+    const score = Math.round((correctCount / activeExam.length) * 400);
+    document.getElementById('predictVal').textContent = score;
 }
 
-function showResults() {
-    let correct = 0;
-    exam.forEach((q, i) => {
-        if(userAnswers[i] === q.ans) correct++;
+function submitExam() {
+    let score = 0;
+    activeExam.forEach((q, i) => {
+        if (userAnswers[i] === q.ans) score++;
     });
 
-    const pct = Math.round((correct / exam.length) * 100);
-    document.getElementById('finalScore').textContent = pct + "%";
-    document.getElementById('resultModal').style.display = "flex";
+    const percent = Math.round((score / activeExam.length) * 100);
+    document.getElementById('finalPercent').textContent = percent + "%";
+    document.getElementById('resultsModal').style.display = "flex";
     
-    const msg = pct >= 70 ? "Excellent! You are ready for the real exam." : 
-                pct >= 50 ? "Good job! A little more study and you'll hit 300+." : 
-                "Keep practicing. Watch the video lessons to master this subject.";
-    document.getElementById('feedbackMsg').textContent = msg;
+    let feedback = "";
+    if (percent >= 70) feedback = "Excellent work! You are ready to crush the real exam.";
+    else if (percent >= 50) feedback = "Good effort. Review your wrong answers to cross the 300 mark.";
+    else feedback = "More practice needed. Watch the video lessons in the classroom.";
+    
+    document.getElementById('resultFeedback').textContent = feedback;
 }
 
-initCBT();
+// Start the engine
+loadCBT();
 </script>
 </body>
 </html>
