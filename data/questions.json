@@ -1,13 +1,79 @@
 {
+  "_readme": "UltimateEdge School — Question Bank. To add questions: find the subject array and paste new question objects. The cbt.html engine loads this file automatically. Each question needs a unique id.",
+  "_version": "1.0.0",
+  "_lastUpdated": "2026-04-08",
+
   "mathematics": [
-    {
-      "topic": "Algebra",
-      "q": "If 3x² − 7x + 2 = 0, find the values of x.",
-      "opts": ["x=2 or x=1/3", "x=2 or x=−1/3", "x=−2 or x=1/3", "x=3 or x=−2"],
-      "ans": 0,
-      "explanation": "Factorize: (3x−1)(x−2)=0.",
-      "exam": "JAMB",
-      "year": "2023"
-    }
+    { "id": "math-q1",  "cat": "Algebra",     "q": "If 3x² − 7x + 2 = 0, find the values of x.", "opts": ["x=2 or x=1/3", "x=2 or x=−1/3", "x=−2 or x=1/3", "x=3 or x=−2"], "ans": 0, "exp": "Factorize: (3x−1)(x−2)=0. So x=1/3 or x=2." },
+    { "id": "math-q2",  "cat": "Algebra",     "q": "Solve for x: 2^(x+1) = 32", "opts": ["4", "5", "3", "6"], "ans": 0, "exp": "32=2⁵, so x+1=5, x=4." },
+    { "id": "math-q3",  "cat": "Algebra",     "q": "The sum of roots of 2x²+5x−3=0 is:", "opts": ["5/2", "−5/2", "3/2", "−3/2"], "ans": 1, "exp": "Sum of roots = −b/a = −5/2." },
+    { "id": "math-q4",  "cat": "Indices",     "q": "Simplify: 2³ × 2⁴", "opts": ["2⁷", "2¹²", "4⁷", "8"], "ans": 0, "exp": "Same base: add exponents. 2^(3+4)=2⁷." },
+    { "id": "math-q5",  "cat": "Indices",     "q": "What is log₁₀(1000)?", "opts": ["2", "3", "4", "10"], "ans": 1, "exp": "log₁₀(1000) = log₁₀(10³) = 3." },
+    { "id": "math-q6",  "cat": "Indices",     "q": "Rationalize: 1/√5", "opts": ["√5", "√5/5", "5/√5", "√25"], "ans": 1, "exp": "Multiply top and bottom by √5: √5/(√5×√5) = √5/5." },
+    { "id": "math-q7",  "cat": "Trigonometry","q": "Find sin 90°", "opts": ["0", "1", "0.5", "undefined"], "ans": 1, "exp": "sin 90° = 1 by definition." },
+    { "id": "math-q8",  "cat": "Trigonometry","q": "What is cos 0°?", "opts": ["0", "1", "−1", "0.5"], "ans": 1, "exp": "cos 0° = 1." },
+    { "id": "math-q9",  "cat": "Trigonometry","q": "tan 45° equals:", "opts": ["0", "√2", "1", "1/√2"], "ans": 2, "exp": "tan 45° = sin45°/cos45° = 1." },
+    { "id": "math-q10", "cat": "Geometry",    "q": "Area of a circle with radius 7 cm (π=22/7):", "opts": ["154 cm²", "144 cm²", "164 cm²", "174 cm²"], "ans": 0, "exp": "A = πr² = (22/7)×49 = 154 cm²." },
+    { "id": "math-q11", "cat": "Geometry",    "q": "An angle in a semicircle is always:", "opts": ["45°", "60°", "90°", "180°"], "ans": 2, "exp": "Angle in a semicircle = 90° (Thales theorem)." },
+    { "id": "math-q12", "cat": "Geometry",    "q": "Volume of cylinder r=3, h=10 (π≈3.14):", "opts": ["282.6", "94.2", "188.4", "314"], "ans": 0, "exp": "V = πr²h = 3.14×9×10 = 282.6." },
+    { "id": "math-q13", "cat": "Calculus",    "q": "Differentiate y = x³ + 2x", "opts": ["3x² + 2", "3x + 2", "x² + 2", "3x²"], "ans": 0, "exp": "Power rule: dy/dx = 3x² + 2." },
+    { "id": "math-q14", "cat": "Calculus",    "q": "dy/dx of y = 5x⁴ is:", "opts": ["20x³", "5x³", "4x³", "20x⁴"], "ans": 0, "exp": "d/dx(5x⁴) = 5×4×x³ = 20x³." },
+    { "id": "math-q15", "cat": "Calculus",    "q": "Find the gradient of y=x²+3x at x=2", "opts": ["7", "4", "10", "5"], "ans": 0, "exp": "dy/dx = 2x+3. At x=2: 2(2)+3 = 7." },
+    { "id": "math-q16", "cat": "Calculus",    "q": "∫3x² dx =", "opts": ["x³+C", "6x+C", "3x³+C", "x²+C"], "ans": 0, "exp": "∫3x² dx = 3×x³/3 + C = x³ + C." },
+    { "id": "math-q17", "cat": "Calculus",    "q": "∫6x dx =", "opts": ["3x²+C", "6x²+C", "x²+C", "12x²+C"], "ans": 0, "exp": "∫6x dx = 6×x²/2 + C = 3x² + C." },
+    { "id": "math-q18", "cat": "Calculus",    "q": "Evaluate ∫₀² 2x dx", "opts": ["4", "2", "8", "6"], "ans": 0, "exp": "[x²]₀² = 4 − 0 = 4." },
+    { "id": "math-q19", "cat": "Statistics",  "q": "Mean of 4, 8, 6, 5, 3 is:", "opts": ["5", "5.2", "6", "4.5"], "ans": 1, "exp": "Sum=26, n=5. Mean=26/5=5.2." },
+    { "id": "math-q20", "cat": "Statistics",  "q": "Mode of 1,2,2,3,4,4,4 is:", "opts": ["2", "3", "4", "1"], "ans": 2, "exp": "4 appears 3 times — most frequent." },
+    { "id": "math-q21", "cat": "Statistics",  "q": "Median of 3,7,1,9,5 is:", "opts": ["5", "7", "3", "9"], "ans": 0, "exp": "Sorted: 1,3,5,7,9. Middle value = 5." },
+    { "id": "math-q22", "cat": "Probability", "q": "A die is thrown. P(even number)=", "opts": ["1/6", "1/3", "1/2", "2/3"], "ans": 2, "exp": "Even: 2,4,6 → 3/6=1/2." },
+    { "id": "math-q23", "cat": "Probability", "q": "P(A)=0.3, P(B)=0.4, independent. P(A and B)=", "opts": ["0.7", "0.12", "0.1", "0.04"], "ans": 1, "exp": "P(A∩B) = 0.3×0.4 = 0.12." },
+    { "id": "math-q24", "cat": "Probability", "q": "What is P(impossible event)?", "opts": ["1", "0.5", "0", "Cannot tell"], "ans": 2, "exp": "Probability of an impossible event = 0." },
+    { "id": "math-q25", "cat": "Algebra",     "q": "Product of roots of 3x²−7x+2=0:", "opts": ["7/3", "2/3", "−7/3", "3/2"], "ans": 1, "exp": "Product = c/a = 2/3." },
+    { "id": "math-q26", "cat": "Algebra",     "q": "Convert 1101₂ to base 10:", "opts": ["11", "13", "15", "12"], "ans": 1, "exp": "1×8+1×4+0×2+1×1 = 13." }
+  ],
+
+  "physics": [
+    { "id": "phy-q1",  "cat": "Mechanics",    "q": "A car accelerates from rest at 2m/s² for 5s. Final velocity:", "opts": ["5m/s", "10m/s", "15m/s", "20m/s"], "ans": 1, "exp": "v=u+at=0+2×5=10m/s." },
+    { "id": "phy-q2",  "cat": "Mechanics",    "q": "Which is a vector quantity?", "opts": ["Speed", "Mass", "Temperature", "Displacement"], "ans": 3, "exp": "Displacement has magnitude and direction." },
+    { "id": "phy-q3",  "cat": "Mechanics",    "q": "A ball is thrown up at 20m/s. Time to reach max height (g=10):", "opts": ["1s", "2s", "3s", "4s"], "ans": 1, "exp": "At max height v=0. t=(v−u)/a=(0−20)/−10=2s." },
+    { "id": "phy-q4",  "cat": "Forces",       "q": "A 5kg object accelerates at 3m/s². Force applied:", "opts": ["8N", "15N", "2N", "53N"], "ans": 1, "exp": "F=ma=5×3=15N." },
+    { "id": "phy-q5",  "cat": "Forces",       "q": "Weight of 20kg object (g=10):", "opts": ["2N", "200N", "20N", "100N"], "ans": 1, "exp": "W=mg=20×10=200N." },
+    { "id": "phy-q6",  "cat": "Forces",       "q": "Newton's 3rd law states:", "opts": ["F=ma", "Every action has equal/opposite reaction", "Objects stay at rest", "Velocity is constant"], "ans": 1, "exp": "3rd law: action and reaction are equal and opposite." },
+    { "id": "phy-q7",  "cat": "Waves",        "q": "Wave speed if f=50Hz, λ=4m:", "opts": ["200m/s", "54m/s", "12.5m/s", "46m/s"], "ans": 0, "exp": "v=fλ=50×4=200m/s." },
+    { "id": "phy-q8",  "cat": "Waves",        "q": "Sound is a ___ wave.", "opts": ["Transverse", "Electromagnetic", "Longitudinal", "None"], "ans": 2, "exp": "Sound is longitudinal." },
+    { "id": "phy-q9",  "cat": "Waves",        "q": "Period of wave with f=25Hz:", "opts": ["0.04s", "25s", "0.4s", "4s"], "ans": 0, "exp": "T=1/f=1/25=0.04s." },
+    { "id": "phy-q10", "cat": "Electricity",  "q": "V=12V, R=4Ω. Current I=", "opts": ["48A", "3A", "8A", "16A"], "ans": 1, "exp": "I=V/R=12/4=3A." },
+    { "id": "phy-q11", "cat": "Electricity",  "q": "Power when I=2A, R=5Ω:", "opts": ["20W", "10W", "7W", "40W"], "ans": 0, "exp": "P=I²R=4×5=20W." },
+    { "id": "phy-q12", "cat": "Electricity",  "q": "Two 6Ω resistors in parallel:", "opts": ["12Ω", "6Ω", "3Ω", "1Ω"], "ans": 2, "exp": "1/R=2/6. R=3Ω." }
+  ],
+
+  "english": [
+    { "id": "eng-q1",  "cat": "Lexis",        "q": "Identify the noun: 'The tall boy ran fast.'", "opts": ["tall", "ran", "boy", "fast"], "ans": 2, "exp": "'Boy' names a person — it is a noun." },
+    { "id": "eng-q2",  "cat": "Lexis",        "q": "'She QUICKLY finished homework.' Adverb is:", "opts": ["She", "quickly", "finished", "homework"], "ans": 1, "exp": "'Quickly' modifies the verb — adverb." },
+    { "id": "eng-q3",  "cat": "Lexis",        "q": "Which is a proper noun?", "opts": ["city", "happiness", "Lagos", "building"], "ans": 2, "exp": "'Lagos' names a specific place." },
+    { "id": "eng-q4",  "cat": "Comprehension","q": "In comprehension, you should first:", "opts": ["Read the passage", "Read the questions", "Write answer", "None"], "ans": 1, "exp": "Read questions first to guide reading." },
+    { "id": "eng-q5",  "cat": "Comprehension","q": "A summary question asks you to:", "opts": ["Copy the passage", "Write your opinion", "Identify and restate key points concisely", "Analyse the author"], "ans": 2, "exp": "Summaries require identifying and concisely restating key points." },
+    { "id": "eng-q6",  "cat": "Comprehension","q": "Lifting means:", "opts": ["Paraphrasing", "Copying word-for-word from passage", "Using synonyms", "None"], "ans": 1, "exp": "Lifting = copying word-for-word, which loses marks in WAEC." },
+    { "id": "eng-q7",  "cat": "Oral",         "q": "Which word has the stress on the first syllable?", "opts": ["reCORD (v)", "REcord (n)", "imPORT (v)", "preSENT (v)"], "ans": 1, "exp": "'REcord' (noun) stress falls on first syllable." },
+    { "id": "eng-q8",  "cat": "Oral",         "q": "How many vowel sounds in English?", "opts": ["5", "20", "12", "26"], "ans": 1, "exp": "English has 20 vowel sounds (12 pure + 8 diphthongs)." },
+    { "id": "eng-q9",  "cat": "Oral",         "q": "The word 'photograph' stress is on:", "opts": ["PHO", "to", "graph", "tograph"], "ans": 0, "exp": "'PHOtograph' — stress on first syllable." },
+    { "id": "eng-q10", "cat": "Grammar",      "q": "'Neither John nor Mary ___ coming.' Correct verb:", "opts": ["are", "were", "is", "am"], "ans": 2, "exp": "With neither/nor, verb agrees with closest subject: Mary → is." },
+    { "id": "eng-q11", "cat": "Grammar",      "q": "Identify the preposition: 'The book is on the table.'", "opts": ["book", "is", "on", "table"], "ans": 2, "exp": "'On' shows position relationship — it is a preposition." },
+    { "id": "eng-q12", "cat": "Grammar",      "q": "'I wish I ___ taller.' Correct form:", "opts": ["am", "was", "were", "be"], "ans": 2, "exp": "Subjunctive mood uses 'were' for unreal conditions." }
+  ],
+
+  "chemistry": [
+    { "id": "chem-q1",  "cat": "Atomic Structure", "q": "Atomic number of Carbon (C) is:", "opts": ["12", "6", "8", "14"], "ans": 1, "exp": "Carbon has 6 protons — atomic number = 6." },
+    { "id": "chem-q2",  "cat": "Atomic Structure", "q": "Isotopes of an element have the same:", "opts": ["Mass number", "Neutron number", "Atomic number", "All of the above"], "ans": 2, "exp": "Isotopes: same atomic number (protons) but different mass numbers." },
+    { "id": "chem-q3",  "cat": "Periodic Table",   "q": "Electronegativity across a period:", "opts": ["Decreases", "Stays same", "Increases", "Random"], "ans": 2, "exp": "Electronegativity increases across a period." },
+    { "id": "chem-q4",  "cat": "Bonding",          "q": "NaCl is formed by:", "opts": ["Covalent bonding", "Ionic bonding", "Metallic bonding", "H-bonding"], "ans": 1, "exp": "Na donates electron to Cl — ionic bond." },
+    { "id": "chem-q5",  "cat": "Bonding",          "q": "H₂O involves:", "opts": ["Ionic bonding", "Metallic bonding", "Covalent bonding", "Van der Waals"], "ans": 2, "exp": "Water: O and H share electrons — covalent." },
+    { "id": "chem-q6",  "cat": "Bonding",          "q": "Which has highest melting point?", "opts": ["Covalent molecular", "Ionic", "Metallic Na", "None"], "ans": 1, "exp": "Ionic compounds generally have high melting points." },
+    { "id": "chem-q7",  "cat": "Organic",          "q": "General formula for alkanes:", "opts": ["CₙH₂ₙ", "CₙH₂ₙ₊₂", "CₙH₂ₙ₋₂", "CₙH₂ₙ₊₁"], "ans": 1, "exp": "Alkanes: saturated, CₙH₂ₙ₊₂." },
+    { "id": "chem-q8",  "cat": "Organic",          "q": "Bromine water test for alkene:", "opts": ["No change", "Turns blue", "Decolourizes", "Black ppt"], "ans": 2, "exp": "Alkenes decolourize bromine water." },
+    { "id": "chem-q9",  "cat": "Organic",          "q": "IUPAC name for CH₃−CH₂−CH₃:", "opts": ["Methane", "Ethane", "Propane", "Butane"], "ans": 2, "exp": "3 carbons = Propane." },
+    { "id": "chem-q10", "cat": "Physical",         "q": "Mole of gas at STP occupies:", "opts": ["22.4 L", "24 L", "11.2 L", "44.8 L"], "ans": 0, "exp": "1 mole of gas at STP = 22.4 L." },
+    { "id": "chem-q11", "cat": "Atomic Structure", "q": "Number of neutrons in ¹⁴N (atomic no.=7):", "opts": ["7", "14", "6", "8"], "ans": 0, "exp": "Neutrons = 14−7 = 7." },
+    { "id": "chem-q12", "cat": "Periodic Table",   "q": "Group 1 elements are called:", "opts": ["Halogens", "Noble gases", "Alkali metals", "Transition metals"], "ans": 2, "exp": "Group 1 = Alkali metals (Li, Na, K, Rb, Cs, Fr)." }
   ]
 }
