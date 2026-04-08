@@ -1,27 +1,40 @@
 {
   "mathematics": {
-    "label": "Mathematics",
-    "icon": "📐",
+    "label": "Mathematics Syllabus",
+    "meta": "8 Topics · 1,500+ Questions",
     "color": "#1a56ff",
     "sections": [
       {
-        "title": "Algebra",
+        "title": "Number & Algebra",
         "topics": [
           {
             "id": "math-1",
             "name": "Number Bases & Quadratic Equations",
             "duration": "14 min",
+            "qcount": 10,
             "free": true,
-            "videoUrl": "lessons/quadratics.html"
+            "done": true,
+            "tag": "Mathematics · Algebra",
+            "videoUrl": "lesson-quadratics.html",
+            "notes": "This lesson covers foundational algebraic concepts tested in JAMB and WAEC. Pay attention to the factorization method and the quadratic formula.",
+            "keyPoints": [
+              "Factorization method: (ax + b)(cx + d) = 0",
+              "Quadratic formula: x = (−b ± √(b²−4ac)) / 2a",
+              "Sum of roots = −b/a · Product = c/a",
+              "Number base conversions: divide repeatedly"
+            ],
+            "formula": "x = (−b ± √(b²−4ac)) / 2a | where a, b, c are coefficients",
+            "quiz": [
+              {
+                "q": "If 3x² − 7x + 2 = 0, find the values of x.",
+                "opts": ["x=2 or x=1/3", "x=2 or x=−1/3", "x=−2 or x=1/3", "x=3 or x=−2"],
+                "ans": 0,
+                "exp": "Factorize: (3x−1)(x−2)=0. Answer is A."
+              }
+            ]
           }
         ]
       }
     ]
-  },
-  "physics": {
-    "label": "Physics",
-    "icon": "⚛️",
-    "color": "#7c3aed",
-    "sections": []
   }
 }
