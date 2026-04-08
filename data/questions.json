@@ -1,1 +1,13 @@
-????
+{
+  "mathematics": [
+    {
+      "topic": "Algebra",
+      "q": "If 3x² − 7x + 2 = 0, find the values of x.",
+      "opts": ["x=2 or x=1/3", "x=2 or x=−1/3", "x=−2 or x=1/3", "x=3 or x=−2"],
+      "ans": 0,
+      "explanation": "Factorize: (3x−1)(x−2)=0.",
+      "exam": "JAMB",
+      "year": "2023"
+    }
+  ]
+}
