@@ -4,149 +4,143 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Classroom — UltimateEdge School</title>
+
+<!-- 1. GOOGLE FONTS -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:#f7f9fc; --surface:#fff; --surface2:#f0f4ff;
-  --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.14);
-  --accent:#1a56ff; --accent2:#00c97a; --accent3:#ff6b35;
-  --text:#0d1117; --muted:#6b7280; --muted2:#9ca3af;
-  --shadow:0 2px 20px rgba(0,0,0,0.08); --shadow-lg:0 8px 40px rgba(0,0,0,0.12);
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;overflow-x:hidden;}
 
-/* NAV */
-nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:66px;background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);box-shadow:0 1px 12px rgba(0,0,0,0.06);}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
-.nav-logo-icon{width:36px;height:36px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
-.nav-logo-text{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.1em;color:var(--text);}
-.nav-logo-text span{color:var(--accent);}
-.nav-right{display:flex;align-items:center;gap:16px;}
-.nav-back{color:var(--muted);text-decoration:none;font-size:0.85rem;font-weight:500;display:flex;align-items:center;gap:5px;transition:color .2s;}
-.nav-back:hover{color:var(--text);}
-.nav-cta{background:var(--accent);color:white;padding:9px 22px;border-radius:8px;font-weight:700;font-size:0.88rem;text-decoration:none;box-shadow:0 4px 14px rgba(26,86,255,0.3);transition:all .2s;}
-.nav-cta:hover{opacity:.92;transform:translateY(-1px);}
+<!-- 2. GLOBAL STYLES (External) -->
+<link rel="stylesheet" href="css/main.css">
+
+<!-- 3. CLASSROOM SPECIFIC STYLES (Layout Only) -->
+<style>
+/* CLASSROOM GRID */
+.classroom-layout { display: grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - 130px); }
+
+/* SIDEBAR */
+.sidebar { background: white; border-right: 1px solid var(--border); overflow-y: auto; position: sticky; top: 130px; height: calc(100vh - 130px); }
+.sidebar-header { padding: 20px 20px 12px; border-bottom: 1px solid var(--border); }
+.sidebar-subject { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.05em; line-height: 1; }
+.sidebar-progress { margin-top: 12px; }
+.progress-bar { height: 5px; background: var(--border); border-radius: 100px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 100px; background: var(--accent); width: 0%; transition: width .4s; }
+.progress-label { font-size: 0.72rem; color: var(--muted); margin-top: 5px; }
+
+.topic-section-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted2); padding: 15px 20px 5px; }
+.topic-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; border-left: 3px solid transparent; transition: 0.15s; }
+.topic-item:hover { background: var(--bg); }
+.topic-item.active { background: var(--surface2); border-left-color: var(--accent); }
+.topic-status { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0; }
+.status-done { background: rgba(0,201,122,0.15); color: var(--accent2); }
+.status-lock { background: var(--bg); border: 1px solid var(--border); color: var(--muted2); }
 
 /* SUBJECT TABS */
-.subject-tabs{background:white;border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.subj-tab{display:flex;align-items:center;gap:8px;padding:16px 24px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;font-weight:600;font-size:0.9rem;color:var(--muted);transition:all .2s;text-decoration:none;background:none;font-family:'DM Sans',sans-serif;border-top:none;border-left:none;border-right:none;}
-.subj-tab.active{color:var(--tab-color,var(--accent));border-bottom-color:var(--tab-color,var(--accent));}
+.subject-tabs { background: white; border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; overflow-x: auto; position: sticky; top: 66px; z-index: 90; }
+.subj-tab { padding: 16px 24px; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; font-weight: 600; font-size: 0.9rem; color: var(--muted); background: none; border-top: none; border-left: none; border-right: none; font-family: 'DM Sans', sans-serif; transition: 0.2s; }
+.subj-tab.active { color: var(--tab-color, var(--accent)); border-bottom-color: var(--tab-color, var(--accent)); }
 
-/* LAYOUT */
-.classroom-layout{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 130px);}
-.sidebar{background:white;border-right:1px solid var(--border);overflow-y:auto;position:sticky;top:130px;height:calc(100vh - 130px);}
-.sidebar-header{padding:20px 20px 12px;border-bottom:1px solid var(--border);}
-.sidebar-subject{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.05em;line-height:1;}
-.sidebar-meta{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
-.sidebar-progress{margin-top:12px;}
-.progress-bar{height:5px;background:var(--border);border-radius:100px;overflow:hidden;}
-.progress-fill{height:100%;border-radius:100px;background:var(--accent);width:0%;transition:width .4s;}
-.progress-label{font-size:0.72rem;color:var(--muted);margin-top:5px;}
+/* MAIN CONTENT */
+.main-content { padding: 0; overflow-y: auto; }
+.video-area { background: #000; position: relative; aspect-ratio: 16/9; max-height: 420px; }
+.video-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: white; }
+.video-embed { width: 100%; height: 100%; border: none; display: none; }
+.play-btn-large { width: 70px; height: 70px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
+.play-btn-large:hover { transform: scale(1.1); }
 
-/* CONTENT */
-.main-content{padding:0;overflow-y:auto;}
-.video-area{background:#000;position:relative;aspect-ratio:16/9;max-height:420px;}
-.video-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:white;}
-.video-embed{width:100%;height:100%;border:none;display:none;}
-.play-btn-large{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;transition:all .2s;backdrop-filter:blur(4px);}
-.play-btn-large:hover{background:var(--accent);border-color:var(--accent);transform:scale(1.08);}
+.locked-overlay { position: absolute; inset: 0; background: rgba(13,17,23,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; padding: 24px; color: white; z-index: 10; }
+.locked-overlay.show { display: flex; }
 
-/* TOPIC ITEMS */
-.topic-section{padding:12px 0;}
-.topic-section-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted2);padding:6px 20px 4px;}
-.topic-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;}
-.topic-item:hover{background:var(--bg);}
-.topic-item.active{background:var(--surface2);border-left-color:var(--accent);}
-.topic-status{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;}
-.status-done{background:rgba(0,201,122,0.15);color:var(--accent2);}
-.status-lock{background:var(--bg);border:1px solid var(--border);color:var(--muted2);}
+.lesson-body { padding: 32px; max-width: 800px; }
+.lesson-tag { font-family: 'DM Mono'; font-size: 0.65rem; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; font-weight: 700; }
+.lesson-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; line-height: 1; margin-bottom: 15px; }
 
-/* LOCKED OVERLAY */
-.locked-overlay{position:absolute;inset:0;background:rgba(13,17,23,0.85);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px;backdrop-filter:blur(4px);}
-.locked-overlay.show{display:flex;}
-.lock-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:white;}
-.unlock-btn{background:var(--accent);color:white;padding:12px 28px;border-radius:10px;font-weight:700;text-decoration:none;}
+.key-point { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 0.95rem; }
+.kp-dot { width: 22px; height: 22px; border-radius: 50%; background: rgba(26,86,255,0.1); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
 
-/* LESSON INFO & QUIZ */
-.lesson-info{padding:24px 32px;border-bottom:1px solid var(--border);}
-.lesson-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;margin-bottom:8px;}
-.lesson-body{padding:28px 32px;}
-.key-point{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;font-size:0.9rem;}
-.kp-dot{width:20px;height:20px;border-radius:50%;background:rgba(26,86,255,0.1);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;}
-.quiz-section{background:white;border:1px solid var(--border);border-radius:16px;padding:24px;margin-top:24px;}
-.quiz-opt{display:flex;align-items:center;gap:10px;padding:12px;border-radius:9px;border:1.5px solid var(--border);margin-bottom:8px;cursor:pointer;}
-.quiz-opt.selected{border-color:var(--accent);background:rgba(26,86,255,0.05);}
+.quiz-section { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-top: 30px; box-shadow: var(--shadow); }
+.quiz-opt { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1.5px solid var(--border); border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+.quiz-opt.selected { border-color: var(--accent); background: rgba(26,86,255,0.05); }
 
 @media(max-width:900px){
-  .classroom-layout{grid-template-columns:1fr;}
-  .sidebar{position:static;height:auto;border-right:none;}
+  .classroom-layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; border-right: none; }
+  .subject-tabs { padding: 0 20px; }
 }
 </style>
 </head>
 <body>
 
-<nav>
-  <a href="index.html" class="nav-logo">
-    <div class="nav-logo-icon">🎓</div>
-    <span class="nav-logo-text">UE <span>School</span></span>
-  </a>
+<!-- NAV -->
+<nav style="position:sticky; top:0; height:66px; background:white; display:flex; align-items:center; justify-content:space-between; padding:0 40px; border-bottom:1px solid var(--border); z-index:100;">
+  <a href="index.html" class="logo">UE <span>School</span></a>
   <div class="nav-right">
-    <a href="index.html" class="nav-back">← Home</a>
-    <a href="index.html#pricing" class="nav-cta">Unlock All — ₦2,500</a>
+    <a href="index.html#pricing" style="background:var(--accent); color:white; padding:8px 20px; border-radius:8px; text-decoration:none; font-weight:700; font-size:0.85rem;">Unlock Full Access</a>
   </div>
 </nav>
 
+<!-- SUBJECT TABS -->
 <div class="subject-tabs" id="subjectTabs">
-  <button class="subj-tab active" data-subject="mathematics" style="--tab-color:#1a56ff" onclick="switchSubject('mathematics', this)">📐 Mathematics</button>
+  <button class="subj-tab active" data-subject="mathematics" onclick="switchSubject('mathematics', this)">📐 Mathematics</button>
   <button class="subj-tab" data-subject="physics" style="--tab-color:#7c3aed" onclick="switchSubject('physics', this)">⚛️ Physics</button>
+  <button class="subj-tab" data-subject="english" style="--tab-color:#00c97a" onclick="switchSubject('english', this)">📖 English</button>
 </div>
 
+<!-- CLASSROOM LAYOUT -->
 <div class="classroom-layout">
-  <div class="sidebar">
+  
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-subject" id="sidebarSubject">Loading...</div>
-      <div class="sidebar-meta" id="sidebarMeta"></div>
+      <div class="sidebar-subject" id="sidebarSubject">Syllabus</div>
+      <div class="sidebar-meta" id="sidebarMeta" style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; margin-top: 5px;">Loading topics...</div>
       <div class="sidebar-progress">
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="progress-label" id="progressLabel"></div>
+        <div class="progress-label" id="progressLabel">0 topics completed</div>
       </div>
     </div>
     <div id="topicList"></div>
-  </div>
+  </aside>
 
-  <div class="main-content" id="mainContent">
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+    
+    <!-- VIDEO PLAYER -->
     <div class="video-area">
       <div class="video-placeholder" id="videoPlaceholder">
         <div class="play-btn-large" onclick="playVideo()">▶</div>
-        <div class="video-label">Click to play lesson</div>
+        <div style="font-size: 0.85rem; margin-top: 10px; opacity: 0.7;">Click to play video masterclass</div>
       </div>
-      <iframe class="video-embed" id="videoEmbed" allowfullscreen></iframe>
-      <div class="locked-overlay" id="lockedOverlay">
-        <div class="lock-title">Premium Topic</div>
-        <a href="index.html#pricing" class="unlock-btn">Unlock Full Access</a>
-      </div>
-    </div>
-
-    <div class="lesson-info">
-      <div class="lesson-title" id="lessonTitle"></div>
-      <div class="lesson-meta" id="lessonMeta"></div>
-    </div>
-
-    <div class="lesson-body">
-      <div id="lessonNotes"></div>
-      <ul class="key-points" id="keyPoints"></ul>
+      <iframe class="video-embed" id="videoEmbed" allowfullscreen allow="autoplay"></iframe>
       
-      <div class="quiz-section" id="quizSection" style="display:none">
-        <h3>Topic Quiz</h3>
-        <div id="quizBody"></div>
-        <button onclick="submitQuiz()" style="margin-top:15px; padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:8px; cursor:pointer;">Submit Quiz</button>
+      <div class="locked-overlay" id="lockedOverlay">
+        <div style="font-size: 3rem;">🔒</div>
+        <div class="lock-title">Premium Masterclass</div>
+        <p style="font-size: 0.85rem; opacity: 0.8; max-width: 300px;">This topic is for Premium members. Unlock all 200+ lessons for a one-time fee.</p>
+        <a href="index.html#pricing" style="background:var(--accent); color:white; padding:12px 28px; border-radius:10px; text-decoration:none; font-weight:700;">Unlock All — ₦2,500</a>
       </div>
     </div>
-  </div>
+
+    <!-- LESSON INFO -->
+    <div class="lesson-info" style="padding: 24px 32px; border-bottom: 1px solid var(--border);">
+      <div class="lesson-tag" id="lessonTag">Mathematics · Algebra</div>
+      <h1 class="lesson-title" id="lessonTitle">Select a topic</h1>
+      <div id="lessonMeta" style="font-size: 0.8rem; color: var(--muted);">Select a lesson from the sidebar to begin learning.</div>
+    </div>
+
+    <!-- LESSON BODY -->
+    <div class="lesson-body">
+      <p id="lessonNotes" style="margin-bottom: 25px; line-height: 1.7; color: var(--text);"></p>
+      <ul id="keyPoints" style="list-style: none; margin-bottom: 30px;"></ul>
+      
+      <div id="quizSection" class="quiz-section" style="display:none">
+        <h3 style="font-family: 'Bebas Neue'; font-size: 1.5rem; margin-bottom: 15px;">Topic Practice Quiz</h3>
+        <div id="quizBody"></div>
+        <button onclick="alert('Mastery access tracks your scores!')" style="background:var(--accent); color:white; border:none; padding:12px 25px; border-radius:8px; font-weight:700; cursor:pointer; margin-top:15px;">Submit Practice</button>
+      </div>
+    </div>
+
+  </main>
 </div>
 
 <script>
@@ -155,113 +149,143 @@ let activeSubject = 'mathematics';
 let activeTopic = null;
 let userAnswers = {};
 
-// THE WAITER: Fetching your data from GitHub
-async function loadData() {
-  try {
-    const response = await fetch('data/curriculum.json');
-    CURRICULUM = await response.json();
-    loadSubject(activeSubject);
-  } catch (e) {
-    console.error("Could not load curriculum data", e);
-  }
+// 1. DATA LOADER
+async function loadClassroom() {
+    try {
+        const response = await fetch('data/curriculum.json');
+        CURRICULUM = await response.json();
+        
+        // Auto-detect subject from URL
+        const params = new URLSearchParams(window.location.search);
+        const subjFromUrl = params.get('subject');
+        if(subjFromUrl && CURRICULUM[subjFromUrl]) activeSubject = subjFromUrl;
+
+        loadSubject(activeSubject);
+    } catch (e) {
+        console.error("Database error:", e);
+    }
 }
 
+// 2. SUBJECT SWITCHER
 function switchSubject(subject, el) {
-  activeSubject = subject;
-  document.querySelectorAll('.subj-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  loadSubject(subject);
+    activeSubject = subject;
+    document.querySelectorAll('.subj-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    loadSubject(subject);
 }
 
 function loadSubject(subject) {
-  const data = CURRICULUM[subject];
-  if (!data) return;
-  document.getElementById('sidebarSubject').textContent = data.label;
-  document.getElementById('sidebarMeta').textContent = data.meta;
-  
-  const list = document.getElementById('topicList');
-  list.innerHTML = '';
-  let total = 0, done = 0;
+    const data = CURRICULUM[subject];
+    if (!data) return;
 
-  data.sections.forEach(sec => {
-    const secLabel = document.createElement('div');
-    secLabel.className = 'topic-section-label';
-    secLabel.textContent = sec.title;
-    list.appendChild(secLabel);
+    document.getElementById('sidebarSubject').textContent = data.label;
+    document.getElementById('sidebarMeta').textContent = data.meta;
+    
+    const list = document.getElementById('topicList');
+    list.innerHTML = '';
+    let total = 0, done = 0;
 
-    sec.topics.forEach(topic => {
-      total++; if(topic.done) done++;
-      const item = document.createElement('div');
-      item.className = `topic-item ${!topic.free ? 'locked' : ''}`;
-      item.innerHTML = `
-        <div class="topic-status ${topic.done?'status-done':'status-lock'}">${topic.done?'✓':'🔒'}</div>
-        <div class="topic-info">
-          <div class="topic-name-text">${topic.name}</div>
-        </div>
-      `;
-      item.onclick = () => openTopic(topic);
-      list.appendChild(item);
+    data.sections.forEach(section => {
+        const label = document.createElement('div');
+        label.className = 'topic-section-label';
+        label.textContent = section.title;
+        list.appendChild(label);
+
+        section.topics.forEach(topic => {
+            total++; if(topic.done) done++;
+            const item = document.createElement('div');
+            item.className = `topic-item ${!topic.free ? 'locked' : ''} ${activeTopic?.id === topic.id ? 'active' : ''}`;
+            item.innerHTML = `
+                <div class="topic-status ${topic.done ? 'status-done' : 'status-lock'}">${topic.done ? '✓' : (topic.free ? '▶' : '🔒')}</div>
+                <div style="font-weight:600; font-size:0.85rem;">${topic.name}</div>
+            `;
+            item.onclick = () => openTopic(topic);
+            list.appendChild(item);
+        });
     });
-  });
 
-  const pct = Math.round((done/total)*100) || 0;
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressLabel').textContent = `${done} of ${total} topics completed`;
-  
-  if(data.sections[0]?.topics[0]) openTopic(data.sections[0].topics[0]);
+    const pct = Math.round((done/total)*100) || 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = `${done} of ${total} topics completed`;
+
+    if(data.sections[0]?.topics[0] && !activeTopic) openTopic(data.sections[0].topics[0]);
 }
 
+// 3. LESSON LOADER
 function openTopic(topic) {
-  activeTopic = topic;
-  document.getElementById('lessonTitle').textContent = topic.name;
-  document.getElementById('lessonNotes').textContent = topic.notes || '';
-  
-  const kpList = document.getElementById('keyPoints');
-  kpList.innerHTML = (topic.keyPoints || []).map((kp,i) => `
-    <li class="key-point"><span class="kp-dot">${i+1}</span>${kp}</li>
-  `).join('');
+    activeTopic = topic;
+    document.getElementById('lessonTitle').textContent = topic.name;
+    document.getElementById('lessonNotes').textContent = topic.notes || "Notes for this lesson are being updated.";
+    document.getElementById('lessonTag').textContent = `${activeSubject} · ${topic.id}`;
+    
+    const kpList = document.getElementById('keyPoints');
+    kpList.innerHTML = (topic.keyPoints || []).map((kp, i) => `
+        <li class="key-point">
+            <span class="kp-dot">${i+1}</span>
+            <div>${kp}</div>
+        </li>
+    `).join('');
 
-  const overlay = document.getElementById('lockedOverlay');
-  const placeholder = document.getElementById('videoPlaceholder');
-  const embed = document.getElementById('videoEmbed');
-  
-  embed.style.display = 'none';
-  placeholder.style.display = 'flex';
-  overlay.classList.toggle('show', !topic.free);
+    // Video/Overlay UI
+    const overlay = document.getElementById('lockedOverlay');
+    const placeholder = document.getElementById('videoPlaceholder');
+    const embed = document.getElementById('videoEmbed');
+    
+    embed.style.display = 'none';
+    placeholder.style.display = 'flex';
+    overlay.classList.toggle('show', !topic.free);
 
-  if(topic.quiz) {
-    document.getElementById('quizSection').style.display = 'block';
-    renderQuiz(topic.quiz);
-  } else {
-    document.getElementById('quizSection').style.display = 'none';
-  }
+    // Quiz UI
+    const quizSec = document.getElementById('quizSection');
+    if(topic.quiz && topic.quiz.length > 0) {
+        quizSec.style.display = 'block';
+        renderQuiz(topic.quiz);
+    } else {
+        quizSec.style.display = 'none';
+    }
+
+    // Update sidebar active state
+    loadSubject(activeSubject);
+    document.getElementById('mainContent').scrollTo({top: 0, behavior: 'smooth'});
 }
 
 function renderQuiz(questions) {
-  const body = document.getElementById('quizBody');
-  body.innerHTML = questions.map((q, i) => `
-    <div style="margin-top:20px">
-      <p><strong>${i+1}. ${q.q}</strong></p>
-      ${q.opts.map((opt, oi) => `
-        <div class="quiz-opt" onclick="userAnswers[${i}]=${oi}; renderQuiz(activeTopic.quiz)">
-          <input type="radio" name="q${i}" ${userAnswers[i]===oi?'checked':''}> ${opt}
+    const body = document.getElementById('quizBody');
+    body.innerHTML = questions.map((q, i) => `
+        <div style="margin-top:20px">
+            <p style="font-weight:700; font-size:0.9rem; margin-bottom:10px;">${i+1}. ${q.q}</p>
+            ${q.opts.map((opt, oi) => `
+                <div class="quiz-opt ${userAnswers[i] === oi ? 'selected' : ''}" onclick="selectQuizAns(${i}, ${oi})">
+                    <input type="radio" name="q${i}" ${userAnswers[i] === oi ? 'checked' : ''} style="accent-color:var(--accent)">
+                    <span style="font-size:0.85rem;">${opt}</span>
+                </div>
+            `).join('')}
         </div>
-      `).join('')}
-    </div>
-  `).join('');
+    `).join('');
+}
+
+function selectQuizAns(qIdx, optIdx) {
+    userAnswers[qIdx] = optIdx;
+    renderQuiz(activeTopic.quiz);
 }
 
 function playVideo() {
-  if (!activeTopic?.videoUrl) return;
-  const embed = document.getElementById('videoEmbed');
-  embed.src = activeTopic.videoUrl;
-  embed.style.display = 'block';
-  document.getElementById('videoPlaceholder').style.display = 'none';
+    if (!activeTopic?.videoUrl) return;
+    const embed = document.getElementById('videoEmbed');
+    
+    // Check if it's a local interactive lesson or a YouTube link
+    if (activeTopic.videoUrl.includes('.html')) {
+        embed.src = activeTopic.videoUrl;
+    } else {
+        embed.src = activeTopic.videoUrl + "?autoplay=1";
+    }
+    
+    embed.style.display = 'block';
+    document.getElementById('videoPlaceholder').style.display = 'none';
 }
 
-function submitQuiz() { alert("Quiz submitted! Master access tracks your score history."); }
-
-loadData();
+// Initial Load
+loadClassroom();
 </script>
 </body>
 </html>
