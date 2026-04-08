@@ -1,1 +1,27 @@
-...
+{
+  "mathematics": {
+    "label": "Mathematics",
+    "icon": "📐",
+    "color": "#1a56ff",
+    "sections": [
+      {
+        "title": "Algebra",
+        "topics": [
+          {
+            "id": "math-1",
+            "name": "Number Bases & Quadratic Equations",
+            "duration": "14 min",
+            "free": true,
+            "videoUrl": "lessons/quadratics.html"
+          }
+        ]
+      }
+    ]
+  },
+  "physics": {
+    "label": "Physics",
+    "icon": "⚛️",
+    "color": "#7c3aed",
+    "sections": []
+  }
+}
