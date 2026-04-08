@@ -14,7 +14,6 @@
   --accent:#1a56ff; --accent2:#00c97a; --accent3:#ff6b35;
   --text:#0d1117; --muted:#6b7280; --muted2:#9ca3af;
   --shadow:0 2px 20px rgba(0,0,0,0.08); --shadow-lg:0 8px 40px rgba(0,0,0,0.12);
-  --math:#1a56ff; --physics:#7c3aed; --english:#00c97a; --chemistry:#ff6b35;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
@@ -34,16 +33,11 @@ nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-co
 
 /* SUBJECT TABS */
 .subject-tabs{background:white;border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.subject-tabs::-webkit-scrollbar{display:none;}
-.subj-tab{display:flex;align-items:center;gap:8px;padding:16px 24px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;font-weight:600;font-size:0.9rem;color:var(--muted);transition:all .2s;text-decoration:none;border-top:none;border-left:none;border-right:none;background:none;font-family:'DM Sans',sans-serif;}
-.subj-tab:hover{color:var(--text);}
+.subj-tab{display:flex;align-items:center;gap:8px;padding:16px 24px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;font-weight:600;font-size:0.9rem;color:var(--muted);transition:all .2s;text-decoration:none;background:none;font-family:'DM Sans',sans-serif;border-top:none;border-left:none;border-right:none;}
 .subj-tab.active{color:var(--tab-color,var(--accent));border-bottom-color:var(--tab-color,var(--accent));}
-.subj-tab-icon{font-size:1.1rem;}
 
-/* CLASSROOM LAYOUT */
+/* LAYOUT */
 .classroom-layout{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 130px);}
-
-/* SIDEBAR */
 .sidebar{background:white;border-right:1px solid var(--border);overflow-y:auto;position:sticky;top:130px;height:calc(100vh - 130px);}
 .sidebar-header{padding:20px 20px 12px;border-bottom:1px solid var(--border);}
 .sidebar-subject{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.05em;line-height:1;}
@@ -53,111 +47,48 @@ nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-co
 .progress-fill{height:100%;border-radius:100px;background:var(--accent);width:0%;transition:width .4s;}
 .progress-label{font-size:0.72rem;color:var(--muted);margin-top:5px;}
 
-.topic-section{padding:12px 0;}
-.topic-section-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted2);padding:6px 20px 4px;}
-.topic-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;}
-.topic-item:hover{background:var(--bg);}
-.topic-item.active{background:var(--surface2);border-left-color:var(--accent);}
-.topic-item.locked{opacity:0.55;cursor:pointer;}
-.topic-status{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;}
-.status-done{background:rgba(0,201,122,0.15);color:var(--accent2);}
-.status-active{background:rgba(26,86,255,0.12);color:var(--accent);}
-.status-lock{background:var(--bg);border:1px solid var(--border);color:var(--muted2);}
-.status-free{background:rgba(26,86,255,0.08);color:var(--accent);border:1px dashed rgba(26,86,255,0.3);}
-.topic-info{flex:1;min-width:0;}
-.topic-name-text{font-size:0.88rem;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.topic-detail{font-size:0.72rem;color:var(--muted);margin-top:1px;}
-.topic-badge{font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;font-weight:700;flex-shrink:0;}
-.badge-free{background:rgba(0,201,122,0.12);color:var(--accent2);}
-.badge-lock{background:rgba(0,0,0,0.04);color:var(--muted2);}
-
-/* MAIN CONTENT AREA */
+/* CONTENT */
 .main-content{padding:0;overflow-y:auto;}
 .video-area{background:#000;position:relative;aspect-ratio:16/9;max-height:420px;}
 .video-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:white;}
 .video-embed{width:100%;height:100%;border:none;display:none;}
 .play-btn-large{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;transition:all .2s;backdrop-filter:blur(4px);}
 .play-btn-large:hover{background:var(--accent);border-color:var(--accent);transform:scale(1.08);}
-.video-label{font-size:0.85rem;color:rgba(255,255,255,0.6);}
 
+/* TOPIC ITEMS */
+.topic-section{padding:12px 0;}
+.topic-section-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted2);padding:6px 20px 4px;}
+.topic-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;}
+.topic-item:hover{background:var(--bg);}
+.topic-item.active{background:var(--surface2);border-left-color:var(--accent);}
+.topic-status{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;}
+.status-done{background:rgba(0,201,122,0.15);color:var(--accent2);}
+.status-lock{background:var(--bg);border:1px solid var(--border);color:var(--muted2);}
+
+/* LOCKED OVERLAY */
 .locked-overlay{position:absolute;inset:0;background:rgba(13,17,23,0.85);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px;backdrop-filter:blur(4px);}
 .locked-overlay.show{display:flex;}
-.lock-icon{font-size:3rem;}
-.lock-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:white;letter-spacing:0.04em;}
-.lock-sub{font-size:0.88rem;color:rgba(255,255,255,0.6);max-width:280px;}
-.unlock-btn{background:var(--accent);color:white;border:none;padding:12px 28px;border-radius:10px;font-weight:700;font-size:0.92rem;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;display:inline-block;transition:all .2s;box-shadow:0 4px 20px rgba(26,86,255,0.4);}
-.unlock-btn:hover{transform:translateY(-2px);opacity:.92;}
+.lock-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:white;}
+.unlock-btn{background:var(--accent);color:white;padding:12px 28px;border-radius:10px;font-weight:700;text-decoration:none;}
 
-/* LESSON INFO */
+/* LESSON INFO & QUIZ */
 .lesson-info{padding:24px 32px;border-bottom:1px solid var(--border);}
-.lesson-tag{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
-.lesson-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:0.03em;line-height:1.1;margin-bottom:8px;}
-.lesson-meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
-.lesson-meta-item{display:flex;align-items:center;gap:5px;font-size:0.8rem;color:var(--muted);}
-.lesson-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;}
-.btn-quiz{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:white;font-weight:700;font-size:0.88rem;padding:11px 22px;border-radius:9px;text-decoration:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;box-shadow:0 4px 14px rgba(26,86,255,0.3);}
-.btn-quiz:hover{transform:translateY(-1px);opacity:.92;}
-.btn-next-lesson{display:inline-flex;align-items:center;gap:8px;background:white;color:var(--text);font-weight:600;font-size:0.88rem;padding:11px 22px;border-radius:9px;text-decoration:none;border:1px solid var(--border2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
-.btn-next-lesson:hover{border-color:var(--accent);color:var(--accent);}
-
-/* LESSON BODY */
+.lesson-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;margin-bottom:8px;}
 .lesson-body{padding:28px 32px;}
-.lesson-section-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.06em;margin-bottom:12px;color:var(--text);}
-.lesson-notes{font-size:0.88rem;color:var(--muted);font-weight:300;line-height:1.8;margin-bottom:24px;}
-.key-points{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:28px;}
-.key-point{display:flex;align-items:flex-start;gap:10px;font-size:0.88rem;color:var(--text);}
-.kp-dot{width:20px;height:20px;border-radius:50%;background:rgba(26,86,255,0.1);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0;margin-top:2px;}
-.formula-box{background:var(--surface2);border:1px solid rgba(26,86,255,0.15);border-radius:12px;padding:20px 24px;margin-bottom:28px;}
-.formula-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
-.formula-text{font-family:'DM Mono',monospace;font-size:1rem;color:var(--text);font-weight:500;}
-
-/* QUIZ */
+.key-point{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;font-size:0.9rem;}
+.kp-dot{width:20px;height:20px;border-radius:50%;background:rgba(26,86,255,0.1);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;}
 .quiz-section{background:white;border:1px solid var(--border);border-radius:16px;padding:24px;margin-top:24px;}
-.quiz-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.quiz-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.04em;}
-.quiz-count{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;}
-.quiz-question{font-size:0.95rem;font-weight:600;margin-bottom:16px;line-height:1.5;}
-.quiz-options{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
-.quiz-opt{display:flex;align-items:center;gap:10px;padding:11px 15px;border-radius:9px;border:1.5px solid var(--border);font-size:0.87rem;cursor:pointer;transition:all .15s;}
-.quiz-opt:hover{border-color:var(--accent);background:rgba(26,86,255,0.04);}
-.quiz-opt.correct{border-color:var(--accent2);background:rgba(0,201,122,0.08);color:#059669;}
-.quiz-opt.wrong{border-color:#ef4444;background:rgba(239,68,68,0.06);color:#dc2626;}
+.quiz-opt{display:flex;align-items:center;gap:10px;padding:12px;border-radius:9px;border:1.5px solid var(--border);margin-bottom:8px;cursor:pointer;}
 .quiz-opt.selected{border-color:var(--accent);background:rgba(26,86,255,0.05);}
-.opt-ltr{width:26px;height:26px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;font-family:'DM Mono',monospace;}
-.explanation-box{display:none;padding:14px 16px;background:rgba(0,201,122,0.08);border-radius:9px;border-left:3px solid var(--accent2);font-size:0.85rem;color:#047857;margin-bottom:14px;line-height:1.6;}
-.quiz-nav{display:flex;justify-content:space-between;align-items:center;}
-.quiz-btn{padding:10px 22px;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
-.quiz-btn-primary{background:var(--accent);color:white;border:none;box-shadow:0 3px 10px rgba(26,86,255,0.25);}
-.quiz-btn-secondary{background:white;color:var(--text);border:1px solid var(--border2);}
-.quiz-score-display{display:none;text-align:center;padding:24px;}
-.score-badge{display:inline-flex;align-items:center;justify-content:center;width:80px;height:80px;border-radius:50%;border:4px solid var(--accent);font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--accent);margin:0 auto 12px;}
-.score-msg{font-size:0.9rem;color:var(--muted);margin-bottom:16px;}
 
-/* UPSELL */
-.upsell-strip{background:linear-gradient(135deg,rgba(26,86,255,0.06),rgba(26,86,255,0.02));border:1.5px dashed rgba(26,86,255,0.25);border-radius:12px;padding:16px 20px;text-align:center;margin-top:20px;}
-.upsell-strip strong{font-size:0.85rem;color:var(--accent);display:block;margin-bottom:4px;}
-.upsell-strip p{font-size:0.78rem;color:var(--muted);margin-bottom:12px;}
-.upsell-btn{background:var(--accent);color:white;text-decoration:none;padding:9px 20px;border-radius:8px;font-size:0.82rem;font-weight:700;display:inline-block;transition:opacity .2s;}
-.upsell-btn:hover{opacity:.88;}
-
-/* RESPONSIVE */
 @media(max-width:900px){
   .classroom-layout{grid-template-columns:1fr;}
-  .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--border);}
-  nav, .subject-tabs{padding:0 20px;}
-}
-@media(max-width:480px){
-  nav{height:58px;padding:0 16px;}
-  .subj-tab{padding:13px 16px;font-size:0.82rem;}
-  .lesson-title{font-size:1.4rem;}
-  .lesson-actions{flex-direction:column;}
-  .btn-quiz, .btn-next-lesson{width:100%;justify-content:center;}
+  .sidebar{position:static;height:auto;border-right:none;}
 }
 </style>
 </head>
 <body>
 
-<!-- NAVIGATION -->
 <nav>
   <a href="index.html" class="nav-logo">
     <div class="nav-logo-icon">🎓</div>
@@ -169,157 +100,71 @@ nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-co
   </div>
 </nav>
 
-<!-- SUBJECT TABS -->
 <div class="subject-tabs" id="subjectTabs">
-  <button class="subj-tab active" data-subject="mathematics" style="--tab-color:#1a56ff" onclick="switchSubject('mathematics', this)">
-    <span class="subj-tab-icon">📐</span> Mathematics
-  </button>
-  <button class="subj-tab" data-subject="physics" style="--tab-color:#7c3aed" onclick="switchSubject('physics', this)">
-    <span class="subj-tab-icon">⚛️</span> Physics
-  </button>
-  <button class="subj-tab" data-subject="english" style="--tab-color:#00c97a" onclick="switchSubject('english', this)">
-    <span class="subj-tab-icon">📖</span> English Language
-  </button>
-  <button class="subj-tab" data-subject="chemistry" style="--tab-color:#ff6b35" onclick="switchSubject('chemistry', this)">
-    <span class="subj-tab-icon">🧪</span> Chemistry
-  </button>
+  <button class="subj-tab active" data-subject="mathematics" style="--tab-color:#1a56ff" onclick="switchSubject('mathematics', this)">📐 Mathematics</button>
+  <button class="subj-tab" data-subject="physics" style="--tab-color:#7c3aed" onclick="switchSubject('physics', this)">⚛️ Physics</button>
 </div>
 
-<!-- CLASSROOM LAYOUT -->
 <div class="classroom-layout">
-  
-  <!-- SIDEBAR -->
-  <div class="sidebar" id="sidebar">
+  <div class="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-subject" id="sidebarSubject">Mathematics Syllabus</div>
-      <div class="sidebar-meta" id="sidebarMeta">8 Topics · 1,500+ Questions</div>
+      <div class="sidebar-subject" id="sidebarSubject">Loading...</div>
+      <div class="sidebar-meta" id="sidebarMeta"></div>
       <div class="sidebar-progress">
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="progress-label" id="progressLabel">Loading...</div>
+        <div class="progress-label" id="progressLabel"></div>
       </div>
     </div>
     <div id="topicList"></div>
   </div>
 
-  <!-- MAIN CONTENT -->
   <div class="main-content" id="mainContent">
-    
-    <!-- VIDEO PLAYER AREA -->
     <div class="video-area">
       <div class="video-placeholder" id="videoPlaceholder">
         <div class="play-btn-large" onclick="playVideo()">▶</div>
-        <div class="video-label" id="videoLabel">Click to play lesson</div>
+        <div class="video-label">Click to play lesson</div>
       </div>
-      <iframe class="video-embed" id="videoEmbed" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-      
-      <!-- LOCKED OVERLAY -->
+      <iframe class="video-embed" id="videoEmbed" allowfullscreen></iframe>
       <div class="locked-overlay" id="lockedOverlay">
-        <div class="lock-icon">🔒</div>
         <div class="lock-title">Premium Topic</div>
-        <div class="lock-sub">Unlock all video masterclasses across every subject for just ₦2,500 — one-time payment.</div>
-        <a href="index.html#pricing" class="unlock-btn">Unlock Full Access — ₦2,500</a>
+        <a href="index.html#pricing" class="unlock-btn">Unlock Full Access</a>
       </div>
     </div>
 
-    <!-- LESSON INFO -->
     <div class="lesson-info">
-      <div class="lesson-tag" id="lessonTag"></div>
       <div class="lesson-title" id="lessonTitle"></div>
-      <div class="lesson-meta">
-        <span class="lesson-meta-item">🎬 <span id="lessonDuration"></span></span>
-        <span class="lesson-meta-item">📝 <span id="lessonQCount"></span></span>
-        <span class="lesson-meta-item" id="lessonFreeTag" style="color:var(--accent2);font-weight:700;">✓ Free Preview</span>
-      </div>
-      <div class="lesson-actions">
-        <button class="btn-quiz" onclick="scrollToQuiz()">📝 Take Topic Quiz</button>
-        <button class="btn-next-lesson" onclick="nextTopic()">Next Topic →</button>
-      </div>
+      <div class="lesson-meta" id="lessonMeta"></div>
     </div>
 
-    <!-- LESSON BODY -->
-    <div class="lesson-body" id="lessonBody">
-      <div class="lesson-section-title">📌 Key Concepts</div>
-      <p class="lesson-notes" id="lessonNotes"></p>
+    <div class="lesson-body">
+      <div id="lessonNotes"></div>
       <ul class="key-points" id="keyPoints"></ul>
       
-      <div class="formula-box">
-        <div class="formula-label">Key Formula</div>
-        <div class="formula-text" id="formulaText"></div>
-      </div>
-
-      <!-- INLINE QUIZ -->
-      <div class="quiz-section" id="quizSection">
-        <div class="quiz-header">
-          <div class="quiz-title">Topic Quiz</div>
-          <div class="quiz-count" id="quizCount">Question 1 of 3</div>
-        </div>
+      <div class="quiz-section" id="quizSection" style="display:none">
+        <h3>Topic Quiz</h3>
         <div id="quizBody"></div>
-        
-        <div class="quiz-score-display" id="scoreDisplay">
-          <div class="score-badge" id="scoreBadge">0/3</div>
-          <p class="score-msg" id="scoreMsg"></p>
-          <button class="quiz-btn quiz-btn-primary" onclick="retryQuiz()">Retry Quiz</button>
-          <div class="upsell-strip">
-            <strong>🚀 Want more questions like these?</strong>
-            <p>Unlock 1,500+ past questions, full mock exams, and all remaining topics with full explanations.</p>
-            <a href="index.html#pricing" class="upsell-btn">Get Full Access — ₦2,500</a>
-          </div>
-        </div>
+        <button onclick="submitQuiz()" style="margin-top:15px; padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:8px; cursor:pointer;">Submit Quiz</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// CURRICULUM DATA
-const CURRICULUM = {
-  mathematics: {
-    label: 'Mathematics Syllabus',
-    meta: '8 Topics · 1,500+ Questions',
-    color: '#1a56ff',
-    sections: [
-      {
-        title: 'Number & Algebra',
-        topics: [
-          { 
-            id:'math-1', name:'Number Bases & Quadratic Equations', duration:'14 min', qcount:10, free:true, done:true,
-            tag:'Mathematics · Algebra', videoUrl:'lesson-quadratics.html',
-            notes:'This lesson covers foundational algebraic concepts tested in JAMB and WAEC. Pay attention to the factorization method and the quadratic formula.',
-            keyPoints:['Factorization method: (ax + b)(cx + d) = 0','Quadratic formula: x = (−b ± √(b²−4ac)) / 2a','Sum of roots = −b/a · Product = c/a','Number base conversions: divide repeatedly'],
-            formula:'x = (−b ± √(b²−4ac)) / 2a | where a, b, c are coefficients',
-            quiz:[
-              {q:'If 3x² − 7x + 2 = 0, find the values of x.',opts:['x=2 or x=1/3','x=2 or x=−1/3','x=−2 or x=1/3','x=3 or x=−2'],ans:0,exp:'Factorize: (3x−1)(x−2)=0. Answer is A.'},
-              {q:'Convert 1101₂ to base 10.',opts:['11','13','15','12'],ans:1,exp:'1×8 + 1×4 + 0×2 + 1×1 = 13.'},
-              {q:'The sum of roots of 2x² + 5x − 3 = 0 is:',opts:['5/2','−5/2','3/2','−3/2'],ans:1,exp:'Sum of roots = −b/a = −5/2.'}
-            ]
-          },
-          { id:'math-2', name:'Indices, Surds & Logarithms', duration:'18 min', qcount:10, free:false, done:false }
-        ]
-      },
-      {
-        title: 'Geometry & Trigonometry',
-        topics: [
-          { id:'math-3', name:'Trigonometry & Angles', duration:'20 min', qcount:10, free:false, done:false }
-        ]
-      }
-    ]
-  },
-  physics: { label: 'Physics Syllabus', meta: '6 Topics · 1,200+ Questions', color: '#7c3aed', sections: [] },
-  english: { label: 'English Syllabus', meta: '5 Topics · 1,300+ Questions', color: '#00c97a', sections: [] },
-  chemistry: { label: 'Chemistry Syllabus', meta: '6 Topics · 1,200+ Questions', color: '#ff6b35', sections: [] }
-};
-
+let CURRICULUM = {};
 let activeSubject = 'mathematics';
 let activeTopic = null;
-let quizState = { questions:[], current:0, answers:{}, submitted:false };
+let userAnswers = {};
 
-// INITIALIZE
-window.addEventListener('DOMContentLoaded', () => {
-  const params = new URLSearchParams(window.location.search);
-  const subj = params.get('subject');
-  if (subj && CURRICULUM[subj]) activeSubject = subj;
-  loadSubject(activeSubject);
-});
+// THE WAITER: Fetching your data from GitHub
+async function loadData() {
+  try {
+    const response = await fetch('data/curriculum.json');
+    CURRICULUM = await response.json();
+    loadSubject(activeSubject);
+  } catch (e) {
+    console.error("Could not load curriculum data", e);
+  }
+}
 
 function switchSubject(subject, el) {
   activeSubject = subject;
@@ -331,139 +176,92 @@ function switchSubject(subject, el) {
 function loadSubject(subject) {
   const data = CURRICULUM[subject];
   if (!data) return;
-  
   document.getElementById('sidebarSubject').textContent = data.label;
   document.getElementById('sidebarMeta').textContent = data.meta;
+  
   const list = document.getElementById('topicList');
   list.innerHTML = '';
-  
-  let totalTopics = 0, doneCount = 0;
-  
-  data.sections.forEach(section => {
-    const secDiv = document.createElement('div');
-    secDiv.className = 'topic-section';
-    secDiv.innerHTML = `<div class="topic-section-label">${section.title}</div>`;
-    
-    section.topics.forEach(topic => {
-      totalTopics++; if (topic.done) doneCount++;
+  let total = 0, done = 0;
+
+  data.sections.forEach(sec => {
+    const secLabel = document.createElement('div');
+    secLabel.className = 'topic-section-label';
+    secLabel.textContent = sec.title;
+    list.appendChild(secLabel);
+
+    sec.topics.forEach(topic => {
+      total++; if(topic.done) done++;
       const item = document.createElement('div');
       item.className = `topic-item ${!topic.free ? 'locked' : ''}`;
       item.innerHTML = `
-        <div class="topic-status ${topic.done ? 'status-done' : (topic.free ? 'status-free' : 'status-lock')}">${topic.done ? '✓' : (topic.free ? '▶' : '🔒')}</div>
+        <div class="topic-status ${topic.done?'status-done':'status-lock'}">${topic.done?'✓':'🔒'}</div>
         <div class="topic-info">
           <div class="topic-name-text">${topic.name}</div>
-          <div class="topic-detail">${topic.duration} · ${topic.qcount} questions</div>
         </div>
-        ${topic.free ? '<span class="topic-badge badge-free">FREE</span>' : '<span class="topic-badge badge-lock">UNLOCK</span>'}`;
+      `;
       item.onclick = () => openTopic(topic);
-      secDiv.appendChild(item);
+      list.appendChild(item);
     });
-    list.appendChild(secDiv);
   });
 
-  const pct = Math.round((doneCount/totalTopics)*100) || 0;
+  const pct = Math.round((done/total)*100) || 0;
   document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressLabel').textContent = `${doneCount} of ${totalTopics} topics completed`;
+  document.getElementById('progressLabel').textContent = `${done} of ${total} topics completed`;
   
-  if (data.sections[0]?.topics[0]) openTopic(data.sections[0].topics[0]);
+  if(data.sections[0]?.topics[0]) openTopic(data.sections[0].topics[0]);
 }
 
 function openTopic(topic) {
   activeTopic = topic;
-  document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active'));
-  
-  document.getElementById('lessonTag').textContent = topic.tag || '';
   document.getElementById('lessonTitle').textContent = topic.name;
-  document.getElementById('lessonDuration').textContent = topic.duration;
-  document.getElementById('lessonQCount').textContent = topic.qcount + ' practice questions';
-  document.getElementById('lessonFreeTag').style.display = topic.free ? 'flex' : 'none';
+  document.getElementById('lessonNotes').textContent = topic.notes || '';
   
-  document.getElementById('lessonNotes').textContent = topic.notes || 'Notes coming soon...';
-  document.getElementById('formulaText').textContent = topic.formula || 'No formula for this section.';
   const kpList = document.getElementById('keyPoints');
-  kpList.innerHTML = (topic.keyPoints || []).map((kp,i) => `<li class="key-point"><span class="kp-dot">${i+1}</span>${kp}</li>`).join('');
-  
+  kpList.innerHTML = (topic.keyPoints || []).map((kp,i) => `
+    <li class="key-point"><span class="kp-dot">${i+1}</span>${kp}</li>
+  `).join('');
+
   const overlay = document.getElementById('lockedOverlay');
-  const embed = document.getElementById('videoEmbed');
   const placeholder = document.getElementById('videoPlaceholder');
+  const embed = document.getElementById('videoEmbed');
   
   embed.style.display = 'none';
   placeholder.style.display = 'flex';
-  if (topic.free) overlay.classList.remove('show'); else overlay.classList.add('show');
-  
-  resetQuiz(topic.quiz || []);
-  document.getElementById('mainContent').scrollTo({top:0, behavior:'smooth'});
+  overlay.classList.toggle('show', !topic.free);
+
+  if(topic.quiz) {
+    document.getElementById('quizSection').style.display = 'block';
+    renderQuiz(topic.quiz);
+  } else {
+    document.getElementById('quizSection').style.display = 'none';
+  }
+}
+
+function renderQuiz(questions) {
+  const body = document.getElementById('quizBody');
+  body.innerHTML = questions.map((q, i) => `
+    <div style="margin-top:20px">
+      <p><strong>${i+1}. ${q.q}</strong></p>
+      ${q.opts.map((opt, oi) => `
+        <div class="quiz-opt" onclick="userAnswers[${i}]=${oi}; renderQuiz(activeTopic.quiz)">
+          <input type="radio" name="q${i}" ${userAnswers[i]===oi?'checked':''}> ${opt}
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
 }
 
 function playVideo() {
   if (!activeTopic?.videoUrl) return;
   const embed = document.getElementById('videoEmbed');
-  
-  // Logic to handle local HTML lesson vs external YouTube
-  if (activeTopic.videoUrl.endsWith('.html')) {
-    embed.src = activeTopic.videoUrl;
-  } else {
-    embed.src = activeTopic.videoUrl + '?autoplay=1';
-  }
-  
+  embed.src = activeTopic.videoUrl;
   embed.style.display = 'block';
   document.getElementById('videoPlaceholder').style.display = 'none';
 }
 
-// QUIZ ENGINE
-function resetQuiz(questions) {
-  quizState = { questions, current:0, answers:{}, submitted:false };
-  document.getElementById('quizSection').style.display = questions.length ? 'block' : 'none';
-  document.getElementById('scoreDisplay').style.display = 'none';
-  document.getElementById('quizBody').style.display = 'block';
-  renderQuizQuestion();
-}
+function submitQuiz() { alert("Quiz submitted! Master access tracks your score history."); }
 
-function renderQuizQuestion() {
-  const { questions, current, answers, submitted } = quizState;
-  const q = questions[current]; if (!q) return;
-  document.getElementById('quizCount').textContent = `Question ${current+1} of ${questions.length}`;
-  const body = document.getElementById('quizBody');
-  body.innerHTML = `<div class="quiz-question">${q.q}</div><div class="quiz-options">
-    ${q.opts.map((o,i) => {
-      let cls = 'quiz-opt';
-      if (submitted) {
-        if (i === q.ans) cls += ' correct';
-        else if (answers[current] === i) cls += ' wrong';
-      } else if (answers[current] === i) cls += ' selected';
-      return `<div class="${cls}" onclick="selectQuizOpt(${i})"><span class="opt-ltr">${String.fromCharCode(65+i)}</span>${o}</div>`;
-    }).join('')}</div>
-    <div class="explanation-box" style="${submitted ? 'display:block' : 'display:none'}">${q.exp}</div>
-    <div class="quiz-nav">
-      <button class="quiz-btn quiz-btn-secondary" onclick="quizNav(-1)" ${current===0?'style="visibility:hidden"':''}>← Prev</button>
-      <button class="quiz-btn quiz-btn-primary" onclick="${current===questions.length-1 ? 'submitQuiz()' : 'quizNav(1)'}">
-        ${submitted ? (current===questions.length-1 ? 'See Results' : 'Next →') : (current===questions.length-1 ? 'Submit' : 'Next →')}
-      </button>
-    </div>`;
-}
-
-function selectQuizOpt(i) { if (!quizState.submitted) { quizState.answers[quizState.current] = i; renderQuizQuestion(); } }
-function quizNav(dir) { quizState.current = Math.max(0, Math.min(quizState.questions.length-1, quizState.current+dir)); renderQuizQuestion(); }
-
-function submitQuiz() {
-  quizState.submitted = true;
-  let correct = 0; quizState.questions.forEach((q,i) => { if (quizState.answers[i] === q.ans) correct++; });
-  const total = quizState.questions.length;
-  document.getElementById('quizBody').style.display = 'none';
-  document.getElementById('scoreDisplay').style.display = 'block';
-  document.getElementById('scoreBadge').textContent = `${correct}/${total}`;
-  const pct = Math.round((correct/total)*100);
-  document.getElementById('scoreMsg').textContent = pct === 100 ? 'Perfect score! Mastered.' : 'Good job! Keep practicing.';
-}
-
-function retryQuiz() { resetQuiz(activeTopic.quiz); }
-function scrollToQuiz() { document.getElementById('quizSection').scrollIntoView({behavior:'smooth'}); }
-function nextTopic() {
-  const data = CURRICULUM[activeSubject];
-  const allTopics = data.sections.flatMap(s => s.topics);
-  const idx = allTopics.findIndex(t => t.id === activeTopic.id);
-  if (allTopics[idx + 1]) openTopic(allTopics[idx + 1]);
-}
+loadData();
 </script>
 </body>
 </html>
