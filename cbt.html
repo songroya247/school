@@ -2,436 +2,771 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CBT Exam Engine — UltimateEdge School</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CBT Practice Engine — UltimateEdge School</title>
+<meta name="description" content="JAMB and WAEC CBT practice engine with adaptive drill mode and live predicted score.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/main.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <style>
-/* ── CBT-SPECIFIC STYLES ── */
-#menuScreen { min-height: 100vh; background: var(--bg); }
-.menu-nav { display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 66px; background: white; border-bottom: 1px solid var(--border); box-shadow: 0 1px 12px rgba(0,0,0,0.06); }
-.menu-inner { max-width: 700px; margin: 0 auto; padding: 60px 24px; }
-.menu-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(26,86,255,0.08); border: 1px solid rgba(26,86,255,0.2); color: var(--accent); padding: 5px 14px; border-radius: 100px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 16px; }
-.badge-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: blink 1.5s infinite; }
-.menu-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.4rem,5vw,3.8rem); letter-spacing: 0.02em; line-height: 0.95; margin-bottom: 14px; }
-.menu-sub { color: var(--muted); font-size: 0.95rem; font-weight: 300; margin-bottom: 48px; }
-.exam-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
-.exam-type-card { background: white; border: 1.5px solid var(--border); border-radius: 14px; padding: 20px; cursor: pointer; transition: all .2s; position: relative; overflow: hidden; }
-.exam-type-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--card-color, var(--accent)); border-radius: 14px 14px 0 0; }
-.exam-type-card:hover { border-color: var(--card-color, var(--accent)); transform: translateY(-2px); box-shadow: var(--shadow); }
-.exam-type-card.selected { border-color: var(--card-color, var(--accent)); background: rgba(26,86,255,0.02); }
-.et-icon { font-size: 1.6rem; margin-bottom: 8px; }
-.et-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 0.05em; margin-bottom: 4px; }
-.et-desc { font-size: 0.78rem; color: var(--muted); font-weight: 300; line-height: 1.5; }
-.et-badge { display: inline-block; margin-top: 8px; font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; font-weight: 700; background: rgba(26,86,255,0.08); color: var(--card-color, var(--accent)); }
-.menu-divider { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted2); text-align: center; margin: 8px 0 18px; }
-.topic-select-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 32px; }
-.topic-select-item { display: flex; align-items: center; justify-content: space-between; background: white; border: 1.5px solid var(--border); border-radius: 11px; padding: 14px 18px; cursor: pointer; transition: all .2s; }
-.topic-select-item:hover { border-color: var(--accent); }
-.topic-select-item.selected { border-color: var(--accent); background: rgba(26,86,255,0.03); }
-.tsi-left { display: flex; align-items: center; gap: 12px; }
-.tsi-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(26,86,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
-.tsi-name { font-weight: 600; font-size: 0.9rem; }
-.tsi-detail { font-size: 0.75rem; color: var(--muted); }
-.tsi-right span { font-family: 'DM Mono', monospace; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; }
-.tag-free { background: rgba(0,201,122,0.1); color: var(--accent2); }
-.tag-lock { background: rgba(0,0,0,0.04); color: var(--muted2); }
-.start-btn { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 12px; font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 0.06em; cursor: pointer; transition: all .2s; box-shadow: 0 6px 20px rgba(26,86,255,0.3); }
-.start-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(26,86,255,0.4); }
-.start-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
-
-/* EXAM SCREEN */
-#examScreen { display: none; min-height: 100vh; flex-direction: column; background: var(--bg); }
-.timer-bar { position: sticky; top: 0; z-index: 50; background: white; border-bottom: 2px solid var(--border); padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-.timer-block .timer-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-.timer-val { font-family: 'DM Mono', monospace; font-size: 1.6rem; font-weight: 700; color: var(--text); line-height: 1; }
-.timer-val.warning { color: #f59e0b; }
-.timer-val.danger { color: #ef4444; animation: blink 1s infinite; }
-.predict-block { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; text-align: center; }
-.predict-label { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-.predict-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.04em; color: var(--accent); line-height: 1; }
-.exit-btn { background: none; border: 1px solid var(--border2); color: var(--muted); padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; }
-.exit-btn:hover { border-color: #ef4444; color: #ef4444; }
-.exam-layout { display: grid; grid-template-columns: 220px 1fr; flex: 1; }
-.palette { background: white; border-right: 1px solid var(--border); padding: 16px; overflow-y: auto; position: sticky; top: 78px; height: calc(100vh - 78px); }
-.palette-title { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-.palette-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 5px; margin-bottom: 16px; }
-.p-btn { aspect-ratio: 1; border: 1px solid var(--border); border-radius: 7px; background: white; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 0.72rem; font-weight: 600; color: var(--text); transition: all .15s; display: flex; align-items: center; justify-content: center; }
-.p-btn:hover { border-color: var(--accent); color: var(--accent); }
-.p-btn.p-active { background: var(--accent); color: white; border-color: var(--accent); }
-.p-btn.p-answered { background: var(--accent2); color: white; border-color: var(--accent2); }
-.palette-legend { display: flex; flex-direction: column; gap: 7px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-.legend-item { display: flex; align-items: center; gap: 7px; font-size: 0.72rem; color: var(--muted); }
-.legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
-.submit-all-btn { width: 100%; margin-top: 14px; padding: 11px; background: var(--accent); color: white; border: none; border-radius: 9px; font-weight: 700; font-size: 0.85rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; box-shadow: 0 3px 10px rgba(26,86,255,0.25); }
-.submit-all-btn:hover { opacity: .9; transform: translateY(-1px); }
-.question-area { padding: 32px 40px; overflow-y: auto; }
-.q-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
-.q-num { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-.q-subject-tag { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; font-weight: 700; background: rgba(26,86,255,0.08); color: var(--accent); }
-.q-card { background: white; border-radius: 16px; padding: 28px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 20px; }
-.q-text { font-size: 1.05rem; font-weight: 600; line-height: 1.6; margin-bottom: 22px; }
-.q-options { display: flex; flex-direction: column; gap: 10px; }
-.opt-item { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border: 1.5px solid var(--border); border-radius: 11px; cursor: pointer; transition: all .15s; font-size: 0.9rem; }
-.opt-item:hover { border-color: var(--accent); background: rgba(26,86,255,0.04); }
-.opt-item.opt-selected { border-color: var(--accent); background: rgba(26,86,255,0.06); }
-.opt-item.opt-correct { border-color: var(--accent2); background: rgba(0,201,122,0.08); color: #059669; }
-.opt-item.opt-wrong { border-color: #ef4444; background: rgba(239,68,68,0.06); color: #dc2626; }
-.opt-letter { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; font-family: 'DM Mono', monospace; }
-.exp-box { display: none; margin-top: 16px; padding: 14px 16px; background: rgba(0,201,122,0.08); border-radius: 10px; border-left: 4px solid var(--accent2); font-size: 0.88rem; color: #047857; line-height: 1.6; }
-.exp-box.show { display: block; }
-.q-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-.q-nav-btn { padding: 11px 24px; border-radius: 9px; font-weight: 700; font-size: 0.88rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; }
-.btn-prev { background: white; color: var(--text); border: 1px solid var(--border2); }
-.btn-prev:hover { border-color: var(--accent); color: var(--accent); }
-.btn-next { background: var(--accent); color: white; border: none; box-shadow: 0 4px 14px rgba(26,86,255,0.3); }
-.btn-next:hover { transform: translateY(-1px); opacity: .92; }
-.overlay { position: fixed; inset: 0; background: rgba(13,17,23,0.85); backdrop-filter: blur(12px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
-.overlay.show { display: flex; }
-.modal { background: white; border-radius: 20px; width: 100%; max-width: 520px; padding: 40px; text-align: center; max-height: 90vh; overflow-y: auto; }
-.modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 0.03em; margin-bottom: 6px; }
-.score-circle { width: 120px; height: 120px; border-radius: 50%; border: 5px solid var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 20px auto; font-family: 'Bebas Neue', sans-serif; }
-.score-pct { font-size: 2.4rem; color: var(--accent); line-height: 1; }
-.score-sub { font-size: 0.65rem; font-family: 'DM Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-.score-msg { font-size: 0.9rem; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
-.stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 24px; }
-.stat-box { background: var(--bg); border-radius: 10px; padding: 14px 10px; }
-.stat-box-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.04em; }
-.stat-box-label { font-size: 0.7rem; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; }
-.upsell-box { background: linear-gradient(135deg,rgba(26,86,255,0.06),rgba(26,86,255,0.02)); border: 2px dashed rgba(26,86,255,0.25); border-radius: 14px; padding: 20px; margin-bottom: 20px; text-align: left; }
-.upsell-box strong { font-size: 0.88rem; color: var(--accent); display: block; margin-bottom: 5px; }
-.upsell-box p { font-size: 0.78rem; color: var(--muted); margin-bottom: 12px; line-height: 1.6; }
-.upsell-box a { display: inline-block; background: var(--accent); color: white; padding: 9px 20px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: opacity .2s; }
-.upsell-box a:hover { opacity: .88; }
-.modal-actions { display: flex; gap: 10px; }
-.modal-btn { flex: 1; padding: 13px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; }
-.modal-btn-secondary { background: white; border: 1px solid var(--border2); color: var(--text); }
-.modal-btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-.modal-btn-primary { background: var(--accent); color: white; border: none; box-shadow: 0 4px 14px rgba(26,86,255,0.3); }
-.modal-btn-primary:hover { opacity: .9; transform: translateY(-1px); }
-
-@media(max-width:768px) {
-  .menu-nav, .menu-inner { padding-left: 16px; padding-right: 16px; }
-  .exam-type-grid { grid-template-columns: 1fr; }
-  .exam-layout { grid-template-columns: 1fr; }
-  .palette { display: none; }
-  .question-area { padding: 20px 16px; }
-  .modal { padding: 24px; }
+:root {
+  --ink:#0c0c14; --paper:#f8f6f0; --white:#fff;
+  --gold:#f0c040; --gold-2:#c99a20; --gold-glow:rgba(240,192,64,.2);
+  --green:#16a34a; --green-bg:rgba(22,163,74,.14);
+  --red:#dc2626; --red-bg:rgba(220,38,38,.14);
+  --slate:#11111c; --slate2:#1a1a2e; --slate3:#252540;
+  --muted:#72728a; --border-w:rgba(255,255,255,.1);
+  --r:12px; --r-lg:18px;
+  --ease:cubic-bezier(.4,0,.2,1);
+  --ff-h:'Bebas Neue',sans-serif;
+  --ff-b:'DM Sans',sans-serif;
 }
-@media(max-width:480px) {
-  .menu-inner { padding-top: 40px; }
-  .timer-val { font-size: 1.3rem; }
-  .q-text { font-size: 0.95rem; }
-  .modal-actions { flex-direction: column; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--ff-b); background:var(--slate); color:#fff;
+  display:flex; flex-direction:column;
+  -webkit-font-smoothing:antialiased; overflow:hidden;
 }
+@media(max-width:640px){body{overflow:auto;}}
+h1,h2,h3{font-family:var(--ff-h);}
+a{color:inherit;text-decoration:none;}
+button{font-family:var(--ff-b);cursor:pointer;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:var(--r);font-weight:700;font-size:.84rem;border:none;cursor:pointer;transition:all .18s;white-space:nowrap;}
+.btn-gold{background:var(--gold);color:var(--ink);}
+.btn-gold:hover{background:#ffd04a;}
+.btn-w{background:rgba(255,255,255,.08);color:#fff;border:1.5px solid var(--border-w);}
+.btn-w:hover{background:rgba(255,255,255,.14);}
+.btn-sm{padding:7px 14px;font-size:.78rem;}
+
+/* TOP BAR */
+.top-bar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 max(16px,3vw); height:56px; gap:12px; flex-wrap:wrap;
+  background:rgba(255,255,255,.03); border-bottom:1px solid var(--border-w);
+  position:sticky; top:0; z-index:50; flex-shrink:0;
+}
+.tb-left{display:flex;align-items:center;gap:12px;}
+.tb-title{font-family:var(--ff-h);font-weight:700;font-size:.95rem;}
+.mode-pill{
+  font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+  padding:3px 9px;border-radius:6px;
+}
+.mode-pill.drill{background:rgba(220,38,38,.2);color:#f87171;}
+.mode-pill.exam {background:rgba(22,163,74,.2);color:#4ade80;}
+.tb-meta{display:flex;align-items:center;gap:16px;}
+.tb-progress{font-size:.78rem;color:rgba(255,255,255,.5);}
+.tb-timer{
+  font-family:var(--ff-h);font-size:1.05rem;color:var(--gold);
+  min-width:76px;text-align:right;
+  transition:opacity .4s;
+}
+.tb-timer.hidden{opacity:0;pointer-events:none;}
+.tb-pred{
+  font-size:.75rem;background:rgba(240,192,64,.12);color:var(--gold);
+  padding:4px 11px;border-radius:20px;white-space:nowrap;
+}
+@media(max-width:520px){
+  .tb-timer,.tb-pred{display:none;}
+  .top-bar{height:auto;padding:10px max(16px,3vw);flex-wrap:wrap;}
+}
+
+/* MAIN BODY */
+.exam-body{display:flex;flex:1;overflow:hidden;min-height:0;}
+
+/* SIDEBAR MAP */
+.q-map{
+  width:200px;min-width:200px;
+  background:rgba(255,255,255,.025);border-right:1px solid var(--border-w);
+  padding:16px 12px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;
+  flex-shrink:0;
+}
+.map-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);}
+.map-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;}
+.m-dot{
+  width:30px;height:30px;border-radius:7px;border:1.5px solid transparent;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:700;cursor:pointer;transition:all .15s;
+  background:rgba(255,255,255,.05);color:rgba(255,255,255,.45);
+}
+.m-dot.curr{border-color:var(--gold);color:var(--gold);}
+.m-dot.ok  {background:var(--green-bg);color:#4ade80;border-color:rgba(22,163,74,.4);}
+.m-dot.bad {background:var(--red-bg);color:#f87171;border-color:rgba(220,38,38,.4);}
+.map-submit{margin-top:auto;}
+@media(max-width:680px){.q-map{display:none;}}
+
+/* PANEL */
+.q-panel{
+  flex:1;padding:28px max(20px,4vw);overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.q-label{font-size:.72rem;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px;}
+.q-topic-tag{
+  display:inline-block;font-size:.7rem;font-weight:700;text-transform:capitalize;
+  background:rgba(255,255,255,.07);padding:3px 10px;border-radius:20px;
+  margin-bottom:16px;
+}
+.q-text{font-size:1.05rem;line-height:1.65;max-width:640px;margin-bottom:26px;font-weight:500;}
+.opts{display:flex;flex-direction:column;gap:9px;max-width:600px;}
+.opt-btn{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 16px;border-radius:var(--r);
+  border:1.5px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.03);color:#fff;
+  text-align:left;font-family:var(--ff-b);font-size:.9rem;
+  cursor:pointer;transition:all .18s;width:100%;
+}
+.opt-btn:hover:not(:disabled){background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);}
+.opt-btn.selected{border-color:var(--gold);background:rgba(240,192,64,.08);}
+.opt-btn.correct{border-color:var(--green);background:var(--green-bg);}
+.opt-btn.wrong{border-color:var(--red);background:var(--red-bg);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{
+  width:28px;height:28px;border-radius:7px;flex-shrink:0;
+  background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-weight:800;
+}
+.opt-btn.correct .opt-letter{background:var(--green);color:#fff;}
+.opt-btn.wrong   .opt-letter{background:var(--red);color:#fff;}
+
+.explain-box{
+  max-width:600px;margin-top:18px;padding:14px 16px;
+  background:rgba(22,163,74,.07);border:1px solid rgba(22,163,74,.22);
+  border-radius:var(--r);font-size:.85rem;line-height:1.65;display:none;
+}
+.explain-box.show{display:block;}
+
+.q-nav{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;}
+
+/* RESULT SCREEN */
+#result{
+  display:none;flex-direction:column;align-items:center;
+  justify-content:center;padding:40px max(20px,5vw);
+  text-align:center;flex:1;overflow-y:auto;gap:4px;
+}
+.score-ring{
+  width:136px;height:136px;border-radius:50%;
+  border:5px solid var(--gold);position:relative;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  margin-bottom:20px;
+}
+.score-ring::before{
+  content:'';position:absolute;inset:-5px;border-radius:50%;
+  border:5px solid rgba(255,255,255,.05);
+}
+.score-pct{font-family:var(--ff-h);font-size:2rem;font-weight:800;line-height:1;}
+.score-lbl{font-size:.72rem;opacity:.5;margin-top:2px;}
+.result-stats{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;margin:16px 0;}
+.rs{text-align:center;}
+.rs-n{font-family:var(--ff-h);font-size:1.5rem;font-weight:800;}
+.rs-l{font-size:.72rem;opacity:.45;margin-top:2px;}
+.jamb-box{
+  background:rgba(240,192,64,.1);border:1.5px solid var(--gold);
+  border-radius:16px;padding:20px 32px;margin:12px 0;
+}
+.jamb-num{font-family:var(--ff-h);font-size:2.2rem;font-weight:800;color:var(--gold);}
+.weak-box{
+  max-width:480px;width:100%;text-align:left;
+  background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);
+  border-radius:var(--r);padding:16px 18px;margin:8px auto;
+}
+.weak-box h3{font-size:.85rem;color:#f87171;margin-bottom:8px;}
+.weak-tag{
+  display:inline-block;background:rgba(220,38,38,.15);color:#fca5a5;
+  font-size:.75rem;padding:4px 11px;border-radius:10px;margin:3px;text-transform:capitalize;
+}
+.prem-prompt{
+  max-width:420px;background:rgba(240,192,64,.08);
+  border:1px solid rgba(240,192,64,.2);border-radius:var(--r);
+  padding:18px 20px;margin:12px auto;
+}
+
+/* LOCK OVERLAY */
+.lock-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(12,12,20,.88);backdrop-filter:blur(8px);
+  flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:24px;
+}
+.lock-overlay.show{display:flex;}
+
+/* TOAST */
+#toast{
+  position:fixed;bottom:20px;left:50%;z-index:9999;
+  transform:translateX(-50%) translateY(calc(100% + 24px));
+  background:var(--slate3);color:#fff;
+  padding:10px 22px;border-radius:50px;font-size:.84rem;font-weight:700;
+  white-space:nowrap;pointer-events:none;
+  transition:transform .3s var(--ease);
+  box-shadow:0 8px 28px rgba(0,0,0,.3);
+}
+#toast.show{transform:translateX(-50%) translateY(0);}
+/* DEFAULTER BANNER */
+.defaulter-banner{display:none;background:#fef2f2;border-bottom:2px solid #ef4444;padding:10px max(16px,3vw);text-align:center;font-size:.84rem;font-weight:600;color:#dc2626;flex-shrink:0;}
+.defaulter-banner.show{display:block;}
+.defaulter-banner a{color:var(--gold);text-decoration:underline;margin-left:8px;}
+/* AUTH MODAL */
+.modal-backdrop{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:16px;}
+.modal-backdrop.open{display:flex;}
+.modal{background:#f7f9fc;border-radius:18px;padding:32px 28px;width:100%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,.35);animation:modalIn .22s ease;}
+@keyframes modalIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.modal-head h2{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.05em;color:#0d1117;}
+.modal-close-btn{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#6b7280;}
+.modal-tab-row{display:flex;background:rgba(0,0,0,.06);border-radius:8px;padding:4px;margin-bottom:20px;}
+.modal-tab-btn{flex:1;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.875rem;border-radius:6px;cursor:pointer;color:#6b7280;transition:all .18s;}
+.modal-tab-btn.active{background:#fff;color:#0d1117;box-shadow:0 1px 5px rgba(0,0,0,.1);}
+.modal-form-group{margin-bottom:12px;}
+.modal-form-group label{display:block;font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#6b7280;margin-bottom:4px;}
+.modal-form-group input{width:100%;padding:10px 13px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;background:#f7f9fc;transition:border-color .15s;}
+.modal-form-group input:focus{outline:none;border-color:#1a56ff;background:#fff;}
+.modal-auth-msg{font-size:.82rem;margin-bottom:10px;padding:8px 12px;border-radius:7px;display:none;}
+.modal-auth-msg.error{background:rgba(239,68,68,.08);color:#dc2626;}
+.modal-auth-msg.success{background:rgba(0,201,122,.08);color:#059669;}
+.modal-auth-msg.visible{display:block;}
+.modal-submit-btn{width:100%;padding:12px;background:#1a56ff;color:white;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:opacity .2s;}
+.modal-submit-btn:hover{opacity:.9;}
 </style>
 </head>
 <body>
 
-<!-- MENU SCREEN -->
-<div id="menuScreen">
-  <div class="menu-nav">
-    <a href="index.html" class="nav-logo">
-      <div class="nav-logo-icon">🎓</div>
-      <span class="nav-logo-text">UE <span>School</span></span>
-    </a>
-    <a href="index.html" style="color:var(--muted);text-decoration:none;font-size:0.85rem;font-weight:600;">← Back to Home</a>
-  </div>
-  <div class="menu-inner">
-    <div class="menu-badge"><span class="badge-pulse"></span> CBT Practice Engine</div>
-    <h1 class="menu-title" id="menuTitle">Loading...</h1>
-    <p class="menu-sub">Choose your exam type. Real CBT interface with live score prediction.</p>
-    <div id="menuLoadingState"><div class="loading-spinner"><div class="spinner"></div>Loading question bank...</div></div>
-    <div id="menuContent" style="display:none;">
-      <div class="exam-type-grid">
-        <div class="exam-type-card selected" style="--card-color:#1a56ff" onclick="selectExamType('full-mock',this)">
-          <div class="et-icon">🎓</div>
-          <div class="et-name">Full Mock Exam</div>
-          <div class="et-desc">All questions · 2 hour timer · Predicts your JAMB score</div>
-          <div class="et-badge">Recommended</div>
-        </div>
-        <div class="exam-type-card" style="--card-color:#00c97a" onclick="selectExamType('topic',this)">
-          <div class="et-icon">🎯</div>
-          <div class="et-name">Topic Practice</div>
-          <div class="et-desc">10 questions · No timer · Instant explanations</div>
-          <div class="et-badge">After Classroom</div>
-        </div>
-      </div>
-      <div class="menu-divider" id="topicDivider" style="display:none">— SELECT A TOPIC —</div>
-      <div class="topic-select-grid" id="topicSelectGrid" style="display:none"></div>
-      <button class="start-btn" id="startBtn" onclick="beginExam()">START EXAM →</button>
-    </div>
-  </div>
+<!-- DEFAULTER BANNER -->
+<div class="defaulter-banner" id="defaulter-banner">
+  ⚠️ Your subscription has expired. Free access is still active.
+  <a href="index.html#pricing">Renew Now →</a>
 </div>
 
-<!-- EXAM SCREEN -->
-<div id="examScreen">
-  <div class="timer-bar">
-    <div style="display:flex;align-items:center;gap:20px;">
-      <div class="timer-block">
-        <div class="timer-label">Time Remaining</div>
-        <div class="timer-val" id="timerDisplay">02:00:00</div>
-      </div>
-      <div class="predict-block">
-        <div class="predict-label">JAMB Prediction</div>
-        <div class="predict-val" id="predictVal">--</div>
-      </div>
-    </div>
-    <button class="exit-btn" onclick="confirmExit()">Exit Exam</button>
+<!-- TOP BAR -->
+<header class="top-bar">
+  <div class="tb-left">
+    <a href="index.html" class="btn btn-w btn-sm">← Exit</a>
+    <span class="tb-title" id="exam-title">Exam Engine</span>
+    <span class="mode-pill drill" id="mode-pill">DRILL</span>
   </div>
-  <div class="exam-layout">
-    <div class="palette">
-      <div class="palette-title">Question Map</div>
-      <div class="palette-grid" id="paletteGrid"></div>
-      <div class="palette-legend">
-        <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Current</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div> Answered</div>
-        <div class="legend-item"><div class="legend-dot" style="border:1px solid #ddd;background:white"></div> Unanswered</div>
-      </div>
-      <button class="submit-all-btn" onclick="submitExam()">Submit Exam</button>
+  <div class="tb-meta">
+    <span class="tb-progress">Progress: <span id="prog">0/0</span></span>
+    <span class="tb-timer hidden" id="timer">00:00:00</span>
+    <span class="tb-pred">Predicted: <span id="pred">—</span></span>
+  </div>
+</header>
+
+<!-- EXAM BODY -->
+<div class="exam-body">
+
+  <!-- SIDEBAR MAP -->
+  <aside class="q-map" aria-label="Question map">
+    <div class="map-label">Question Map</div>
+    <div class="map-grid" id="map-grid"></div>
+    <div class="map-submit">
+      <button class="btn btn-gold" style="width:100%" onclick="submitExam()">Submit Exam</button>
     </div>
-    <div class="question-area">
-      <div class="q-meta">
-        <div class="q-num" id="qNum">QUESTION 1</div>
-        <div class="q-subject-tag" id="qSubjectTag">Mathematics</div>
-      </div>
-      <div class="q-card">
-        <div class="q-text" id="qText"></div>
-        <div class="q-options" id="qOptions"></div>
-        <div class="exp-box" id="expBox"></div>
-      </div>
-      <div class="q-nav">
-        <button class="q-nav-btn btn-prev" onclick="navQ(-1)">← Previous</button>
-        <button class="q-nav-btn btn-next" id="nextQBtn" onclick="navQ(1)">Next Question →</button>
-      </div>
+  </aside>
+
+  <!-- QUESTION PANEL -->
+  <main class="q-panel" id="q-panel">
+    <div class="q-label" id="q-label">QUESTION 1</div>
+    <div class="q-topic-tag" id="q-topic">—</div>
+    <div class="q-text" id="q-text">Loading questions…</div>
+    <div class="opts" id="opts"></div>
+    <div class="explain-box" id="explain-box"></div>
+    <div class="q-nav">
+      <button class="btn btn-w" id="prev-btn" onclick="prevQ()">← Prev</button>
+      <button class="btn btn-gold" id="next-btn" onclick="nextQ()">Next →</button>
+    </div>
+  </main>
+
+  <!-- RESULT -->
+  <div id="result">
+    <div class="score-ring">
+      <div class="score-pct" id="r-pct">0%</div>
+      <div class="score-lbl">Accuracy</div>
+    </div>
+    <h2 id="r-headline" style="margin-bottom:6px;font-size:1.5rem"></h2>
+    <div class="result-stats">
+      <div class="rs"><div class="rs-n" id="r-cor">0</div><div class="rs-l">Correct</div></div>
+      <div class="rs"><div class="rs-n" id="r-wrg">0</div><div class="rs-l">Wrong</div></div>
+      <div class="rs"><div class="rs-n" id="r-spd">0s</div><div class="rs-l">Avg/Question</div></div>
+    </div>
+    <div class="jamb-box">
+      <div style="font-size:.75rem;opacity:.5;margin-bottom:5px">Predicted JAMB Score</div>
+      <div class="jamb-num" id="r-jamb">—</div>
+      <div style="font-size:.75rem;opacity:.4;margin-top:4px">Based on accuracy × speed</div>
+    </div>
+    <div class="weak-box" id="weak-box" style="display:none"></div>
+    <div class="prem-prompt" id="prem-prompt" style="display:none">
+      <p style="font-size:.84rem;margin-bottom:12px">🚀 <strong>Unlock SmartPath™</strong> — full topic breakdown + personalised drill sessions.</p>
+      <a href="index.html#pricing" class="btn btn-gold btn-sm">Upgrade to Mastery — ₦2,500</a>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center">
+      <button class="btn btn-w" onclick="location.reload()">Retake</button>
+      <a href="dashboard.html" class="btn btn-gold">View Dashboard →</a>
     </div>
   </div>
+
 </div>
 
-<!-- RESULTS -->
-<div class="overlay" id="resultsOverlay">
+<!-- LOCK OVERLAY -->
+<div class="lock-overlay" id="lock-overlay">
+  <div style="font-size:2.5rem;margin-bottom:12px">🔒</div>
+  <h2 style="margin-bottom:8px">Premium Exams</h2>
+  <p style="color:rgba(255,255,255,.55);max-width:360px;margin-bottom:22px;font-size:.9rem">
+    Full 40-question mock exams are for Mastery Pro members. Upgrade once, unlock forever.
+  </p>
+  <a href="index.html#pricing" class="btn btn-gold" style="font-size:.95rem;padding:12px 28px">Unlock — ₦2,500</a>
+  <a href="index.html" style="margin-top:14px;font-size:.82rem;opacity:.4">← Return home</a>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ── CONFIG ── */
+const SUPA_URL = 'https://hmfbterdmgoumeeiatji.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtZmJ0ZXJkbWdvdW1lZWlhdGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTAyNzYsImV4cCI6MjA5MTMyNjI3Nn0.JxC-FN5BtBf0keNPqZq8IF-q6A7LMnGoUTkrF3GyEm8';
+
+/* ── STATE ── */
+const params  = new URLSearchParams(location.search);
+const subject = params.get('subject') || 'mathematics';
+const masteryMode = params.get('mode') === 'mastery';
+
+let sb, currentUser, currentProfile;
+let questions = [];
+let currentIdx = 0;
+let answers = {};        // { idx: { selected, correct, timeSpent, topic } }
+let qStartTime = null;
+let examInterval = null;
+let totalSecs = 0;
+let drillMode = true;
+
+/* ── SUPABASE INIT ── */
+function waitForSupabase(cb) {
+  if (typeof window.supabase !== 'undefined') { cb(); }
+  else { setTimeout(()=>waitForSupabase(cb), 100); }
+}
+
+waitForSupabase(async () => {
+  sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  const { data:{session} } = await sb.auth.getSession();
+  currentUser = session?.user ?? null;
+  if (currentUser) {
+    const {data} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+    currentProfile = data;
+  }
+  document.getElementById('exam-title').textContent =
+    subject.charAt(0).toUpperCase()+subject.slice(1) + (masteryMode ? ' · Mastery' : ' Mock');
+  await loadQuestions();
+});
+
+/* ── LOAD QUESTIONS ── */
+async function loadQuestions() {
+  let q = [];
+  try {
+    const res = await fetch('/data/questions.json');
+    if (res.ok) {
+      const all = await res.json();
+      q = all.filter(x => !x.subject || x.subject === subject);
+    }
+  } catch(e) {}
+
+  // fallback bank
+  if (!q.length) q = getSampleBank(subject);
+
+  // mastery mode: put weak topics first
+  if (masteryMode && currentUser && sb) {
+    const {data:mastery} = await sb.from('topic_mastery')
+      .select('topic_id,mastery_level').eq('user_id',currentUser.id)
+      .lt('mastery_level',0.6).order('mastery_level',{ascending:true});
+    if (mastery?.length) {
+      const weak = mastery.map(m=>m.topic_id);
+      q = [...q.filter(x=>weak.includes(x.topic)), ...q.filter(x=>!weak.includes(x.topic))];
+    }
+  }
+
+  // gate: free users 20 q, premium 40 q
+  const limit = currentProfile?.is_premium ? 40 : 20;
+  if (params.get('fullmock')==='true' && !currentProfile?.is_premium) {
+    document.getElementById('lock-overlay').classList.add('show'); return;
+  }
+  questions = q.slice(0, limit);
+
+  await setDrillMode(questions[0]?.topic);
+  buildMap();
+  renderQ(0);
+  startTimer();
+}
+
+/* ── DRILL / EXAM MODE ── */
+async function setDrillMode(topicId) {
+  if (!sb || !currentUser || !topicId) { drillMode = true; refreshModeUI(); return; }
+  const {data} = await sb.from('topic_mastery')
+    .select('mastery_level').eq('user_id',currentUser.id).eq('topic_id',topicId).single();
+  drillMode = !data || data.mastery_level < 0.50;
+  refreshModeUI();
+}
+
+function refreshModeUI() {
+  const pill  = document.getElementById('mode-pill');
+  const timer = document.getElementById('timer');
+  if (drillMode) {
+    pill.textContent='DRILL'; pill.className='mode-pill drill';
+    timer.classList.add('hidden');
+  } else {
+    pill.textContent='EXAM'; pill.className='mode-pill exam';
+    timer.classList.remove('hidden');
+  }
+}
+
+/* ── TIMER ── */
+function startTimer() {
+  if (examInterval) clearInterval(examInterval);
+  examInterval = setInterval(()=>{
+    totalSecs++;
+    const h=String(Math.floor(totalSecs/3600)).padStart(2,'0');
+    const m=String(Math.floor((totalSecs%3600)/60)).padStart(2,'0');
+    const s=String(totalSecs%60).padStart(2,'0');
+    document.getElementById('timer').textContent=`${h}:${m}:${s}`;
+  },1000);
+}
+
+/* ── RENDER QUESTION ── */
+function renderQ(idx) {
+  currentIdx = idx;
+  const q = questions[idx];
+  if (!q) return;
+  qStartTime = Date.now();
+
+  document.getElementById('q-label').textContent = `QUESTION ${idx+1} OF ${questions.length}`;
+  document.getElementById('q-topic').textContent = q.topic || 'General';
+  document.getElementById('q-text').textContent  = q.question;
+  document.getElementById('prog').textContent    = `${Object.keys(answers).length}/${questions.length}`;
+
+  const letters = ['A','B','C','D','E'];
+  const optsEl  = document.getElementById('opts');
+  const ans     = answers[idx];
+
+  optsEl.innerHTML = q.options.map((o,i)=>{
+    let cls='opt-btn';
+    if (ans!==undefined) {
+      if (i===q.correct) cls+=' correct';
+      else if (i===ans.selected && i!==q.correct) cls+=' wrong';
+    }
+    return `<button class="${cls}" onclick="pickOpt(${i})" ${ans!==undefined?'disabled':''}>
+      <span class="opt-letter">${letters[i]}</span>
+      <span>${o}</span>
+    </button>`;
+  }).join('');
+
+  // explanation
+  const expl = document.getElementById('explain-box');
+  expl.classList.remove('show');
+  if (ans!==undefined && q.explanation) {
+    expl.textContent = '💡 '+q.explanation;
+    expl.classList.add('show');
+  }
+
+  // nav buttons
+  document.getElementById('prev-btn').disabled = idx===0;
+  document.getElementById('prev-btn').style.opacity = idx===0 ? '.35' : '1';
+  const isLast = idx===questions.length-1;
+  const nb = document.getElementById('next-btn');
+  nb.textContent = isLast ? 'Submit Exam ✓' : 'Next →';
+  nb.onclick = isLast ? submitExam : nextQ;
+
+  updateMapDots();
+  livePrediction();
+}
+
+async function pickOpt(optIdx) {
+  if (answers[currentIdx]!==undefined) return;
+  const q = questions[currentIdx];
+  const timeSpent = Math.round((Date.now()-qStartTime)/1000);
+  const isCorrect = optIdx === q.correct;
+  answers[currentIdx] = {selected:optIdx, correct:isCorrect, timeSpent, topic:q.topic};
+  renderQ(currentIdx);
+
+  if (sb && currentUser) {
+    await recordResponse(q, isCorrect, timeSpent);
+    await updateMastery(q.topic);
+    await refreshDrillForTopic(q.topic);
+  }
+}
+
+async function recordResponse(q, isCorrect, timeSpent) {
+  await sb.from('response_logs').insert({
+    user_id:currentUser.id,
+    question_id:q.id||'q_'+currentIdx,
+    topic:q.topic||'general',
+    is_correct:isCorrect,
+    time_spent:timeSpent
+  });
+}
+
+async function updateMastery(topicId) {
+  const {data:logs} = await sb.from('response_logs')
+    .select('is_correct,time_spent')
+    .eq('user_id',currentUser.id).eq('topic_id',topicId)
+    .order('created_at',{ascending:false}).limit(40);
+  if (!logs?.length) return;
+  const acc = Math.round(logs.filter(l=>l.is_correct).length/logs.length*100);
+  const avg = Math.round(logs.reduce((s,l)=>s+(l.time_spent||0),0)/logs.length);
+  const mastery = parseFloat((acc/100*0.7 + Math.min(logs.length/50,1)*0.3).toFixed(3));
+  await sb.from('topic_mastery').upsert({
+    user_id:currentUser.id, topic_id:topicId,
+    accuracy_avg:acc, speed_avg:avg,
+    questions_solved:logs.length,
+    mastery_level:mastery,
+    last_studied:new Date().toISOString()
+  },{onConflict:'user_id,topic_id'});
+}
+
+async function refreshDrillForTopic(topicId) {
+  const {data} = await sb.from('topic_mastery')
+    .select('mastery_level').eq('user_id',currentUser.id).eq('topic_id',topicId).single();
+  const newDrill = !data || data.mastery_level < 0.50;
+  if (newDrill !== drillMode) { drillMode=newDrill; refreshModeUI(); }
+}
+
+/* ── NAVIGATION ── */
+function prevQ() { if(currentIdx>0) renderQ(currentIdx-1); }
+function nextQ() { if(currentIdx<questions.length-1) renderQ(currentIdx+1); }
+
+/* ── QUESTION MAP ── */
+function buildMap() {
+  const g=document.getElementById('map-grid');
+  g.innerHTML=questions.map((_,i)=>
+    `<button class="m-dot" id="md-${i}" onclick="jumpTo(${i})">${i+1}</button>`
+  ).join('');
+  updateMapDots();
+}
+function updateMapDots() {
+  questions.forEach((_,i)=>{
+    const d=document.getElementById('md-'+i);
+    if (!d) return;
+    d.className='m-dot';
+    if (i===currentIdx){ d.classList.add('curr'); return; }
+    const a=answers[i];
+    if (a===undefined) return;
+    d.classList.add(a.correct?'ok':'bad');
+  });
+}
+function jumpTo(i){ renderQ(i); }
+
+/* ── LIVE PREDICTION ── */
+function livePrediction() {
+  const a=Object.values(answers);
+  if (!a.length) return;
+  const acc=a.filter(x=>x.correct).length/a.length;
+  const avgT=a.reduce((s,x)=>s+(x.timeSpent||0),0)/a.length;
+  const spd=1+Math.min(.1,Math.max(0,(40-avgT)/400));
+  const pred=Math.min(400,Math.max(0,Math.round(acc*400*spd)));
+  document.getElementById('pred').textContent=pred;
+}
+
+/* ── SUBMIT ── */
+async function submitExam() {
+  clearInterval(examInterval);
+
+  const answered=Object.values(answers);
+  const correct=answered.filter(a=>a.correct).length;
+  const wrong=answered.filter(a=>!a.correct).length;
+  const total=questions.length;
+  const pct=total?Math.round(correct/total*100):0;
+  const avgT=answered.length?Math.round(answered.reduce((s,a)=>s+(a.timeSpent||0),0)/answered.length):0;
+  const spd=1+Math.min(.1,Math.max(0,(40-avgT)/400));
+  const jamb=Math.min(400,Math.max(50,Math.round((pct/100)*400*spd)));
+
+  // weak topics
+  const tp={};
+  answered.forEach(a=>{
+    if (!a.topic) return;
+    tp[a.topic]=tp[a.topic]||{c:0,t:0};
+    tp[a.topic].t++;
+    if (a.correct) tp[a.topic].c++;
+  });
+  const weak=Object.entries(tp).filter(([_,v])=>v.t>0&&v.c/v.t<.6).map(([k])=>k);
+
+  // save to Supabase
+  if (sb && currentUser) {
+    const examType = params.get('exam')?.toUpperCase() || 'JAMB';
+    const avgMastery = jamb / 400;
+    const waecGrade = avgMastery>=0.75?'A1':avgMastery>=0.70?'B2':avgMastery>=0.65?'B3':avgMastery>=0.50?'C4':avgMastery>=0.40?'C6':'F9';
+    await sb.from('session_scores').insert({
+      user_id:currentUser.id, subject, exam_type:examType,
+      accuracy:pct, predicted_score:jamb,
+      waec_grade:waecGrade,
+      session_date:new Date().toISOString()
+    });
+  }
+
+  // show result
+  document.getElementById('q-panel').style.display='none';
+  const r=document.getElementById('result');
+  r.style.display='flex';
+
+  document.getElementById('r-pct').textContent=pct+'%';
+  document.getElementById('r-cor').textContent=correct;
+  document.getElementById('r-wrg').textContent=wrong;
+  document.getElementById('r-spd').textContent=avgT+'s';
+  document.getElementById('r-jamb').textContent=jamb;
+  document.getElementById('r-headline').textContent=
+    pct>=70?'🎉 Excellent Work!':pct>=50?'📈 Keep Going':'💪 Time to Drill';
+
+  // weak box
+  const wb=document.getElementById('weak-box');
+  if (weak.length) {
+    wb.style.display='block';
+    wb.innerHTML='<h3>🔴 Weak Topics to Focus On</h3>'+weak.map(t=>`<span class="weak-tag">${t}</span>`).join('');
+  }
+  if (!currentProfile?.is_premium) document.getElementById('prem-prompt').style.display='block';
+}
+
+/* ── SAMPLE QUESTIONS ── */
+function getSampleBank(subj) {
+  const banks={
+    mathematics:[
+      {id:'m1',topic:'quadratics',question:'If 3x² − 7x + 2 = 0, find the values of x.',options:['x = 2 or x = −⅓','x = 2 or x = ⅓','x = −2 or x = ⅓','x = 1 or x = ⅔'],correct:1,explanation:'Using the quadratic formula: x = (7±√(49−24))/6 = (7±5)/6, giving x=2 or x=⅓.'},
+      {id:'m2',topic:'algebra',question:'Simplify: (x² − 4) ÷ (x − 2)',options:['x − 2','x + 2','x² − 2','2x − 1'],correct:1,explanation:'x²−4 = (x+2)(x−2). Dividing by (x−2) gives (x+2).'},
+      {id:'m3',topic:'trigonometry',question:'Find the exact value of sin 60°.',options:['½','√3/2','1/√2','√2/3'],correct:1,explanation:'sin 60° = √3/2 ≈ 0.866. Memorise: 30-60-90 triangle ratios.'},
+      {id:'m4',topic:'calculus',question:'Differentiate y = 3x³ − 2x + 5.',options:['9x² − 2','9x² + 2','3x² − 2','6x − 2'],correct:0,explanation:'dy/dx = 9x² − 2 by the power rule (bring down power, reduce by 1).'},
+      {id:'m5',topic:'statistics',question:'Find the mean of: 4, 7, 13, 16.',options:['9','10','11','12'],correct:1,explanation:'Sum = 40, count = 4. Mean = 40/4 = 10.'},
+      {id:'m6',topic:'geometry',question:'The interior angle of a regular hexagon is:',options:['90°','108°','120°','135°'],correct:2,explanation:'Interior angle = (n−2)×180/n = (4×180)/6 = 120°.'},
+      {id:'m7',topic:'algebra',question:'If 2x + 3 = 11, find x.',options:['3','4','5','7'],correct:1,explanation:'2x = 8 → x = 4.'},
+      {id:'m8',topic:'quadratics',question:'The product of roots of x² − 5x + 6 = 0 is:',options:['5','6','−5','−6'],correct:1,explanation:'Product of roots = c/a = 6/1 = 6.'},
+      {id:'m9',topic:'trigonometry',question:'cos 0° equals:',options:['0','½','1','√3/2'],correct:2,explanation:'cos 0° = 1 — cosine is at maximum at 0°.'},
+      {id:'m10',topic:'calculus',question:'Evaluate ∫(2x + 3) dx.',options:['x² + 3x','x² + 3x + C','2x² + 3 + C','x² + C'],correct:1,explanation:'∫2x dx = x² and ∫3 dx = 3x, so the answer is x² + 3x + C.'},
+      {id:'m11',topic:'statistics',question:'If the mode of 2, 4, 5, k, 4, 3 is 4, what is a possible value of k?',options:['2','4','5','3'],correct:1,explanation:'For mode = 4, the value 4 must appear most frequently. k = 4 gives three 4s.'},
+      {id:'m12',topic:'geometry',question:'A circle has radius 7 cm. Its circumference is (take π = 22/7):',options:['22 cm','44 cm','154 cm','308 cm'],correct:1,explanation:'C = 2πr = 2 × 22/7 × 7 = 44 cm.'},
+      {id:'m13',topic:'algebra',question:'Factorise completely: 6x² − x − 2.',options:['(3x+2)(2x−1)','(6x−1)(x+2)','(3x−2)(2x+1)','(2x+2)(3x−1)'],correct:0,explanation:'6x²−x−2 = (3x+2)(2x−1). Verify by expanding.'},
+      {id:'m14',topic:'quadratics',question:'The discriminant b²−4ac determines the nature of roots. If b²−4ac < 0, the roots are:',options:['Real and equal','Real and distinct','Complex (no real roots)','Zero'],correct:2,explanation:'When discriminant < 0, the square root is imaginary, giving complex conjugate roots.'},
+      {id:'m15',topic:'calculus',question:'Find the gradient of y = x² − 4x + 3 at x = 2.',options:['0','1','−1','4'],correct:0,explanation:"dy/dx = 2x − 4. At x = 2: 2(2)−4 = 0. This is the curve's minimum!"},
+      {id:'m16',topic:'trigonometry',question:'In triangle ABC, if angle B = 90°, AB = 3, BC = 4, find AC.',options:['5','7','√7','25'],correct:0,explanation:'Pythagoras: AC² = 3² + 4² = 25, so AC = 5.'},
+      {id:'m17',topic:'statistics',question:'The median of 3, 7, 9, 12, 15 is:',options:['7','9','10','12'],correct:1,explanation:'5 values sorted; middle = 3rd value = 9.'},
+      {id:'m18',topic:'algebra',question:'If 4^x = 64, find x.',options:['3','4','2','16'],correct:0,explanation:'4^x = 64 → 4^x = 4³ → x = 3.'},
+      {id:'m19',topic:'geometry',question:'Area of a trapezium with parallel sides 6 cm and 10 cm, height 4 cm:',options:['32 cm²','24 cm²','40 cm²','16 cm²'],correct:0,explanation:'Area = ½(a+b)×h = ½(6+10)×4 = ½×16×4 = 32 cm².'},
+      {id:'m20',topic:'calculus',question:'What is the second derivative of y = x⁴?',options:['4x³','12x²','24x','4x'],correct:1,explanation:"y' = 4x³, y'' = 12x²."},
+    ],
+    physics:[
+      {id:'p1',topic:'mechanics',question:"Newton's second law states that Force equals:",options:['mass × velocity','mass × acceleration','mass × distance','velocity × time'],correct:1,explanation:'F = ma is Newton\'s second law of motion.'},
+      {id:'p2',topic:'waves',question:'The speed of light in a vacuum is approximately:',options:['3×10⁶ m/s','3×10⁸ m/s','3×10¹⁰ m/s','3×10⁴ m/s'],correct:1,explanation:'c ≈ 3×10⁸ m/s (300,000 km/s).'},
+      {id:'p3',topic:'electricity',question:"Ohm's Law states that V =",options:['I/R','IR','I+R','I²R'],correct:1,explanation:'V = IR (Voltage = Current × Resistance).'},
+      {id:'p4',topic:'mechanics',question:'A 5 kg mass accelerates at 3 m/s². The net force is:',options:['8 N','15 N','1.67 N','2 N'],correct:1,explanation:'F = ma = 5×3 = 15 N.'},
+      {id:'p5',topic:'waves',question:'The unit of frequency is:',options:['Metre','Hertz','Newton','Pascal'],correct:1,explanation:'Frequency is measured in Hertz (Hz) = cycles per second.'},
+      {id:'p6',topic:'mechanics',question:'Which quantity is a vector?',options:['Speed','Mass','Velocity','Temperature'],correct:2,explanation:'Velocity has both magnitude and direction — it is a vector.'},
+      {id:'p7',topic:'electricity',question:'The SI unit of electrical resistance is:',options:['Ampere','Volt','Ohm','Watt'],correct:2,explanation:'Resistance is measured in Ohms (Ω).'},
+      {id:'p8',topic:'optics',question:'A concave mirror is also called a:',options:['Convex mirror','Diverging mirror','Converging mirror','Plane mirror'],correct:2,explanation:'Concave = converging — it brings parallel rays to a focus.'},
+      {id:'p9',topic:'thermodynamics',question:'The process by which heat travels through a vacuum is:',options:['Conduction','Convection','Radiation','Diffusion'],correct:2,explanation:'Radiation (electromagnetic waves) is the only method that does not require a medium.'},
+      {id:'p10',topic:'waves',question:'A wave has frequency 200 Hz and wavelength 1.7 m. Its speed is:',options:['117.6 m/s','340 m/s','200 m/s','1.7 m/s'],correct:1,explanation:'v = fλ = 200×1.7 = 340 m/s (speed of sound in air at room temperature).'},
+      {id:'p11',topic:'mechanics',question:"The work done by a force of 10 N through a distance of 5 m is:",options:['2 J','15 J','50 J','0.5 J'],correct:2,explanation:'W = F × d = 10 × 5 = 50 J.'},
+      {id:'p12',topic:'electricity',question:'Two resistors 4Ω and 12Ω are in parallel. Their combined resistance is:',options:['16 Ω','3 Ω','48 Ω','8 Ω'],correct:1,explanation:'1/R = 1/4 + 1/12 = 3/12 + 1/12 = 4/12 → R = 3 Ω.'},
+      {id:'p13',topic:'thermodynamics',question:'The temperature at which water boils at standard pressure is:',options:['100°C','0°C','373°F','212 K'],correct:0,explanation:'Water boils at 100°C (373 K) at standard atmospheric pressure.'},
+      {id:'p14',topic:'optics',question:'Which colour of light has the highest frequency?',options:['Red','Green','Blue','Violet'],correct:3,explanation:'Violet has the shortest wavelength and highest frequency in the visible spectrum.'},
+      {id:'p15',topic:'mechanics',question:'The kinetic energy of a 2 kg object moving at 4 m/s is:',options:['8 J','16 J','32 J','4 J'],correct:1,explanation:'KE = ½mv² = ½×2×16 = 16 J.'},
+    ],
+    english:[
+      {id:'e1',topic:'grammar',question:"Choose the correct form: 'Neither of the boys ___ done his homework.'",options:['have','has','had','were'],correct:1,explanation:"'Neither' takes a singular verb: 'has'."},
+      {id:'e2',topic:'lexis',question:"What is the meaning of 'EBULLIENT'?",options:['Gloomy','Cheerful and full of energy','Tired','Confused'],correct:1,explanation:"'Ebullient' means lively, enthusiastic, and full of energy."},
+      {id:'e3',topic:'comprehension',question:"A word meaning the opposite of 'BENEVOLENT' is:",options:['Generous','Kind','Malevolent','Charitable'],correct:2,explanation:"'Malevolent' means wishing evil — the direct antonym of benevolent."},
+      {id:'e4',topic:'oral-english',question:"In the word 'PHOTOGRAPH', which syllable carries the primary stress?",options:['PHO','TO','GRAPH','None'],correct:0,explanation:"PHO-to-graph — stress on the first syllable: PHO."},
+      {id:'e5',topic:'grammar',question:"'The committee ___ reached its decision.' (Choose the correct verb)",options:['have','has','are','were'],correct:1,explanation:"'Committee' as collective noun (formal): singular verb 'has'."},
+      {id:'e6',topic:'lexis',question:"The word 'GREGARIOUS' means:",options:['Shy','Sociable and fond of company','Aggressive','Clever'],correct:1,explanation:"Gregarious = sociable, enjoying the company of others."},
+      {id:'e7',topic:'grammar',question:"Which sentence is grammatically correct?",options:["The datas are correct.","The information are wrong.","The scissors is sharp.","The scissors are sharp."],correct:3,explanation:"'Scissors' is always plural and takes a plural verb."},
+      {id:'e8',topic:'comprehension',question:"A 'METAPHOR' is:",options:['A comparison using like or as','A direct comparison without like or as','Exaggeration for effect','Repetition of a sound'],correct:1,explanation:"A metaphor directly states one thing is another: 'He is a lion in battle'."},
+      {id:'e9',topic:'oral-english',question:"In 'RECORD' used as a noun, stress falls on:",options:['Second syllable','First syllable','Both equally','Third syllable'],correct:1,explanation:"REcord (noun) vs reCORD (verb) — nouns stress the first syllable."},
+      {id:'e10',topic:'lexis',question:"The plural of 'phenomenon' is:",options:['phenomenons','phenomenas','phenomena','phenomenae'],correct:2,explanation:"'Phenomena' is the correct Greek plural of phenomenon."},
+    ]
+  };
+  return banks[subj]||banks.mathematics;
+}
+
+/* ── TOAST ── */
+function toast(msg,ms=3000){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),ms);
+}
+
+/* ── SUBSCRIPTION EXPIRY CHECK ── */
+function checkSubscriptionExpiry(profile){
+  if(!profile?.is_premium) return;
+  const expiry=profile.subscription_expiry?new Date(profile.subscription_expiry):null;
+  if(expiry && new Date()>expiry){
+    document.getElementById('defaulter-banner').classList.add('show');
+  }
+}
+</script>
+
+<!-- AUTH MODAL -->
+<div class="modal-backdrop" id="auth-modal">
   <div class="modal">
-    <div class="modal-title">Exam Complete</div>
-    <div class="score-circle">
-      <div class="score-pct" id="resPct">0%</div>
-      <div class="score-sub">Score</div>
+    <div class="modal-head">
+      <h2 id="cbt-modal-title">Welcome Back</h2>
+      <button class="modal-close-btn" onclick="document.getElementById('auth-modal').classList.remove('open')">✕</button>
     </div>
-    <p class="score-msg" id="resMsg"></p>
-    <div class="stat-row">
-      <div class="stat-box"><div class="stat-box-num" id="resCorrect" style="color:var(--accent2)">0</div><div class="stat-box-label">Correct</div></div>
-      <div class="stat-box"><div class="stat-box-num" id="resWrong" style="color:#ef4444">0</div><div class="stat-box-label">Wrong</div></div>
-      <div class="stat-box"><div class="stat-box-num" id="resPredict" style="color:var(--accent)">--</div><div class="stat-box-label">JAMB Est.</div></div>
+    <div class="modal-tab-row">
+      <button class="modal-tab-btn active" id="cbt-tab-login" onclick="switchCbtTab('login')">Login</button>
+      <button class="modal-tab-btn" id="cbt-tab-signup" onclick="switchCbtTab('signup')">Sign Up</button>
     </div>
-    <div class="upsell-box">
-      <strong>🔍 Want to see your weak topics?</strong>
-      <p>Our Weakness Tracker reveals exactly which categories pulled your score down.</p>
-      <a href="index.html#pricing">Unlock Full Access — ₦2,500</a>
+    <div class="modal-auth-msg error" id="cbt-error"></div>
+    <div class="modal-auth-msg success" id="cbt-success"></div>
+    <div id="cbt-login">
+      <div class="modal-form-group"><label>Email</label><input type="email" id="cbt-l-email" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="modal-form-group"><label>Password</label><input type="password" id="cbt-l-pass" placeholder="••••••••" autocomplete="current-password"></div>
+      <button class="modal-submit-btn" onclick="doCbtLogin()">Login →</button>
     </div>
-    <div class="modal-actions">
-      <button class="modal-btn modal-btn-secondary" onclick="retryExam()">Retry Exam</button>
-      <button class="modal-btn modal-btn-primary" onclick="reviewExam()">Review Answers</button>
+    <div id="cbt-signup" style="display:none">
+      <div class="modal-form-group"><label>Full Name</label><input type="text" id="cbt-s-name" placeholder="Amaka Obi" autocomplete="name"></div>
+      <div class="modal-form-group"><label>Email</label><input type="email" id="cbt-s-email" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="modal-form-group"><label>Password</label><input type="password" id="cbt-s-pass" placeholder="Min 6 characters" autocomplete="new-password"></div>
+      <button class="modal-submit-btn" onclick="doCbtSignup()">Create Free Account →</button>
     </div>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════
-//  DATA LAYER — loads from /data/questions.json
-//              and /data/curriculum.json
-// ═══════════════════════════════════════════════════
-let QUESTIONS  = null;
-let CURRICULUM = null;
-let activeSubject = 'mathematics';
-let examType   = 'full-mock';
-let selectedTopic = null;
-let exam = [], current = 0, answers = {}, timeLeft = 0, timerInterval = null, isReview = false;
-
-async function loadData() {
-  try {
-    const [qRes, cRes] = await Promise.all([
-      fetch('data/questions.json'),
-      fetch('data/curriculum.json')
-    ]);
-    QUESTIONS  = await qRes.json();
-    CURRICULUM = await cRes.json();
-  } catch(e) {
-    document.getElementById('menuLoadingState').innerHTML =
-      `<div class="error-banner">⚠️ Could not load question bank. Check that data/questions.json exists.<br><small>${e.message}</small></div>`;
-    return false;
+function switchCbtTab(t){
+  document.getElementById('cbt-login').style.display=t==='login'?'block':'none';
+  document.getElementById('cbt-signup').style.display=t==='signup'?'block':'none';
+  document.getElementById('cbt-tab-login').classList.toggle('active',t==='login');
+  document.getElementById('cbt-tab-signup').classList.toggle('active',t==='signup');
+  document.getElementById('cbt-modal-title').textContent=t==='login'?'Welcome Back':'Create Account';
+  ['cbt-error','cbt-success'].forEach(id=>{const e=document.getElementById(id);e.classList.remove('visible');e.textContent='';});
+}
+function showCbtMsg(type,msg){
+  ['cbt-error','cbt-success'].forEach(id=>{const e=document.getElementById(id);e.classList.remove('visible');e.textContent='';});
+  const el=document.getElementById('cbt-'+type);el.textContent=msg;el.classList.add('visible');
+}
+async function doCbtLogin(){
+  if(!sb){showCbtMsg('error','Loading, please try again.');return;}
+  const email=document.getElementById('cbt-l-email').value.trim();
+  const pass=document.getElementById('cbt-l-pass').value;
+  if(!email||!pass){showCbtMsg('error','Please fill all fields.');return;}
+  showCbtMsg('success','Logging in…');
+  const{error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error){showCbtMsg('error',error.message);return;}
+  showCbtMsg('success','Logged in! ✅ Refreshing…');
+  setTimeout(()=>location.reload(),900);
+}
+async function doCbtSignup(){
+  if(!sb){showCbtMsg('error','Loading, please try again.');return;}
+  const name=document.getElementById('cbt-s-name').value.trim();
+  const email=document.getElementById('cbt-s-email').value.trim();
+  const pass=document.getElementById('cbt-s-pass').value;
+  if(!name||!email||!pass){showCbtMsg('error','Please fill all fields.');return;}
+  if(pass.length<6){showCbtMsg('error','Password must be 6+ characters.');return;}
+  showCbtMsg('success','Creating account…');
+  const{data,error}=await sb.auth.signUp({email,password:pass});
+  if(error){showCbtMsg('error',error.message);return;}
+  if(data?.user){
+    await sb.from('profiles').insert({id:data.user.id,full_name:name,is_premium:false,subscription_status:'inactive',target_jamb_score:290,current_streak:0,total_xp:0,badges:[]});
+    const TOPICS=['quadratics','algebra','trigonometry','calculus','statistics','geometry','mechanics','waves','electricity','optics','thermodynamics','comprehension','lexis','oral-english','grammar'];
+    await sb.from('topic_mastery').insert(TOPICS.map(t=>({user_id:data.user.id,topic_id:t,accuracy_avg:0,speed_avg:0,questions_solved:0,mastery_level:0})));
   }
-  return true;
+  showCbtMsg('success','Account created! Check your email, then log in.');
 }
-
-// ── Build topic selector from curriculum ──
-function buildTopicSelect() {
-  const grid = document.getElementById('topicSelectGrid');
-  const subj = CURRICULUM?.subjects[activeSubject];
-  if (!subj) return;
-  const allTopics = subj.sections.flatMap(s => s.topics);
-  const categories = [...new Set((QUESTIONS[activeSubject]||[]).map(q => q.cat))];
-  grid.innerHTML = categories.map((cat, i) => `
-    <div class="topic-select-item ${i===0?'':'locked-item'}" onclick="selectTopic('${cat}',this,${i===0})">
-      <div class="tsi-left">
-        <div class="tsi-icon">${i===0?'▶':'🔒'}</div>
-        <div><div class="tsi-name">${cat}</div><div class="tsi-detail">10 questions</div></div>
-      </div>
-      <div class="tsi-right"><span class="${i===0?'tag-free':'tag-lock'}">${i===0?'FREE':'UNLOCK'}</span></div>
-    </div>`).join('');
-}
-
-function selectExamType(type, el) {
-  examType = type;
-  document.querySelectorAll('.exam-type-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  const show = type === 'topic';
-  document.getElementById('topicDivider').style.display = show ? 'block' : 'none';
-  document.getElementById('topicSelectGrid').style.display = show ? 'flex' : 'none';
-  document.getElementById('startBtn').disabled = show && !selectedTopic;
-}
-
-function selectTopic(name, el, isFree) {
-  if (!isFree) { window.location.href = 'index.html#pricing'; return; }
-  selectedTopic = name;
-  document.querySelectorAll('.topic-select-item').forEach(i => i.classList.remove('selected'));
-  el.classList.add('selected');
-  document.getElementById('startBtn').disabled = false;
-}
-
-// ── Begin exam ──
-function beginExam() {
-  const pool = QUESTIONS[activeSubject] || [];
-  if (!pool.length) { alert('No questions found for this subject.'); return; }
-  if (examType === 'topic' && selectedTopic) {
-    exam = pool.filter(q => q.cat === selectedTopic).slice(0, 10);
-  } else {
-    exam = [...pool].sort(() => Math.random() - 0.5);
-  }
-  if (!exam.length) { alert('No questions available for this selection.'); return; }
-  answers = {}; current = 0; isReview = false;
-  document.getElementById('menuScreen').style.display = 'none';
-  document.getElementById('examScreen').style.display = 'flex';
-  if (examType === 'full-mock') { timeLeft = 7200; startTimer(); }
-  else { document.getElementById('timerDisplay').textContent = 'NO LIMIT'; }
-  buildPalette(); renderQuestion();
-}
-
-function startTimer() {
-  clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    const h=Math.floor(timeLeft/3600), m=Math.floor((timeLeft%3600)/60), s=timeLeft%60;
-    const d = document.getElementById('timerDisplay');
-    d.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
-    d.className = 'timer-val' + (timeLeft<300?' danger':timeLeft<600?' warning':'');
-    if (timeLeft <= 0) submitExam();
-  }, 1000);
-}
-function pad(n){ return String(n).padStart(2,'0'); }
-
-function buildPalette() {
-  const grid = document.getElementById('paletteGrid');
-  grid.innerHTML = '';
-  exam.forEach((_,i) => {
-    const btn = document.createElement('button');
-    btn.className='p-btn'; btn.textContent=i+1; btn.id='pb-'+i;
-    btn.onclick=()=>{ current=i; renderQuestion(); updatePalette(); };
-    grid.appendChild(btn);
-  });
-  updatePalette();
-}
-
-function updatePalette() {
-  exam.forEach((_,i) => {
-    const b = document.getElementById('pb-'+i);
-    if (!b) return;
-    b.className='p-btn'+(i===current?' p-active':answers[i]!==undefined?' p-answered':'');
-  });
-  const correct = exam.filter((_,i)=>answers[i]===exam[i].ans).length;
-  document.getElementById('predictVal').textContent =
-    Object.keys(answers).length > 0 ? Math.round((correct/exam.length)*400) : '--';
-}
-
-function renderQuestion() {
-  const q = exam[current];
-  document.getElementById('qNum').textContent = `QUESTION ${current+1} OF ${exam.length}`;
-  document.getElementById('qSubjectTag').textContent = q.cat;
-  document.getElementById('qText').textContent = q.q;
-  document.getElementById('qOptions').innerHTML = q.opts.map((o,i) => {
-    let cls = 'opt-item';
-    if (isReview) { if(i===q.ans) cls+=' opt-correct'; else if(answers[current]===i) cls+=' opt-wrong'; }
-    else if (answers[current]===i) cls+=' opt-selected';
-    return `<div class="${cls}" onclick="selectOpt(${i})">
-      <span class="opt-letter">${String.fromCharCode(65+i)}</span><span>${o}</span></div>`;
-  }).join('');
-  const exp = document.getElementById('expBox');
-  if (isReview) { exp.textContent='💡 '+q.exp; exp.classList.add('show'); }
-  else exp.classList.remove('show');
-  const nextBtn = document.getElementById('nextQBtn');
-  nextBtn.textContent = isReview
-    ? (current===exam.length-1?'Back to Results':'Next →')
-    : (current===exam.length-1?'Submit Exam':'Next Question →');
-  nextBtn.onclick = isReview
-    ? (current===exam.length-1 ? ()=>document.getElementById('resultsOverlay').classList.add('show') : ()=>navQ(1))
-    : (current===exam.length-1 ? submitExam : ()=>navQ(1));
-}
-
-function selectOpt(i) {
-  if (isReview) return;
-  answers[current] = i; renderQuestion(); updatePalette();
-}
-function navQ(dir) {
-  current = Math.max(0,Math.min(exam.length-1,current+dir));
-  renderQuestion(); updatePalette();
-  document.querySelector('.question-area').scrollTo({top:0,behavior:'smooth'});
-}
-function confirmExit() {
-  if (confirm('Exit the exam? Progress will be lost.')) {
-    clearInterval(timerInterval); window.location.href='index.html';
-  }
-}
-
-function submitExam() {
-  clearInterval(timerInterval);
-  let correct=0;
-  exam.forEach((q,i)=>{ if(answers[i]===q.ans) correct++; });
-  const pct = Math.round((correct/exam.length)*100);
-  document.getElementById('resPct').textContent = pct+'%';
-  document.getElementById('resCorrect').textContent = correct;
-  document.getElementById('resWrong').textContent = Math.max(0, Object.keys(answers).length-correct);
-  document.getElementById('resPredict').textContent = Math.round((correct/exam.length)*400);
-  const msgs = [[80,'🏆 Excellent! You are on track for 300+.'],[60,'👍 Good performance! Focus on weak categories.'],[40,'📚 You are improving! Review explanations and retry.'],[0,'💪 Keep going. Every expert was once a beginner.']];
-  document.getElementById('resMsg').textContent = msgs.find(([min])=>pct>=min)[1];
-  document.getElementById('resultsOverlay').classList.add('show');
-}
-function retryExam() {
-  document.getElementById('resultsOverlay').classList.remove('show');
-  answers={}; current=0; isReview=false;
-  if(examType==='full-mock'){timeLeft=7200;startTimer();}
-  buildPalette(); renderQuestion();
-}
-function reviewExam() {
-  isReview=true;
-  document.getElementById('resultsOverlay').classList.remove('show');
-  current=0; renderQuestion(); updatePalette();
-}
-
-// ── BOOT ──
-(async()=>{
-  const params = new URLSearchParams(window.location.search);
-  const subj = params.get('subject')||params.get('exam')||'mathematics';
-  const ok = await loadData();
-  if (!ok) return;
-
-  const validSubjects = Object.keys(QUESTIONS);
-  activeSubject = validSubjects.includes(subj) ? subj : validSubjects[0];
-  const subjectNames = { mathematics:'Mathematics', physics:'Physics', english:'English Language', chemistry:'Chemistry' };
-  document.getElementById('menuTitle').innerHTML = `${subjectNames[activeSubject]||activeSubject}<br>Mock Exam`;
-  document.getElementById('menuLoadingState').style.display = 'none';
-  document.getElementById('menuContent').style.display = 'block';
-  buildTopicSelect();
-})();
+document.getElementById('auth-modal').addEventListener('click',e=>{if(e.target===document.getElementById('auth-modal'))document.getElementById('auth-modal').classList.remove('open');});
+// Run subscription expiry check once profile is loaded
+const _expiryCheck=setInterval(()=>{if(typeof currentProfile!=='undefined'){checkSubscriptionExpiry(currentProfile);clearInterval(_expiryCheck);}},300);
 </script>
 </body>
 </html>
