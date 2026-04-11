@@ -1,120 +1,113 @@
-/* ================================================================
-   paystack.js — UltimateEdge v2.1
-   Recurring (₦1,500/mo) + Bulk Plans (₦4,000/3mo · ₦12,000/yr)
-   Integrates with Supabase profiles + payments tables
-   ================================================================ */
+// ============================================================
+// UltimateEdge School — /js/paystack.js  (v3.1)
+// Load AFTER auth.js. Only needed on index.html.
+// Exposes: openPaystack(plan), handlePaymentSuccess(response, plan)
+// ============================================================
 
-const PS_PUBLIC_KEY = 'pk_live_681bc4436b4c4249010d01795bb05f655cd470eb'; // ← replace
+const PS_PUBLIC_KEY = 'pk_live_681bc4436b4c4249010d01795bb05f655cd470eb';
 
-const PLANS = {
-  monthly:   { label: '1 Month',    amount: 150000,  days: 30,  naira: '₦1,500',  save: null,       autoRenew: true  },
-  quarterly: { label: '3 Months',   amount: 400000,  days: 90,  naira: '₦4,000',  save: '₦500',     autoRenew: false },
-  yearly:    { label: '12 Months',  amount: 1200000, days: 365, naira: '₦12,000', save: '₦6,000',   autoRenew: false }
+// ⚠️  Replace these with your actual PLN_xxxxxxx codes from:
+// dashboard.paystack.com → Products → Plans
+const PS_PLANS = {
+  monthly:  'PLN_REPLACE_MONTHLY',   // ₦1,500/month   — recurring
+  '3month': 'PLN_REPLACE_3MONTH',   // ₦4,000 one-time — 90 days
+  annual:   'PLN_REPLACE_ANNUAL'    // ₦12,000/year    — recurring
 };
 
-/* ── OPEN PAYMENT POPUP ─────────────────────────────────────
-   planKey: 'monthly' | 'quarterly' | 'yearly'
-   ──────────────────────────────────────────────────────────── */
-function openPaystack(planKey = 'monthly') {
-  if (typeof currentUser === 'undefined' || !currentUser) {
-    openAuthModal('login'); return;
-  }
-  if (typeof PaystackPop === 'undefined') {
-    toast('Payment service loading, please retry in a moment.'); return;
+// Plan metadata (amounts in kobo for the payments table)
+const PS_PLAN_META = {
+  monthly:  { label: 'Monthly',   kobo: 150000, days: 30,  autoRenew: true  },
+  '3month': { label: '3 Months',  kobo: 400000, days: 90,  autoRenew: false },
+  annual:   { label: 'Annual',    kobo: 1200000, days: 365, autoRenew: true  }
+};
+
+// ── Open Paystack popup ───────────────────────────────────────
+function openPaystack(plan) {
+  // Guard: user must be logged in
+  if (!window.currentUser || !window.currentProfile) {
+    openAuthModal('login');
+    toast('Please log in to subscribe.');
+    return;
   }
 
-  const plan = PLANS[planKey];
-  if (!plan) return;
+  // Guard: keys must be configured
+  const planCode = PS_PLANS[plan];
+  if (!PS_PUBLIC_KEY || PS_PUBLIC_KEY.includes('REPLACE') ||
+      !planCode || planCode.includes('REPLACE')) {
+    toast('Payment is not yet configured. Please check back soon.');
+    console.warn('Paystack: PS_PUBLIC_KEY or plan code not set for plan:', plan);
+    return;
+  }
 
-  const ref = 'UE2_' + planKey.toUpperCase() + '_' + Date.now() + '_' + currentUser.id.slice(0, 8);
+  const meta      = PS_PLAN_META[plan];
+  const ref       = 'ue_' + Date.now() + '_' + currentUser.id.slice(0, 8);
+
+  trackAction('payment_initiated', { plan, ref });
 
   const handler = PaystackPop.setup({
-    key:      PS_PUBLIC_KEY,
-    email:    currentUser.email,
-    amount:   plan.amount,
-    currency: 'NGN',
-    ref,
-    metadata: {
-      user_id:   currentUser.id,
-      plan_type: planKey,
-      auto_renew: plan.autoRenew,
-      custom_fields: [
-        { display_name: 'Plan', variable_name: 'plan', value: plan.label },
-        { display_name: 'Auto-renew', variable_name: 'auto_renew', value: String(plan.autoRenew) }
-      ]
-    },
-    callback: async function(response) {
-      await onPaymentSuccess(response, planKey, plan);
-    },
-    onClose: function() {
-      toast('Payment window closed.');
-    }
+    key:          PS_PUBLIC_KEY,
+    email:        currentUser.email,
+    plan:         planCode,
+    ref:          ref,
+    callback_url: 'https://school.ultimateedge.info/payment-success.html',
+    callback:     (response) => handlePaymentSuccess(response, plan),
+    onClose:      () => toast('Payment window closed. Your progress is saved.')
   });
 
   handler.openIframe();
 }
 
-/* ── ON SUCCESS CALLBACK ──────────────────────────────────── */
-async function onPaymentSuccess(response, planKey, plan) {
-  if (!sb || !currentUser) return;
+// ── Handle successful payment ─────────────────────────────────
+async function handlePaymentSuccess(response, plan) {
+  if (!window.currentUser || !window.sb) return;
 
-  const now    = new Date();
-  const expiry = new Date(now.getTime() + plan.days * 86400000);
+  const meta    = PS_PLAN_META[plan];
+  const expiry  = new Date();
+  expiry.setDate(expiry.getDate() + meta.days);
 
-  // 1. Log the payment
-  await sb.from('payments').insert({
-    user_id:   currentUser.id,
-    amount:    plan.amount / 100, // store in naira
-    plan_type: planKey,
-    reference: response.reference,
-    status:    'success',
-    created_at: now.toISOString()
-  });
+  try {
+    // 1. Update profiles — premium access
+    const { error: profileErr } = await sb.from('profiles').update({
+      is_premium:           true,
+      status:               'ACTIVE',
+      subscription_status:  'ACTIVE',
+      subscription_expiry:  expiry.toISOString(),
+      auto_renew:           meta.autoRenew
+    }).eq('id', currentUser.id);
 
-  // 2. Update profile
-  await sb.from('profiles').update({
-    is_premium:            true,
-    subscription_status:   'active',
-    subscription_type:     planKey,
-    subscription_expiry:   expiry.toISOString(),
-    auto_renew:            plan.autoRenew
-  }).eq('id', currentUser.id);
+    if (profileErr) throw profileErr;
 
-  // 3. Refresh local profile
-  if (typeof loadProfile === 'function') await loadProfile();
-  if (typeof updateNavUI === 'function') updateNavUI();
+    // 2. Log payment record
+    const { error: payErr } = await sb.from('payments').insert({
+      user_id:   currentUser.id,
+      amount:    meta.kobo,
+      plan:      plan,
+      reference: response.reference || response.trxref || 'ps_' + Date.now(),
+      status:    'success'
+    });
 
-  // 4. Award XP + badge
-  if (typeof addXP === 'function') await addXP(100, '🎉 Premium Unlocked');
+    if (payErr) console.warn('Payment log error (non-fatal):', payErr);
 
-  // 5. UI feedback
-  toast('🎉 Mastery Pro unlocked! Welcome to the 300+ Club.');
-  refreshPaymentUI();
+    // 3. Refresh local state
+    await loadProfile();
+    updateNavUI();
 
-  // Dismiss any defaulter banner
-  document.getElementById('defaulter-banner')?.classList.remove('show');
-}
+    // 4. Remove any premium-lock overlays on the page
+    document.querySelectorAll('.premium-lock').forEach(el => {
+      el.classList.remove('premium-lock');
+    });
 
-/* ── REFRESH PAYMENT BUTTONS ─────────────────────────────── */
-function refreshPaymentUI() {
-  document.querySelectorAll('[data-pay-btn]').forEach(btn => {
-    const planKey = btn.dataset.payBtn;
-    if (currentProfile?.is_premium && currentProfile?.subscription_type === planKey) {
-      btn.textContent = '✅ Active Plan';
-      btn.disabled = true;
-      btn.style.opacity = '0.65';
-    }
-  });
-}
+    // 5. Hide defaulter banner if showing
+    const banner = document.getElementById('defaulter-banner');
+    if (banner) banner.classList.remove('active');
 
-/* ── PRICING TOGGLE (Monthly vs Bulk) ───────────────────────
-   Call this from the pricing toggle UI.
-   ──────────────────────────────────────────────────────────── */
-function showPricingTab(tab) {
-  document.querySelectorAll('.pricing-tab-content').forEach(el => {
-    el.style.display = el.dataset.tab === tab ? 'block' : 'none';
-  });
-  document.querySelectorAll('.pricing-tab-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === tab);
-  });
+    // 6. Track
+    trackAction('payment_success', { plan, days: meta.days, ref: response.reference });
+
+    toast(`🎉 PRO activated! ${meta.label} access unlocked.`, 5000);
+
+  } catch (err) {
+    console.error('Payment success handler error:', err);
+    toast('Payment recorded but profile update failed. Please contact support.');
+  }
 }
