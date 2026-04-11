@@ -1,708 +1,551 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Classroom — UltimateEdge School</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<style>
-:root{
-  --ink:#0c0c14;--paper:#f8f6f0;--white:#fff;
-  --gold:#f0c040;--gold-2:#c99a20;--gold-glow:rgba(240,192,64,.18);
-  --green:#16a34a;--green-bg:rgba(22,163,74,.1);
-  --red:#dc2626;--red-bg:rgba(220,38,38,.1);
-  --slate:#11111c;--slate2:#1a1a2e;
-  --muted:#737380;--border:rgba(12,12,20,.08);--border-w:rgba(255,255,255,.1);
-  --r:11px;--r-lg:17px;
-  --ease:cubic-bezier(.4,0,.2,1);
-  --ff-h:'Bebas Neue',sans-serif;
-  --ff-b:'DM Sans',sans-serif;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;overflow:hidden;}
-body{font-family:var(--ff-b);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;}
-h1,h2,h3,h4{font-family:var(--ff-h);}
-a{color:inherit;text-decoration:none;}
-button{font-family:var(--ff-b);cursor:pointer;}
-
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:var(--r);font-weight:700;font-size:.84rem;border:none;cursor:pointer;transition:all .18s;white-space:nowrap;}
-.btn-gold{background:var(--gold);color:var(--ink);}
-.btn-gold:hover{background:#ffd04a;box-shadow:0 4px 16px var(--gold-glow);}
-.btn-outline{background:transparent;color:var(--ink);border:1.5px solid var(--border);}
-.btn-outline:hover{border-color:var(--ink);}
-.btn-sm{padding:6px 14px;font-size:.78rem;}
-.btn-full{width:100%;}
-
-/* LAYOUT */
-.page{display:flex;flex-direction:column;height:100%;}
-
-/* TOP NAV */
-.top-nav{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 max(16px,3vw);height:56px;flex-shrink:0;
-  background:rgba(248,246,240,.95);backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
-  position:relative;z-index:100;
-}
-.nav-logo{font-family:var(--ff-h);font-weight:800;font-size:1.05rem;color:var(--ink);}
-.nav-logo .accent{color:var(--gold-2);}
-.top-nav-right{display:flex;gap:8px;align-items:center;}
-
-/* MAIN SPLIT */
-.classroom-body{display:flex;flex:1;overflow:hidden;min-height:0;}
-
-/* SIDEBAR */
-.sidebar{
-  width:250px;min-width:250px;flex-shrink:0;
-  background:var(--white);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;overflow:hidden;
-}
-.sidebar-head{
-  padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0;
-}
-.sidebar-head h3{font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
-.subj-tabs{display:flex;gap:5px;flex-wrap:wrap;}
-.subj-tab{
-  font-size:.74rem;padding:5px 11px;border-radius:20px;
-  border:1.5px solid var(--border);background:none;color:var(--muted);
-  font-weight:700;cursor:pointer;transition:all .15s;
-}
-.subj-tab.active{background:var(--gold);border-color:var(--gold);color:var(--ink);}
-.topic-scroll{flex:1;overflow-y:auto;padding:8px 0;}
-.topic-item{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 16px;cursor:pointer;
-  border-left:3px solid transparent;transition:all .14s;
-  font-size:.86rem;gap:8px;
-}
-.topic-item:hover{background:rgba(12,12,20,.03);}
-.topic-item.active{background:rgba(240,192,64,.1);border-left-color:var(--gold);font-weight:700;}
-.topic-item .ti-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
-.topic-item .ti-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.mastery-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.badge{font-size:.62rem;font-weight:800;padding:2px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;}
-.badge-free{background:var(--green-bg);color:var(--green);}
-.badge-pro {background:rgba(240,192,64,.15);color:var(--gold-2);}
-
-/* MOBILE sidebar toggle */
-.sidebar-toggle{display:none;}
-@media(max-width:680px){
-  html,body{overflow:auto;}
-  .classroom-body{flex-direction:column;overflow:visible;}
-  .sidebar{width:100%;min-width:0;height:auto;max-height:220px;border-right:none;border-bottom:1px solid var(--border);}
-  .content-area{overflow:visible;max-height:none;}
-}
-
-/* CONTENT AREA */
-.content-area{flex:1;overflow-y:auto;padding:28px max(20px,4vw) 48px;}
-
-/* CONTENT STATES */
-#empty-state{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;min-height:40vh;gap:12px;
-}
-#empty-state .ei{font-size:3rem;}
-#empty-state h2{font-size:1.3rem;}
-#empty-state p{color:var(--muted);font-size:.9rem;max-width:360px;}
-#topic-content{display:none;}
-
-/* CONTENT HEADER */
-.ch{margin-bottom:22px;}
-.ch h2{font-size:1.6rem;margin-bottom:8px;}
-.ch-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.mastery-chip{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;}
-.ch-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
-
-/* VIDEO BLOCK */
-.video-wrap{
-  aspect-ratio:16/9;background:var(--slate2);border-radius:var(--r-lg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  color:rgba(255,255,255,.5);margin-bottom:22px;position:relative;overflow:hidden;
-  cursor:pointer;
-}
-.video-wrap:hover .play-btn{transform:scale(1.1);}
-.play-btn{
-  width:62px;height:62px;border-radius:50%;background:var(--gold);
-  color:var(--ink);display:flex;align-items:center;justify-content:center;
-  font-size:1.4rem;transition:transform .2s var(--ease);margin-bottom:10px;
-}
-.video-lbl{font-size:.82rem;}
-
-/* NOTES CARD */
-.notes-card{
-  background:var(--white);border-radius:var(--r-lg);
-  border:1.5px solid var(--border);padding:22px;margin-bottom:20px;
-  position:relative;overflow:hidden;
-}
-.notes-card h3{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:12px;}
-.notes-card p{font-size:.9rem;line-height:1.72;color:var(--ink);}
-.formula-box{
-  background:var(--slate);color:#fff;border-radius:var(--r);
-  padding:13px 16px;font-family:monospace;font-size:.92rem;
-  margin:14px 0;line-height:1.6;letter-spacing:.01em;
-  overflow-x:auto;
-}
-
-/* LOCK OVERLAY */
-.lock-overlay{
-  position:absolute;inset:0;z-index:10;
-  background:rgba(248,246,240,.92);backdrop-filter:blur(5px);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:24px;border-radius:inherit;
-}
-.lock-overlay h3{margin:10px 0 6px;font-size:1.1rem;}
-.lock-overlay p{font-size:.84rem;color:var(--muted);margin-bottom:16px;max-width:300px;}
-
-/* QUIZ */
-.quiz-card{
-  background:var(--white);border-radius:var(--r-lg);
-  border:1.5px solid var(--border);padding:22px;
-}
-.quiz-card h3{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:16px;}
-.quiz-prog{font-size:.75rem;color:var(--muted);margin-bottom:12px;}
-.quiz-q{font-size:.95rem;font-weight:600;margin-bottom:14px;line-height:1.55;}
-.quiz-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
-.quiz-opt{
-  padding:11px 15px;border-radius:var(--r);border:1.5px solid var(--border);
-  background:none;font-family:var(--ff-b);font-size:.88rem;text-align:left;
-  cursor:pointer;transition:all .15s;color:var(--ink);
-}
-.quiz-opt:hover:not(:disabled){border-color:var(--gold);}
-.quiz-opt.correct{border-color:var(--green);background:var(--green-bg);font-weight:700;}
-.quiz-opt.wrong  {border-color:var(--red);  background:var(--red-bg);}
-.quiz-opt:disabled{cursor:default;}
-.quiz-exp{
-  font-size:.84rem;line-height:1.65;padding:11px 14px;
-  background:rgba(22,163,74,.06);border:1px solid rgba(22,163,74,.18);
-  border-radius:var(--r);display:none;margin-bottom:10px;
-}
-.quiz-exp.show{display:block;}
-.quiz-nav{display:flex;justify-content:space-between;align-items:center;gap:8px;}
-
-/* TOAST */
-#toast{
-  position:fixed;bottom:20px;left:50%;z-index:9999;
-  transform:translateX(-50%) translateY(calc(100%+24px));
-  background:var(--slate);color:#fff;
-  padding:10px 22px;border-radius:50px;font-size:.84rem;font-weight:700;
-  white-space:nowrap;pointer-events:none;
-  transition:transform .3s var(--ease);
-  box-shadow:0 6px 24px rgba(0,0,0,.2);
-}
-#toast.show{transform:translateX(-50%) translateY(0);}
-/* DEFAULTER BANNER */
-.defaulter-banner{display:none;background:#fef2f2;border-bottom:2px solid #ef4444;padding:10px 20px;text-align:center;font-size:.86rem;font-weight:600;color:#dc2626;flex-shrink:0;}
-.defaulter-banner.show{display:block;}
-.defaulter-banner a{color:#1a56ff;text-decoration:underline;margin-left:8px;}
-/* AUTH MODAL */
-.modal-backdrop{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:16px;}
-.modal-backdrop.open{display:flex;}
-.modal{background:#f7f9fc;border-radius:18px;padding:32px 28px;width:100%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,.3);animation:modalIn .22s ease;}
-@keyframes modalIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
-.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-.modal-head h2{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.05em;color:#0d1117;}
-.modal-close-btn{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#6b7280;}
-.modal-tab-row{display:flex;background:rgba(0,0,0,.06);border-radius:8px;padding:4px;margin-bottom:20px;}
-.modal-tab-btn{flex:1;padding:8px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.875rem;border-radius:6px;cursor:pointer;color:#6b7280;transition:all .18s;}
-.modal-tab-btn.active{background:#fff;color:#0d1117;box-shadow:0 1px 5px rgba(0,0,0,.1);}
-.modal-form-group{margin-bottom:12px;}
-.modal-form-group label{display:block;font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#6b7280;margin-bottom:4px;}
-.modal-form-group input{width:100%;padding:10px 13px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;background:#f7f9fc;transition:border-color .15s;}
-.modal-form-group input:focus{outline:none;border-color:#1a56ff;background:#fff;}
-.modal-auth-msg{font-size:.82rem;margin-bottom:10px;padding:8px 12px;border-radius:7px;display:none;}
-.modal-auth-msg.error{background:rgba(239,68,68,.08);color:#dc2626;}
-.modal-auth-msg.success{background:rgba(0,201,122,.08);color:#059669;}
-.modal-auth-msg.visible{display:block;}
-.modal-submit-btn{width:100%;padding:12px;background:#1a56ff;color:white;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:opacity .2s;}
-.modal-submit-btn:hover{opacity:.9;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classroom — UltimateEdge School</title>
+  <meta name="description" content="Watch expert video lessons by topic, then take a quiz to lock in understanding. JAMB, WAEC and NECO syllabus covered.">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
 </head>
-<body>
-<div class="page">
 
-<!-- DEFAULTER BANNER -->
+<body class="classroom-page">
+
 <div class="defaulter-banner" id="defaulter-banner">
   ⚠️ Your subscription has expired. Free access is still active.
   <a href="index.html#pricing">Renew Now →</a>
 </div>
 
-<!-- TOP NAV -->
-<header class="top-nav">
-  <a class="nav-logo" href="index.html">🎓 Ultimate<span class="accent">Edge</span></a>
-  <div class="top-nav-right">
-    <a href="index.html" class="btn btn-outline btn-sm">← Home</a>
-    <a href="cbt.html" class="btn btn-outline btn-sm">Mock Exam</a>
-    <a href="index.html#pricing" class="btn btn-gold btn-sm">Unlock Pro — ₦2,500</a>
+<!-- NAV -->
+<nav class="classroom-nav">
+  <a href="/index.html" class="classroom-nav-logo">UE <span>SCHOOL</span></a>
+  <span class="nav-sep">›</span>
+  <span class="classroom-nav-title" id="nav-lesson-title">Classroom</span>
+  <div class="classroom-nav-right">
+    <div id="nav-user-pill" style="display:none">
+      <div id="nav-avatar"></div>
+      <span id="nav-user-name"></span>
+      <span id="nav-pro-badge">PRO</span>
+    </div>
+    <span id="nav-xp" style="font-family:var(--font-mono);font-size:.75rem;color:var(--green)"></span>
+    <button id="nav-login-btn"  class="nav-btn" onclick="openAuthModal('login')">Login / Sign Up</button>
+    <button id="nav-logout-btn" class="nav-btn" style="display:none">Log out</button>
   </div>
-</header>
+</nav>
 
 <!-- BODY -->
 <div class="classroom-body">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar" aria-label="Topic list">
-    <div class="sidebar-head">
-      <h3>Subject</h3>
-      <div class="subj-tabs">
-        <button class="subj-tab active" onclick="setSubject('mathematics')">📐 Math</button>
-        <button class="subj-tab" onclick="setSubject('physics')">⚛️ Physics</button>
-        <button class="subj-tab" onclick="setSubject('english')">📖 English</button>
-      </div>
+  <!-- ── Left: Topic Sidebar ── -->
+  <aside class="topic-sidebar" id="topic-sidebar">
+    <div class="subject-tabs" id="subject-tabs">
+      <button class="subject-tab active" onclick="selectSubject('mathematics')" data-subject="mathematics">📐 Maths</button>
+      <button class="subject-tab" onclick="selectSubject('physics')"   data-subject="physics">⚛️ Physics</button>
+      <button class="subject-tab" onclick="selectSubject('english')"   data-subject="english">📖 English</button>
+      <button class="subject-tab" onclick="selectSubject('chemistry')" data-subject="chemistry">🧪 Chemistry</button>
+      <button class="subject-tab" onclick="selectSubject('biology')"   data-subject="biology">🌿 Biology</button>
     </div>
-    <div class="topic-scroll" id="topic-scroll" role="list"></div>
+    <div class="topic-list" id="topic-list">
+      <div style="padding:1.5rem;text-align:center;color:var(--text-muted);font-size:.85rem">Loading curriculum…</div>
+    </div>
   </aside>
 
-  <!-- CONTENT -->
-  <main class="content-area" id="content-area">
-    <div id="empty-state">
-      <div class="ei">📚</div>
-      <h2>Select a Topic to Begin</h2>
-      <p>Pick any topic from the sidebar on the left to start learning with notes, formulas, and a mini quiz.</p>
+  <!-- ── Centre: Main Panel ── -->
+  <main class="main-panel" id="main-panel">
+
+    <!-- Video -->
+    <div class="video-container" id="video-container">
+      <div class="video-placeholder" id="video-placeholder">
+        <div class="play-icon">▶</div>
+        <p>Select a topic from the sidebar to begin</p>
+      </div>
     </div>
-    <div id="topic-content"></div>
+
+    <!-- Lesson content -->
+    <div class="lesson-content" id="lesson-content" style="display:none">
+      <div class="lesson-meta">
+        <h2 class="lesson-title" id="lesson-title">Topic Title</h2>
+        <span class="lesson-badge free" id="lesson-access-badge">Free Preview</span>
+        <!--
+          No grade badge shown here.
+          The algorithm selects which grade's content to load based on
+          currentProfile.current_skill_level — invisible to the student.
+        -->
+      </div>
+      <p class="lesson-description" id="lesson-description"></p>
+
+      <div class="info-section-label" style="margin-bottom:.6rem">📌 Key Concepts</div>
+      <div class="concepts-grid" id="concepts-grid"></div>
+
+      <div class="formula-box" id="formula-box">
+        <span class="formula-label">Key Formula</span>
+        <span id="formula-text">—</span>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="btn btn-outline btn-sm" onclick="prevTopic()">← Previous Topic</button>
+        <button class="btn btn-primary btn-sm"  onclick="scrollToQuiz()">📝 Take Topic Quiz →</button>
+        <button class="btn btn-outline btn-sm" onclick="nextTopic()">Next Topic →</button>
+      </div>
+    </div>
+
+    <!-- Quiz section -->
+    <div class="quiz-section" id="quiz-section" style="display:none">
+      <div class="quiz-header">
+        <h3>Topic Quiz</h3>
+        <span class="quiz-progress-text" id="quiz-progress-text">Question 1 of 3</span>
+      </div>
+      <div class="quiz-progress-bar">
+        <div class="quiz-progress-fill" id="quiz-progress-fill" style="width:0%"></div>
+      </div>
+      <div id="quiz-q-text" class="quiz-q-text">Loading question…</div>
+      <div class="quiz-options" id="quiz-options"></div>
+      <div class="quiz-explanation" id="quiz-explanation"></div>
+      <div class="quiz-actions">
+        <span class="quiz-score-display" id="quiz-score-display">0 / 0</span>
+        <button class="btn btn-primary btn-sm" id="quiz-next-btn" onclick="quizNext()" disabled>Next →</button>
+      </div>
+
+      <div class="quiz-complete" id="quiz-complete">
+        <div class="quiz-complete-score" id="quiz-complete-score">0/3</div>
+        <p class="quiz-complete-msg" id="quiz-complete-msg">Well done!</p>
+        <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" onclick="retakeQuiz()">↺ Retry Quiz</button>
+          <button class="btn btn-primary btn-sm" onclick="nextTopic()">Next Topic →</button>
+          <a href="/cbt.html" class="btn btn-success btn-sm">🎯 Practice Full Drill</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="empty-state" style="flex:1;display:flex;align-items:center;justify-content:center;padding:3rem;text-align:center">
+      <div>
+        <div style="font-size:3rem;margin-bottom:1rem">🎓</div>
+        <h2 style="font-size:2rem;margin-bottom:.5rem">Choose a Topic</h2>
+        <p style="color:var(--text-muted);max-width:320px;margin:0 auto">Select a subject and topic from the sidebar to watch the lesson and take a quiz.</p>
+      </div>
+    </div>
+
   </main>
 
-</div>
+  <!-- ── Right: Info Panel ── -->
+  <aside class="info-panel">
+    <div class="info-section">
+      <div class="info-section-label">Your Mastery</div>
+      <div class="mastery-ring-wrap">
+        <div class="mastery-ring-val" id="info-mastery-pct">NIL</div>
+        <div class="mastery-ring-lbl" id="info-mastery-lbl">Take a quiz to generate your score</div>
+      </div>
+      <div class="mastery-bar"><div class="mastery-bar-fill" id="info-mastery-bar" style="width:0%"></div></div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-section-label">Score Predictions</div>
+      <div class="pred-mini"><span class="pred-mini-lbl">JAMB Range</span><span class="pred-mini-val" id="info-jamb-pred">—</span></div>
+      <div class="pred-mini"><span class="pred-mini-lbl">WAEC Grade</span><span class="pred-mini-val" id="info-waec-pred">—</span></div>
+      <div class="pred-mini"><span class="pred-mini-lbl">NECO Grade</span><span class="pred-mini-val" id="info-neco-pred">—</span></div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-section-label">SmartPath™ Tips</div>
+      <div class="smartpath-tip"><span class="tip-icon">🎯</span><span>Complete the quiz after every lesson to update your mastery score.</span></div>
+      <div class="smartpath-tip"><span class="tip-icon">📈</span><span>Watch the full video before quizzing — it improves your Commitment score.</span></div>
+      <div class="smartpath-tip"><span class="tip-icon">⚡</span><span>Topics below 60% mastery are your SmartPath™ priority.</span></div>
+    </div>
+
+    <div class="cta-box" id="cta-box">
+      <h4>Unlock All Lessons</h4>
+      <p>Unlimited video masterclasses, quizzes and mock exams.</p>
+      <a href="/index.html#pricing" class="btn btn-primary btn-full btn-sm">Upgrade — ₦1,500/mo</a>
+    </div>
+  </aside>
+
 </div>
 
+<button class="mobile-sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">☰</button>
 <div id="toast"></div>
 
-<script>
-/* ── CONFIG ── */
-const SUPA_URL = 'https://hmfbterdmgoumeeiatji.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtZmJ0ZXJkbWdvdW1lZWlhdGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTAyNzYsImV4cCI6MjA5MTMyNjI3Nn0.JxC-FN5BtBf0keNPqZq8IF-q6A7LMnGoUTkrF3GyEm8';
-
-let sb, currentUser, currentProfile;
-let masteryMap = {}; // topic_id → mastery_level (0.0–1.0)
-let currentSubject = new URLSearchParams(location.search).get('subject') || 'mathematics';
-let currentTopicId = null;
-let quizState = {};
-
-/* ── CURRICULUM ── */
-const CURRICULUM = {
-  mathematics:{
-    topics:[
-      {id:'quadratics',title:'Quadratic Equations',premium:false,
-       notes:'A quadratic equation has the form ax² + bx + c = 0. Three solution methods: factorisation, completing the square, and the quadratic formula. The discriminant b²−4ac tells you the nature of the roots.',
-       formula:'x = (−b ± √(b²−4ac)) / 2a\n\nSum of roots = −b/a  |  Product of roots = c/a',
-       questions:[
-         {q:'Solve x² − 5x + 6 = 0',opts:['x=2, x=3','x=1, x=6','x=−2, x=−3','x=5, x=1'],correct:0,exp:'(x−2)(x−3)=0 → x=2 or x=3.'},
-         {q:'The sum of roots of 2x² + 4x − 6 = 0 is:',opts:['−2','2','3','−3'],correct:0,exp:'Sum = −b/a = −4/2 = −2.'},
-         {q:"Find the discriminant of x² + 2x + 5 = 0",opts:['16','−16','4','−4'],correct:1,exp:'b²−4ac = 4−20 = −16. No real roots — complex roots.'}
-       ]
-      },
-      {id:'algebra',title:'Algebra & Indices',premium:false,
-       notes:'Index laws: aᵐ × aⁿ = aᵐ⁺ⁿ, aᵐ÷aⁿ = aᵐ⁻ⁿ, (aᵐ)ⁿ = aᵐⁿ, a⁰ = 1, a⁻ⁿ = 1/aⁿ. For logarithms: log_a(xy) = log_a(x) + log_a(y).',
-       formula:'aᵐ × aⁿ = aᵐ⁺ⁿ\n(aᵐ)ⁿ = aᵐⁿ\na⁻ⁿ = 1/aⁿ\nlog_a(xy) = log_a x + log_a y',
-       questions:[
-         {q:'Simplify 2³ × 2⁴',opts:['2⁷','2¹²','4⁷','2²'],correct:0,exp:'Add the powers: 3+4=7 → 2⁷.'},
-         {q:'Evaluate (3²)³',opts:['3⁵','3⁶','9³','3⁸'],correct:1,exp:'Multiply powers: 2×3=6 → 3⁶.'},
-         {q:'What is the value of 7⁰?',opts:['0','7','1','−1'],correct:2,exp:'Any non-zero number to the power 0 = 1.'}
-       ]
-      },
-      {id:'trigonometry',title:'Trigonometry',premium:true,
-       notes:'SOH-CAH-TOA: sin θ = Opp/Hyp, cos θ = Adj/Hyp, tan θ = Opp/Adj. Memorise exact values at 0°, 30°, 45°, 60°, 90°. The identity sin²θ + cos²θ = 1 is fundamental.',
-       formula:'sin 30°=½, cos 60°=½, tan 45°=1\nsin 60°=cos 30°=√3/2\nsin²θ + cos²θ = 1',
-       questions:[
-         {q:'What is cos 60°?',opts:['1','½','√3/2','0'],correct:1,exp:'cos 60° = ½ — standard value.'},
-         {q:'Simplify sin²x + cos²x',opts:['2','0','1','sin x'],correct:2,exp:'Pythagorean identity: always equals 1.'},
-         {q:'In a right triangle, tan θ =',opts:['opp/hyp','adj/hyp','opp/adj','hyp/opp'],correct:2,exp:'Tan = Opposite ÷ Adjacent.'}
-       ]
-      },
-      {id:'calculus',title:'Differentiation & Integration',premium:true,
-       notes:'Differentiation: rate of change. If y = xⁿ, then dy/dx = nxⁿ⁻¹. Integration is the reverse — find area under a curve. Always add constant C for indefinite integrals.',
-       formula:'d/dx(xⁿ) = nxⁿ⁻¹\n∫xⁿ dx = xⁿ⁺¹/(n+1) + C\nd/dx(sin x) = cos x\nd/dx(eˣ) = eˣ',
-       questions:[
-         {q:'Differentiate y = 5x³',opts:['15x²','5x²','15x','10x³'],correct:0,exp:'dy/dx = 3×5x² = 15x².'},
-         {q:'∫3x² dx equals:',opts:['6x','x³+C','3x+C','x²+C'],correct:1,exp:'∫3x² = 3x³/3 + C = x³ + C.'},
-         {q:'The gradient of y = 4x − 7 at any point is:',opts:['4','−7','4x','0'],correct:0,exp:'dy/dx = 4 (constant for a linear function).'}
-       ]
-      },
-      {id:'statistics',title:'Statistics & Probability',premium:false,
-       notes:'Mean = Σx/n. Median = middle value when sorted. Mode = most frequent. Range = max − min. Probability of event A = P(A) = favourable outcomes / total outcomes.',
-       formula:'Mean = Σfx / Σf\nMedian: middle value of sorted data\nP(A) = n(A)/n(S)',
-       questions:[
-         {q:'Find the mean of: 4, 7, 13, 16.',opts:['9','10','11','12'],correct:1,exp:'40/4 = 10.'},
-         {q:'The median of 3, 5, 7, 9, 11 is:',opts:['5','7','9','6'],correct:1,exp:'5 sorted values; middle = 3rd = 7.'},
-         {q:'If P(A) = 0.3, find P(not A).',opts:['0.3','0.7','1.3','0'],correct:1,exp:"P(A') = 1 − P(A) = 1 − 0.3 = 0.7."}
-       ]
-      },
-    ]
-  },
-  physics:{
-    topics:[
-      {id:'mechanics',title:"Newton's Laws & Motion",premium:false,
-       notes:"Newton's Laws: 1st — inertia (body stays at rest or uniform motion unless acted on by net force). 2nd — F = ma. 3rd — every action has equal and opposite reaction. SUVAT equations apply to uniform acceleration.",
-       formula:'v = u + at\ns = ut + ½at²\nv² = u² + 2as\nF = ma',
-       questions:[
-         {q:'A 5 kg mass accelerates at 3 m/s². Net force is:',opts:['8 N','15 N','2 N','1.67 N'],correct:1,exp:'F = ma = 5×3 = 15 N.'},
-         {q:'Uniform velocity means acceleration equals:',opts:['Maximum','Minimum','Zero','Constant'],correct:2,exp:'No change in velocity → zero acceleration.'},
-         {q:"Newton's 3rd law is about:",opts:['F=ma','Action & reaction','Inertia','Gravity'],correct:1,exp:'For every action there is an equal and opposite reaction.'}
-       ]
-      },
-      {id:'waves',title:'Waves & Sound',premium:false,
-       notes:'v = fλ where v = wave speed (m/s), f = frequency (Hz), λ = wavelength (m). Period T = 1/f. Transverse waves: oscillation perpendicular to direction. Longitudinal waves: oscillation parallel (e.g. sound).',
-       formula:'v = fλ  |  T = 1/f\nSpeed of sound ≈ 340 m/s in air\nSpeed of light c = 3×10⁸ m/s',
-       questions:[
-         {q:'f = 500 Hz, λ = 0.68 m. Wave speed is:',opts:['340 m/s','500 m/s','0.68 m/s','200 m/s'],correct:0,exp:'v = 500×0.68 = 340 m/s.'},
-         {q:'Sound is a ___ wave.',opts:['Transverse','Longitudinal','Electromagnetic','Standing'],correct:1,exp:'Sound = longitudinal (compression/rarefaction).'},
-         {q:'Frequency is measured in:',opts:['Hertz','Metre','Newton','Watt'],correct:0,exp:'Hz = cycles per second.'}
-       ]
-      },
-      {id:'electricity',title:'Electricity & Circuits',premium:true,
-       notes:"Ohm's Law: V = IR. Power P = IV = I²R = V²/R. Series: same current, voltages add. Parallel: same voltage, currents add. Kirchhoff's laws: sum of currents at a node = 0; sum of EMFs = sum of voltage drops in a loop.",
-       formula:"V = IR  |  P = IV = I²R\nR_series = R₁+R₂+R₃\n1/R_parallel = 1/R₁+1/R₂+1/R₃",
-       questions:[
-         {q:'A 12V battery drives 2 A through a resistor. Resistance is:',opts:['24 Ω','6 Ω','10 Ω','14 Ω'],correct:1,exp:'R = V/I = 12/2 = 6 Ω.'},
-         {q:'Power dissipated by 4 Ω carrying 3 A:',opts:['12 W','36 W','0.75 W','7 W'],correct:1,exp:'P = I²R = 9×4 = 36 W.'},
-         {q:'In parallel, the voltage across each branch is:',opts:['Different','Same','Zero','Maximum'],correct:1,exp:'All parallel branches share the same voltage.'}
-       ]
-      },
-    ]
-  },
-  english:{
-    topics:[
-      {id:'grammar',title:'Grammar & Structure',premium:false,
-       notes:"Subject-verb agreement: singular → singular verb. 'Either/Neither' + singular noun takes singular verb. Collective nouns (team, government) take singular in formal British English. Gerunds act as nouns.",
-       formula:"Neither/Either + singular verb\nCollective nouns → singular verb (formal)\nSubject + Verb + Object (SVO)",
-       questions:[
-         {q:"'Each of the students ___ done their work.'",opts:['have','has','had','were'],correct:1,exp:"'Each' is singular → 'has'."},
-         {q:"Which sentence is grammatically correct?",opts:["The scissors is sharp.","The scissors are sharp.","The news are bad.","The data are wrong."],correct:1,exp:"'Scissors' is always plural."},
-         {q:"A gerund is a verb used as a:",opts:['Adjective','Adverb','Noun','Preposition'],correct:2,exp:"Gerunds end in -ing and function as nouns: 'Swimming is fun.'"}
-       ]
-      },
-      {id:'lexis',title:'Lexis & Structure',premium:false,
-       notes:"Synonyms = words with similar meaning. Antonyms = opposites. Collocations = words that naturally go together. Prefixes and suffixes change meaning and word class. Root words from Latin/Greek are common in JAMB.",
-       formula:"bio=life, geo=earth, phon=sound, graph=write\nauto=self, tele=far, micro=small, macro=large\nanti=against, pro=in favour of",
-       questions:[
-         {q:"A synonym of 'VERBOSE' is:",opts:['Silent','Wordy','Brief','Confused'],correct:1,exp:"Verbose = using too many words."},
-         {q:"The antonym of 'MAGNANIMOUS' is:",opts:['Generous','Brave','Petty','Kind'],correct:2,exp:"Magnanimous = generous; antonym = petty."},
-         {q:"The prefix 'ANTI-' means:",opts:['Before','After','Against','With'],correct:2,exp:"Anti = against (antisocial, antibiotic)."}
-       ]
-      },
-      {id:'oral-english',title:'Oral English',premium:true,
-       notes:"Stress shifts between noun/verb pairs: REcord (noun) vs reCORD (verb). Consonant clusters: /str/, /spr/, /thr/. Minimal pairs differ by one phoneme. JAMB tests: stress, intonation, vowel sounds, consonant sounds.",
-       formula:"Nouns: stress 1st syllable (PROtest, REcord)\nVerbs: stress 2nd syllable (proTEST, reCORD)\nAdjectives: usually 1st syllable",
-       questions:[
-         {q:"In 'PHOTOGRAPHY', primary stress falls on:",opts:['PHO','TO','TOGRA','GRA'],correct:1,exp:"pho-TOG-ra-phy — stress on the second syllable."},
-         {q:"Which word has a silent consonant?",opts:['Phone','Knife','Table','Group'],correct:1,exp:"'kNife' — the k is silent."},
-         {q:"'PERmit' (noun) vs 'perMIT' (verb). The noun stresses the:",opts:['Second syllable','First syllable','Third syllable','Both equally'],correct:1,exp:"Nouns stress first syllable: PERmit."}
-       ]
-      },
-      {id:'comprehension',title:'Comprehension',premium:false,
-       notes:"Read the passage carefully before the questions. Identify the main idea, supporting details, and tone. Vocabulary in context: the meaning of an unfamiliar word can often be inferred from surrounding sentences.",
-       formula:"Main idea: usually in the first or last sentence of a paragraph\nInference: reading between the lines\nTone: look for adjectives and adverbs",
-       questions:[
-         {q:"A 'METAPHOR' is:",opts:['Comparison using like or as','Direct comparison (is/was)','Repetition of sounds','Exaggeration'],correct:1,exp:"Metaphor: 'Life is a journey.' (no like/as). Simile uses like/as."},
-         {q:"The word 'INFER' means:",opts:['To state directly','To deduce from evidence','To summarise','To quote'],correct:1,exp:"Infer = reach a conclusion from indirect evidence."},
-         {q:"A 'THEME' in a passage is:",opts:['The title','The central idea or message','The opening paragraph','The author\'s name'],correct:1,exp:"Theme = the underlying central idea the author conveys throughout."}
-       ]
-      },
-    ]
-  }
-};
-
-/* ── INIT ── */
-function waitForSB(cb) {
-  if (typeof window.supabase!=='undefined'){ cb(); }
-  else{ setTimeout(()=>waitForSB(cb),100); }
-}
-waitForSB(async()=>{
-  sb=window.supabase.createClient(SUPA_URL, SUPA_KEY);
-  const {data:{session}}=await sb.auth.getSession();
-  currentUser=session?.user??null;
-  if (currentUser){
-    const [p,m]=await Promise.all([
-      sb.from('profiles').select('*').eq('id',currentUser.id).single(),
-      sb.from('topic_mastery').select('topic_id,mastery_level').eq('user_id',currentUser.id)
-    ]);
-    currentProfile=p.data;
-    (m.data||[]).forEach(r=>{ masteryMap[r.topic_id]=r.mastery_level; });
-  }
-  setSubject(currentSubject);
-});
-
-/* ── SIDEBAR ── */
-function setSubject(subj) {
-  currentSubject = subj;
-  document.querySelectorAll('.subj-tab').forEach(b=>{
-    b.classList.toggle('active',
-      (subj==='mathematics'&&b.textContent.includes('Math'))||
-      (subj==='physics'&&b.textContent.includes('Physics'))||
-      (subj==='english'&&b.textContent.includes('English'))
-    );
-  });
-  renderTopicList();
-}
-
-function renderTopicList() {
-  const topics = CURRICULUM[currentSubject]?.topics || [];
-  const scroll = document.getElementById('topic-scroll');
-  scroll.innerHTML = topics.map(t=>{
-    const acc = masteryMap[t.id];
-    const dot = acc>=0.70?'var(--green)':acc>=0.40?'var(--gold)':acc>0?'var(--red)':'rgba(12,12,20,.18)';
-    return `<div class="topic-item${currentTopicId===t.id?' active':''}" onclick="openTopic('${t.id}')" role="button" tabindex="0">
-      <div class="ti-left">
-        <div class="mastery-dot" style="background:${dot}"></div>
-        <span class="ti-name">${t.title}</span>
+<!-- Auth Modal -->
+<div id="auth-modal" class="modal-backdrop" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <div class="auth-tabs">
+      <button class="auth-tab-btn active" data-tab="login"  onclick="switchAuthTab('login')">Login</button>
+      <button class="auth-tab-btn"        data-tab="signup" onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+    <div class="auth-panel" data-panel="login">
+      <h2 style="font-size:1.7rem;margin-bottom:1.25rem">Welcome Back</h2>
+      <div class="form-group"><label class="form-label">Email</label><input id="li-email" type="email" class="form-input" placeholder="you@example.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input id="li-password" type="password" class="form-input" placeholder="••••••••"></div>
+      <button id="li-btn" class="btn btn-primary btn-full" style="margin-top:.5rem" onclick="handleLogin(event)">Login →</button>
+      <p style="text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:1rem">No account? <button onclick="switchAuthTab('signup')" style="background:none;border:none;color:var(--blue);cursor:pointer;font-weight:600;font-family:var(--font-body)">Sign up free</button></p>
+    </div>
+    <div class="auth-panel" data-panel="signup" style="display:none">
+      <h2 style="font-size:1.7rem;margin-bottom:1rem">Create Free Account</h2>
+      <div class="form-group"><label class="form-label">Full Name</label><input id="su-name" type="text" class="form-input" placeholder="Your name"></div>
+      <div class="form-group"><label class="form-label">Email</label><input id="su-email" type="email" class="form-input" placeholder="you@example.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input id="su-password" type="password" placeholder="Min. 8 characters" class="form-input"></div>
+      <div class="form-group">
+        <label class="form-label">Exams you're sitting for</label>
+        <div class="exam-checks">
+          <label class="exam-check-label"><input class="su-exam-check" type="checkbox" value="JAMB"      onchange="this.closest('label').classList.toggle('checked',this.checked)"><span>🎓 JAMB</span></label>
+          <label class="exam-check-label"><input class="su-exam-check" type="checkbox" value="WAEC"      onchange="this.closest('label').classList.toggle('checked',this.checked)"><span>📋 WAEC</span></label>
+          <label class="exam-check-label"><input class="su-exam-check" type="checkbox" value="NECO"      onchange="this.closest('label').classList.toggle('checked',this.checked)"><span>📝 NECO</span></label>
+          <label class="exam-check-label"><input class="su-exam-check" type="checkbox" value="Post-UTME" onchange="this.closest('label').classList.toggle('checked',this.checked)"><span>🏫 Post-UTME</span></label>
+        </div>
       </div>
-      <span class="badge ${t.premium?'badge-pro':'badge-free'}">${t.premium?'PRO':'FREE'}</span>
-    </div>`;
-  }).join('');
-}
-
-/* ── OPEN TOPIC ── */
-function openTopic(topicId) {
-  currentTopicId = topicId;
-  const topics = CURRICULUM[currentSubject]?.topics||[];
-  const t = topics.find(x=>x.id===topicId);
-  if (!t) return;
-
-  const isPremiumLocked = t.premium && !currentProfile?.is_premium;
-  const acc = masteryMap[topicId];
-  const accColor = acc>=0.70?'var(--green)':acc>=0.40?'var(--gold-2)':acc>0?'var(--red)':'var(--muted)';
-  const accBg = acc>=0.70?'rgba(22,163,74,.1)':acc>=0.40?'rgba(240,192,64,.12)':acc>0?'rgba(220,38,38,.1)':'rgba(12,12,20,.05)';
-
-  quizState = {idx:0, answered:{}};
-  document.getElementById('empty-state').style.display='none';
-  const tc = document.getElementById('topic-content');
-  tc.style.display='block';
-
-  tc.innerHTML=`
-    <div class="ch">
-      <h2>${t.title}</h2>
-      <div class="ch-meta">
-        <span style="font-size:.8rem;color:var(--muted);text-transform:capitalize">${currentSubject}</span>
-        ${acc!==undefined?`<span class="mastery-chip" style="background:${accBg};color:${accColor}">${Math.round(acc*100)}% Mastery</span>`:''}
-      </div>
-      <div class="ch-actions">
-        <a href="cbt.html?subject=${currentSubject}" class="btn btn-outline btn-sm">📝 Full Mock Exam</a>
-        <a href="dashboard.html" class="btn btn-outline btn-sm">📊 Dashboard</a>
-        ${topics.findIndex(x=>x.id===topicId)<topics.length-1
-          ? `<button class="btn btn-gold btn-sm" onclick="nextTopic()">Next Topic →</button>`:''}
-      </div>
-    </div>
-
-    <!-- VIDEO -->
-    <div class="video-wrap${isPremiumLocked?' locked-parent':''}" onclick="this.querySelector('.play-btn').textContent='⏸'">
-      <div class="play-btn">▶</div>
-      <div class="video-lbl">🎬 ${t.title} — Video Masterclass</div>
-      ${isPremiumLocked?`<div class="lock-overlay">
-        <div style="font-size:2rem;margin-bottom:8px">🔒</div>
-        <h3>Premium Video</h3>
-        <p>Unlock all video masterclasses with Mastery Pro.</p>
-        <a href="index.html#pricing" class="btn btn-gold btn-sm">Unlock — ₦2,500</a>
-      </div>`:''}
-    </div>
-
-    <!-- NOTES -->
-    <div class="notes-card${isPremiumLocked?' relative':''}">
-      <h3>📌 Key Concepts</h3>
-      <p>${t.notes}</p>
-      <h3 style="margin-top:18px">Key Formula</h3>
-      <div class="formula-box">${t.formula.replace(/\n/g,'<br>')}</div>
-      ${isPremiumLocked?`<div class="lock-overlay">
-        <div style="font-size:1.5rem;margin-bottom:8px">🔒</div>
-        <h3>Premium Notes</h3>
-        <p>Full explanations, worked examples, and shortcut formulas.</p>
-        <a href="index.html#pricing" class="btn btn-gold btn-sm">Unlock — ₦2,500</a>
-      </div>`:''}
-    </div>
-
-    <!-- QUIZ -->
-    <div class="quiz-card" id="quiz-card">
-      <h3>Topic Quiz</h3>
-      <div id="quiz-body"></div>
-    </div>
-  `;
-
-  renderTopicList();
-  renderQuiz(t);
-}
-
-/* ── QUIZ ── */
-function renderQuiz(t) {
-  const body=document.getElementById('quiz-body');
-  if (!body) return;
-  const qs=t.questions;
-  const i=quizState.idx;
-
-  if (i>=qs.length) {
-    const cor=Object.values(quizState.answered).filter(Boolean).length;
-    body.innerHTML=`
-      <div style="text-align:center;padding:20px 0">
-        <div style="font-size:2rem;margin-bottom:8px">${cor===qs.length?'🎉':'📈'}</div>
-        <div style="font-family:var(--ff-h);font-size:1.4rem;font-weight:800">${cor}/${qs.length} Correct</div>
-        <p style="color:var(--muted);font-size:.85rem;margin:8px 0 18px">${cor===qs.length?'Perfect! You nailed it.':cor>=qs.length*0.6?'Good effort. Review the wrong ones.':'Keep practising — drill mode will help.'}</p>
-        <button class="btn btn-gold btn-sm" onclick="retryQuiz()">Retry Quiz</button>
-        <a href="cbt.html?subject=${currentSubject}" class="btn btn-outline btn-sm" style="margin-left:8px">Full Exam →</a>
-      </div>`;
-    if (currentUser && sb) saveQuizMastery(t.id, cor, qs.length);
-    return;
-  }
-
-  const q=qs[i];
-  body.innerHTML=`
-    <div class="quiz-prog">Question ${i+1} of ${qs.length}</div>
-    <div class="quiz-q">${q.q}</div>
-    <div class="quiz-opts" id="q-opts">
-      ${q.opts.map((o,idx)=>`<button class="quiz-opt" onclick="answerQuiz(${idx})">${o}</button>`).join('')}
-    </div>
-    <div class="quiz-exp" id="q-exp"></div>
-    <div class="quiz-nav">
-      <span style="font-size:.75rem;color:var(--muted)">${Object.keys(quizState.answered).length} answered</span>
-      <button class="btn btn-gold btn-sm" id="q-next" style="display:none" onclick="nextQuizQ()">Next →</button>
-    </div>
-  `;
-}
-
-function answerQuiz(optIdx) {
-  const topics=CURRICULUM[currentSubject]?.topics||[];
-  const t=topics.find(x=>x.id===currentTopicId);
-  const q=t.questions[quizState.idx];
-  quizState.answered[quizState.idx]=(optIdx===q.correct);
-
-  document.querySelectorAll('.quiz-opt').forEach((b,i)=>{
-    b.disabled=true;
-    if (i===q.correct) b.classList.add('correct');
-    else if (i===optIdx) b.classList.add('wrong');
-  });
-  const exp=document.getElementById('q-exp');
-  exp.textContent='💡 '+q.exp; exp.classList.add('show');
-  document.getElementById('q-next').style.display='inline-flex';
-}
-
-function nextQuizQ(){
-  quizState.idx++;
-  const t=CURRICULUM[currentSubject]?.topics?.find(x=>x.id===currentTopicId);
-  renderQuiz(t);
-}
-function retryQuiz(){
-  quizState={idx:0,answered:{}};
-  const t=CURRICULUM[currentSubject]?.topics?.find(x=>x.id===currentTopicId);
-  renderQuiz(t);
-}
-
-async function saveQuizMastery(topicId, correct, total){
-  const acc=Math.round(correct/total*100);
-  const mastery=parseFloat((acc/100*0.7 + Math.min(total/50,1)*0.3).toFixed(3));
-  await sb.from('topic_mastery').upsert({
-    user_id:currentUser.id, topic_id:topicId,
-    accuracy_avg:acc,
-    questions_solved:total,
-    mastery_level:mastery,
-    last_studied:new Date().toISOString()
-  },{onConflict:'user_id,topic_id'});
-  masteryMap[topicId]=mastery;
-  renderTopicList();
-}
-
-function nextTopic(){
-  const topics=CURRICULUM[currentSubject]?.topics||[];
-  const idx=topics.findIndex(t=>t.id===currentTopicId);
-  if (idx<topics.length-1) openTopic(topics[idx+1].id);
-}
-
-/* ── TOAST ── */
-function toast(msg,ms=3000){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),ms);
-}
-
-/* ── SUBSCRIPTION EXPIRY CHECK ── */
-function checkSubscriptionExpiry(profile){
-  if(!profile?.is_premium) return;
-  const expiry=profile.subscription_expiry?new Date(profile.subscription_expiry):null;
-  if(expiry && new Date()>expiry){
-    document.getElementById('defaulter-banner').classList.add('show');
-  }
-}
-</script>
-
-<!-- AUTH MODAL -->
-<div class="modal-backdrop" id="auth-modal">
-  <div class="modal">
-    <div class="modal-head">
-      <h2 id="modal-title">Welcome Back</h2>
-      <button class="modal-close-btn" onclick="document.getElementById('auth-modal').classList.remove('open')">✕</button>
-    </div>
-    <div class="modal-tab-row">
-      <button class="modal-tab-btn active" id="tab-login" onclick="switchModalTab('login')">Login</button>
-      <button class="modal-tab-btn" id="tab-signup" onclick="switchModalTab('signup')">Sign Up</button>
-    </div>
-    <div class="modal-auth-msg error" id="m-error"></div>
-    <div class="modal-auth-msg success" id="m-success"></div>
-    <div id="m-login">
-      <div class="modal-form-group"><label>Email</label><input type="email" id="m-l-email" placeholder="you@example.com" autocomplete="email"></div>
-      <div class="modal-form-group"><label>Password</label><input type="password" id="m-l-pass" placeholder="••••••••" autocomplete="current-password"></div>
-      <button class="modal-submit-btn" onclick="doLogin()">Login →</button>
-    </div>
-    <div id="m-signup" style="display:none">
-      <div class="modal-form-group"><label>Full Name</label><input type="text" id="m-s-name" placeholder="Amaka Obi" autocomplete="name"></div>
-      <div class="modal-form-group"><label>Email</label><input type="email" id="m-s-email" placeholder="you@example.com" autocomplete="email"></div>
-      <div class="modal-form-group"><label>Password</label><input type="password" id="m-s-pass" placeholder="Min 6 characters" autocomplete="new-password"></div>
-      <button class="modal-submit-btn" onclick="doSignup()">Create Free Account →</button>
+      <div class="form-group"><label class="form-label">Exam Month</label><select id="su-exam-month" class="form-select"><option value="">— Select month —</option></select></div>
+      <div class="form-group"><label class="form-label">Target JAMB Score</label>
+        <select id="su-target" class="form-select"><option value="200">200+</option><option value="250" selected>250+</option><option value="280">280+</option><option value="300">300+</option><option value="320">320+</option></select></div>
+      <button id="su-btn" class="btn btn-primary btn-full" onclick="handleSignup(event)">Create Free Account →</button>
+      <p style="text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:.75rem">Have an account? <button onclick="switchAuthTab('login')" style="background:none;border:none;color:var(--blue);cursor:pointer;font-weight:600;font-family:var(--font-body)">Log in</button></p>
     </div>
   </div>
 </div>
 
-<div id="toast"></div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/ai-engine.js"></script>
 <script>
-const _SURL='https://hmfbterdmgoumeeiatji.supabase.co';
-const _SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtZmJ0ZXJkbWdvdW1lZWlhdGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTAyNzYsImV4cCI6MjA5MTMyNjI3Nn0.JxC-FN5BtBf0keNPqZq8IF-q6A7LMnGoUTkrF3GyEm8';
-let _sbM;
-function getSBM(){if(!_sbM&&typeof window.supabase!=='undefined')_sbM=window.supabase.createClient(_SURL,_SKEY);return _sbM;}
-function openAuthModal(tab){document.getElementById('auth-modal').classList.add('open');switchModalTab(tab||'login');}
-function switchModalTab(t){
-  document.getElementById('m-login').style.display=t==='login'?'block':'none';
-  document.getElementById('m-signup').style.display=t==='signup'?'block':'none';
-  document.getElementById('tab-login').classList.toggle('active',t==='login');
-  document.getElementById('tab-signup').classList.toggle('active',t==='signup');
-  document.getElementById('modal-title').textContent=t==='login'?'Welcome Back':'Create Account';
-  ['m-error','m-success'].forEach(id=>{const e=document.getElementById(id);e.classList.remove('visible');e.textContent='';});
-}
-function showMMsg(type,msg){
-  ['m-error','m-success'].forEach(id=>{const e=document.getElementById(id);e.classList.remove('visible');e.textContent='';});
-  const el=document.getElementById('m-'+type);el.textContent=msg;el.classList.add('visible');
-}
-async function doLogin(){
-  const sb=getSBM();if(!sb)return;
-  const email=document.getElementById('m-l-email').value.trim();
-  const pass=document.getElementById('m-l-pass').value;
-  if(!email||!pass){showMMsg('error','Please fill all fields.');return;}
-  showMMsg('success','Logging in…');
-  const{error}=await sb.auth.signInWithPassword({email,password:pass});
-  if(error){showMMsg('error',error.message);return;}
-  showMMsg('success','Logged in! ✅ Refreshing…');
-  setTimeout(()=>location.reload(),900);
-}
-async function doSignup(){
-  const sb=getSBM();if(!sb)return;
-  const name=document.getElementById('m-s-name').value.trim();
-  const email=document.getElementById('m-s-email').value.trim();
-  const pass=document.getElementById('m-s-pass').value;
-  if(!name||!email||!pass){showMMsg('error','Please fill all fields.');return;}
-  if(pass.length<6){showMMsg('error','Password must be 6+ characters.');return;}
-  showMMsg('success','Creating account…');
-  const{data,error}=await sb.auth.signUp({email,password:pass});
-  if(error){showMMsg('error',error.message);return;}
-  if(data?.user){
-    await sb.from('profiles').insert({id:data.user.id,full_name:name,is_premium:false,subscription_status:'inactive',target_jamb_score:290,current_streak:0,total_xp:0,badges:[]});
-    const TOPICS=['quadratics','algebra','trigonometry','calculus','statistics','geometry','mechanics','waves','electricity','optics','thermodynamics','comprehension','lexis','oral-english','grammar'];
-    await sb.from('topic_mastery').insert(TOPICS.map(t=>({user_id:data.user.id,topic_id:t,accuracy_avg:0,speed_avg:0,questions_solved:0,mastery_level:0})));
-  }
-  showMMsg('success','Account created! Check your email, then log in.');
-}
-document.getElementById('auth-modal').addEventListener('click',e=>{if(e.target===document.getElementById('auth-modal'))document.getElementById('auth-modal').classList.remove('open');});
-// Run expiry check after profile loads
+// ─────────────────────────────────────────────────────────────
+//  CLASSROOM SCRIPT  (inline)
+//
+//  Grade 1/2/3 logic is INTERNAL.
+//  The algorithm reads currentProfile.current_skill_level to
+//  decide which grade's content to load. The student sees only
+//  the lesson content — never a grade label or grade number.
+// ─────────────────────────────────────────────────────────────
+
+const CURRICULUM = {
+  mathematics: {
+    label:'📐 Mathematics',
+    topics:[
+      {
+        id:'algebra',label:'Algebra',free:true,
+        grades:{
+          3:{description:'Master quadratic equations, factorisation, and algebraic expressions at exam level.',video_url:'https://www.youtube.com/embed/qBfc57x_RSk',
+            concepts:[{title:'Quadratic Formula',body:'x = (−b ± √(b²−4ac)) / 2a'},{title:'Factorisation',body:'Find two numbers: multiply → ac, add → b'},{title:'Sum of Roots',body:'−b/a'},{title:'Product of Roots',body:'c/a'}],
+            formula:'ax² + bx + c = 0  →  x = (−b ± √(b²−4ac)) / 2a\nSum = −b/a   |   Product = c/a'},
+          2:{description:'Step-by-step algebra with extra examples and simpler language.',video_url:'https://www.youtube.com/embed/qBfc57x_RSk',
+            concepts:[{title:'What is a Quadratic?',body:'An equation where x² is the highest power: ax² + bx + c = 0'},{title:'Trial Method',body:'Find two numbers that multiply → c and add → b'},{title:'Check Answer',body:'Substitute back to verify'}],
+            formula:'x² + bx + c = 0\nFind two numbers: multiply → c,  add → b'},
+          1:{description:'Absolute basics of algebra — variables, expressions and simple equations from scratch.',video_url:'https://www.youtube.com/embed/qBfc57x_RSk',
+            concepts:[{title:'What is a Variable?',body:'A letter like x that stands for an unknown number'},{title:'Like Terms',body:'2x + 3x = 5x (same letter, can be combined)'},{title:'Simple Equations',body:'2x = 10 → divide both sides by 2 → x = 5'}],
+            formula:'2x + 3 = 11\nStep 1: 2x = 11 − 3 = 8\nStep 2: x = 8 ÷ 2 = 4'},
+        },
+        quiz:[
+          {q:'Solve: x² − 5x + 6 = 0',opts:['x = 2 or 3','x = 1 or 6','x = −2 or −3','x = 0 or 5'],ans:0,explanation:'Factor: (x−2)(x−3)=0 → x=2 or x=3.'},
+          {q:'If f(x) = x² + 2x, find f(3).',opts:['9','15','12','11'],ans:1,explanation:'f(3) = 9 + 6 = 15.'},
+          {q:'Sum of roots of 2x² − 8x + 6 = 0:',opts:['4','3','−4','−3'],ans:0,explanation:'Sum = −b/a = 8/2 = 4.'},
+        ],
+      },
+      {
+        id:'number-bases',label:'Number Bases',free:true,
+        grades:{
+          3:{description:'Convert between binary, octal and decimal. Perform arithmetic in different bases.',video_url:'https://www.youtube.com/embed/a2FpnU9NjLw',
+            concepts:[{title:'Binary (Base 2)',body:'Only 0 and 1. Each place is a power of 2.'},{title:'Octal (Base 8)',body:'Digits 0–7. Each place is a power of 8.'},{title:'Conversion',body:'Divide by base; remainders (bottom to top) = answer.'}],
+            formula:'25₁₀ to binary:\n25÷2=12r1 | 12÷2=6r0 | 6÷2=3r0 | 3÷2=1r1 | 1÷2=0r1\nResult (bottom→top): 11001₂'},
+          2:{description:'Number bases made simple — step by step with visual examples.',video_url:'https://www.youtube.com/embed/a2FpnU9NjLw',
+            concepts:[{title:'Place Value',body:'In 1011₂: 1×8 + 0×4 + 1×2 + 1×1 = 11'},{title:'Counting Pattern',body:'0,1,10,11,100,101,110… (only use 0 and 1)'}],
+            formula:'1011₂ = (1×2³)+(0×2²)+(1×2¹)+(1×2⁰) = 8+0+2+1 = 11₁₀'},
+          1:{description:'What is a "base"? Perfect starting point for total beginners.',video_url:'https://www.youtube.com/embed/a2FpnU9NjLw',
+            concepts:[{title:'What is Base 10?',body:'Our normal numbers use 10 digits: 0,1,2,3,4,5,6,7,8,9'},{title:'What is Base 2?',body:'Computers use only 2 digits: 0 and 1'}],
+            formula:'Base 10: 234 = (2×100)+(3×10)+(4×1)\nBase 2:  101 = (1×4)+(0×2)+(1×1) = 5₁₀'},
+        },
+        quiz:[
+          {q:'Convert 1101₂ to base 10.',opts:['11','13','12','15'],ans:1,explanation:'1×8+1×4+0×2+1×1=13.'},
+          {q:'12₁₀ in binary:',opts:['1010','1100','1110','1001'],ans:1,explanation:'12=8+4=1100₂.'},
+          {q:'111₂ + 001₂ =',opts:['1000₂','1001₂','110₂','1010₂'],ans:0,explanation:'7+1=8=1000₂.'},
+        ],
+      },
+      {id:'calculus',label:'Calculus',free:false,grades:{3:{description:'Differentiation and integration — exam-level techniques.',video_url:'',concepts:[{title:'Differentiation Rule',body:'d/dx(xⁿ) = nxⁿ⁻¹'},{title:'Integration Rule',body:'∫xⁿ dx = xⁿ⁺¹/(n+1) + C'},{title:'Chain Rule',body:'dy/dx = (dy/du)(du/dx)'}],formula:'d/dx(axⁿ) = naxⁿ⁻¹\n∫axⁿ dx = axⁿ⁺¹/(n+1) + C'},2:{description:'',video_url:'',concepts:[],formula:''},1:{description:'',video_url:'',concepts:[],formula:''}},quiz:[]},
+      {id:'trigonometry',label:'Trigonometry',free:false,grades:{3:{description:'Sin, cos, tan, identities and triangle applications.',video_url:'',concepts:[{title:'SOH CAH TOA',body:'Sin=Opp/Hyp | Cos=Adj/Hyp | Tan=Opp/Adj'},{title:'Pythagorean Identity',body:'sin²θ + cos²θ = 1'}],formula:'sin 30°=½ | cos 60°=½ | tan 45°=1'},2:{description:'',video_url:'',concepts:[],formula:''},1:{description:'',video_url:'',concepts:[],formula:''}},quiz:[]},
+      {id:'geometry',label:'Geometry',free:false,grades:{3:{description:'Circles, polygons and coordinate geometry.',video_url:'',concepts:[],formula:''},2:{description:'',video_url:'',concepts:[],formula:''},1:{description:'',video_url:'',concepts:[],formula:''}},quiz:[]},
+    ],
+  },
+  physics:{
+    label:'⚛️ Physics',
+    topics:[
+      {
+        id:'mechanics',label:'Mechanics',free:true,
+        grades:{
+          3:{description:"Newton's laws, motion, energy and momentum at exam level.",video_url:'',
+            concepts:[{title:"Newton's 2nd Law",body:'F = ma'},{title:'Work Done',body:'W = Fd'},{title:'Kinetic Energy',body:'KE = ½mv²'},{title:'Equations of Motion',body:'v=u+at | s=ut+½at² | v²=u²+2as'}],
+            formula:'F = ma\nKE = ½mv²\nPE = mgh\nW = Fd'},
+          2:{description:'Physics with extra worked examples and slower explanations.',video_url:'',concepts:[{title:'What is Force?',body:'A push or pull measured in Newtons (N)'},{title:'Mass vs Weight',body:'Mass (kg) stays constant. Weight (N) = mass × gravity.'}],formula:'F = ma\na = F ÷ m\nm = F ÷ a'},
+          1:{description:'Absolute basics — what is physics and why it matters.',video_url:'',concepts:[{title:'Distance vs Displacement',body:'Distance = total path length. Displacement = straight line from start to end.'},{title:'Speed vs Velocity',body:'Speed = distance/time. Velocity = displacement/time (has direction).'}],formula:'Speed = Distance ÷ Time\nTime = Distance ÷ Speed'},
+        },
+        quiz:[
+          {q:'F=ma. F=30N, m=6kg. Find a.',opts:['5 m/s²','6 m/s²','3 m/s²','10 m/s²'],ans:0,explanation:'a=F/m=30/6=5 m/s².'},
+          {q:'Unit of power:',opts:['Joule','Newton','Watt','Pascal'],ans:2,explanation:'Watts (W).'},
+          {q:'KE of 2kg at 3m/s:',opts:['6J','9J','3J','18J'],ans:1,explanation:'KE=½×2×9=9J.'},
+        ],
+      },
+      {id:'waves',label:'Waves & Optics',free:false,grades:{3:{description:'Wave properties, sound, light and electromagnetic spectrum.',video_url:'',concepts:[{title:'Wave Speed',body:'v = fλ (speed = frequency × wavelength)'},{title:'Frequency',body:'f = 1/T'}],formula:'v = fλ\nf = 1/T'},2:{description:'',video_url:'',concepts:[],formula:''},1:{description:'',video_url:'',concepts:[],formula:''}},quiz:[]},
+      {id:'electricity',label:'Electricity',free:false,grades:{3:{description:"Ohm's law, circuits, resistance and electrical energy.",video_url:'',concepts:[{title:"Ohm's Law",body:'V = IR'},{title:'Power',body:'P = IV = I²R = V²/R'}],formula:"V = IR\nP = IV\nResistors in series: R = R₁+R₂\nResistors in parallel: 1/R = 1/R₁+1/R₂"},2:{description:'',video_url:'',concepts:[],formula:''},1:{description:'',video_url:'',concepts:[],formula:''}},quiz:[]},
+    ],
+  },
+  english:{
+    label:'📖 English Language',
+    topics:[
+      {
+        id:'comprehension',label:'Comprehension',free:true,
+        grades:{
+          3:{description:'Reading comprehension strategies and vocabulary in context.',video_url:'',
+            concepts:[{title:'Skimming',body:'Read quickly to get the main idea'},{title:'Scanning',body:'Look for specific keywords or information'},{title:'Inference',body:'Deduce meaning from context, not just stated facts'},{title:'Tone',body:"Identify the author's attitude from word choice"}],
+            formula:'Step 1: Read question first\nStep 2: Skim passage\nStep 3: Find specific evidence\nStep 4: Answer in own words'},
+          2:{description:'Comprehension with clearer strategies and more practice passages.',video_url:'',concepts:[{title:'Main Idea',body:'What the whole passage is mainly about (usually in the first paragraph)'},{title:'Supporting Details',body:'Facts and examples the author uses to prove the main idea'}],formula:'Before reading: scan the questions\nWhile reading: underline key words\nAfter reading: answer in your own words'},
+          1:{description:'Reading basics — understanding paragraphs and simple passages.',video_url:'',concepts:[{title:'What is a Paragraph?',body:'A group of sentences about one main idea, starting with a topic sentence'},{title:'Context Clues',body:'Use surrounding words to guess the meaning of unfamiliar words'}],formula:'Unknown word → read the sentence again → look for clues before and after the word'},
+        },
+        quiz:[
+          {q:'A word that means the same as another:',opts:['Antonym','Synonym','Homophone','Idiom'],ans:1,explanation:'Synonym = same meaning (e.g. happy/glad).'},
+          {q:'Noun in: "The tall building collapsed."',opts:['tall','building','collapsed','The'],ans:1,explanation:'"Building" names a thing = noun.'},
+          {q:'"Neither the boys nor the girl ___ present."',opts:['were','are','was','been'],ans:2,explanation:'Verb agrees with nearest subject ("girl" = singular → "was").'},
+        ],
+      },
+      {id:'lexis',label:'Lexis & Structure',free:false,grades:{3:{description:'Parts of speech, sentence structure and register.',video_url:'',concepts:[{title:'Nouns',body:'Person, place, thing or idea'},{title:'Verbs',body:'Action or state words'},{title:'Adjectives',body:'Describe nouns'},{title:'Adverbs',body:'Modify verbs, adjectives or other adverbs'}],formula:'Subject + Verb + Object\n(The student [S] reads [V] the book [O])'},2:{description:'',video_url:'',concepts:[],formula:''},1:{description:'',video_url:'',concepts:[],formula:''}},quiz:[]},
+      {id:'oral-english',label:'Oral English',free:false,grades:{3:{description:'Phonetics, stress patterns and intonation.',video_url:'',concepts:[{title:'Word Stress',body:'The syllable that is said louder: PHOtograph, phoTOgraphy'},{title:'Vowel Sounds',body:'/ɪ/ (bit) vs /iː/ (beat) — different sounds, different meanings'}],formula:'Identify stress: say word aloud, which syllable feels stronger?'},2:{description:'',video_url:'',concepts:[],formula:''},1:{description:'',video_url:'',concepts:[],formula:''}},quiz:[]},
+    ],
+  },
+  chemistry:{
+    label:'🧪 Chemistry',
+    topics:[
+      {
+        id:'periodic-table',label:'Periodic Table',free:true,
+        grades:{
+          3:{description:'Trends, groups, periods and electronic configuration.',video_url:'',
+            concepts:[{title:'Groups (Columns)',body:'Same valence electrons → similar chemical properties'},{title:'Periods (Rows)',body:'Period number = number of electron shells'},{title:'Atomic Radius Trend',body:'Decreases across a period; increases down a group'},{title:'Electronegativity',body:'Increases across period. Fluorine is highest.'}],
+            formula:'Atomic Number = Protons = Electrons\nMass Number = Protons + Neutrons\nNeutrons = Mass Number − Atomic Number'},
+          2:{description:'Periodic table with clearer explanations and extra examples.',video_url:'',concepts:[{title:'Metals vs Non-Metals',body:'Metals (left/centre): shiny, conduct electricity. Non-metals (right): dull, poor conductors.'},{title:'Valence Electrons',body:'Electrons in the outermost shell. Group I = 1, Group II = 2, etc.'}],formula:'Group I: 1 valence electron → very reactive\nGroup VIII: 8 valence electrons → stable (noble gases)'},
+          1:{description:'What is the periodic table and why does it matter? Absolute basics.',video_url:'',concepts:[{title:'What is an Element?',body:'A pure substance made of one type of atom only. E.g. Gold (Au), Carbon (C)'},{title:'The Periodic Table',body:'A chart of all known elements, arranged by atomic number'}],formula:'Atomic Number = number of protons (and electrons in neutral atom)'},
+        },
+        quiz:[
+          {q:'How many groups in the modern periodic table?',opts:['7','8','16','18'],ans:3,explanation:'18 groups.'},
+          {q:'Elements in same group have same:',opts:['Protons','Neutrons','Valence electrons','Mass numbers'],ans:2,explanation:'Same valence electrons → same group.'},
+          {q:'Smallest atom in Period 2:',opts:['Li','Be','Ne','F'],ans:3,explanation:'Atomic radius decreases across period. F is smallest.'},
+        ],
+      },
+      {id:'reactions',label:'Chemical Reactions',free:false,grades:{3:{description:'Types of reactions, energy changes and reaction rates.',video_url:'',concepts:[{title:'Exothermic',body:'Releases energy (heat). Products have less energy than reactants.'},{title:'Endothermic',body:'Absorbs energy. Products have more energy than reactants.'},{title:'Rate Factors',body:'Temperature, concentration, surface area, catalyst'}],formula:'Rate ∝ Temperature\nRate ∝ Concentration\nRate ∝ Surface Area'},2:{description:'',video_url:'',concepts:[],formula:''},1:{description:'',video_url:'',concepts:[],formula:''}},quiz:[]},
+      {id:'organic-chem',label:'Organic Chemistry',free:false,grades:{3:{description:'Alkanes, alkenes, alcohols, functional groups and IUPAC naming.',video_url:'',concepts:[{title:'Alkanes',body:'CₙH₂ₙ₊₂ — saturated, single bonds only'},{title:'Alkenes',body:'CₙH₂ₙ — one C=C double bond'},{title:'Alcohols',body:'Contain −OH group'}],formula:'Alkanes: CₙH₂ₙ₊₂\nAlkenes: CₙH₂ₙ\nAlkynes: CₙH₂ₙ₋₂'},2:{description:'',video_url:'',concepts:[],formula:''},1:{description:'',video_url:'',concepts:[],formula:''}},quiz:[]},
+    ],
+  },
+  biology:{
+    label:'🌿 Biology',
+    topics:[
+      {
+        id:'cell-biology',label:'Cell Biology',free:true,
+        grades:{
+          3:{description:'Cell structure, organelles, osmosis and cell division.',video_url:'',
+            concepts:[{title:'Mitochondria',body:'ATP production — energy for the cell'},{title:'Nucleus',body:'Contains DNA, controls cell activities'},{title:'Cell Membrane',body:'Semi-permeable — controls entry/exit'},{title:'Ribosome',body:'Site of protein synthesis'}],
+            formula:'Osmosis: water moves HIGH water potential → LOW water potential\nthrough a semi-permeable membrane'},
+          2:{description:'Cell biology with clearer explanations and diagrams.',video_url:'',concepts:[{title:'Animal vs Plant Cell',body:'Plant cells have: cell wall, chloroplasts, large vacuole. Animal cells do not.'},{title:'Diffusion',body:'Movement of particles from high → low concentration (no energy needed)'}],formula:'Diffusion: high concentration → low concentration\nOsmosis: dilute solution → concentrated solution (water only)'},
+          1:{description:'What is a cell? The basics of life explained simply.',video_url:'',concepts:[{title:'What is a Cell?',body:'The smallest unit of life. Every living thing is made of cells.'},{title:'Two Types',body:'Animal cells (no wall) and Plant cells (have wall and chloroplasts)'}],formula:'Smallest unit of life = Cell\nCells → Tissues → Organs → Organ Systems → Organism'},
+        },
+        quiz:[
+          {q:'Which organelle controls cell activities?',opts:['Ribosome','Mitochondria','Nucleus','Vacuole'],ans:2,explanation:'Nucleus contains DNA.'},
+          {q:'Cell division producing gametes:',opts:['Mitosis','Meiosis','Binary fission','Budding'],ans:1,explanation:'Meiosis produces sex cells.'},
+          {q:'NOT found in plant cells:',opts:['Cell wall','Chloroplast','Centriole','Vacuole'],ans:2,explanation:'Centrioles are in animal cells.'},
+        ],
+      },
+    ],
+  },
+};
+
+/* ── State ─────────────────────────────────────────────────── */
+const state={subject:'mathematics',topicIdx:0,masteryCache:{},_quizQuestions:[]};
+
+/* ── Init ──────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded',()=>{
-  const check=setInterval(()=>{if(typeof currentProfile!=='undefined'){checkSubscriptionExpiry(currentProfile);clearInterval(check);}},300);
+  const p=new URLSearchParams(location.search);
+  const s=p.get('subject'),t=p.get('topic');
+  if(s&&CURRICULUM[s])selectSubject(s,t);
+  else selectSubject('mathematics');
+
+  const sel=document.getElementById('su-exam-month');
+  if(sel){const months=['January','February','March','April','May','June','July','August','September','October','November','December'],now=new Date();for(let i=1;i<=18;i++){const d=new Date(now.getFullYear(),now.getMonth()+i,1),o=document.createElement('option');o.value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;o.textContent=`${months[d.getMonth()]} ${d.getFullYear()}`;sel.appendChild(o);}}
+
+  // Wait for auth.js to load profile, then load mastery data
+  const poll=setInterval(()=>{
+    if(typeof sb!=='undefined'&&typeof currentUser!=='undefined'){
+      clearInterval(poll);
+      if(currentUser){loadMasteryData();updateInfoPanel();}
+    }
+  },200);
 });
+
+/* ── Subject select ─────────────────────────────────────────── */
+function selectSubject(subject,topicId){
+  state.subject=subject;
+  document.querySelectorAll('.subject-tab').forEach(t=>t.classList.toggle('active',t.dataset.subject===subject));
+  renderTopicList(topicId);
+  if(topicId){const idx=CURRICULUM[subject]?.topics.findIndex(t=>t.id===topicId);if(idx>=0)selectTopic(idx);}
+}
+
+function renderTopicList(selectId){
+  const subj=CURRICULUM[state.subject];if(!subj)return;
+  const list=document.getElementById('topic-list');list.innerHTML='';
+  subj.topics.forEach((topic,idx)=>{
+    const locked=!topic.free&&!currentProfile?.is_premium;
+    const mastery=state.masteryCache[topic.id];
+    const item=document.createElement('div');
+    item.className='topic-item'+(idx===state.topicIdx?' active':'');
+    item.onclick=()=>selectTopic(idx);
+    item.innerHTML=`<span>${topic.label}</span>${locked?'<span class="topic-lock">🔒</span>':''}`;
+    list.appendChild(item);
+    if(mastery?.accuracy_avg!=null){const bar=document.createElement('div');bar.className='topic-mastery-bar';bar.innerHTML=`<div class="topic-mastery-fill" style="width:${mastery.accuracy_avg}%"></div>`;list.appendChild(bar);}
+  });
+}
+
+/* ── Topic select ───────────────────────────────────────────── */
+function selectTopic(idx){
+  const subj=CURRICULUM[state.subject],topic=subj?.topics[idx];if(!topic)return;
+  state.topicIdx=idx;
+  const locked=!topic.free&&!currentProfile?.is_premium;
+  document.querySelectorAll('.topic-item').forEach((el,i)=>el.classList.toggle('active',i===idx));
+  document.getElementById('nav-lesson-title').textContent=`${subj.label} › ${topic.label}`;
+  showContent(topic,locked);
+  if(typeof trackAction==='function')trackAction('video_started',{subject:state.subject,topic:topic.id});
+  updateInfoPanel(topic.id);
+  document.getElementById('topic-sidebar').classList.remove('open');
+}
+
+function showContent(topic,isLocked){
+  // Grade is read silently from profile — student never sees the grade number
+  const grade=currentProfile?.current_skill_level||3;
+  const gradeData=topic.grades[grade]||topic.grades[3];
+
+  document.getElementById('empty-state').style.display='none';
+  document.getElementById('lesson-content').style.display='';
+  document.getElementById('quiz-section').style.display=topic.quiz?.length?'':'none';
+
+  document.getElementById('lesson-title').textContent=topic.label;
+  document.getElementById('lesson-access-badge').textContent=topic.free?'Free Preview':'Premium';
+  document.getElementById('lesson-access-badge').className=`lesson-badge ${topic.free?'free':'premium'}`;
+  document.getElementById('lesson-description').textContent=gradeData.description||'Lesson coming soon.';
+
+  // Video
+  const container=document.getElementById('video-container');
+  container.querySelectorAll('iframe,.video-lock-overlay').forEach(el=>el.remove());
+  if(isLocked){
+    const ov=document.createElement('div');ov.className='video-lock-overlay';
+    ov.innerHTML=`<div class="lock-icon">🔒</div><h3>Premium Lesson</h3><p>Unlock all video masterclasses for just ₦1,500/month.</p><button class="btn btn-primary" onclick="openAuthModal('login')">Unlock Full Access →</button>`;
+    container.appendChild(ov);document.getElementById('video-placeholder').style.display='flex';
+  }else if(gradeData.video_url){
+    document.getElementById('video-placeholder').style.display='none';
+    const iframe=document.createElement('iframe');iframe.className='video-frame';iframe.src=gradeData.video_url;iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';iframe.allowFullscreen=true;
+    container.appendChild(iframe);
+    // Notify ai-engine when lesson iframe fires completion message
+    window.onmessage=e=>{if(e.data?.type==='lesson_completed'){if(typeof addXP==='function')addXP(15,'Lesson completed');if(typeof trackAction==='function')trackAction('video_completed',{topic:e.data.topic||topic.id});}};
+  }else{
+    document.getElementById('video-placeholder').innerHTML='<div class="play-icon">🎬</div><p>Video lesson coming soon for this topic.</p><p style="font-size:.8rem;margin-top:.25rem">Review the key concepts below while you wait.</p>';
+    document.getElementById('video-placeholder').style.display='flex';
+  }
+
+  // Concepts
+  const grid=document.getElementById('concepts-grid');grid.innerHTML='';
+  (gradeData.concepts||[]).forEach(c=>{const card=document.createElement('div');card.className='concept-card';card.innerHTML=`<strong>${c.title}</strong>${c.body}`;grid.appendChild(card);});
+  if(!gradeData.concepts?.length)grid.innerHTML='<p style="color:var(--text-muted);font-size:.85rem">Key concepts coming soon.</p>';
+
+  // Formula
+  document.getElementById('formula-text').textContent=gradeData.formula||'—';
+
+  // Quiz
+  if(topic.quiz?.length)renderQuiz(topic.quiz);
+}
+
+/* ── Quiz ───────────────────────────────────────────────────── */
+function renderQuiz(questions){
+  state._quizQuestions=questions;
+  state._quizQ=0;state._quizCorrect=0;
+  document.getElementById('quiz-complete').classList.remove('show');
+  document.getElementById('quiz-q-text').style.display='';
+  document.getElementById('quiz-options').style.display='';
+  document.getElementById('quiz-next-btn').style.display='';
+  renderQuizQ();
+}
+function renderQuizQ(){
+  const questions=state._quizQuestions,idx=state._quizQ,total=questions.length,q=questions[idx];
+  if(!q)return;
+  state._quizAnswered=false;
+  document.getElementById('quiz-q-text').textContent=q.q;
+  document.getElementById('quiz-progress-text').textContent=`Question ${idx+1} of ${total}`;
+  document.getElementById('quiz-progress-fill').style.width=`${idx/total*100}%`;
+  document.getElementById('quiz-score-display').textContent=`${state._quizCorrect} / ${idx}`;
+  const optContainer=document.getElementById('quiz-options');optContainer.innerHTML='';
+  const keys=['A','B','C','D'];
+  q.opts.forEach((opt,i)=>{const btn=document.createElement('button');btn.className='drill-option';btn.innerHTML=`<span class="drill-option-key">${keys[i]}</span><span class="drill-option-text">${opt}</span>`;btn.onclick=()=>pickQuizAnswer(i,q);optContainer.appendChild(btn);});
+  document.getElementById('quiz-explanation').style.display='none';
+  document.getElementById('quiz-next-btn').disabled=true;
+}
+function pickQuizAnswer(optIdx,q){
+  if(state._quizAnswered)return;state._quizAnswered=true;
+  const isCorrect=optIdx===q.ans;if(isCorrect)state._quizCorrect++;
+  document.querySelectorAll('.quiz-options .drill-option').forEach((btn,i)=>{btn.disabled=true;if(i===q.ans)btn.classList.add('correct');else if(i===optIdx)btn.classList.add('wrong');});
+  const ex=document.getElementById('quiz-explanation');
+  ex.style.display='block';ex.className='quiz-explanation'+(isCorrect?'':' wrong');
+  ex.innerHTML=`<strong>${isCorrect?'✅ Correct!':'❌ Incorrect — correct answer: '+['A','B','C','D'][q.ans]}</strong>${q.explanation}`;
+  document.getElementById('quiz-score-display').textContent=`${state._quizCorrect} / ${state._quizQ+1}`;
+  document.getElementById('quiz-next-btn').disabled=false;
+  if(isCorrect&&typeof addXP==='function')addXP(5,'Quiz correct');
+}
+function quizNext(){
+  state._quizQ++;
+  if(state._quizQ>=state._quizQuestions.length)showQuizComplete(state._quizQuestions.length);
+  else renderQuizQ();
+}
+async function showQuizComplete(total){
+  const pct=Math.round(state._quizCorrect/total*100);
+  document.getElementById('quiz-complete-score').textContent=`${state._quizCorrect}/${total}`;
+  document.getElementById('quiz-complete-msg').textContent=pct>=70?'🎉 Excellent! You\'re on track.':pct>=50?'💪 Good effort — keep practising!':'📚 Keep studying — you\'ll get there!';
+  ['quiz-q-text','quiz-options','quiz-next-btn'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('quiz-progress-fill').style.width='100%';
+  document.getElementById('quiz-complete').classList.add('show');
+
+  if(currentUser){
+    const topicId=CURRICULUM[state.subject]?.topics[state.topicIdx]?.id||state.subject;
+    const mastery=parseFloat(((pct/100*.7)+(Math.min(total/50,1)*.3)).toFixed(3));
+    // Save using CORRECT schema columns: accuracy_avg and mastery_level
+    await sb.from('topic_mastery').upsert({
+      user_id:currentUser.id,topic_id:topicId,
+      accuracy_avg:pct,mastery_level:mastery,
+      grade_level:currentProfile?.current_skill_level||3,
+      last_studied:new Date().toISOString()
+    },{onConflict:'user_id,topic_id'}).catch(()=>{});
+    await sb.from('profiles').update({accuracy_avg:pct,subscription_status:'ACTIVE'}).eq('id',currentUser.id).catch(()=>{});
+    state.masteryCache[topicId]={accuracy_avg:pct,mastery_level:mastery};
+    renderTopicList();updateInfoPanel(topicId);
+    if(typeof trackAction==='function')trackAction('drill_completed',{topic:topicId,score:state._quizCorrect,accuracy:pct});
+    if(typeof applyAdaptivePyramid==='function')await applyAdaptivePyramid(topicId,pct,currentProfile?.attempts_at_grade1||0);
+  }
+}
+function retakeQuiz(){const t=CURRICULUM[state.subject]?.topics[state.topicIdx];if(t)renderQuiz(t.quiz);}
+
+/* ── Navigation ────────────────────────────────────────────── */
+function prevTopic(){if(state.topicIdx>0)selectTopic(state.topicIdx-1);}
+function nextTopic(){const topics=CURRICULUM[state.subject]?.topics||[];if(state.topicIdx<topics.length-1)selectTopic(state.topicIdx+1);}
+function scrollToQuiz(){document.getElementById('quiz-section').scrollIntoView({behavior:'smooth'});}
+
+/* ── Info panel ─────────────────────────────────────────────── */
+async function loadMasteryData(){
+  if(!currentUser)return;
+  const{data}=await sb.from('topic_mastery').select('topic_id,accuracy_avg,mastery_level').eq('user_id',currentUser.id).catch(()=>({data:[]}));
+  (data||[]).forEach(r=>{state.masteryCache[r.topic_id]=r;});
+  renderTopicList();updateInfoPanel();
+}
+function updateInfoPanel(topicId){
+  const m=topicId?state.masteryCache[topicId]:null,pct=m?.accuracy_avg??currentProfile?.accuracy_avg;
+  document.getElementById('info-mastery-pct').textContent=pct!=null?`${Math.round(pct)}%`:'NIL';
+  document.getElementById('info-mastery-lbl').textContent=pct!=null?'current accuracy':'Take a quiz to generate your score';
+  document.getElementById('info-mastery-bar').style.width=pct!=null?`${pct}%`:'0%';
+  document.getElementById('info-jamb-pred').textContent=pct!=null?(predictJAMB(pct)||'—'):'—';
+  document.getElementById('info-waec-pred').textContent=pct!=null?(predictWAEC(pct)||'—'):'—';
+  document.getElementById('info-neco-pred').textContent=pct!=null?(predictWAEC(pct)||'—'):'—';
+  if(currentProfile?.is_premium)document.getElementById('cta-box').style.display='none';
+}
+
+/* ── Mobile sidebar ─────────────────────────────────────────── */
+function toggleSidebar(){document.getElementById('topic-sidebar').classList.toggle('open');}
+document.addEventListener('click',e=>{const s=document.getElementById('topic-sidebar'),t=document.getElementById('sidebar-toggle');if(!s.contains(e.target)&&!t.contains(e.target))s.classList.remove('open');});
 </script>
 </body>
 </html>
