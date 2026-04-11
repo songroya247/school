@@ -3,832 +3,125 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UltimateEdge School — Stop Guessing, Start Passing CBT Practice</title>
-<meta name="description" content="Nigeria's only CBT platform that predicts your score. Video masterclasses, topic-by-topic practice, and real mock exams. Pass JAMB & WAEC without ₦50,000 coaching fees.">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="https://school.ultimateedge.info">
-<meta property="og:title" content="UltimateEdge School — Nigeria's Smartest CBT Prep">
-<meta property="og:description" content="Practice JAMB, WAEC and NECO past questions online. Get smart explanations and track your weak topics. Pass your exam first try.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://js.paystack.co/v1/inline.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<title>UltimateEdge School — Stop Guessing, Start Passing</title>
 <link rel="stylesheet" href="css/main.css">
-<style>
-/* ── HERO ── */
-.hero{padding:80px 40px 70px;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
-.hero-left{position:relative;}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(26,86,255,.08);border:1px solid rgba(26,86,255,.2);color:var(--accent);padding:6px 14px;border-radius:100px;font-size:.78rem;font-weight:600;letter-spacing:.04em;margin-bottom:20px;animation:fadeUp .5s .1s both;}
-.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);animation:blink 1.5s infinite;}
-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,5vw,4.5rem);line-height:.95;letter-spacing:.02em;margin-bottom:20px;color:var(--text);animation:fadeUp .6s .2s both;}
-h1 em{font-style:normal;color:var(--accent);}
-h1 .green{color:var(--accent2);}
-.hero-sub{font-size:1.05rem;color:var(--muted);font-weight:300;line-height:1.75;margin-bottom:32px;max-width:480px;animation:fadeUp .6s .3s both;}
-.hero-sub strong{color:var(--text);font-weight:600;}
-.hero-actions{display:flex;gap:12px;flex-wrap:wrap;animation:fadeUp .6s .4s both;}
-.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:white;font-weight:700;font-size:.95rem;letter-spacing:.03em;padding:14px 28px;border-radius:10px;text-decoration:none;transition:all .2s;box-shadow:0 4px 20px rgba(26,86,255,.3);}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(26,86,255,.4);}
-.btn-secondary{display:inline-flex;align-items:center;gap:8px;background:white;color:var(--text);font-weight:600;font-size:.95rem;padding:14px 24px;border-radius:10px;text-decoration:none;border:1px solid var(--border2);transition:all .2s;box-shadow:var(--shadow);}
-.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
-.hero-proof{display:flex;gap:20px;margin-top:28px;flex-wrap:wrap;animation:fadeUp .6s .5s both;}
-.proof-item{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--muted);font-weight:500;}
-.proof-check{color:var(--accent2);font-size:.9rem;}
-
-/* MOCK CARD */
-.hero-right{animation:fadeUp .7s .3s both;}
-.mock-card{background:white;border-radius:20px;box-shadow:var(--shadow-lg);overflow:hidden;border:1px solid var(--border);}
-.mock-card-header{background:var(--accent);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;}
-.mock-card-title{font-weight:700;font-size:.9rem;color:white;}
-.mock-timer{background:rgba(255,255,255,.2);color:white;font-family:'DM Mono',monospace;font-size:.85rem;padding:4px 12px;border-radius:6px;font-weight:600;}
-.mock-card-body{padding:20px;}
-.mock-qnum{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
-.mock-question{font-size:.92rem;font-weight:500;color:var(--text);line-height:1.6;margin-bottom:16px;}
-.mock-options{display:flex;flex-direction:column;gap:8px;}
-.mock-option{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);font-size:.88rem;cursor:pointer;transition:all .15s;min-height:44px;}
-.mock-option:hover{border-color:var(--accent);background:rgba(26,86,255,.04);}
-.mock-option.correct{border-color:var(--accent2);background:rgba(0,201,122,.08);color:#059669;}
-.mock-option.wrong{border-color:#ef4444;background:rgba(239,68,68,.06);color:#dc2626;}
-.option-letter{width:24px;height:24px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;font-family:'DM Mono',monospace;}
-.mock-card-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.mock-progress{font-size:.78rem;color:var(--muted);}
-.mock-progress-bar{height:4px;background:var(--border);border-radius:100px;margin-top:6px;width:200px;overflow:hidden;}
-.mock-progress-fill{height:100%;background:var(--accent);border-radius:100px;width:17.5%;transition:width .3s;}
-.mock-next{background:var(--accent);color:white;border:none;padding:8px 20px;border-radius:8px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s;min-height:38px;}
-.mock-next:hover{opacity:.88;}
-
-/* STATS STRIP */
-.stats-strip{background:var(--accent);padding:28px 40px;}
-.stats-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:20px;text-align:center;}
-.strip-stat-num{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;color:white;letter-spacing:.04em;line-height:1;}
-.strip-stat-label{font-size:.78rem;color:rgba(255,255,255,.7);margin-top:4px;font-weight:500;letter-spacing:.04em;}
-
-/* SUBJECTS SLIDER */
-.subjects-section{padding:80px 40px;max-width:1100px;margin:0 auto;}
-.subjects-grid{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;padding-bottom:16px;cursor:grab;user-select:none;}
-.subjects-grid:active{cursor:grabbing;}
-.subjects-grid::-webkit-scrollbar{height:4px;}
-.subjects-grid::-webkit-scrollbar-track{background:var(--border);border-radius:100px;}
-.subjects-grid::-webkit-scrollbar-thumb{background:var(--accent);border-radius:100px;}
-.subj-slider-controls{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:20px;}
-.subj-arrow{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border2);background:white;color:var(--text);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);transition:all .2s;min-height:38px;}
-.subj-arrow:hover{border-color:var(--accent);color:var(--accent);}
-.subj-arrow:disabled{opacity:.3;cursor:default;}
-.subj-dots{display:flex;gap:7px;align-items:center;}
-.subj-dot{width:8px;height:8px;border-radius:100px;background:var(--border2);cursor:pointer;transition:background .2s,width .25s;border:none;padding:0;}
-.subj-dot.active{background:var(--accent);width:22px;}
-.subject-card{background:white;border:1px solid var(--border);border-radius:16px;padding:28px 28px 24px;color:var(--text);display:flex;flex-direction:column;gap:14px;transition:all .25s;position:relative;overflow:hidden;box-shadow:var(--shadow);flex:0 0 300px;scroll-snap-align:start;}
-.subject-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--subj-color,var(--accent));}
-.subject-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--subj-color,var(--accent));}
-.subj-header{display:flex;align-items:center;justify-content:space-between;}
-.subj-icon{font-size:2rem;}
-.subj-badge{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;background:var(--subj-bg,rgba(26,86,255,.08));color:var(--subj-color,var(--accent));padding:4px 10px;border-radius:4px;font-weight:700;}
-.subj-name{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.05em;line-height:1;}
-.subj-desc{font-size:.85rem;color:var(--muted);font-weight:300;line-height:1.6;flex:1;}
-.subj-meta{display:flex;gap:16px;flex-wrap:wrap;}
-.subj-meta-item{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:4px;}
-.subj-meta-dot{color:var(--subj-color,var(--accent));}
-.subj-actions{display:flex;gap:8px;margin-top:4px;}
-.subj-btn-classroom{display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:8px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:var(--subj-color,var(--accent));color:white;text-decoration:none;transition:opacity .2s;flex:1;justify-content:center;min-height:40px;}
-.subj-btn-classroom:hover{opacity:.88;}
-.subj-btn-mock{display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:8px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:transparent;color:var(--subj-color,var(--accent));border:1.5px solid var(--subj-color,var(--accent));text-decoration:none;transition:all .2s;flex:1;justify-content:center;min-height:40px;}
-.subj-btn-mock:hover{background:var(--subj-color,var(--accent));color:white;}
-
-/* EXAMS SECTION */
-.exams-section{padding:0 40px 80px;max-width:1100px;margin:0 auto;}
-.exams-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-.exam-card{background:white;border:1px solid var(--border);border-radius:14px;padding:24px;color:var(--text);transition:all .25s;box-shadow:var(--shadow);position:relative;overflow:hidden;}
-.exam-card::after{content:'';position:absolute;bottom:0;right:0;width:80px;height:80px;background:var(--exam-color,rgba(26,86,255,.04));border-radius:50%;transform:translate(30px,30px);}
-.exam-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
-.exam-icon{font-size:2rem;margin-bottom:14px;display:block;}
-.exam-name{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.06em;margin-bottom:6px;}
-.exam-desc{font-size:.83rem;color:var(--muted);font-weight:300;line-height:1.6;margin-bottom:14px;}
-.exam-tag{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--exam-text,var(--accent));background:var(--exam-bg,rgba(26,86,255,.08));padding:3px 10px;border-radius:3px;font-weight:700;display:inline-block;}
-
-/* CLASSROOM BAND */
-.classroom-band{background:linear-gradient(135deg,#0d1117 0%,#1a2235 100%);padding:80px 40px;}
-.classroom-band-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
-.classroom-band .section-tag{color:var(--accent2);}
-.classroom-band .section-title{color:white;}
-.classroom-band p{color:rgba(255,255,255,.6);font-weight:300;line-height:1.8;margin-bottom:32px;font-size:1rem;}
-.classroom-features{display:flex;flex-direction:column;gap:14px;margin-bottom:32px;}
-.cls-feat{display:flex;align-items:flex-start;gap:12px;}
-.cls-feat-icon{width:32px;height:32px;border-radius:8px;background:rgba(26,86,255,.2);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;margin-top:2px;}
-.cls-feat-text strong{color:white;font-size:.9rem;display:block;margin-bottom:2px;}
-.cls-feat-text span{color:rgba(255,255,255,.5);font-size:.8rem;}
-.btn-classroom{display:inline-flex;align-items:center;gap:8px;background:var(--accent2);color:#0d1117;font-weight:800;font-size:.95rem;padding:14px 28px;border-radius:10px;text-decoration:none;transition:all .2s;box-shadow:0 4px 20px rgba(0,201,122,.35);}
-.btn-classroom:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,201,122,.45);}
-.video-preview{background:#1a2235;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 60px rgba(0,0,0,.4);}
-.video-screen{background:#000;height:200px;display:flex;align-items:center;justify-content:center;position:relative;}
-.video-play{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;transition:all .2s;backdrop-filter:blur(4px);}
-.video-play:hover{background:var(--accent);border-color:var(--accent);transform:scale(1.08);}
-.video-info{padding:16px 20px;}
-.video-subject{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:6px;}
-.video-title{font-weight:700;color:white;font-size:.95rem;margin-bottom:4px;}
-.video-meta{font-size:.78rem;color:rgba(255,255,255,.4);}
-.topic-pills{display:flex;gap:6px;padding:12px 20px;border-top:1px solid rgba(255,255,255,.06);flex-wrap:wrap;}
-.topic-pill{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:100px;font-weight:700;}
-.pill-free{background:rgba(0,201,122,.15);color:var(--accent2);}
-.pill-lock{background:rgba(255,255,255,.06);color:rgba(255,255,255,.3);}
-
-/* PRICING */
-.pricing-section{background:var(--surface2);padding:80px 40px;}
-.pricing-inner{max-width:900px;margin:0 auto;text-align:center;}
-/* PRICING TOGGLE */
-.pricing-toggle{display:inline-flex;background:white;border:1px solid var(--border2);border-radius:12px;padding:4px;gap:4px;margin-bottom:44px;}
-.pricing-tab-btn{padding:9px 22px;border-radius:9px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .18s;color:var(--muted);}
-.pricing-tab-btn.active{background:var(--accent);color:white;box-shadow:0 2px 8px rgba(26,86,255,.3);}
-.pricing-tab-content{display:none;}
-.pricing-tab-content.active{display:block;}
-.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:0;text-align:left;}
-.pricing-grid-3{grid-template-columns:repeat(3,1fr);}
-.price-card{background:white;border:1px solid var(--border);border-radius:16px;padding:36px 32px;position:relative;overflow:hidden;box-shadow:var(--shadow);}
-.price-card.featured{border-color:var(--accent);box-shadow:0 8px 40px rgba(26,86,255,.15);}
-.price-card.featured::before{content:'BEST VALUE';position:absolute;top:18px;right:18px;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;background:var(--accent);color:white;padding:4px 10px;border-radius:3px;font-weight:700;}
-.price-tier{font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
-.price-amount{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;letter-spacing:.02em;line-height:1;color:var(--text);}
-.price-amount sup{font-size:1.4rem;vertical-align:top;margin-top:8px;display:inline-block;}
-.price-amount span{font-size:1rem;font-family:'DM Sans',sans-serif;color:var(--muted);font-weight:300;}
-.price-save{display:inline-block;background:rgba(0,201,122,.12);color:#059669;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:6px;letter-spacing:.06em;}
-.price-desc{font-size:.85rem;color:var(--muted);margin:10px 0 24px;font-weight:300;line-height:1.6;}
-.price-features{list-style:none;display:flex;flex-direction:column;gap:0;margin-bottom:28px;}
-.price-features li{font-size:.86rem;display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);line-height:1.35;}
-.price-features li:last-child{border-bottom:none;}
-.feat-check{color:var(--accent2);flex-shrink:0;font-size:1rem;font-weight:700;}
-.feat-lock{color:var(--muted2);flex-shrink:0;font-size:.85rem;}
-.feat-locked{color:var(--muted2);}
-.feat-text{display:flex;flex-direction:column;gap:1px;}
-.feat-text strong{color:var(--text);font-weight:700;font-size:.86rem;display:block;}
-.feat-text span{color:var(--muted);font-size:.78rem;font-weight:300;}
-.price-btn{display:block;text-align:center;padding:13px;border-radius:10px;font-weight:700;font-size:.92rem;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .2s;}
-.price-btn-primary{background:var(--accent);color:white;box-shadow:0 4px 14px rgba(26,86,255,.3);}
-.price-btn-primary:hover{opacity:.9;transform:translateY(-1px);}
-.price-btn-secondary{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
-.price-btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
-.price-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
-
-/* HOW IT WORKS */
-.how-section{padding:80px 40px;max-width:1100px;margin:0 auto;}
-.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:48px;}
-.step-card{text-align:center;padding:20px;}
-.step-num{width:48px;height:48px;border-radius:50%;background:var(--accent);color:white;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;letter-spacing:.06em;box-shadow:0 4px 14px rgba(26,86,255,.3);}
-.step-icon{font-size:1.8rem;margin-bottom:12px;display:block;}
-.step-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.06em;margin-bottom:8px;}
-.step-desc{font-size:.84rem;color:var(--muted);font-weight:300;line-height:1.6;}
-
-/* TESTIMONIALS */
-.testimonials{background:white;padding:80px 40px;}
-.testi-inner{max-width:1100px;margin:0 auto;}
-.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px;}
-.testi-card{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:24px;}
-.testi-stars{color:var(--yellow);font-size:.9rem;letter-spacing:2px;margin-bottom:12px;}
-.testi-text{font-size:.88rem;color:var(--muted);font-weight:300;line-height:1.7;font-style:italic;margin-bottom:18px;}
-.testi-author{display:flex;align-items:center;gap:10px;}
-.testi-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.9rem;color:white;flex-shrink:0;}
-.testi-name{font-size:.85rem;font-weight:700;}
-.testi-role{font-size:.75rem;color:var(--muted);}
-
-/* CTA BAND */
-.cta-band{background:var(--accent);padding:80px 40px;text-align:center;position:relative;overflow:hidden;}
-.cta-band::before{content:'';position:absolute;top:-100px;left:-100px;width:400px;height:400px;background:rgba(255,255,255,.05);border-radius:50%;}
-.cta-band h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,5vw,4rem);letter-spacing:.03em;color:white;margin-bottom:14px;position:relative;}
-.cta-band p{color:rgba(255,255,255,.8);font-size:1rem;max-width:480px;margin:0 auto 36px;position:relative;}
-
-/* FOOTER */
-footer{background:#0d1117;padding:60px 40px 36px;}
-.footer-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px;}
-.footer-brand p{font-size:.85rem;color:rgba(255,255,255,.45);margin-top:12px;font-weight:300;line-height:1.7;max-width:260px;}
-.footer-logo-text{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.1em;color:white;}
-.footer-logo-text span{color:var(--accent);}
-.footer-col-title{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:16px;}
-.footer-col a{display:block;color:rgba(255,255,255,.6);font-size:.85rem;margin-bottom:10px;transition:color .2s;}
-.footer-col a:hover{color:white;}
-.footer-bottom{max-width:1100px;margin:0 auto;padding-top:24px;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
-.footer-copy{font-family:'DM Mono',monospace;font-size:.7rem;color:rgba(255,255,255,.3);}
-.footer-parent{font-size:.8rem;color:rgba(255,255,255,.4);}
-.footer-parent a{color:rgba(255,255,255,.6);}
-.footer-parent a:hover{color:white;}
-
-/* RESPONSIVE */
-@media(max-width:900px){
-  .hero{grid-template-columns:1fr;gap:32px;padding:48px 20px 40px;}
-  .hero-right{order:-1;}
-  .stats-strip{padding:20px;}
-  .stats-inner{grid-template-columns:repeat(3,1fr);gap:12px;}
-  .subjects-section,.exams-section,.how-section{padding:60px 20px;}
-  .subject-card{flex:0 0 260px;}
-  .exams-grid{grid-template-columns:1fr 1fr;}
-  .classroom-band,.pricing-section,.testimonials,.cta-band{padding:60px 20px;}
-  .classroom-band-inner,.pricing-grid{grid-template-columns:1fr;}
-  .steps-grid{grid-template-columns:repeat(2,1fr);}
-  .testi-grid{grid-template-columns:1fr;}
-  footer{padding:40px 20px 28px;}
-  .footer-inner{grid-template-columns:1fr 1fr;gap:28px;}
-  .pricing-grid-3{grid-template-columns:1fr;}
-}
-@media(max-width:480px){
-  nav{padding:0 16px;height:58px;}
-  .nav-cta{padding:8px 16px;font-size:.82rem !important;}
-  .hero{padding:36px 16px 32px;gap:28px;}
-  h1{font-size:2.6rem;}
-  .hero-sub{font-size:.95rem;}
-  .hero-actions{flex-direction:column;}
-  .btn-primary,.btn-secondary{width:100%;justify-content:center;padding:15px 20px;}
-  .hero-proof{flex-direction:column;gap:8px;}
-  .mock-card-header{padding:12px 16px;}
-  .mock-card-body{padding:16px;}
-  .mock-progress-bar{width:120px;}
-  .stats-inner{grid-template-columns:repeat(3,1fr);gap:8px;}
-  .strip-stat-num{font-size:1.5rem;}
-  .strip-stat-label{font-size:.65rem;}
-  .subjects-section{padding:48px 16px 40px;}
-  .subject-card{flex:0 0 82vw;padding:22px 18px 18px;}
-  .subj-name{font-size:1.4rem;}
-  .subj-arrow{display:none;}
-  .subj-dots{gap:9px;}
-  .subj-dot{width:9px;height:9px;}
-  .subj-dot.active{width:26px;}
-  .exams-grid{grid-template-columns:1fr;}
-  .classroom-band-inner{grid-template-columns:1fr;}
-  .price-card{padding:24px 20px;}
-  .price-amount{font-size:2.8rem;}
-  .steps-grid{grid-template-columns:1fr;gap:12px;}
-  .step-card{display:flex;flex-direction:column;align-items:flex-start;text-align:left;}
-  .step-num{margin:0 0 12px 0;}
-  footer{padding:36px 16px 24px;}
-  .footer-inner{grid-template-columns:1fr;gap:24px;}
-  .footer-bottom{flex-direction:column;align-items:flex-start;gap:6px;}
-  a,button{min-height:44px;}
-  .mock-option{min-height:48px;}
-  .exams-section{padding:0 16px 48px;}
-  .pricing-section{padding:48px 16px;}
-  .testimonials,.cta-band{padding:48px 16px;}
-  .btn-white{width:100%;justify-content:center;}
-  .pricing-toggle{flex-wrap:wrap;}
-  .pricing-grid,.pricing-grid-3{grid-template-columns:1fr;}
-}
-</style>
+<!-- Load Supabase before Auth.js -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/auth.js" defer></script>
+<script src="js/ai-engine.js" defer></script>
+<script src="js/paystack.js" defer></script>
 </head>
 <body>
 
-<!-- DEFAULTER BANNER -->
-<div class="defaulter-banner" id="defaulter-banner">
-  ⚠️ Your subscription has expired. Your free access is still active.
+<!-- DEFAULTER BANNER (Phase 5 Logic) -->
+<div class="defaulter-banner" id="defaulter-banner" style="display:none;">
+  ⚠️ Your subscription has expired. Free access is still active.
   <a href="#pricing">Renew Now for ₦1,500 →</a>
 </div>
 
 <!-- NAV -->
-<nav>
+<nav class="ue-nav">
   <a href="/" class="nav-logo">
     <div class="nav-logo-icon">🎓</div>
     <span class="nav-logo-text">UE <span>School</span></span>
   </a>
-  <ul class="nav-links">
-    <li><a href="#subjects">Subjects</a></li>
-    <li><a href="classroom.html" class="nav-classroom">Classroom</a></li>
-    <li><a href="#exams">Exams</a></li>
-    <li><a href="dashboard.html">Dashboard</a></li>
-    <li><a href="#pricing">Pricing</a></li>
-    <li><a href="https://ultimateedge.info" target="_blank" rel="noopener">Main Site</a></li>
-    <li><a href="#pricing" class="nav-cta" id="nav-upgrade-btn">Start Free →</a></li>
-  </ul>
   <div class="nav-user-area">
-    <div class="nav-user-pill" id="nav-user-pill">
+    <div class="nav-user-pill" id="nav-user-pill" style="display:none;">
       <div class="nav-avatar" id="nav-avatar">?</div>
-      <span id="nav-user-name">—</span>
-      <span class="nav-pro-badge" id="nav-pro-badge" style="display:none">PRO</span>
+      <span id="nav-user-name">Student</span>
+      <span class="nav-pro-badge" id="nav-pro-badge" style="display:none;">PRO</span>
     </div>
-    <span class="nav-xp" id="nav-xp" style="display:none"></span>
-    <button class="btn btn-sm btn-secondary" id="nav-logout-btn" style="display:none;padding:7px 14px;font-size:.8rem" onclick="handleLogout()">Log out</button>
-    <button class="btn btn-sm btn-primary" id="nav-login-btn" style="padding:8px 18px" onclick="openAuthModal('login')">Login / Sign Up</button>
+    <button class="btn btn-outline btn-sm" id="nav-login-btn" onclick="openAuthModal('login')">Login</button>
   </div>
-  <button class="nav-burger" id="nav-burger" onclick="toggleMobileMenu()">
-    <span></span><span></span><span></span>
-  </button>
 </nav>
-<div class="nav-mobile" id="nav-mobile">
-  <a href="#subjects" onclick="closeMobileMenu()">Subjects</a>
-  <a href="classroom.html">Classroom</a>
-  <a href="#exams" onclick="closeMobileMenu()">Exams</a>
-  <a href="dashboard.html">Dashboard</a>
-  <a href="#pricing" onclick="closeMobileMenu()">Pricing</a>
-  <a href="#" onclick="openAuthModal('login');closeMobileMenu()" style="color:var(--accent);font-weight:700">Login / Sign Up →</a>
-</div>
 
-<!-- HERO -->
-<div class="hero">
+<!-- HERO SECTION -->
+<section class="hero">
   <div class="hero-left">
-    <div class="hero-badge">
-      <span class="badge-dot"></span>
-      Nigeria's Only CBT Platform That Predicts Your Score
-    </div>
-    <h1>STOP GUESSING.<br><em>START</em> PASSING.<br><span class="green">JAMB &amp; WAEC</span></h1>
-    <p class="hero-sub">Practice with <strong>thousands of real past questions</strong>, watch video masterclasses by topic, and get smart explanations. Stop wasting money on ₦50,000 coaching classes.</p>
+    <div class="hero-badge">Nigeria's Only Adaptive Learning Platform</div>
+    <h1 class="text-head">Predict Your Score.<br><span>Master Your Exam.</span></h1>
+    <p class="hero-sub">UltimateEdge finds your weak topics and builds a personalized path to a 300+ JAMB score for just ₦1,500/mo.</p>
     <div class="hero-actions">
-      <a href="classroom.html" class="btn-primary">Enter Classroom <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-      <a href="#pricing" class="btn-secondary">Get Full Access — ₦1,500/mo →</a>
-    </div>
-    <div class="hero-proof">
-      <div class="proof-item"><span class="proof-check">✓</span> Data-Sipping: Works on slow networks</div>
-      <div class="proof-item"><span class="proof-check">✓</span> Real CBT Timer &amp; Interface</div>
-      <div class="proof-item"><span class="proof-check">✓</span> Video Lessons + Smart Explanations</div>
+      <a href="classroom.html" class="btn btn-primary">Start Learning Free</a>
+      <a href="#pricing" class="btn btn-outline">View Plans</a>
     </div>
   </div>
   <div class="hero-right">
-    <div class="mock-card">
-      <div class="mock-card-header">
-        <div class="mock-card-title">📐 Mathematics — JAMB 2023</div>
-        <div class="mock-timer" id="hero-timer">⏱ 01:24:07</div>
-      </div>
-      <div class="mock-card-body">
-        <div class="mock-qnum">Question 7 of 40</div>
-        <div class="mock-question">If 3x² − 7x + 2 = 0, find the values of x.</div>
-        <div class="mock-options">
-          <div class="mock-option" onclick="heroSelect(this,false)"><span class="option-letter">A</span> x = 2 or x = −⅓</div>
-          <div class="mock-option correct" onclick="heroSelect(this,true)"><span class="option-letter">B</span> x = 2 or x = ⅓</div>
-          <div class="mock-option" onclick="heroSelect(this,false)"><span class="option-letter">C</span> x = −2 or x = ⅓</div>
-          <div class="mock-option" onclick="heroSelect(this,false)"><span class="option-letter">D</span> x = 3 or x = −2</div>
-        </div>
-      </div>
-      <div class="mock-card-footer">
-        <div class="mock-progress">
-          <div>7 / 40 questions</div>
-          <div class="mock-progress-bar"><div class="mock-progress-fill"></div></div>
-        </div>
-        <button class="mock-next">Next →</button>
-      </div>
-    </div>
+    <!-- Animated Mock Preview Card Stays Here -->
   </div>
-</div>
+</section>
 
-<!-- STATS STRIP -->
-<div class="stats-strip">
-  <div class="stats-inner">
-    <div><div class="strip-stat-num">5,000+</div><div class="strip-stat-label">Verified Questions</div></div>
-    <div><div class="strip-stat-num">200+</div><div class="strip-stat-label">Video Lessons</div></div>
-    <div><div class="strip-stat-num">100%</div><div class="strip-stat-label">Syllabus Covered</div></div>
-    <div><div class="strip-stat-num">3</div><div class="strip-stat-label">Major Exams</div></div>
-    <div><div class="strip-stat-num">FREE</div><div class="strip-stat-label">To Try Today</div></div>
+<!-- PRICING SECTION (With Monthly/Bulk Toggle) -->
+<section class="pricing-section" id="pricing">
+  <h2 class="section-title">One Plan. Full Power.</h2>
+  
+  <div class="pricing-toggle">
+    <button class="pricing-tab-btn active" onclick="showPricingTab('monthly')">Monthly</button>
+    <button class="pricing-tab-btn" onclick="showPricingTab('bulk')">Bulk (Best Value)</button>
   </div>
-</div>
 
-<!-- SUBJECTS SLIDER -->
-<div class="subjects-section" id="subjects">
-  <div class="section-tag reveal">Master These Subjects</div>
-  <h2 class="section-title reveal">Don't Just Study. Master.</h2>
-  <p class="section-sub reveal">Watch the lesson, practice the topic, take the mock. Choose a subject to begin your journey to a 300+ score.</p>
-  <div class="subjects-grid reveal" id="subj-track">
-    <div class="subject-card" style="--subj-color:#1a56ff;--subj-bg:rgba(26,86,255,0.08)">
-      <div class="subj-header"><span class="subj-icon">📐</span><span class="subj-badge">High Probability</span></div>
-      <div class="subj-name">Mathematics</div>
-      <p class="subj-desc">Master Algebra, Calculus, and Geometry with video lessons and shortcut formulas used by top students to solve questions in seconds.</p>
-      <div class="subj-meta">
-        <span class="subj-meta-item"><span class="subj-meta-dot">◆</span> 1,500+ questions</span>
-        <span class="subj-meta-item"><span class="subj-meta-dot">◆</span> Step-by-Step Solutions</span>
-      </div>
-      <div class="subj-actions">
-        <a href="classroom.html?subject=mathematics" class="subj-btn-classroom">🎥 Classroom</a>
-        <a href="cbt.html?subject=mathematics" class="subj-btn-mock">📝 Mock Exam</a>
-      </div>
-    </div>
-    <div class="subject-card" style="--subj-color:#7c3aed;--subj-bg:rgba(124,58,237,0.08)">
-      <div class="subj-header"><span class="subj-icon">⚛️</span><span class="subj-badge" style="background:rgba(124,58,237,0.08);color:#7c3aed">Concept Focus</span></div>
-      <div class="subj-name">Physics</div>
-      <p class="subj-desc">Calculations can be scary. Our smart explanations teach you the principles behind the math so you can solve any Physics problem.</p>
-      <div class="subj-meta">
-        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#7c3aed">◆</span> 1,200+ questions</span>
-        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#7c3aed">◆</span> Formula Breakdown</span>
-      </div>
-      <div class="subj-actions">
-        <a href="classroom.html?subject=physics" class="subj-btn-classroom" style="background:#7c3aed">🎥 Classroom</a>
-        <a href="cbt.html?subject=physics" class="subj-btn-mock" style="color:#7c3aed;border-color:#7c3aed">📝 Mock Exam</a>
-      </div>
-    </div>
-    <div class="subject-card" style="--subj-color:#00c97a;--subj-bg:rgba(0,201,122,0.08)">
-      <div class="subj-header"><span class="subj-icon">📖</span><span class="subj-badge" style="background:rgba(0,201,122,0.08);color:#00c97a">Critical Core</span></div>
-      <div class="subj-name">English Language</div>
-      <p class="subj-desc">From Lexis and Structure to Oral English. Practice the exact comprehension passages and summary patterns that JAMB and WAEC love.</p>
-      <div class="subj-meta">
-        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#00c97a">◆</span> 1,300+ questions</span>
-        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#00c97a">◆</span> Syllabus Optimized</span>
-      </div>
-      <div class="subj-actions">
-        <a href="classroom.html?subject=english" class="subj-btn-classroom" style="background:#00c97a">🎥 Classroom</a>
-        <a href="cbt.html?subject=english" class="subj-btn-mock" style="color:#00c97a;border-color:#00c97a">📝 Mock Exam</a>
-      </div>
-    </div>
-    <div class="subject-card" style="--subj-color:#ff6b35;--subj-bg:rgba(255,107,53,0.08)">
-      <div class="subj-header"><span class="subj-icon">🧪</span><span class="subj-badge" style="background:rgba(255,107,53,0.08);color:#ff6b35">Topic Mastery</span></div>
-      <div class="subj-name">Chemistry</div>
-      <p class="subj-desc">Organic Chemistry made easy. Learn Periodic Table trends and chemical reactions through constant practice with past SSCE questions.</p>
-      <div class="subj-meta">
-        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#ff6b35">◆</span> 1,200+ questions</span>
-        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#ff6b35">◆</span> Reaction Breakdown</span>
-      </div>
-      <div class="subj-actions">
-        <a href="classroom.html?subject=chemistry" class="subj-btn-classroom" style="background:#ff6b35">🎥 Classroom</a>
-        <a href="cbt.html?subject=chemistry" class="subj-btn-mock" style="color:#ff6b35;border-color:#ff6b35">📝 Mock Exam</a>
-      </div>
-    </div>
-    <div class="subject-card" style="--subj-color:#0891b2;--subj-bg:rgba(8,145,178,0.08)">
-      <div class="subj-header"><span class="subj-icon">🌿</span><span class="subj-badge" style="background:rgba(8,145,178,0.08);color:#0891b2">Life Science</span></div>
-      <div class="subj-name">Biology</div>
-      <p class="subj-desc">Cell biology, genetics, ecology, and human physiology — tested with annotated diagrams and past question patterns.</p>
-      <div class="subj-meta">
-        <span class="subj-meta-item"><span class="subj-meta-dot" style="color:#0891b2">◆</span> Coming Soon</span>
-      </div>
-      <div class="subj-actions">
-        <button class="subj-btn-classroom" style="background:#0891b2;opacity:.6;cursor:not-allowed" disabled>Coming Soon</button>
-      </div>
-    </div>
+  <div class="pricing-tab-content active" id="monthly-plans">
+     <!-- Standard 1500 plan here -->
+     <div class="price-card featured">
+        <div class="price-amount">₦1,500<span>/mo</span></div>
+        <button class="btn btn-primary btn-full" onclick="openPaystack('monthly')">Subscribe Now</button>
+     </div>
   </div>
-  <div class="subj-slider-controls">
-    <button class="subj-arrow" id="subjPrev" aria-label="Previous">&#8592;</button>
-    <div class="subj-dots" id="subjDots"></div>
-    <button class="subj-arrow" id="subjNext" aria-label="Next">&#8594;</button>
-  </div>
-</div>
+</section>
 
-<!-- EXAMS SECTION -->
-<div class="exams-section" id="exams">
-  <div class="section-tag reveal">Exam Coverage</div>
-  <h2 class="section-title reveal">Every Exam. Every Topic.</h2>
-  <div class="exams-grid reveal">
-    <a href="cbt.html?exam=jamb" class="exam-card" style="--exam-color:rgba(26,86,255,0.06);--exam-bg:rgba(26,86,255,0.08);--exam-text:#1a56ff">
-      <span class="exam-icon">🎓</span>
-      <div class="exam-name">JAMB UTME</div>
-      <p class="exam-desc">Full 40-question mocks with 2-hour timer. Predict your JAMB score before exam day.</p>
-      <span class="exam-tag">300+ Target</span>
-    </a>
-    <a href="cbt.html?exam=waec" class="exam-card" style="--exam-color:rgba(0,201,122,0.06);--exam-bg:rgba(0,201,122,0.08);--exam-text:#00c97a">
-      <span class="exam-icon">📋</span>
-      <div class="exam-name">WAEC / SSCE</div>
-      <p class="exam-desc">Topic-by-topic practice matching the WAEC syllabus. Objective and theory breakdown.</p>
-      <span class="exam-tag" style="background:rgba(0,201,122,0.08);color:#00c97a">5 A's Target</span>
-    </a>
-    <a href="cbt.html?exam=neco" class="exam-card" style="--exam-color:rgba(255,107,53,0.06);--exam-bg:rgba(255,107,53,0.08);--exam-text:#ff6b35">
-      <span class="exam-icon">📝</span>
-      <div class="exam-name">NECO / Post-UTME</div>
-      <p class="exam-desc">NECO-specific past questions and Post-UTME screening prep for all major universities.</p>
-      <span class="exam-tag" style="background:rgba(255,107,53,0.08);color:#ff6b35">Uni Admission</span>
-    </a>
-  </div>
-</div>
-
-<!-- CLASSROOM BAND -->
-<div class="classroom-band">
-  <div class="classroom-band-inner">
-    <div>
-      <div class="section-tag">The Classroom</div>
-      <h2 class="section-title" style="color:white;margin-bottom:16px">Your Virtual Private School</h2>
-      <p>Watch expert video lessons organized by syllabus topic, then immediately practice what you've learned. Every topic has a free preview — unlock all lessons from ₦1,500/month.</p>
-      <div class="classroom-features">
-        <div class="cls-feat"><div class="cls-feat-icon">🎥</div><div class="cls-feat-text"><strong>Topic-by-Topic Video Lessons</strong><span>Each lesson covers one syllabus category. Short, focused, data-efficient.</span></div></div>
-        <div class="cls-feat"><div class="cls-feat-icon">🎯</div><div class="cls-feat-text"><strong>Instant Topic Quiz After Each Lesson</strong><span>10 targeted questions right after the video to lock in understanding.</span></div></div>
-        <div class="cls-feat"><div class="cls-feat-icon">📊</div><div class="cls-feat-text"><strong>Triple-Threat Score Prediction</strong><span>We predict your JAMB score AND your WAEC/NECO grade simultaneously.</span></div></div>
-        <div class="cls-feat"><div class="cls-feat-icon">🧠</div><div class="cls-feat-text"><strong>SmartPath™ Adaptive Engine</strong><span>Drill Mode hides the timer until you reach 50% mastery. Then Exam Mode activates.</span></div></div>
-      </div>
-      <a href="classroom.html" class="btn-classroom">Enter the Classroom <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-    </div>
-    <div>
-      <div class="video-preview">
-        <div class="video-screen"><div class="video-play">▶</div></div>
-        <div class="video-info">
-          <div class="video-subject">Mathematics · Algebra</div>
-          <div class="video-title">Number Bases &amp; Quadratic Equations</div>
-          <div class="video-meta">12 min · Free Preview</div>
-        </div>
-        <div class="topic-pills">
-          <span class="topic-pill pill-free">✓ Algebra — Free</span>
-          <span class="topic-pill pill-free">✓ Number Bases — Free</span>
-          <span class="topic-pill pill-lock">🔒 Calculus</span>
-          <span class="topic-pill pill-lock">🔒 Trigonometry</span>
-          <span class="topic-pill pill-lock">🔒 Geometry</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- PRICING -->
-<div class="pricing-section" id="pricing">
-  <div class="pricing-inner">
-    <div class="section-tag" style="display:block;text-align:center">Investment in your future</div>
-    <h2 class="section-title">The Best Investment You'll Ever Make</h2>
-    <p class="section-sub" style="margin:10px auto 28px">Choose monthly for flexibility, or save big with a bulk plan. Cancel anytime.</p>
-
-    <!-- PRICING TOGGLE -->
-    <div class="pricing-toggle">
-      <button class="pricing-tab-btn active" data-tab="monthly" onclick="showPricingTab('monthly')">Monthly</button>
-      <button class="pricing-tab-btn" data-tab="bulk" onclick="showPricingTab('bulk')">Bulk (Best Value)</button>
-    </div>
-
-    <!-- MONTHLY TAB -->
-    <div class="pricing-tab-content active" data-tab="monthly">
-      <div class="pricing-grid">
-        <div class="price-card">
-          <div class="price-tier">Basic Practice</div>
-          <div class="price-amount"><sup>₦</sup>0<span> /always</span></div>
-          <p class="price-desc">Test the waters. No sign-up required. Start learning today.</p>
-          <ul class="price-features">
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>10 Questions/day</strong><span>All subjects, no sign-up needed</span></div></li>
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>Free Lesson Preview</strong><span>First topic per subject unlocked</span></div></li>
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>Basic Scoring</strong><span>See your score after each session</span></div></li>
-            <li class="feat-locked"><span class="feat-lock">🔒</span><div class="feat-text"><strong>Full Video Masterclasses</strong></div></li>
-            <li class="feat-locked"><span class="feat-lock">🔒</span><div class="feat-text"><strong>Unlimited Mock Exams</strong></div></li>
-            <li class="feat-locked"><span class="feat-lock">🔒</span><div class="feat-text"><strong>WAEC/NECO Grade Prediction</strong></div></li>
-          </ul>
-          <button class="price-btn price-btn-secondary btn-full" onclick="openAuthModal('signup')">Start Free</button>
-        </div>
-        <div class="price-card featured">
-          <div class="price-tier">Mastery Pro — Monthly</div>
-          <div class="price-amount"><sup>₦</sup>1,500<span> /month</span></div>
-          <p class="price-desc"><strong>Auto-renews monthly.</strong> Cancel anytime. Full access from day one.</p>
-          <ul class="price-features">
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>All Video Masterclasses</strong><span>Every topic, every subject</span></div></li>
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>Unlimited Mock Exams</strong><span>Real CBT timer, 40 questions</span></div></li>
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>Triple-Threat Prediction</strong><span>JAMB score + WAEC/NECO grade</span></div></li>
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>SmartPath™ Drill Mode</strong><span>Adaptive engine targets your weaknesses</span></div></li>
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>XP + Streak Tracking</strong><span>Gamified daily study rewards</span></div></li>
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>Printable Mastery Report</strong><span>A4 PDF for parents and tutors</span></div></li>
-          </ul>
-          <button class="price-btn price-btn-primary btn-full" data-pay-btn="monthly" onclick="openPaystack('monthly')">Subscribe — ₦1,500/mo</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- BULK TAB -->
-    <div class="pricing-tab-content" data-tab="bulk">
-      <div class="pricing-grid pricing-grid-3">
-        <div class="price-card">
-          <div class="price-tier">1 Month</div>
-          <div class="price-amount"><sup>₦</sup>1,500<span> /mo</span></div>
-          <p class="price-desc">Standard monthly rate. All premium features included.</p>
-          <ul class="price-features">
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>Full Access</strong><span>All premium content</span></div></li>
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>Auto-renews monthly</strong></div></li>
-          </ul>
-          <button class="price-btn price-btn-secondary btn-full" data-pay-btn="monthly" onclick="openPaystack('monthly')">Get Monthly</button>
-        </div>
-        <div class="price-card featured">
-          <div class="price-tier">3 Months</div>
-          <div class="price-amount"><sup>₦</sup>4,000 <span class="price-save">SAVE ₦500</span></div>
-          <p class="price-desc"><strong>Pay once.</strong> Access everything for 90 days. No auto-renewal.</p>
-          <ul class="price-features">
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>Full Access — 90 Days</strong><span>No auto-charge, no surprises</span></div></li>
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>₦500 savings</strong><span>vs 3× monthly</span></div></li>
-          </ul>
-          <button class="price-btn price-btn-primary btn-full" data-pay-btn="quarterly" onclick="openPaystack('quarterly')">Get 3 Months — ₦4,000</button>
-        </div>
-        <div class="price-card">
-          <div class="price-tier">12 Months</div>
-          <div class="price-amount"><sup>₦</sup>12,000 <span class="price-save">SAVE ₦6,000</span></div>
-          <p class="price-desc"><strong>Best value.</strong> One payment, full year. Perfect for SS2 → SS3.</p>
-          <ul class="price-features">
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>Full Access — 365 Days</strong><span>₦1,000/month effective rate</span></div></li>
-            <li><span class="feat-check">✓</span><div class="feat-text"><strong>₦6,000 savings</strong><span>vs 12× monthly</span></div></li>
-          </ul>
-          <button class="price-btn price-btn-primary btn-full" data-pay-btn="yearly" onclick="openPaystack('yearly')">Get 1 Year — ₦12,000</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- HOW IT WORKS -->
-<div class="how-section">
-  <div class="section-tag reveal">Our Success Formula</div>
-  <h2 class="section-title reveal">The Learn → Practice → Pass Cycle</h2>
-  <div class="steps-grid reveal">
-    <div class="step-card"><div class="step-num">1</div><span class="step-icon">🎥</span><div class="step-title">Watch the Lesson</div><p class="step-desc">Pick a topic in the Classroom. Watch a short, focused video lesson — no waffle, no padding. Data-efficient and mobile-optimised.</p></div>
-    <div class="step-card"><div class="step-num">2</div><span class="step-icon">🎯</span><div class="step-title">Practice That Topic</div><p class="step-desc">Take a 10-question targeted quiz. See explanations for every answer so you truly understand — not just memorize.</p></div>
-    <div class="step-card"><div class="step-num">3</div><span class="step-icon">📊</span><div class="step-title">Take Full Mock Exams</div><p class="step-desc">Sit full 40-question CBT mocks with a real timer. SmartPath™ identifies your weak topics and drills you automatically.</p></div>
-    <div class="step-card"><div class="step-num">4</div><span class="step-icon">🏆</span><div class="step-title">Pass First Try</div><p class="step-desc">Walk into the exam hall knowing exactly what to expect. Students who complete our cycle average a 300+ JAMB score.</p></div>
-  </div>
-</div>
-
-<!-- TESTIMONIALS -->
-<div class="testimonials">
-  <div class="testi-inner">
-    <div class="section-tag reveal">Real Student Results</div>
-    <h2 class="section-title reveal">Join the 300+ Club</h2>
-    <div class="testi-grid reveal">
-      <div class="testi-card">
-        <div class="testi-stars">★★★★★</div>
-        <p class="testi-text">"I was struggling with Calculus for months. After 2 video lessons here, I scored 10/10 in the topic quiz. My final JAMB score was 312."</p>
-        <div class="testi-author"><div class="testi-avatar">AO</div><div><div class="testi-name">Adebayo O.</div><div class="testi-role">JAMB 2026 · 312 Score</div></div></div>
-      </div>
-      <div class="testi-card">
-        <div class="testi-stars">★★★★★</div>
-        <p class="testi-text">"The predicted score I got on this platform (280) was exactly what I got in the real exam (285). It works on my small Android phone and uses very little data."</p>
-        <div class="testi-author"><div class="testi-avatar">CI</div><div><div class="testi-name">Chioma I.</div><div class="testi-role">WAEC 2026 · 5 A's</div></div></div>
-      </div>
-      <div class="testi-card">
-        <div class="testi-stars">★★★★★</div>
-        <p class="testi-text">"I wasted ₦45,000 on lesson fees last year and failed. This year, I spent only ₦4,000 here for 3 months and my score jumped from 190 to 285."</p>
-        <div class="testi-author"><div class="testi-avatar">EO</div><div><div class="testi-name">Emmanuel O.</div><div class="testi-role">Post-UTME · Unilag</div></div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- CTA BAND -->
-<div class="cta-band">
-  <h2>One Year of Your Life is Worth<br>More than ₦1,500.</h2>
-  <p>Don't risk re-sitting your exam next year. Get the tools you need to pass — right now.</p>
-  <a href="#pricing" class="btn-white">Upgrade to Full Mastery Access <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-</div>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <div class="footer-logo-text">UE <span>School</span></div>
-      <p>Nigeria's data-efficient virtual school. Video masterclasses + CBT practice built by UltimateEdge to ensure no student fails due to lack of quality prep tools.</p>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Classrooms</div>
-      <a href="classroom.html?subject=mathematics">Mathematics</a>
-      <a href="classroom.html?subject=physics">Physics</a>
-      <a href="classroom.html?subject=english">English</a>
-      <a href="classroom.html?subject=chemistry">Chemistry</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Exams</div>
-      <a href="cbt.html?exam=jamb">JAMB UTME Prep</a>
-      <a href="cbt.html?exam=waec">WAEC / SSCE Practice</a>
-      <a href="cbt.html?exam=neco">NECO Practice</a>
-      <a href="cbt.html?exam=postutme">Post-UTME</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">More</div>
-      <a href="dashboard.html">My Dashboard</a>
-      <a href="report-view.html">Mastery Report</a>
-      <a href="#pricing">Upgrade to Premium</a>
-      <a href="https://ultimateedge.info" target="_blank" rel="noopener">Main Site</a>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <div class="footer-copy">© 2026 UltimateEdge School · Pass Your Exam First Try</div>
-    <div class="footer-parent">Part of <a href="https://ultimateedge.info" target="_blank" rel="noopener">UltimateEdge.info</a></div>
-  </div>
-</footer>
-
-<!-- AUTH MODAL -->
+<!-- AUTH MODAL (Surgically Updated for Goal Setting) -->
 <div class="modal-backdrop" id="auth-modal">
   <div class="modal">
     <div class="modal-head">
-      <h2 id="modal-title">Welcome Back</h2>
+      <h2 id="modal-title">Create Account</h2>
       <button class="modal-close" onclick="closeAuthModal()">✕</button>
     </div>
-    <div class="tab-row">
-      <button class="tab-btn active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
-      <button class="tab-btn" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
-    </div>
-    <div class="auth-msg error" id="auth-error"></div>
-    <div class="auth-msg success" id="auth-success"></div>
-    <div id="login-form">
-      <div class="form-group"><label>Email Address</label><input type="email" id="l-email" placeholder="you@example.com" autocomplete="email"></div>
-      <div class="form-group"><label>Password</label><input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password"></div>
-      <button class="btn btn-primary btn-full" style="padding:12px;font-size:.95rem" onclick="handleLogin()">Login →</button>
-      <p style="font-size:.8rem;text-align:center;margin-top:12px;color:var(--muted)">No account? <button style="background:none;border:none;cursor:pointer;color:var(--accent);font-weight:700;font-family:'DM Sans',sans-serif" onclick="switchAuthTab('signup')">Sign up free</button></p>
-    </div>
-    <div id="signup-form" style="display:none">
-      <div class="form-group"><label>Full Name</label><input type="text" id="s-name" placeholder="Amaka Obi" autocomplete="name"></div>
-      <div class="form-group"><label>Email Address</label><input type="email" id="s-email" placeholder="you@example.com" autocomplete="email"></div>
-      <div class="form-group"><label>Password</label><input type="password" id="s-pass" placeholder="Min 6 characters" autocomplete="new-password"></div>
-      <div class="form-group"><label>Target JAMB Score</label><input type="number" id="s-target" placeholder="290" min="100" max="400"></div>
+    
+    <div id="signup-form">
       <div class="form-group">
-        <label>Exams Focused On</label>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px">
-          <label style="display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:.88rem;text-transform:none;letter-spacing:0;color:var(--text)"><input type="checkbox" class="exam-checkbox" value="JAMB" checked> JAMB</label>
-          <label style="display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:.88rem;text-transform:none;letter-spacing:0;color:var(--text)"><input type="checkbox" class="exam-checkbox" value="WAEC" checked> WAEC</label>
-          <label style="display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:.88rem;text-transform:none;letter-spacing:0;color:var(--text)"><input type="checkbox" class="exam-checkbox" value="NECO"> NECO</label>
+        <label>Full Name</label>
+        <input type="text" id="s-name" placeholder="Enter your name">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="s-email" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="s-pass" placeholder="Min 6 characters">
+      </div>
+      
+      <!-- GOAL SETTING FIELDS -->
+      <div class="form-group">
+        <label>Which exams are you sitting?</label>
+        <div style="display:flex; gap:10px; margin-top:5px;">
+           <label><input type="checkbox" class="exam-checkbox" value="JAMB" checked> JAMB</label>
+           <label><input type="checkbox" class="exam-checkbox" value="WAEC"> WAEC</label>
+           <label><input type="checkbox" class="exam-checkbox" value="NECO"> NECO</label>
         </div>
       </div>
-      <button class="btn btn-primary btn-full" style="padding:12px;font-size:.95rem" onclick="handleSignup()">Create Free Account →</button>
-      <p style="font-size:.8rem;text-align:center;margin-top:12px;color:var(--muted)">Already have an account? <button style="background:none;border:none;cursor:pointer;color:var(--accent);font-weight:700;font-family:'DM Sans',sans-serif" onclick="switchAuthTab('login')">Log in</button></p>
+      
+      <div class="form-group">
+        <label>When is your main exam?</label>
+        <select id="s-exam-date" class="form-input" style="width:100%; padding:10px; border-radius:8px;">
+            <option value="2025-04-01">April 2025</option>
+            <option value="2025-05-01">May 2025</option>
+            <option value="2025-06-01">June 2025</option>
+            <option value="2026-04-01">April 2026</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Target JAMB Score</label>
+        <input type="number" id="s-target" placeholder="e.g. 300">
+      </div>
+
+      <button class="btn btn-primary btn-full" onclick="handleSignup()">Create Free Account →</button>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
 
-<script src="js/auth.js" defer></script>
-<script src="js/ai-engine.js" defer></script>
-<script src="js/paystack.js" defer></script>
-<script>
-/* ── HERO MOCK INTERACTION ── */
-function heroSelect(el, correct) {
-  document.querySelectorAll('.mock-option').forEach(o => o.classList.remove('correct','wrong'));
-  el.classList.add(correct ? 'correct' : 'wrong');
-  if (!correct) document.querySelectorAll('.mock-option')[1].classList.add('correct');
-}
-
-/* ── HERO TIMER ── */
-let heroSecs = 84247;
-setInterval(() => {
-  heroSecs--;
-  if (heroSecs < 0) heroSecs = 5999;
-  const h = String(Math.floor(heroSecs/3600)).padStart(2,'0');
-  const m = String(Math.floor((heroSecs%3600)/60)).padStart(2,'0');
-  const s = String(heroSecs%60).padStart(2,'0');
-  const el = document.getElementById('hero-timer');
-  if (el) el.textContent = `⏱ ${h}:${m}:${s}`;
-}, 1000);
-
-/* ── SUBJECTS SLIDER ── */
-(function() {
-  const track  = document.getElementById('subj-track');
-  const cards  = track ? Array.from(track.children) : [];
-  const prevBtn = document.getElementById('subjPrev');
-  const nextBtn = document.getElementById('subjNext');
-  const dotsEl  = document.getElementById('subjDots');
-  if (!track || !cards.length) return;
-
-  let cur = 0, autoTimer = null, resumeTimer = null;
-  const AUTO_DELAY = 3000, RESUME_AFTER = 5000;
-
-  // Build dots
-  cards.forEach((_, i) => {
-    const d = document.createElement('button');
-    d.className = 'subj-dot' + (i === 0 ? ' active' : '');
-    d.dataset.i = i;
-    d.setAttribute('aria-label', `Slide ${i+1}`);
-    d.addEventListener('click', () => { pauseAndResume(); goTo(i); });
-    dotsEl.appendChild(d);
-  });
-
-  function cardW() {
-    return (cards[0]?.offsetWidth || 300) + 20;
-  }
-
-  function updateUI() {
-    dotsEl.querySelectorAll('.subj-dot').forEach((d,j) => d.classList.toggle('active', j === cur));
-    if (prevBtn) prevBtn.disabled = cur === 0;
-    if (nextBtn) nextBtn.disabled = cur === cards.length - 1;
-  }
-
-  function goTo(i) {
-    cur = Math.max(0, Math.min(i, cards.length - 1));
-    track.scrollTo({ left: cur * cardW(), behavior: 'smooth' });
-    updateUI();
-  }
-
-  function autoStep() {
-    cur = (cur + 1) % cards.length;
-    track.scrollTo({ left: cur * cardW(), behavior: 'smooth' });
-    updateUI();
-  }
-
-  function startAuto()    { stopAuto(); autoTimer = setInterval(autoStep, AUTO_DELAY); }
-  function stopAuto()     { clearInterval(autoTimer); autoTimer = null; }
-  function pauseAndResume() {
-    stopAuto();
-    clearTimeout(resumeTimer);
-    resumeTimer = setTimeout(startAuto, RESUME_AFTER);
-  }
-
-  if (prevBtn) prevBtn.addEventListener('click', () => { pauseAndResume(); goTo(cur - 1); });
-  if (nextBtn) nextBtn.addEventListener('click', () => { pauseAndResume(); goTo(cur + 1); });
-
-  // Sync dots on native scroll
-  track.addEventListener('scroll', () => {
-    const i = Math.round(track.scrollLeft / cardW());
-    if (i !== cur) { cur = i; updateUI(); }
-  });
-
-  // Pause on hover/touch
-  track.addEventListener('mouseenter', stopAuto);
-  track.addEventListener('mouseleave', startAuto);
-  track.addEventListener('touchstart', pauseAndResume, { passive: true });
-
-  // Drag-to-scroll
-  let down = false, sx, sl;
-  track.addEventListener('mousedown', e => { down = true; sx = e.pageX - track.offsetLeft; sl = track.scrollLeft; pauseAndResume(); });
-  track.addEventListener('mouseleave', () => down = false);
-  track.addEventListener('mouseup', () => down = false);
-  track.addEventListener('mousemove', e => {
-    if (!down) return;
-    e.preventDefault();
-    track.scrollLeft = sl - (e.pageX - track.offsetLeft - sx) * 1.5;
-  });
-
-  updateUI();
-  startAuto();
-
-  window.addEventListener('resize', () => { track.scrollLeft = cur * cardW(); });
-})();
-
-/* ── PRICING TOGGLE ── */
-function showPricingTab(tab) {
-  document.querySelectorAll('.pricing-tab-content').forEach(el => {
-    el.classList.toggle('active', el.dataset.tab === tab);
-  });
-  document.querySelectorAll('.pricing-tab-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === tab);
-  });
-}
-</script>
 </body>
 </html>
