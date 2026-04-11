@@ -1,108 +1,109 @@
-/* ================================================================
-   service-worker.js — UltimateEdge School v2.1
-   PWA: Offline caching + IndexedDB sync for response logs
-   ================================================================ */
+// ============================================================
+// UltimateEdge School — service-worker.js  (v3.1)
+// ⚠️  MUST be at ROOT of site, NOT in /js/ folder.
+// Handles offline caching and background sync.
+// ============================================================
 
-const CACHE_NAME   = 'ue-school-v2.1';
-const DATA_CACHE   = 'ue-data-v2.1';
-const OFFLINE_PAGE = '/index.html';
+const CACHE_NAME  = 'ue-school-v3';
+const SYNC_TAG    = 'ue-sync-logs';
 
-const STATIC_ASSETS = [
+// Assets to pre-cache on install
+const PRECACHE_URLS = [
   '/',
   '/index.html',
+  '/dashboard.html',
   '/classroom.html',
   '/cbt.html',
-  '/dashboard.html',
-  '/report-view.html',
   '/css/main.css',
   '/js/auth.js',
   '/js/ai-engine.js',
   '/js/paystack.js',
-  '/data/curriculum.json',
-  '/data/questions.json',
+  '/js/cbt-engine.js',
   'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js'
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
 ];
 
-/* ── INSTALL: cache static shell ── */
-self.addEventListener('install', event => {
+// ── Install — pre-cache shell ─────────────────────────────────
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(STATIC_ASSETS.filter(u => !u.startsWith('https://cdn'))))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => {
+      // Cache what we can — ignore failures (CDN may block)
+      return Promise.allSettled(
+        PRECACHE_URLS.map(url => cache.add(url).catch(() => {}))
+      );
+    }).then(() => self.skipWaiting())
   );
 });
 
-/* ── ACTIVATE: clear old caches ── */
-self.addEventListener('activate', event => {
+// ── Activate — clean old caches ───────────────────────────────
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
+    caches.keys().then((keys) =>
       Promise.all(
-        keys.filter(k => k !== CACHE_NAME && k !== DATA_CACHE)
-            .map(k => caches.delete(k))
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
       )
     ).then(() => self.clients.claim())
   );
 });
 
-/* ── FETCH: network-first for API, cache-first for assets ── */
-self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-
-  // Skip non-GET
+// ── Fetch — network-first with cache fallback ─────────────────
+self.addEventListener('fetch', (event) => {
+  // Only handle GET requests
   if (event.request.method !== 'GET') return;
 
-  // Supabase API calls: network-only, don't cache
-  if (url.hostname.includes('supabase.co')) return;
+  // Skip Supabase API calls — always go to network
+  if (event.request.url.includes('supabase.co')) return;
 
-  // Data files: network-first, fallback to cache
-  if (url.pathname.startsWith('/data/')) {
-    event.respondWith(
-      fetch(event.request)
-        .then(res => {
-          const clone = res.clone();
-          caches.open(DATA_CACHE).then(c => c.put(event.request, clone));
-          return res;
-        })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
+  // Skip Paystack calls
+  if (event.request.url.includes('paystack')) return;
 
-  // Static assets: cache-first
   event.respondWith(
-    caches.match(event.request)
-      .then(cached => {
-        if (cached) return cached;
-        return fetch(event.request).then(res => {
-          if (res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
+    fetch(event.request)
+      .then((response) => {
+        // Cache successful responses
+        if (response && response.status === 200) {
+          const cloned = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, cloned);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        // Network failed — serve from cache
+        return caches.match(event.request).then(cached => {
+          if (cached) return cached;
+          // Offline fallback for navigation
+          if (event.request.mode === 'navigate') {
+            return caches.match('/index.html');
           }
-          return res;
+          return new Response('Offline', { status: 503 });
         });
       })
-      .catch(() => caches.match(OFFLINE_PAGE))
   );
 });
 
-/* ── BACKGROUND SYNC: flush IndexedDB logs to Supabase ──────
-   When connection returns, the CBT engine posts a 'sync-logs' message.
-   ──────────────────────────────────────────────────────────── */
-self.addEventListener('message', event => {
-  if (event.data?.type === 'SYNC_LOGS') {
-    // The main thread handles the actual Supabase insert via postMessage reply
-    // because service workers can't import the Supabase client directly.
-    event.source?.postMessage({ type: 'DO_SYNC' });
+// ── Background Sync — flush queued response_logs ──────────────
+self.addEventListener('sync', (event) => {
+  if (event.tag === SYNC_TAG) {
+    event.waitUntil(syncQueuedLogs());
   }
 });
 
-self.addEventListener('sync', event => {
-  if (event.tag === 'sync-response-logs') {
-    event.waitUntil(
-      self.clients.matchAll().then(clients =>
-        clients.forEach(client => client.postMessage({ type: 'DO_SYNC' }))
-      )
-    );
+async function syncQueuedLogs() {
+  // The actual sync logic runs in cbt-engine.js via the 'online' event.
+  // This background sync is a belt-and-suspenders fallback.
+  const clients = await self.clients.matchAll();
+  clients.forEach(client => {
+    client.postMessage({ type: 'SW_SYNC_REQUEST' });
+  });
+}
+
+// ── Message handler ───────────────────────────────────────────
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
   }
 });
