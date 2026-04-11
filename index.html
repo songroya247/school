@@ -3,191 +3,258 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UltimateEdge School — Predict Your Score, Master Your Exam</title>
-<meta name="description" content="Nigeria's only adaptive mastery platform for JAMB, WAEC, and NECO.">
+<title>UltimateEdge — The Mavis Beacon of Exam Success</title>
 
-<!-- 1. CSS SOURCE OF TRUTH -->
+<!-- 1. SYSTEM ASSETS -->
 <link rel="stylesheet" href="css/main.css">
-
-<!-- 2. CORE LIBRARIES -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://js.paystack.co/v1/inline.js" defer></script>
 
-<!-- 3. MASTER LOGIC (Injected surgically) -->
+<!-- 2. MASTER BRAIN -->
 <script src="js/auth.js" defer></script>
 <script src="js/ai-engine.js" defer></script>
 <script src="js/paystack.js" defer></script>
+
+<style>
+    /* ── PREMIUM INTERFACE EXTENSIONS ── */
+    :root { --glass: rgba(255, 255, 255, 0.7); }
+
+    /* Hero App-Shell */
+    .hero { 
+        padding: 100px 40px; 
+        max-width: 1300px; 
+        margin: 0 auto; 
+        display: flex; 
+        align-items: center; 
+        gap: 80px; 
+    }
+
+    .hero-content { flex: 1; }
+    .hero-visual { 
+        flex: 1; 
+        position: relative; 
+        display: flex; 
+        justify-content: center;
+    }
+
+    /* Glass Analytics Card */
+    .glass-card {
+        background: var(--glass);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255,255,255,0.4);
+        border-radius: var(--radius-lg);
+        padding: 30px;
+        box-shadow: var(--shadow-lg);
+        width: 100%;
+        max-width: 440px;
+    }
+
+    /* Proof Strip */
+    .proof-strip {
+        background: var(--dark);
+        color: white;
+        padding: 20px 40px;
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+    }
+    .stat-item h4 { color: var(--gold); font-size: 1.8rem; margin-bottom: 0; }
+    .stat-item p { font-family: var(--font-mono); font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; }
+
+    /* Toggle UI */
+    .mode-toggle {
+        background: #eee;
+        padding: 5px;
+        border-radius: 100px;
+        display: inline-flex;
+        margin-bottom: 40px;
+    }
+    .toggle-btn {
+        padding: 10px 30px;
+        border-radius: 100px;
+        border: none;
+        font-weight: 700;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .toggle-btn.active { background: var(--accent); color: white; box-shadow: var(--shadow); }
+
+    /* Feature Grid */
+    .feat-card {
+        background: white;
+        padding: 40px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        transition: 0.3s;
+    }
+    .feat-card:hover { border-color: var(--accent); transform: translateY(-5px); }
+
+    @media (max-width: 1000px) {
+        .hero { flex-direction: column; text-align: center; padding: 60px 20px; }
+        .hero-visual { width: 100%; }
+        .proof-strip { grid-template-columns: 1fr 1fr; display: grid; gap: 20px; }
+    }
+</style>
 </head>
 <body>
 
-<!-- ⚠️ DEFAULTER GUARD BANNER -->
+<!-- ⚠️ DYNAMIC ACCESS BANNER -->
 <div class="defaulter-banner" id="defaulter-banner" style="display:none;">
-    ⚠️ Your subscription has expired. Free access is still active. 
-    <a href="#pricing">Renew Access for ₦1,500 →</a>
+    <span>Your subscription has expired. Mastery Pro features are locked.</span>
+    <button class="btn btn-warning btn-sm" onclick="location.href='#pricing'">RENEW ACCESS</button>
 </div>
 
-<!-- ── NAVIGATION ── -->
+<!-- ── NAV ── -->
 <nav class="ue-nav">
     <a href="/" class="nav-logo">
         <div class="nav-logo-icon">🎓</div>
-        <span class="nav-logo-text">UE <span>School</span></span>
+        <span class="nav-logo-text">ULTIMATE<span>EDGE</span></span>
     </a>
-    <div class="nav-links">
-        <a href="classroom.html" class="nav-classroom">Classroom</a>
-        <a href="cbt.html">Mock Exams</a>
-        <a href="#pricing">Pricing</a>
+    
+    <div class="nav-links" style="display: flex; gap: 30px; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.05em;">
+        <a href="classroom.html">CLASSROOM</a>
+        <a href="cbt.html">CBT ENGINE</a>
+        <a href="#pricing" style="color: var(--accent);">PRICING</a>
     </div>
+
     <div class="nav-user-area">
         <div class="nav-user-pill" id="nav-user-pill" style="display:none;">
-            <div class="nav-avatar" id="nav-avatar">?</div>
-            <span id="nav-user-name">Student</span>
-            <span class="nav-pro-badge" id="nav-pro-badge" style="display:none;">PRO</span>
+            <div class="nav-avatar" id="nav-avatar"></div>
+            <span id="nav-user-name"></span>
+            <div class="status-pill status-active" id="nav-pro-badge" style="display:none; background: var(--gold); color: black;">PRO</div>
         </div>
-        <button class="btn btn-outline btn-sm" id="nav-login-btn" onclick="openAuthModal('login')">Login</button>
+        <button class="btn btn-primary btn-sm" id="nav-login-btn" onclick="openAuthModal('login')">GET STARTED</button>
     </div>
 </nav>
 
-<!-- ── HERO SECTION ── -->
-<section class="hero reveal">
-    <div class="hero-left">
-        <div class="hero-badge">
-            <span class="badge-dot"></span>
-            Nigeria's Only Adaptive Mastery Platform
-        </div>
-        <h1>Predict Your Score.<br><span>Master Your Exam.</span></h1>
-        <p class="hero-sub">UltimateEdge identifies your specific weak topics and builds a personalized path to a 300+ JAMB score for just $0.99/mo.</p>
-        
-        <div class="hero-actions">
-            <a href="classroom.html" class="btn btn-primary btn-lg">Start Learning Free</a>
-            <a href="#pricing" class="btn btn-outline btn-lg">View Mastery Plans</a>
-        </div>
-
-        <div class="hero-proof">
-            <div class="proof-item"><span style="color:var(--accent-2)">✓</span> Data-Sipping: Works on 2G/3G</div>
-            <div class="proof-item"><span style="color:var(--accent-2)">✓</span> 95% Prediction Accuracy</div>
-            <div class="proof-item"><span style="color:var(--accent-2)">✓</span> Cancel Subscription Anytime</div>
+<!-- ── HERO ── -->
+<header class="hero">
+    <div class="hero-content reveal">
+        <div class="status-pill status-active" style="margin-bottom: 20px;">⚡ AI-DRIVEN MASTERY PLATFORM</div>
+        <h1 style="font-size: 5rem; line-height: 0.9;">STUDY ONCE.<br><span>TRACK EVERYWHERE.</span></h1>
+        <p class="hero-sub" style="font-size: 1.2rem; margin-top: 20px; max-width: 550px;">
+            Nigeria's first adaptive platform for <b>JAMB, WAEC, & NECO</b>. 
+            We find your weak topics and build your path to success for just $0.99.
+        </p>
+        <div class="hero-actions" style="margin-top: 40px; display: flex; gap: 20px;">
+            <button class="btn btn-primary btn-lg" onclick="openAuthModal('signup')">CREATE YOUR PROFILE</button>
+            <button class="btn btn-outline btn-lg" onclick="location.href='classroom.html'">START LEARNING</button>
         </div>
     </div>
 
-    <div class="hero-right">
-        <!-- Live Predictive Preview Card -->
-        <div class="card" style="border: 2px solid var(--accent); position: relative; overflow: hidden;">
-            <div style="background: var(--accent); color: white; padding: 10px 20px; font-family: var(--font-head); font-size: 0.8rem; letter-spacing: 0.1em;">
-                MASTER AI: LIVE READINESS PULSE
+    <div class="hero-visual">
+        <div class="glass-card">
+            <h4 class="text-head" style="font-size: 0.8rem; color: var(--muted); margin-bottom: 20px;">Real-Time Score Prediction</h4>
+            <div style="display: flex; align-items: baseline; gap: 10px;">
+                <span style="font-family: var(--font-head); font-size: 4rem; color: var(--accent);">295</span>
+                <span style="color: var(--accent-2); font-weight: 800;">+12 pts this week</span>
             </div>
-            <div style="padding: 24px; text-align: center;">
-                <div style="font-family: var(--font-head); font-size: 3.5rem; line-height: 1; color: var(--accent);">285<span style="font-size: 1.2rem; color: var(--muted); font-family: var(--font-body);">—305</span></div>
-                <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--muted); margin-top: 5px;">ESTIMATED JAMB SCORE</div>
-                <div style="margin-top: 20px; height: 4px; background: #eee; border-radius: 100px;">
-                    <div style="width: 75%; height: 100%; background: var(--accent-2); border-radius: 100px;"></div>
+            <div style="margin: 25px 0;">
+                <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.6rem; margin-bottom: 8px;">
+                    <span>SYLLABUS MASTERY</span>
+                    <span>72%</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.65rem; margin-top: 8px; font-weight: 700;">
-                    <span>SYLLABUS COVERAGE</span>
-                    <span>75%</span>
+                <div style="height: 8px; background: #eee; border-radius: 100px; overflow: hidden;">
+                    <div style="width: 72%; height: 100%; background: var(--accent);"></div>
                 </div>
+            </div>
+            <div style="background: var(--surface-2); padding: 15px; border-radius: 10px; font-size: 0.75rem;">
+                🎯 <b>AI Suggestion:</b> Practice <b>Calculus</b> to boost your score to 310+.
             </div>
         </div>
     </div>
-</section>
+</header>
 
-<!-- ── PRICING SECTION ── -->
-<section class="pricing-section" id="pricing" style="padding: 100px 24px; background: var(--surface-2);">
-    <div style="max-width: 900px; margin: 0 auto; text-align: center;">
-        <h2 class="section-title">One Plan. Full Power.</h2>
-        <p class="section-sub" style="margin: 0 auto 40px;">Choose a plan that fits your goals. No hidden fees.</p>
+<div class="proof-strip">
+    <div class="stat-item"><h4>5,000+</h4><p>Past Questions</p></div>
+    <div class="stat-item"><h4>200+</h4><p>Masterclasses</p></div>
+    <div class="stat-item"><h4>95%</h4><p>AI Accuracy</p></div>
+    <div class="stat-item"><h4>$0.99</h4><p>Monthly Access</p></div>
+</div>
 
-        <div class="pricing-toggle" style="margin-bottom: 50px;">
-            <button class="btn btn-outline active" id="tab-btn-monthly" onclick="showPricing('monthly')">Monthly Subscription</button>
-            <button class="btn btn-outline" id="tab-btn-bulk" onclick="showPricing('bulk')">Bulk Access (Save ₦6,000)</button>
+<!-- ── PRICING ── -->
+<section id="pricing" style="padding: 100px 20px; text-align: center;">
+    <h2 class="section-title">Investment in your future</h2>
+    <p class="section-sub" style="margin: 0 auto 40px;">Cancel anytime. Study anywhere. Unbeatable value.</p>
+    
+    <div class="mode-toggle">
+        <button class="toggle-btn active" id="tab-monthly" onclick="switchPricing('monthly')">MONTHLY</button>
+        <button class="toggle-btn" id="tab-bulk" onclick="switchPricing('bulk')">BULK (SAVE ₦6,000)</button>
+    </div>
+
+    <div id="price-monthly" class="reveal">
+        <div class="card" style="max-width: 400px; margin: 0 auto; border: 2px solid var(--accent); padding: 50px 30px;">
+            <h3 class="text-head" style="color: var(--accent);">Full Mastery Access</h3>
+            <div style="font-family: var(--font-head); font-size: 4rem; margin: 20px 0;">$0.99<span style="font-size: 1rem; color: var(--muted);">/mo</span></div>
+            <ul style="text-align: left; list-style: none; margin: 30px 0; display: grid; gap: 15px; font-size: 0.9rem;">
+                <li>✅ <b>Unified Goals:</b> JAMB + WAEC + NECO</li>
+                <li>✅ <b>Adaptive Drills:</b> Mavis-style repetition</li>
+                <li>✅ <b>Printable Reports:</b> Professional PDF for parents</li>
+                <li>✅ <b>Offline Mode:</b> Study without data</li>
+            </ul>
+            <button class="btn btn-primary btn-full btn-lg" onclick="openPaystack('monthly')">START SUBSCRIPTION</button>
         </div>
+    </div>
 
-        <!-- Monthly -->
-        <div id="pricing-monthly" class="pricing-content active">
-            <div class="card featured" style="max-width: 450px; margin: 0 auto; padding: 40px;">
-                <div class="text-head" style="color: var(--accent); font-size: 1.2rem;">Mastery Pro</div>
-                <div style="font-family: var(--font-head); font-size: 4.5rem; line-height: 1; margin: 20px 0;">$0.99<span style="font-size: 1.2rem; font-family: var(--font-body); color: var(--muted);">/mo</span></div>
-                <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 30px;">Approximately ₦1,500. Charged every 30 days. Cancel anytime.</p>
-                <ul style="text-align: left; list-style: none; margin-bottom: 35px; display: grid; gap: 12px;">
-                    <li>✅ JAMB Point Prediction AI</li>
-                    <li>✅ WAEC/NECO Grade Forecast</li>
-                    <li>✅ All Video Masterclasses</li>
-                    <li>✅ Weakness Repetition Engine</li>
-                </ul>
-                <button class="btn btn-primary btn-full btn-lg" onclick="openPaystack('monthly')">Subscribe Now</button>
-            </div>
+    <div id="price-bulk" style="display: none; gap: 20px; justify-content: center; max-width: 900px; margin: 0 auto;">
+        <div class="card" style="flex: 1; padding: 40px;">
+            <h3 class="text-head">3 Months</h3>
+            <div style="font-family: var(--font-head); font-size: 2.5rem; margin: 15px 0;">₦4,000</div>
+            <p style="color: var(--accent-2); font-weight: 800; font-size: 0.7rem;">SAVE ₦500</p>
+            <button class="btn btn-outline btn-full" style="margin-top: 20px;" onclick="openPaystack('3month')">GET BULK ACCESS</button>
         </div>
-
-        <!-- Bulk -->
-        <div id="pricing-bulk" class="pricing-content" style="display:none;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                <div class="card" style="padding: 40px;">
-                    <h3 class="text-head">3 Months Access</h3>
-                    <div style="font-family: var(--font-head); font-size: 3rem; margin: 15px 0;">₦4,000</div>
-                    <div class="status-pill status-active" style="display: inline-block; margin-bottom: 20px;">SAVE ₦500</div>
-                    <button class="btn btn-primary btn-full" onclick="openPaystack('3month')">Get Access</button>
-                </div>
-                <div class="card featured" style="padding: 40px;">
-                    <h3 class="text-head">Full Year Access</h3>
-                    <div style="font-family: var(--font-head); font-size: 3rem; margin: 15px 0;">₦12,000</div>
-                    <div class="status-pill status-active" style="display: inline-block; margin-bottom: 20px; background: var(--accent-2); color: white;">SAVE ₦6,000</div>
-                    <button class="btn btn-primary btn-full" onclick="openPaystack('yearly')">Get Access</button>
-                </div>
-            </div>
+        <div class="card" style="flex: 1; padding: 40px; border: 2px solid var(--accent-2);">
+            <h3 class="text-head">1 Year (Best)</h3>
+            <div style="font-family: var(--font-head); font-size: 2.5rem; margin: 15px 0;">₦12,000</div>
+            <p style="color: var(--accent-2); font-weight: 800; font-size: 0.7rem;">SAVE ₦6,000</p>
+            <button class="btn btn-primary btn-full" style="margin-top: 20px; background: var(--accent-2);" onclick="openPaystack('yearly')">GET BULK ACCESS</button>
         </div>
     </div>
 </section>
 
-<!-- ── AUTH MODAL (Unified Goals) ── -->
+<!-- ── AUTH MODAL ── -->
 <div class="modal-backdrop" id="auth-modal">
     <div class="modal">
         <div class="modal-head">
             <h2 id="modal-title">Welcome</h2>
             <button class="modal-close" onclick="closeAuthModal()">✕</button>
         </div>
-
-        <div class="tab-row" style="margin-bottom: 25px;">
-            <button class="tab-btn active" id="login-tab-btn" onclick="switchTab('login')">Login</button>
-            <button class="tab-btn" id="signup-tab-btn" onclick="switchTab('signup')">Sign Up</button>
+        <div class="tab-row">
+            <button class="tab-btn active" id="btn-login" onclick="switchAuth('login')">LOGIN</button>
+            <button class="tab-btn" id="btn-signup" onclick="switchAuth('signup')">SIGN UP</button>
         </div>
 
-        <!-- Login Form -->
         <div id="login-form">
-            <div class="form-group">
-                <label>EMAIL ADDRESS</label>
-                <input type="email" id="l-email" placeholder="you@example.com">
-            </div>
-            <div class="form-group" style="margin-top: 15px;">
-                <label>PASSWORD</label>
-                <input type="password" id="l-pass" placeholder="••••••••">
-            </div>
-            <button class="btn btn-primary btn-full btn-lg" style="margin-top: 25px;" onclick="handleLogin()">Login →</button>
+            <div class="form-group"><label>EMAIL</label><input type="email" id="l-email"></div>
+            <div class="form-group"><label>PASSWORD</label><input type="password" id="l-pass"></div>
+            <button class="btn btn-primary btn-full btn-lg" style="margin-top: 20px;" onclick="handleLogin()">ENTER PORTAL</button>
         </div>
 
-        <!-- Signup Form (Unified Goals) -->
-        <div id="signup-form" style="display:none;">
-            <div class="form-group"><input type="text" id="s-name" placeholder="Full Name"></div>
-            <div class="form-group"><input type="email" id="s-email" placeholder="Email Address"></div>
-            <div class="form-group"><input type="password" id="s-pass" placeholder="Password (Min 6 chars)"></div>
+        <div id="signup-form" style="display: none;">
+            <div class="form-group"><label>FULL NAME</label><input type="text" id="s-name"></div>
+            <div class="form-group"><label>EMAIL</label><input type="email" id="s-email"></div>
+            <div class="form-group"><label>PASSWORD</label><input type="password" id="s-pass"></div>
             
-            <div class="form-group">
+            <div class="form-group" style="margin-top: 20px;">
                 <label>WHICH EXAMS ARE YOU SITTING?</label>
                 <div style="display: flex; gap: 15px; margin-top: 5px;">
-                    <label style="font-size: 0.8rem;"><input type="checkbox" class="exam-checkbox" value="JAMB" checked> JAMB</label>
-                    <label style="font-size: 0.8rem;"><input type="checkbox" class="exam-checkbox" value="WAEC"> WAEC</label>
-                    <label style="font-size: 0.8rem;"><input type="checkbox" class="exam-checkbox" value="NECO"> NECO</label>
+                    <label style="font-size: 0.75rem;"><input type="checkbox" class="exam-checkbox" value="JAMB" checked> JAMB</label>
+                    <label style="font-size: 0.75rem;"><input type="checkbox" class="exam-checkbox" value="WAEC"> WAEC</label>
+                    <label style="font-size: 0.75rem;"><input type="checkbox" class="exam-checkbox" value="NECO"> NECO</label>
                 </div>
             </div>
 
             <div class="form-group">
                 <label>EXAM MONTH</label>
-                <select id="s-exam-date" style="width:100%; height:45px; border-radius:8px; border: 1.5px solid var(--border);">
+                <select id="s-exam-date" style="width: 100%; padding: 12px; border-radius: 8px; border: 1.5px solid var(--border);">
                     <option value="2025-04-01">April 2025</option>
                     <option value="2025-05-01">May 2025</option>
                     <option value="2026-04-01">April 2026</option>
                 </select>
             </div>
 
-            <button class="btn btn-primary btn-full btn-lg" style="margin-top: 10px;" onclick="handleSignup()">Create Free Account →</button>
+            <button class="btn btn-primary btn-full btn-lg" style="margin-top: 20px;" onclick="handleSignup()">CREATE MY PROFILE</button>
         </div>
     </div>
 </div>
@@ -195,30 +262,26 @@
 <div id="toast"></div>
 
 <script>
-/* ── UI CONTROLLER ── */
-function showPricing(type) {
-    document.getElementById('pricing-monthly').style.display = type === 'monthly' ? 'block' : 'none';
-    document.getElementById('pricing-bulk').style.display = type === 'bulk' ? 'block' : 'none';
-    document.getElementById('tab-btn-monthly').classList.toggle('active', type === 'monthly');
-    document.getElementById('tab-btn-bulk').classList.toggle('active', type === 'bulk');
-}
+    function switchPricing(type) {
+        document.getElementById('price-monthly').style.display = type === 'monthly' ? 'block' : 'none';
+        document.getElementById('price-bulk').style.display = type === 'bulk' ? 'flex' : 'none';
+        document.getElementById('tab-monthly').classList.toggle('active', type === 'monthly');
+        document.getElementById('tab-bulk').classList.toggle('active', type === 'bulk');
+    }
 
-function openAuthModal(tab) {
-    document.getElementById('auth-modal').classList.add('open');
-    switchTab(tab);
-}
+    function openAuthModal(tab) {
+        document.getElementById('auth-modal').classList.add('open');
+        switchAuth(tab);
+    }
+    function closeAuthModal() { document.getElementById('auth-modal').classList.remove('open'); }
 
-function closeAuthModal() {
-    document.getElementById('auth-modal').classList.remove('open');
-}
-
-function switchTab(tab) {
-    document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
-    document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none';
-    document.getElementById('login-tab-btn').classList.toggle('active', tab === 'login');
-    document.getElementById('signup-tab-btn').classList.toggle('active', tab === 'signup');
-    document.getElementById('modal-title').textContent = tab === 'login' ? 'Welcome Back' : 'Join the 300+ Club';
-}
+    function switchAuth(tab) {
+        document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+        document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none';
+        document.getElementById('btn-login').classList.toggle('active', tab === 'login');
+        document.getElementById('btn-signup').classList.toggle('active', tab === 'signup');
+        document.getElementById('modal-title').textContent = tab === 'login' ? 'Welcome Back' : 'Setup Your Path';
+    }
 </script>
 
 </body>
