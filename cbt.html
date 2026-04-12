@@ -3,106 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CBT Practice — UltimateEdge School</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+  <title>CBT Exam – UltimateEdge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
-
-  <!-- Required Defaulter Banner -->
-  <div class="defaulter-banner" id="defaulter-banner">
-    ⚠️ Your subscription has expired. <a href="index.html#pricing">Renew Now →</a>
-  </div>
-
-  <nav class="ue-nav">
-    <a class="ue-nav__brand" href="/index.html">ULTIMATE<span>EDGE</span></a>
-    <div class="cbt-timer" id="q-timer" style="display:none">00:45</div>
-    <div class="ue-nav__right">
-       <span id="nav-xp">0 XP</span>
-       <div id="nav-user-pill" style="display:none">
-         <div id="nav-avatar">U</div>
-         <span id="nav-user-name">Student</span>
-       </div>
-    </div>
-  </nav>
-
-  <div class="container mt-lg" id="cbt-app">
-    
-    <!-- LOADING SCREEN -->
-    <div id="cbt-loading" class="text-center" style="padding:100px 0;">
-        <h2 class="text-head">Preparing your drill...</h2>
-        <p class="text-muted">Mixing failed and new questions...</p>
-    </div>
-
-    <!-- QUESTION INTERFACE -->
-    <div id="cbt-interface" style="display:none">
-        <div class="card">
-          <div class="flex-between mb-lg">
-            <span class="status-pill status-active" id="q-topic-tag">PRACTICE</span>
-            <span class="text-mono" id="q-count" style="font-weight:700">0/0</span>
-          </div>
-          <h2 class="mb-lg" id="q-text" style="font-size:1.3rem; min-height:80px">Loading...</h2>
-          
-          <div class="flex-col gap" id="q-options"></div>
-
-          <div class="q-map mt-lg" id="q-map"></div>
-        </div>
-    </div>
-
-    <!-- RESULTS SCREEN -->
-    <div id="cbt-results" style="display:none">
-        <div class="card text-center">
-            <h1 class="text-head" style="font-size:3rem">Session Complete!</h1>
-            <div class="grid-2 mt">
-                <div class="card--blue card">
-                    <p class="text-xs fw-700">ACCURACY</p>
-                    <div id="res-acc" class="text-head" style="font-size:2.5rem">0%</div>
-                </div>
-                <div class="card">
-                    <p class="text-xs fw-700 text-muted">JAMB ESTIMATE</p>
-                    <div id="res-jamb" class="text-head" style="font-size:2.5rem">NIL</div>
-                </div>
-            </div>
-            <div class="flex-col gap mt-lg">
-                <button class="btn btn-primary" onclick="location.reload()">Try Another Topic</button>
-                <a href="dashboard.html" class="btn btn-outline">Go to Dashboard</a>
-            </div>
-        </div>
-    </div>
-
-  </div>
-
-  <div id="toast"></div>
-
-  <!-- Shared Scripts -->
   <script src="/js/auth.js"></script>
   <script src="/js/ai-engine.js"></script>
   <script src="/js/cbt-engine.js"></script>
+</head>
+<body>
+<div class="defaulter-banner" id="defaulter-banner">⚠️ Subscription expired. <a href="index.html#pricing">Renew</a></div>
+<nav class="ue-nav"><div class="nav-brand">ULTIMATE<span>EDGE</span></div><div class="nav-links"><a href="index.html">Home</a><a href="classroom.html">Classroom</a><a href="cbt.html">CBT</a><a href="dashboard.html">Dashboard</a></div><div class="nav-user" id="nav-user-pill"><div class="nav-avatar"></div><span id="nav-user-name"></span><span id="nav-pro-badge" class="pro-badge" style="display:none">PRO</span><span id="nav-xp"></span></div><button id="nav-login-btn" onclick="openAuthModal('login')">Login / Sign Up</button><button id="nav-logout-btn" style="display:none" onclick="sb.auth.signOut()">Log out</button></nav>
+<main class="cbt-container" style="max-width:800px; margin:2rem auto; padding:1rem;">
+  <div class="cbt-header" style="display:flex; justify-content:space-between; align-items:center;">
+    <select id="mode-select" class="form-select"><option value="drill">Topic Practice (Drill)</option><option value="mock">Full Mock Exam</option></select>
+    <select id="topic-select" class="form-select"><option value="quadratics">Quadratics</option><option value="logarithms">Logarithms</option><option value="trigonometry">Trigonometry</option></select>
+    <span id="timer" class="cbt-timer" style="display:none">02:00:00</span>
+  </div>
+  <div id="question-panel" style="margin: 2rem 0;"></div>
+  <div id="question-map" class="question-map"></div>
+  <button id="start-btn" class="btn btn-primary">Start Exam</button>
+</main>
+<div id="toast"></div>
+<!-- Auth Modal snippet (same as previous) -->
+<div id="auth-modal" class="modal-backdrop" style="display:none"><div class="modal-card"><span class="modal-close" onclick="closeAuthModal()">&times;</span><div class="auth-tabs"><button class="tab-btn active" onclick="switchAuthTab('login')">Login</button><button class="tab-btn" onclick="switchAuthTab('signup')">Sign Up</button></div><div id="login-form" class="auth-form"><input type="email" id="login-email" placeholder="Email"><input type="password" id="login-password" placeholder="Password"><button class="btn btn-primary" onclick="handleLogin(event)">Login →</button></div><div id="signup-form" class="auth-form" style="display:none"><input type="text" id="signup-name" placeholder="Full Name"><input type="email" id="signup-email" placeholder="Email"><input type="password" id="signup-password" placeholder="Password (min 6 chars)"><div class="exam-checks"><label><input type="checkbox" value="JAMB"> JAMB</label><label><input type="checkbox" value="WAEC"> WAEC</label></div><select id="signup-exam-month"></select><select id="signup-target-score"></select><button class="btn btn-primary" onclick="handleSignup(event)">Create Free Account →</button></div></div></div>
+<script>
+  // Populate month/score selects
+  for(let i=1;i<=18;i++){ let d=new Date(); d.setMonth(d.getMonth()+i); document.getElementById('signup-exam-month').innerHTML+=`<option value="${d.toISOString().slice(0,10)}">${d.toLocaleDateString('en-NG',{year:'numeric',month:'long'})}</option>`;}
+  for(let s=200;s<=320;s+=10) document.getElementById('signup-target-score').innerHTML+=`<option value="${s}">${s}</option>`;
 
-  <script>
-    // Logic to parse URL and start engine
-    document.addEventListener('DOMContentLoaded', async () => {
-        const params = new URLSearchParams(window.location.search);
-        const topicId = params.get('topic') || 'quadratics';
-        
-        // Wait for Auth
-        const checkAuth = setInterval(() => {
-            if (window.currentUser) {
-                clearInterval(checkAuth);
-                document.getElementById('cbt-loading').style.display = 'none';
-                document.getElementById('cbt-interface').style.display = 'block';
-                initCBTSession(topicId, 'drill');
-            }
-        }, 500);
-    });
-
-    function showResults(correct, total, acc, speed) {
-        document.getElementById('cbt-interface').style.display = 'none';
-        document.getElementById('cbt-results').style.display = 'block';
-        document.getElementById('res-acc').textContent = Math.round(acc) + '%';
-        document.getElementById('res-jamb').textContent = window.predictJAMBWithSpeed(acc, speed);
-    }
-  </script>
+  document.getElementById('start-btn').onclick = () => {
+    const mode = document.getElementById('mode-select').value;
+    const topic = document.getElementById('topic-select').value;
+    if(mode === 'drill') startDrill(topic);
+    else startMock(topic);
+  };
+</script>
 </body>
 </html>
