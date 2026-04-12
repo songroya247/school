@@ -3,42 +3,106 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CBT Practice — UltimateEdge</title>
+  <title>CBT Practice — UltimateEdge School</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
+  <!-- Required Defaulter Banner -->
+  <div class="defaulter-banner" id="defaulter-banner">
+    ⚠️ Your subscription has expired. <a href="index.html#pricing">Renew Now →</a>
+  </div>
+
   <nav class="ue-nav">
     <a class="ue-nav__brand" href="/index.html">ULTIMATE<span>EDGE</span></a>
-    <div class="cbt-timer" id="q-timer" style="background:var(--surface-2); padding:6px 12px; border-radius:8px; font-family:var(--font-mono); font-weight:700;">00:45</div>
+    <div class="cbt-timer" id="q-timer" style="display:none">00:45</div>
     <div class="ue-nav__right">
-       <button class="btn btn-primary btn-sm">Login</button>
+       <span id="nav-xp">0 XP</span>
+       <div id="nav-user-pill" style="display:none">
+         <div id="nav-avatar">U</div>
+         <span id="nav-user-name">Student</span>
+       </div>
     </div>
   </nav>
 
-  <div class="container mt-lg">
-    <div class="card">
-      <div class="flex-between mb-lg">
-        <span class="status-pill status-active" style="background:var(--blue-light); color:var(--blue)">MATHEMATICS</span>
-        <span class="text-mono" style="font-weight:700">1/10</span>
-      </div>
-      <h2 class="mb-lg" id="q-text" style="font-size:1.4rem">LOADING QUESTION...</h2>
-      
-      <div class="flex-col gap" id="q-options">
-        <button class="drill-option">
-          <span class="drill-option__label">A</span>
-          <span>Option Text</span>
-        </button>
-      </div>
-
-      <div class="flex-between mt-lg">
-        <button class="btn btn-ghost" style="flex:1">Previous</button>
-        <button class="btn btn-primary" style="flex:1">Next →</button>
-      </div>
+  <div class="container mt-lg" id="cbt-app">
+    
+    <!-- LOADING SCREEN -->
+    <div id="cbt-loading" class="text-center" style="padding:100px 0;">
+        <h2 class="text-head">Preparing your drill...</h2>
+        <p class="text-muted">Mixing failed and new questions...</p>
     </div>
+
+    <!-- QUESTION INTERFACE -->
+    <div id="cbt-interface" style="display:none">
+        <div class="card">
+          <div class="flex-between mb-lg">
+            <span class="status-pill status-active" id="q-topic-tag">PRACTICE</span>
+            <span class="text-mono" id="q-count" style="font-weight:700">0/0</span>
+          </div>
+          <h2 class="mb-lg" id="q-text" style="font-size:1.3rem; min-height:80px">Loading...</h2>
+          
+          <div class="flex-col gap" id="q-options"></div>
+
+          <div class="q-map mt-lg" id="q-map"></div>
+        </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="cbt-results" style="display:none">
+        <div class="card text-center">
+            <h1 class="text-head" style="font-size:3rem">Session Complete!</h1>
+            <div class="grid-2 mt">
+                <div class="card--blue card">
+                    <p class="text-xs fw-700">ACCURACY</p>
+                    <div id="res-acc" class="text-head" style="font-size:2.5rem">0%</div>
+                </div>
+                <div class="card">
+                    <p class="text-xs fw-700 text-muted">JAMB ESTIMATE</p>
+                    <div id="res-jamb" class="text-head" style="font-size:2.5rem">NIL</div>
+                </div>
+            </div>
+            <div class="flex-col gap mt-lg">
+                <button class="btn btn-primary" onclick="location.reload()">Try Another Topic</button>
+                <a href="dashboard.html" class="btn btn-outline">Go to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
   </div>
 
   <div id="toast"></div>
+
+  <!-- Shared Scripts -->
+  <script src="/js/auth.js"></script>
+  <script src="/js/ai-engine.js"></script>
+  <script src="/js/cbt-engine.js"></script>
+
+  <script>
+    // Logic to parse URL and start engine
+    document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const topicId = params.get('topic') || 'quadratics';
+        
+        // Wait for Auth
+        const checkAuth = setInterval(() => {
+            if (window.currentUser) {
+                clearInterval(checkAuth);
+                document.getElementById('cbt-loading').style.display = 'none';
+                document.getElementById('cbt-interface').style.display = 'block';
+                initCBTSession(topicId, 'drill');
+            }
+        }, 500);
+    });
+
+    function showResults(correct, total, acc, speed) {
+        document.getElementById('cbt-interface').style.display = 'none';
+        document.getElementById('cbt-results').style.display = 'block';
+        document.getElementById('res-acc').textContent = Math.round(acc) + '%';
+        document.getElementById('res-jamb').textContent = window.predictJAMBWithSpeed(acc, speed);
+    }
+  </script>
 </body>
 </html>
