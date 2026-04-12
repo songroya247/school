@@ -1,81 +1,67 @@
-/**
- * UltimateEdge Paystack Controller (v3.1)
- * Handles subscription logic and plan-based billing.
- */
+// Paystack Live Key (provided)
+const PS_PUBLIC_KEY = 'pk_live_681bc4436b4c4249010d01795bb05f655cd470eb';
 
-const PS_PUBLIC_KEY = 'pk_live_YOUR_ACTUAL_KEY'; // Replace with your key
-
+// Plan codes – you must replace these with actual Paystack Plan Codes
+// Log into Paystack Dashboard → Products → Plans → create 3 plans and copy PLN_xxx
 const PS_PLANS = {
-    'monthly': 'PLN_MONTHLY_CODE', // Replace with Paystack Plan Code
-    '3month':  'PLN_3MONTH_CODE',  // Replace with Paystack Plan Code
-    'annual':  'PLN_ANNUAL_CODE'   // Replace with Paystack Plan Code
+  monthly: 'PLN_monthly_placeholder',   // Replace with actual
+  '3month': 'PLN_3month_placeholder',   // Replace
+  annual: 'PLN_annual_placeholder'      // Replace
 };
 
-async function openPaystack(planKey) {
-    if (!window.currentUser) {
-        window.openAuthModal('login');
-        window.toast("Please log in to subscribe.");
-        return;
-    }
+async function handlePaymentSuccess(response, plan) {
+  if (!currentUser) return;
+  let expiry = new Date();
+  if (plan === 'monthly') expiry.setDate(expiry.getDate() + 30);
+  else if (plan === '3month') expiry.setDate(expiry.getDate() + 90);
+  else if (plan === 'annual') expiry.setDate(expiry.getDate() + 365);
 
-    const planCode = PS_PLANS[planKey];
-    if (planCode.includes('CODE')) {
-        window.toast("Payment setup incomplete. Plan codes missing.");
-        return;
-    }
+  const { error } = await sb
+    .from('profiles')
+    .update({
+      is_premium: true,
+      subscription_expiry: expiry.toISOString(),
+      auto_renew: plan === 'monthly',
+      subscription_status: 'ACTIVE'
+    })
+    .eq('id', currentUser.id);
 
-    const handler = PaystackPop.setup({
-        key: PS_PUBLIC_KEY,
-        email: window.currentUser.email,
-        plan: planCode,
-        metadata: {
-            user_id: window.currentUser.id,
-            plan_type: planKey
-        },
-        callback: function(response) {
-            handlePaymentSuccess(response, planKey);
-        },
-        onClose: function() {
-            window.toast("Payment window closed.");
-        }
+  if (!error) {
+    // Log payment
+    await sb.from('payments').insert({
+      user_id: currentUser.id,
+      amount: plan === 'monthly' ? 1500 : plan === '3month' ? 4000 : 12000,
+      plan: plan,
+      reference: response.reference,
+      status: 'success'
     });
-
-    handler.openIframe();
-    window.trackAction('payment_initiated', { plan: planKey });
+    toast(`Payment successful! Premium active until ${expiry.toLocaleDateString()}`);
+    await loadProfile(); // refresh profile
+    updateNavUI();
+  } else {
+    toast('Error updating subscription. Contact support.');
+  }
 }
 
-async function handlePaymentSuccess(response, planKey) {
-    window.toast("Verifying payment...");
-
-    // 1. Calculate new expiry
-    let daysToAdd = 30;
-    if (planKey === '3month') daysToAdd = 90;
-    if (planKey === 'annual') daysToAdd = 365;
-
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + daysToAdd);
-
-    // 2. Update Profile in Supabase
-    const { error } = await window.sb.from('profiles').update({
-        is_premium: true,
-        subscription_expiry: expiryDate.toISOString(),
-        status: 'ACTIVE',
-        paystack_customer_id: response.customer_code || null
-    }).eq('id', window.currentUser.id);
-
-    // 3. Log Payment Transaction
-    await window.sb.from('payments').insert([{
-        user_id: window.currentUser.id,
-        amount: 0, // Paystack handles actual amounts via Plan
-        plan: planKey,
-        reference: response.reference,
-        status: 'SUCCESS'
-    }]);
-
-    if (!error) {
-        window.trackAction('payment_success', { reference: response.reference });
-        window.location.href = 'payment-success.html';
-    } else {
-        window.toast("Error updating subscription. Contact support.");
-    }
+function openPaystack(plan) {
+  if (!currentUser) {
+    toast('Please log in first');
+    openAuthModal('login');
+    return;
+  }
+  const planCode = PS_PLANS[plan];
+  if (!planCode || planCode.includes('placeholder')) {
+    toast('Payment not yet configured. Please contact support.');
+    return;
+  }
+  const handler = PaystackPop.setup({
+    key: PS_PUBLIC_KEY,
+    email: currentUser.email,
+    plan: planCode,
+    callback: (response) => handlePaymentSuccess(response, plan),
+    onClose: () => toast('Payment window closed.')
+  });
+  handler.openIframe();
 }
+
+window.openPaystack = openPaystack;
