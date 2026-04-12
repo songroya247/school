@@ -1,52 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/main.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classroom – UltimateEdge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/ai-engine.js"></script>
 </head>
 <body>
-    <nav class="ue-nav">
-        <div class="ue-nav__brand">ULTIMATE<span>EDGE</span></div>
-        <div class="ue-nav__right">
-            <span id="nav-xp">0 XP</span>
-            <div id="nav-user-pill" style="display:none"><span id="nav-user-name"></span></div>
-        </div>
-    </nav>
-    <main class="container mt-lg">
-        <h1 class="section-title">Your Progress</h1>
-        <div class="grid-3 mt-lg">
-            <div class="card card--blue text-center">
-                <p>JAMB ESTIMATE</p>
-                <h2 id="res-jamb" style="font-size:2.5rem">NIL</h2>
-            </div>
-            <div class="card text-center">
-                <p>WAEC GRADE</p>
-                <h2 id="res-waec" style="font-size:2.5rem">NIL</h2>
-            </div>
-            <div class="card">
-                <p>COMMITMENT</p>
-                <h2 id="res-comm">0</h2>
-            </div>
-        </div>
-        <div class="card mt-lg">
-            <h3>🧭 SmartPath Tips</h3>
-            <div id="smartpath-list" class="mt"></div>
-        </div>
-    </main>
-    <script src="/js/auth.js"></script>
-    <script src="/js/ai-engine.js"></script>
-    <script>
-        window.addEventListener('ue_auth_ready', async () => {
-            const acc = currentProfile.accuracy_avg;
-            document.getElementById('res-jamb').textContent = window.predictJAMB(acc);
-            document.getElementById('res-waec').textContent = window.predictWAEC(acc);
-            
-            const { data: tm } = await sb.from('topic_mastery').select('*').eq('user_id', currentUser.id).limit(3);
-            document.getElementById('smartpath-list').innerHTML = tm.map(t => `<div class="card" style="margin-bottom:10px">${t.topic_id.toUpperCase()} - ${Math.round(t.accuracy_avg)}%</div>`).join('');
-        });
-    </script>
+<div class="defaulter-banner" id="defaulter-banner">⚠️ Subscription expired. <a href="index.html#pricing">Renew</a></div>
+<nav class="ue-nav"><div class="nav-brand">ULTIMATE<span>EDGE</span></div><div class="nav-links"><a href="index.html">Home</a><a href="classroom.html">Classroom</a><a href="cbt.html">CBT</a><a href="dashboard.html">Dashboard</a></div><div class="nav-user" id="nav-user-pill"><div class="nav-avatar"></div><span id="nav-user-name"></span><span id="nav-pro-badge" class="pro-badge" style="display:none">PRO</span><span id="nav-xp"></span></div><button id="nav-login-btn" onclick="openAuthModal('login')">Login / Sign Up</button><button id="nav-logout-btn" style="display:none" onclick="sb.auth.signOut()">Log out</button></nav>
+<main class="classroom-layout" style="display:flex; gap:1rem; padding:1rem;">
+  <div class="subject-sidebar" style="width:200px; background:var(--dark-2); border-radius:20px; padding:1rem;">
+    <h3>Subjects</h3>
+    <div id="subject-list"></div>
+  </div>
+  <div style="flex:1;">
+    <iframe id="lesson-frame" src="/lessons/placeholder/index.html" style="width:100%; height:400px; border:none; border-radius:20px;"></iframe>
+    <div class="quiz-area card" style="margin-top:1rem;"><h3>Topic Quiz</h3><div id="quiz-questions"></div><button id="submit-quiz" class="btn btn-primary">Submit Quiz</button></div>
+  </div>
+</main>
+<div id="toast"></div>
+<!-- Auth Modal -->
+<div id="auth-modal" class="modal-backdrop" style="display:none"><div class="modal-card"><span class="modal-close" onclick="closeAuthModal()">&times;</span><div class="auth-tabs"><button class="tab-btn active" onclick="switchAuthTab('login')">Login</button><button class="tab-btn" onclick="switchAuthTab('signup')">Sign Up</button></div><div id="login-form" class="auth-form"><input type="email" id="login-email" placeholder="Email"><input type="password" id="login-password" placeholder="Password"><button class="btn btn-primary" onclick="handleLogin(event)">Login →</button></div><div id="signup-form" class="auth-form" style="display:none"><input type="text" id="signup-name" placeholder="Full Name"><input type="email" id="signup-email" placeholder="Email"><input type="password" id="signup-password" placeholder="Password (min 6 chars)"><div class="exam-checks"><label><input type="checkbox" value="JAMB"> JAMB</label><label><input type="checkbox" value="WAEC"> WAEC</label></div><select id="signup-exam-month"></select><select id="signup-target-score"></select><button class="btn btn-primary" onclick="handleSignup(event)">Create Free Account →</button></div></div></div>
+<script>
+  // Populate dropdowns same as before
+  const monthSelect = document.getElementById('signup-exam-month');
+  for(let i=1;i<=18;i++){ let d=new Date(); d.setMonth(d.getMonth()+i); monthSelect.innerHTML+=`<option value="${d.toISOString().slice(0,10)}">${d.toLocaleDateString('en-NG',{year:'numeric',month:'long'})}</option>`;}
+  for(let s=200;s<=320;s+=10) document.getElementById('signup-target-score').innerHTML+=`<option value="${s}">${s}</option>`;
+
+  // Load subjects from curriculum
+  fetch('/data/curriculum.json').then(r=>r.json()).then(data=>{
+    const subjDiv = document.getElementById('subject-list');
+    for(let [subject, topics] of Object.entries(data)){
+      let btn = document.createElement('button');
+      btn.innerText = subject;
+      btn.className = 'btn btn-outline';
+      btn.style.margin = '5px 0';
+      btn.onclick = () => loadTopic(topics[0]); // load first topic
+      subjDiv.appendChild(btn);
+    }
+  });
+  async function loadTopic(topicId){
+    const grade = currentProfile?.current_skill_level || 3;
+    document.getElementById('lesson-frame').src = `/lessons/${topicId}/index.html?grade=${grade}`;
+    // Load quiz questions from question bank
+    const res = await fetch('/data/questions.json');
+    const all = await res.json();
+    const quizQ = all.filter(q=>q.topic===topicId).slice(0,3);
+    const quizDiv = document.getElementById('quiz-questions');
+    quizDiv.innerHTML = quizQ.map((q,i)=>`<div><p>${q.text}</p>${q.options.map((opt,idx)=>`<label><input type="radio" name="q${i}" value="${idx}"> ${opt}</label>`).join('')}</div>`).join('');
+    window.currentQuiz = { topicId, questions: quizQ };
+  }
+  document.getElementById('submit-quiz').onclick = async () => {
+    let correct=0;
+    window.currentQuiz.questions.forEach((q,i)=>{
+      const selected = document.querySelector(`input[name="q${i}"]:checked`);
+      if(selected && parseInt(selected.value)===q.correct) correct++;
+    });
+    const acc = (correct/window.currentQuiz.questions.length)*100;
+    toast(`Quiz score: ${acc}%`);
+    // Update mastery (simplified)
+    await sb.from('topic_mastery').upsert({ user_id: currentUser.id, topic_id: window.currentQuiz.topicId, accuracy_avg: acc, last_studied: new Date() });
+    addXP(20, 'Quiz completed');
+  };
+  // Listen for iframe completion
+  window.addEventListener('message', (e) => {
+    if(e.data.type === 'lesson_completed') addXP(25, 'Video completed');
+  });
+</script>
 </body>
 </html>
