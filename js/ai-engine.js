@@ -1,266 +1,241 @@
 // ============================================================
-// UltimateEdge School â€” /js/ai-engine.js  (v3.1)
-// The Brain. Load AFTER auth.js.
-// Exposes: calcMastery(), predictJAMB(), predictWAEC(),
-//          isDrillMode(), getSkillGrade(), applyAdaptivePyramid(),
-//          calcCommitmentScore(), showTeacherMarketplace()
+// UltimateEdge School — /js/cbt-engine.js  (v3.2)
+// Load AFTER ai-engine.js. Only included on cbt.html.
+//
+// Drill question set logic: wrong-answer-priority mixing.
+// Students face their missed questions repeatedly until correct.
+// No internal algorithm names exposed to users.
 // ============================================================
 
-// â”€â”€ 1. MASTERY CALCULATION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// M = (accuracy% Ã— 0.7) + (min(attempts/50, 1) Ã— 0.3)
-// Returns 0.0 to 1.0.  Returns null if accuracy is null (NIL).
-function calcMastery(accuracyPercent, attempts) {
-  if (accuracyPercent == null) return null;
-  const acc    = Math.max(0, Math.min(100, accuracyPercent)) / 100;
-  const vol    = Math.min((attempts || 0) / 50, 1);
-  return parseFloat(((acc * 0.7) + (vol * 0.3)).toFixed(4));
+// ── IndexedDB: offline answer queue ──────────────────────────
+const IDB_NAME    = 'ue-school-v3';
+const IDB_STORE   = 'queued_logs';
+let   _idb        = null;
+
+function openIDB() {
+  return new Promise((res, rej) => {
+    if (_idb) return res(_idb);
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e =>
+      e.target.result.createObjectStore(IDB_STORE, { keyPath: 'id', autoIncrement: true });
+    req.onsuccess = e => { _idb = e.target.result; res(_idb); };
+    req.onerror   = e => rej(e.target.error);
+  });
 }
 
-// â”€â”€ 2. DRILL MODE vs EXAM MODE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// mastery < 0.50 â†’ Drill Mode (timer hidden)
-// mastery â‰¥ 0.50 â†’ Exam Mode  (timer shown)
-function isDrillMode(masteryLevel) {
-  if (masteryLevel == null) return true; // NIL users always start in Drill Mode
-  return masteryLevel < 0.50;
+async function saveLogOffline(entry) {
+  const db    = await openIDB();
+  const tx    = db.transaction(IDB_STORE, 'readwrite');
+  tx.objectStore(IDB_STORE).add(entry);
+  return new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
 }
 
-// â”€â”€ 3. ADAPTIVE PYRAMID â€” Grade 1/2/3 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Based on last 20 questions for a specific topic
-function getSkillGrade(accuracyPercent) {
-  if (accuracyPercent == null) return 3; // default
-  if (accuracyPercent >= 60) return 3;   // Standard
-  if (accuracyPercent >= 40) return 2;   // Intermediate
-  return 1;                              // Foundational
+async function getAllQueued() {
+  const db = await openIDB();
+  const tx = db.transaction(IDB_STORE, 'readonly');
+  return new Promise((res, rej) => {
+    const req = tx.objectStore(IDB_STORE).getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror   = rej;
+  });
 }
 
-// â”€â”€ 4. JAMB SCORE PREDICTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// JAMB is out of 400. We estimate from overall accuracy.
-// Returns a range string like "265â€“295"
-function predictJAMB(accuracyPercent) {
-  if (accuracyPercent == null) return 'â€”';
-  const raw  = Math.round(accuracyPercent * 4);
-  const low  = Math.max(0,   raw - 15);
-  const high = Math.min(400, raw + 15);
-  return low + 'â€“' + high;
+async function clearQueued(ids) {
+  const db    = await openIDB();
+  const tx    = db.transaction(IDB_STORE, 'readwrite');
+  const store = tx.objectStore(IDB_STORE);
+  ids.forEach(id => store.delete(id));
+  return new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
 }
 
-// JAMB with speed factor (for Triple-Threat on dashboard)
-function predictJAMBWithSpeed(avgAccuracy, avgSpeedSeconds) {
-  if (avgAccuracy == null) return 'â€”';
-  const raw         = avgAccuracy * 4;
-  let   speedFactor = 1.0;
-  if      (avgSpeedSeconds < 45) speedFactor = 1.05;
-  else if (avgSpeedSeconds > 65) speedFactor = 0.90;
-  const adjusted = Math.round(raw * speedFactor);
-  const low      = Math.max(0,   adjusted - 15);
-  const high     = Math.min(400, adjusted + 15);
-  return low + 'â€“' + high;
-}
-
-// â”€â”€ 5. WAEC/NECO GRADE PREDICTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function predictWAEC(accuracyPercent) {
-  if (accuracyPercent == null) return 'â€”';
-  const a = accuracyPercent;
-  if (a >= 75) return 'A1';
-  if (a >= 70) return 'B2';
-  if (a >= 65) return 'B3';
-  if (a >= 60) return 'C4';
-  if (a >= 55) return 'C5';
-  if (a >= 50) return 'C6';
-  if (a >= 45) return 'D7';
-  if (a >= 40) return 'E8';
-  return 'F9';
-}
-
-// Alias â€” same logic for NECO
-const predictNECO = predictWAEC;
-
-// â”€â”€ 6. APPLY ADAPTIVE PYRAMID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Run after every drill session ends.
-// Updates profile + topic_mastery grade, shows appropriate banners.
-async function applyAdaptivePyramid(topicId, accuracyAvg, attemptsAtGrade1) {
-  if (!currentUser || !sb) return;
-
-  const newGrade = getSkillGrade(accuracyAvg);
-
-  // Update topic_mastery grade
-  await sb.from('topic_mastery').upsert({
-    user_id:   currentUser.id,
-    topic_id:  topicId,
-    grade_level: newGrade,
-    attempts_at_grade1: newGrade === 1
-      ? (attemptsAtGrade1 || 0) + 1
-      : (attemptsAtGrade1 || 0),
-    last_studied: new Date().toISOString()
-  }, { onConflict: 'user_id,topic_id' });
-
-  // Update overall skill level on profile
-  await sb.from('profiles')
-    .update({ current_skill_level: newGrade })
-    .eq('id', currentUser.id);
-  if (currentProfile) currentProfile.current_skill_level = newGrade;
-
-  // Show appropriate banner
-  const totalGrade1Attempts = newGrade === 1 ? (attemptsAtGrade1 || 0) + 1 : 0;
-
-  if (newGrade === 1 && totalGrade1Attempts >= 3 && accuracyAvg < 40) {
-    showElementaryRedirect(topicId);
-  } else if (newGrade < 3) {
-    showGradeBanner(newGrade, topicId);
-  }
-}
-
-// â”€â”€ 7. GRADE BANNER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function showGradeBanner(grade, topicId) {
-  const existing = document.getElementById('adaptive-banner');
-  if (existing) existing.remove();
-
-  const messages = {
-    1: {
-      title: 'ðŸ”¬ Foundational Mode Activated',
-      body:  'We\'ve adjusted your materials to build a rock-solid foundation. Master these and you\'ll be unstoppable.',
-      cls:   'adaptive-banner--grade1'
-    },
-    2: {
-      title: 'ðŸ“˜ Intermediate Level',
-      body:  'We\'ve switched to Intermediate materials â€” more worked examples and step-by-step breakdowns.',
-      cls:   'adaptive-banner--grade2'
+// ── Online sync: flush queue to Supabase ─────────────────────
+window.syncOfflineLogs = async function() {
+  if (!navigator.onLine || !window.currentUser || !window.sb) return;
+  try {
+    const queued = await getAllQueued();
+    if (!queued.length) return;
+    const rows = queued.map(({ id, ...rest }) => rest);
+    const { error } = await window.sb.from('response_logs').insert(rows);
+    if (!error) {
+      await clearQueued(queued.map(q => q.id));
+      console.log('[UE] Synced', rows.length, 'offline response(s).');
     }
-  };
-
-  const msg    = messages[grade];
-  if (!msg) return;
-
-  const banner = document.createElement('div');
-  banner.id    = 'adaptive-banner';
-  banner.className = `adaptive-banner ${msg.cls}`;
-  banner.innerHTML = `
-    <div class="adaptive-banner__icon">${grade === 1 ? 'ðŸŒ±' : 'ðŸ“–'}</div>
-    <div class="adaptive-banner__text">
-      <strong>${msg.title}</strong>
-      <p>${msg.body}</p>
-    </div>
-    <button class="adaptive-banner__close" onclick="this.parentElement.remove()">âœ•</button>
-  `;
-  document.body.appendChild(banner);
-
-  // Auto-dismiss after 8 seconds
-  setTimeout(() => banner.remove(), 8000);
-}
-
-// â”€â”€ 8. ELEMENTARY REDIRECT CARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function showElementaryRedirect(topicId) {
-  const existing = document.getElementById('elementary-card');
-  if (existing) return; // don't show twice
-
-  const card    = document.createElement('div');
-  card.id       = 'elementary-card';
-  card.className = 'elementary-card';
-  card.innerHTML = `
-    <div class="elementary-card__icon">ðŸŒŸ</div>
-    <div class="elementary-card__body">
-      <h3>Let's Strengthen the Basics First</h3>
-      <p>You've put in real effort on this topic. Sometimes the best move is to go back to absolute basics â€” that's not a setback, it's strategy.</p>
-      <div class="elementary-card__actions">
-        <a href="https://elementary.ultimateedge.info/${topicId}"
-           class="btn btn-primary" target="_blank">
-          Visit Elementary Level â†’
-        </a>
-        <button class="btn btn-outline"
-                onclick="document.getElementById('elementary-card').remove()">
-          I'll Keep Trying Here
-        </button>
-      </div>
-    </div>
-  `;
-
-  // Insert after nav
-  const nav = document.querySelector('nav, .ue-nav');
-  if (nav) nav.insertAdjacentElement('afterend', card);
-  else document.body.prepend(card);
-}
-
-// â”€â”€ 9. TEACHER MARKETPLACE CARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function showTeacherMarketplace(topicId, weaknessReport = []) {
-  const existing = document.getElementById('teacher-card');
-  if (existing) return;
-
-  const reportHTML = weaknessReport.length
-    ? weaknessReport.map(t => `<li>${t.topic}: ${t.accuracy}% accuracy</li>`).join('')
-    : '<li>Multiple topics need attention</li>';
-
-  const card    = document.createElement('div');
-  card.id       = 'teacher-card';
-  card.className = 'teacher-card';
-  card.innerHTML = `
-    <div class="teacher-card__icon">ðŸ‘¨â€ðŸ«</div>
-    <div class="teacher-card__body">
-      <h3>Would a Live Teacher Help?</h3>
-      <p>Based on your performance, a tutor could make a big difference. Here's your weakness summary:</p>
-      <ul class="teacher-card__report">${reportHTML}</ul>
-      <div class="teacher-card__actions">
-        <a href="/tutors.html" class="btn btn-warning">Hire a Live Tutor â†’</a>
-        <button class="btn btn-outline"
-                onclick="document.getElementById('teacher-card').remove()">
-          No Thanks
-        </button>
-      </div>
-    </div>
-  `;
-  const nav = document.querySelector('nav, .ue-nav');
-  if (nav) nav.insertAdjacentElement('afterend', card);
-  else document.body.prepend(card);
-}
-
-// â”€â”€ 10. COMMITMENT SCORE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Calculates a score from the usage_logs JSONB array
-const COMMITMENT_WEIGHTS = {
-  page_view:        0.5,
-  video_started:    1,
-  video_completed:  3,
-  drill_attempted:  2,
-  drill_completed:  3,
-  login_streak:     2
+  } catch (e) {
+    console.warn('[UE] Offline sync failed:', e.message);
+  }
 };
 
-function calcCommitmentScore(usageLogs) {
-  if (!usageLogs || !usageLogs.length) return 0;
-  return usageLogs.reduce((total, log) => {
-    return total + (COMMITMENT_WEIGHTS[log.action] || 0);
-  }, 0);
-}
+// Auto-sync when browser comes back online
+window.addEventListener('online', window.syncOfflineLogs);
+// Listen for service worker sync signal
+navigator.serviceWorker?.addEventListener('message', e => {
+  if (e.data?.type === 'SW_SYNC_REQUEST') window.syncOfflineLogs();
+});
 
-// â”€â”€ 11. SMARTPATH RECOMMENDATIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Returns topics where mastery < 0.60, sorted by urgency (lowest first)
-function getSmartPath(topicMasteryRows, limit = 5) {
-  return topicMasteryRows
-    .filter(row => row.mastery_level == null || row.mastery_level < 0.60)
-    .sort((a, b) => {
-      const ma = a.mastery_level ?? -1;
-      const mb = b.mastery_level ?? -1;
-      return ma - mb; // lowest mastery first
-    })
-    .slice(0, limit);
-}
-
-// â”€â”€ 12. MASTERY STATUS LABEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function getMasteryLabel(masteryLevel) {
-  if (masteryLevel == null)        return { label: 'NIL',         cls: 'status-nil'    };
-  if (masteryLevel >= 0.75)        return { label: 'Mastered',    cls: 'status-good'   };
-  if (masteryLevel >= 0.50)        return { label: 'In Progress', cls: 'status-warn'   };
-  return                                  { label: 'Needs Work',  cls: 'status-danger' };
-}
-
-// â”€â”€ 13. NIL DISPLAY HELPER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Use in any template to render mastery safely without showing "0%"
-function renderMasteryDisplay(masteryLevel, accuracyAvg) {
-  if (masteryLevel == null || accuracyAvg == null) {
-    return '<span class="status-nil">NIL</span>';
+// ── Record one question response ─────────────────────────────
+window.recordResponse = async function({ topic_id, exam_type, is_correct, time_spent, grade_level }) {
+  if (!window.currentUser) return;
+  const entry = {
+    user_id:    window.currentUser.id,
+    topic_id,
+    exam_type,
+    is_correct,
+    time_spent,
+    grade_level: grade_level || window.currentProfile?.current_skill_level || 3
+  };
+  if (navigator.onLine && window.sb) {
+    const { error } = await window.sb.from('response_logs').insert(entry);
+    if (error) await saveLogOffline(entry);
+  } else {
+    await saveLogOffline(entry);
   }
-  const pct = Math.round(accuracyAvg);
-  const { label, cls } = getMasteryLabel(masteryLevel);
-  return `
-    <span class="mastery-pct">${pct}%</span>
-    <span class="status-pill ${cls}">${label}</span>
-  `;
+};
+
+// ── Recalculate and upsert topic_mastery after each answer ───
+window.updateTopicMastery = async function(topic_id) {
+  if (!window.currentUser || !window.sb) return null;
+  try {
+    const { data: logs } = await window.sb
+      .from('response_logs')
+      .select('is_correct')
+      .eq('user_id', window.currentUser.id)
+      .eq('topic_id', topic_id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (!logs?.length) return null;
+
+    const attempts  = logs.length;
+    const correct   = logs.filter(l => l.is_correct).length;
+    const accuracy  = parseFloat(((correct / attempts) * 100).toFixed(2));
+    const mastery   = window.calcMastery(accuracy, attempts);
+    const status    = mastery >= 0.75 ? 'MASTERED' : 'IN_PROGRESS';
+
+    await window.sb.from('topic_mastery').upsert({
+      user_id:       window.currentUser.id,
+      topic_id,
+      accuracy_avg:  accuracy,      // correct column name (not accuracy_score)
+      mastery_level: mastery,
+      status,
+      last_studied:  new Date().toISOString()
+    }, { onConflict: 'user_id,topic_id' });
+
+    // Refresh overall profile accuracy in background
+    updateOverallAccuracy();
+    return { accuracy, mastery, attempts };
+  } catch (e) {
+    console.warn('[UE] updateTopicMastery error:', e.message);
+    return null;
+  }
+};
+
+// Update overall profile accuracy from all response_logs
+async function updateOverallAccuracy() {
+  if (!window.currentUser || !window.sb) return;
+  try {
+    const { data } = await window.sb
+      .from('response_logs')
+      .select('is_correct')
+      .eq('user_id', window.currentUser.id);
+    if (!data?.length) return;
+    const attempts = data.length;
+    const correct  = data.filter(l => l.is_correct).length;
+    const accuracy = parseFloat(((correct / attempts) * 100).toFixed(2));
+    const mastery  = window.calcMastery(accuracy, Math.min(attempts, 50));
+    await window.sb.from('profiles').update({
+      accuracy_avg: accuracy, mastery_level: mastery, status: 'ACTIVE'
+    }).eq('id', window.currentUser.id);
+    if (window.currentProfile) {
+      window.currentProfile.accuracy_avg  = accuracy;
+      window.currentProfile.mastery_level = mastery;
+      window.currentProfile.status        = 'ACTIVE';
+    }
+  } catch (e) { /* non-fatal */ }
 }
+
+// ── Award XP for correct answer (+10 per spec) ────────────────
+window.awardXP = async function(is_correct) {
+  if (is_correct && window.addXP) await window.addXP(10, 'Correct answer');
+};
+
+// ── Save completed session to session_scores ─────────────────
+window.saveSessionScore = async function({
+  topic_id, exam_type, session_type,
+  score, total_questions, accuracy, avg_time_per_q, grade_level
+}) {
+  if (!window.currentUser || !window.sb) return;
+  try {
+    await window.sb.from('session_scores').insert({
+      user_id:         window.currentUser.id,
+      topic_id:        topic_id || null,
+      exam_type,
+      session_type:    session_type || 'drill',
+      score,
+      total_questions,
+      accuracy:        parseFloat(accuracy.toFixed(2)),
+      avg_time_per_q:  parseFloat((avg_time_per_q || 0).toFixed(1)),
+      grade_level:     grade_level || window.currentProfile?.current_skill_level || 3
+    });
+  } catch (e) { console.warn('[UE] saveSessionScore error:', e.message); }
+};
+
+// ── BUILD DRILL QUESTION SET ─────────────────────────────────
+// Priority: re-test previously wrong answers first, then add fresh questions.
+// Spec: 5 from "wrong list" + 5 new/random = 10 questions per topic drill.
+// (No internal algorithm names shown to users — it's just "Smart Drill".)
+window.buildDrillSet = async function(topicId, allQuestions) {
+  const topicQs  = allQuestions.filter(q => q.topic_id === topicId);
+  const pool     = topicQs.length >= 5 ? topicQs : allQuestions;
+  const shuffled = shuffle([...pool]);
+
+  if (!window.currentUser || !window.sb) {
+    return shuffled.slice(0, 10);
+  }
+
+  // Fetch recent wrong-answer question IDs for this topic
+  let wrongSet = [];
+  try {
+    const { data } = await window.sb
+      .from('response_logs')
+      .select('topic_id, is_correct, created_at')
+      .eq('user_id', window.currentUser.id)
+      .eq('topic_id', topicId)
+      .eq('is_correct', false)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    wrongSet = data || [];
+  } catch (_) {}
+
+  // Up to 5 retry slots from wrong history, 5 fresh slots
+  const retrySlot = shuffled.slice(0, Math.min(5, wrongSet.length || 5));
+  const freshSlot = shuffled.filter(q => !retrySlot.includes(q)).slice(0, 5);
+  return [...retrySlot, ...freshSlot].slice(0, 10);
+};
+
+// ── BUILD FULL MOCK SET ───────────────────────────────────────
+window.buildMockSet = function(allQuestions) {
+  return shuffle([...allQuestions]).slice(0, 40);
+};
+
+// ── Utility: shuffle ──────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── Register service worker ───────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .catch(e => console.warn('[UE] SW registration failed:', e));
+  });
+}
+
+// ── On load: attempt offline sync ────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(window.syncOfflineLogs, 3500);
+});
