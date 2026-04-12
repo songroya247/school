@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quadratics — UltimateEdge</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      font-size: 15px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    .lesson {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    .lesson-badge {
+      display: inline-block;
+      background: rgba(26,86,255,.15);
+      color: #1a56ff;
+      border: 1px solid rgba(26,86,255,.3);
+      border-radius: 99px;
+      padding: 3px 12px;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; }
+    h2 { font-size: 1.3rem; font-weight: 700; margin: 28px 0 10px; color: #e6edf3; }
+    p  { color: #8b949e; margin-bottom: 14px; }
+    .formula {
+      background: #161b22;
+      border: 1px solid rgba(255,255,255,.08);
+      border-left: 3px solid #1a56ff;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      font-family: 'DM Mono', monospace;
+      font-size: .95rem;
+      margin: 16px 0;
+    }
+    .step-card {
+      background: #161b22;
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 12px;
+    }
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      background: #1a56ff;
+      color: #fff;
+      border-radius: 50%;
+      font-size: .8rem;
+      font-weight: 700;
+      margin-right: 10px;
+      flex-shrink: 0;
+      float: left;
+    }
+    .step-text { overflow: hidden; }
+    strong { color: #e6edf3; }
+    .example-box {
+      background: rgba(0,201,122,.06);
+      border: 1px solid rgba(0,201,122,.2);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 20px 0;
+    }
+    .example-box h3 { color: #00c97a; font-size: 1rem; margin-bottom: 10px; }
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: #1a56ff;
+      transition: width .3s;
+      z-index: 100;
+    }
+    .complete-btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: #1a56ff;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 40px;
+      font-family: inherit;
+      transition: background .2s;
+    }
+    .complete-btn:hover { background: #1040cc; }
+    .complete-btn.done  { background: #00c97a; cursor: default; }
+  </style>
+</head>
+<body>
+
+  <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+
+  <div class="lesson">
+    <div class="lesson-badge">📐 Mathematics · Grade 3</div>
+    <h1>Quadratic Equations</h1>
+    <p>A quadratic equation is any equation that can be written in the standard form below. Mastering this topic is essential for JAMB Mathematics — expect 3–5 questions every year.</p>
+
+    <div class="formula">ax² + bx + c = 0 &nbsp;&nbsp;(where a ≠ 0)</div>
+
+    <h2>Method 1: Factorisation</h2>
+    <p>This is the fastest method when the equation factors neatly. Follow these steps:</p>
+
+    <div class="step-card"><span class="step-num">1</span><div class="step-text">Write the equation in standard form: <strong>ax² + bx + c = 0</strong></div></div>
+    <div class="step-card"><span class="step-num">2</span><div class="step-text">Find two numbers that <strong>multiply to ac</strong> and <strong>add to b</strong></div></div>
+    <div class="step-card"><span class="step-num">3</span><div class="step-text">Split the middle term and factorise by grouping</div></div>
+    <div class="step-card"><span class="step-num">4</span><div class="step-text">Set each factor equal to zero and solve</div></div>
+
+    <div class="example-box">
+      <h3>✦ Worked Example: Solve x² − 5x + 6 = 0</h3>
+      <p>Find two numbers that multiply to <strong>6</strong> and add to <strong>−5</strong>: they are <strong>−2</strong> and <strong>−3</strong></p>
+      <div class="formula">(x − 2)(x − 3) = 0</div>
+      <p>Therefore: <strong>x = 2</strong> or <strong>x = 3</strong></p>
+    </div>
+
+    <h2>Method 2: The Quadratic Formula</h2>
+    <p>Use this when factorisation is difficult or the roots are not whole numbers.</p>
+
+    <div class="formula">x = (−b ± √(b² − 4ac)) / 2a</div>
+
+    <p>The expression <strong>b² − 4ac</strong> is called the <strong>discriminant (Δ)</strong>:</p>
+    <p>· Δ &gt; 0 → Two distinct real roots<br>
+       · Δ = 0 → One repeated real root<br>
+       · Δ &lt; 0 → No real roots (complex)</p>
+
+    <div class="example-box">
+      <h3>✦ Worked Example: Solve 2x² + 3x − 5 = 0</h3>
+      <p>a = 2, b = 3, c = −5</p>
+      <div class="formula">Δ = 3² − 4(2)(−5) = 9 + 40 = 49</div>
+      <div class="formula">x = (−3 ± √49) / 4 = (−3 ± 7) / 4</div>
+      <p><strong>x = 1</strong> or <strong>x = −2.5</strong></p>
+    </div>
+
+    <h2>Key Relationships (Vieta's Formulas)</h2>
+    <p>If α and β are the roots of ax² + bx + c = 0:</p>
+    <div class="formula">Sum of roots (α + β) = −b/a</div>
+    <div class="formula">Product of roots (αβ) = c/a</div>
+
+    <p>These let you find roots or form equations without full solving — very useful for JAMB shortcuts.</p>
+
+    <h2>JAMB Exam Tips</h2>
+    <p>
+      · Always check if the equation can be factorised before using the formula — it's faster<br>
+      · If asked for "nature of roots," go straight to the discriminant<br>
+      · Sum/product questions can often be solved in under 20 seconds with Vieta's formulas<br>
+      · If you get a negative discriminant in a JAMB question, double-check your arithmetic
+    </p>
+
+    <button class="complete-btn" id="complete-btn" onclick="markComplete()">
+      ✓ Mark Lesson Complete (+50 XP)
+    </button>
+  </div>
+
+  <script>
+    // Track reading progress via scroll
+    window.addEventListener('scroll', () => {
+      const scrolled  = window.scrollY;
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
+      const pct       = maxScroll > 0 ? Math.min((scrolled / maxScroll) * 100, 100) : 0;
+      document.getElementById('progress-bar').style.width = pct + '%';
+    });
+
+    // ── Iframe bridge: notify parent on completion ────────────────
+    function markComplete() {
+      const btn = document.getElementById('complete-btn');
+      btn.textContent = '🎉 Lesson Complete!';
+      btn.classList.add('done');
+
+      window.parent.postMessage({
+        type:  'lesson_completed',
+        topic: 'quadratics'
+      }, '*');
+    }
+
+    // Also fire automatically if user scrolls to bottom
+    let autoFired = false;
+    window.addEventListener('scroll', () => {
+      if (autoFired) return;
+      const atBottom = window.scrollY + window.innerHeight >= document.body.scrollHeight - 60;
+      if (atBottom) {
+        autoFired = true;
+        // Just fire the message silently — don't change button state
+        window.parent.postMessage({ type: 'lesson_completed', topic: 'quadratics' }, '*');
+      }
+    });
+  </script>
+</body>
+</html>
