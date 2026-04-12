@@ -3,137 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="UltimateEdge School — Nigeria's smartest JAMB, WAEC & NECO exam prep platform.">
-  <title>UltimateEdge School — JAMB, WAEC & NECO Exam Prep</title>
-
-  <!-- 1. Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-  <!-- 2. Design system -->
+  <title>UltimateEdge School — JAMB & WAEC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
-
-  <!-- 3. CDNs -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
 <body>
 
-  <!-- Required: Defaulter Banner -->
-  <div class="defaulter-banner" id="defaulter-banner">
-    ⚠️ Your subscription has expired. Free access is still active.
-    <a href="#pricing">Renew Now →</a>
-  </div>
-
-  <!-- ── NAV ── -->
   <nav class="ue-nav">
     <a class="ue-nav__brand" href="/index.html">ULTIMATE<span>EDGE</span></a>
-    <ul class="ue-nav__links">
-      <li><a href="#features">Features</a></li>
-      <li><a href="#pricing">Pricing</a></li>
-      <li><a href="classroom.html">Classroom</a></li>
-      <li><a href="cbt.html">Practice</a></li>
-      <li><a href="dashboard.html">Dashboard</a></li>
-    </ul>
     <div class="ue-nav__right">
-      <span id="nav-xp"></span>
-      <div id="nav-user-pill" style="display:none">
-        <div id="nav-avatar"></div>
-        <span id="nav-user-name"></span>
-        <span id="nav-pro-badge" style="display:none">PRO</span>
-      </div>
-      <button class="btn btn-primary btn-sm" id="nav-login-btn" onclick="openAuthModal('login')">Login / Sign Up</button>
-      <button class="btn btn-ghost btn-sm"   id="nav-logout-btn" style="display:none" onclick="sb.auth.signOut().then(()=>location.reload())">Log out</button>
+      <button class="btn btn-primary btn-sm" onclick="openAuthModal('login')">Login / Sign Up</button>
     </div>
   </nav>
 
-  <!-- ── HERO ── -->
-  <section class="section container text-center">
-    <div class="flex-center flex-col">
-      <h1 class="section-title">Pass JAMB. Ace WAEC. <span>Score Higher.</span></h1>
-      <p class="text-muted text-lg mb-lg" style="max-width:600px">
-        Adaptive CBT drills that track your weaknesses and predict your scores — built strictly for the Nigerian curriculum.
-      </p>
-      <div class="flex gap">
-        <button class="btn btn-primary btn-lg" onclick="openAuthModal('signup')">Start Free Today →</button>
-        <a href="cbt.html" class="btn btn-outline btn-lg">Try a Drill</a>
+  <section class="container mt-lg mb-lg text-center">
+    <h1 class="section-title">Pass JAMB. Ace WAEC. <br><span style="color:var(--blue)">Score Higher.</span></h1>
+    <p class="text-muted mt-lg mb-lg">Adaptive CBT drills that track your weaknesses and predict your scores — built for the Nigerian curriculum.</p>
+    <div class="flex-col gap">
+      <button class="btn btn-primary btn-lg" onclick="openAuthModal('signup')">Start Free Today →</button>
+      <a href="cbt.html" class="btn btn-outline btn-lg">Try a Drill</a>
+    </div>
+  </section>
+
+  <section class="container mt-lg mb-lg">
+    <h2 class="section-title text-center mb-lg">Choose Your Plan</h2>
+    <div class="grid-3">
+      <!-- Card 1 -->
+      <div class="card pricing-card">
+        <div class="pricing-card__plan">Monthly</div>
+        <div class="pricing-card__price">₦1,500</div>
+        <p class="text-xs text-muted">Auto-renews every 30 days</p>
+        <button class="btn btn-outline btn-block">Subscribe Monthly</button>
+      </div>
+      <!-- Card 2 -->
+      <div class="card pricing-card" style="border-color:var(--blue)">
+        <div class="pricing-card__badge">MOST POPULAR</div>
+        <div class="pricing-card__plan">3 Months</div>
+        <div class="pricing-card__price">₦4,000</div>
+        <p class="text-xs text-muted">One-time payment</p>
+        <button class="btn btn-primary btn-block">Get 3 Months Access</button>
+      </div>
+      <!-- Card 3 -->
+      <div class="card pricing-card">
+        <div class="pricing-card__plan">Annual</div>
+        <div class="pricing-card__price">₦12,000</div>
+        <p class="text-xs text-muted">Full year preparation</p>
+        <button class="btn btn-outline btn-block">Get Annual Plan</button>
       </div>
     </div>
   </section>
 
-  <!-- ── PRICING (Section 16: Paystack Flow) ── -->
-  <section class="section section--light" id="pricing">
-    <div class="container">
-      <h2 class="section-title text-center">Choose Your Plan</h2>
-      <div class="grid-3 mt-lg">
-        <div class="pricing-card">
-          <div class="pricing-card__plan">Monthly</div>
-          <div class="pricing-card__price">₦1,500</div>
-          <p class="pricing-card__period">Auto-renews every 30 days</p>
-          <button class="btn btn-outline btn-block" onclick="openPaystack('monthly')">Subscribe Monthly</button>
-        </div>
-        <div class="pricing-card pricing-card--featured">
-          <div class="pricing-card__badge">MOST POPULAR</div>
-          <div class="pricing-card__plan">3 Months</div>
-          <div class="pricing-card__price">₦4,000</div>
-          <p class="pricing-card__period">One-time payment</p>
-          <button class="btn btn-primary btn-block" onclick="openPaystack('3month')">Get 3 Months Access</button>
-        </div>
-        <div class="pricing-card">
-          <div class="pricing-card__plan">Annual</div>
-          <div class="pricing-card__price">₦12,000</div>
-          <p class="pricing-card__period">Full year of preparation</p>
-          <button class="btn btn-outline btn-block" onclick="openPaystack('annual')">Get Annual Plan</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Required: Toast -->
   <div id="toast"></div>
-
-  <!-- Modals (Pasted once, referenced in auth.js) -->
-  <div class="modal-backdrop" id="auth-modal">
-    <div class="modal-card" onclick="event.stopPropagation()">
-      <div class="modal-card__header"><h2 class="modal-card__title">UltimateEdge</h2><button class="modal-close" onclick="closeAuthModal()">✕</button></div>
-      <div class="auth-tabs">
-        <button class="auth-tab-btn active" data-tab="login" onclick="switchAuthTab('login')">Sign In</button>
-        <button class="auth-tab-btn" data-tab="signup" onclick="switchAuthTab('signup')">Create Account</button>
-      </div>
-      <div class="auth-tab-pane active" data-pane="login">
-        <form onsubmit="handleLogin(event)"><div class="form-group"><label class="form-label">Email</label><input class="form-input" id="login-email" type="email" required></div><div class="form-group"><label class="form-label">Password</label><input class="form-input" id="login-password" type="password" required></div><button class="btn btn-primary btn-block" type="submit" id="login-btn">Sign In →</button></form>
-      </div>
-      <div class="auth-tab-pane" data-pane="signup">
-        <form onsubmit="handleSignup(event)">
-          <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="signup-name" type="text" required></div>
-          <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="signup-email" type="email" required></div>
-          <div class="form-group"><label class="form-label">Password (Min 8)</label><input class="form-input" id="signup-password" type="password" required minlength="8"></div>
-          <div class="form-group"><label class="form-label">Exams</label><div class="exam-checks"><label class="exam-check-label"><input type="checkbox" class="signup-exam-check" value="JAMB"> JAMB</label><label class="exam-check-label"><input type="checkbox" class="signup-exam-check" value="WAEC"> WAEC</label><label class="exam-check-label"><input type="checkbox" class="signup-exam-check" value="NECO"> NECO</label></div></div>
-          <div class="form-group"><label class="form-label">Exam Month</label><select class="form-select" id="signup-exam-date"></select></div>
-          <div class="form-group"><label class="form-label">Target JAMB Score</label><select class="form-select" id="signup-target"><option value="250">250</option><option value="280" selected>280</option><option value="300">300</option></select></div>
-          <button class="btn btn-primary btn-block" type="submit" id="signup-btn">Create Free Account →</button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div class="sp-modal" id="study-plan-modal">
-    <div class="sp-card">
-      <div class="flex-between mb"><h2 class="sp-card__title">📚 Your Study Plan</h2><button class="modal-close" onclick="document.getElementById('study-plan-modal').classList.remove('active')">✕</button></div>
-      <div class="sp-stats">
-        <div class="sp-stat"><div class="sp-stat__label">Time to Exam</div><div class="sp-stat__value" id="sp-months">—</div></div>
-        <div class="sp-stat"><div class="sp-stat__label">Readiness</div><div class="sp-stat__value" id="sp-readiness">NIL</div></div>
-        <div class="sp-stat"><div class="sp-stat__label">Pace</div><div class="sp-stat__value" id="sp-intensity">—</div></div>
-        <div class="sp-stat"><div class="sp-stat__label">Level</div><div class="sp-stat__value" id="sp-grade">—</div></div>
-      </div>
-      <div class="sp-advice">💡 Focus on your weakest topics first to maximize score gains.</div>
-      <div class="sp-exams-row">Exams: <strong id="sp-exams">—</strong></div>
-      <button class="btn btn-primary btn-block" onclick="document.getElementById('study-plan-modal').classList.remove('active')">Let's Go!</button>
-    </div>
-  </div>
-
-  <!-- Shared Scripts -->
-  <script src="/js/auth.js"></script>
-  <script src="/js/ai-engine.js"></script>
-  <script src="/js/paystack.js"></script>
 </body>
 </html>
