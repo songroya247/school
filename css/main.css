@@ -1,38 +1,187 @@
+/* ============================================================
+   main.css — UltimateEdge School
+   Patched: Batch 1 (fixes bugs #11–15)
+   ============================================================ */
+
+/* ── DESIGN TOKENS (FIX #11: --green and --orange added) ── */
 :root {
-  --blue: #1a56ff; --blue-dark: #1040cc; --blue-light: #eef1ff;
-  --bg: #f4f7ff; --surface: #ffffff; --border: #d8e0f5;
-  --text: #0d1b4b; --text-muted: #5a6a9a; --font-head: 'Bebas Neue', sans-serif;
-  --font-body: 'DM Sans', sans-serif; --radius: 12px;
+  --blue:       #1a56ff;
+  --blue-dark:  #1040cc;
+  --blue-light: #eef1ff;
+  --green:      #00c97a;   /* ← Grade 1 / Success */
+  --orange:     #ff6b35;   /* ← Grade 2 / Warning  */
+  --red:        #e53935;   /* Danger / expired     */
+  --bg:         #f4f7ff;
+  --surface:    #ffffff;
+  --border:     #d8e0f5;
+  --text:       #0d1b4b;
+  --text-muted: #5a6a9a;
+  --font-head:  'Bebas Neue', sans-serif;
+  --font-body:  'DM Sans', sans-serif;
+  --radius:     12px;
 }
 
+/* ── RESET ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-body); background: var(--bg); color: var(--text); overflow-x: hidden; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
 
 /* ── NAV ── */
 .ue-nav {
-  position: sticky; top: 0; z-index: 1000; background: var(--surface);
-  border-bottom: 2.5px solid var(--blue); padding: 0 15px; height: 64px;
+  position: sticky; top: 0; z-index: 1000;
+  background: var(--surface);
+  border-bottom: 2.5px solid var(--blue);
+  padding: 0 15px; height: 64px;
   display: flex; align-items: center; justify-content: space-between;
 }
 .ue-nav__brand { font-family: var(--font-head); font-size: 1.5rem; text-decoration: none; color: var(--text); }
 .ue-nav__brand span { color: var(--blue); }
 .ue-nav__links { display: flex; gap: 15px; list-style: none; }
 .ue-nav__links a { text-decoration: none; color: var(--text-muted); font-weight: 700; font-size: 0.9rem; }
+.ue-nav__links a:hover { color: var(--blue); }
 
-/* ── MODALS (Physical Visibility) ── */
+/* User pill */
+.nav-user-pill { display: flex; align-items: center; gap: 8px; }
+.nav-pro-badge {
+  background: var(--blue); color: #fff;
+  font-size: 0.7rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px;
+}
+
+/* ── DEFAULTER BANNER (FIX #12) ── */
+#defaulter-banner {
+  display: none;
+  background: var(--red);
+  color: #fff;
+  text-align: center;
+  padding: 10px 15px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  position: sticky; top: 64px; z-index: 999;
+}
+#defaulter-banner.active { display: block; }
+#defaulter-banner a { color: #fff; text-decoration: underline; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: #fff;
+  padding: 12px 24px; border-radius: 8px;
+  font-weight: 500; font-size: 0.95rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s; z-index: 9999;
+}
+.toast--visible  { opacity: 1; pointer-events: auto; }
+.toast--success  { background: var(--green); }
+.toast--error    { background: var(--red); }
+.toast--info     { background: var(--blue); }
+
+/* ── MODALS ── */
 .modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
   display: none; align-items: center; justify-content: center; z-index: 2000;
 }
-.modal-backdrop.active { display: flex; } /* FIXED: This makes it show */
-.modal-card { background: #fff; padding: 25px; border-radius: var(--radius); width: 90%; max-width: 400px; }
+.modal-backdrop.active { display: flex; }
+.modal-card {
+  background: #fff; padding: 25px;
+  border-radius: var(--radius); width: 90%; max-width: 420px;
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-card h2 { font-family: var(--font-head); font-size: 1.6rem; margin-bottom: 15px; }
+
+/* Auth tabs */
+.auth-tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid var(--border); }
+.auth-tab-btn {
+  flex: 1; padding: 10px; background: none; border: none;
+  font-weight: 700; cursor: pointer; color: var(--text-muted); font-size: 0.95rem;
+}
+.auth-tab-btn.active { color: var(--blue); border-bottom: 2px solid var(--blue); margin-bottom: -2px; }
 
 /* ── UI COMPONENTS ── */
 .container { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 15px; }
-.btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; text-decoration: none; }
-.btn-primary { background: var(--blue); color: #fff; }
-.btn-outline { border: 2px solid var(--blue); color: var(--blue); }
-.form-group { margin-bottom: 15px; }
-.form-input { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 8px; margin-top: 5px; }
 
-@media (max-width: 768px) { .ue-nav__links { display: none; } }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 12px 24px; border-radius: 8px;
+  font-weight: 700; cursor: pointer; border: none;
+  text-decoration: none; font-size: 1rem; transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.88; }
+.btn-primary  { background: var(--blue);  color: #fff; }
+.btn-success  { background: var(--green); color: #fff; }
+.btn-danger   { background: var(--red);   color: #fff; }
+.btn-outline  { border: 2px solid var(--blue); color: var(--blue); background: transparent; }
+
+/* CBT Answer Buttons (FIX #13: height 56px, bold) */
+.cbt-btn {
+  width: 100%; height: 56px;
+  font-weight: 700; font-size: 1rem;
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: 8px; cursor: pointer; text-align: left;
+  padding: 0 16px; transition: border-color 0.2s, background 0.2s;
+}
+.cbt-btn:hover              { border-color: var(--blue); background: var(--blue-light); }
+.cbt-btn.selected           { border-color: var(--blue); background: var(--blue-light); }
+.cbt-btn.correct            { border-color: var(--green); background: #e6fff4; }
+.cbt-btn.wrong              { border-color: var(--red);   background: #fff0f0; }
+
+/* ── FORMS ── */
+.form-group { margin-bottom: 15px; }
+.form-group label { font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 4px; }
+.form-input {
+  width: 100%; padding: 12px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  margin-top: 5px; font-size: 0.95rem; font-family: var(--font-body);
+}
+.form-input:focus { outline: none; border-color: var(--blue); }
+
+/* ── MASTERY STATUS BADGES (FIX #15) ── */
+.status-nil     { background: #e0e0e0; color: #555;           padding: 2px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+.status-good    { background: #d4f7e7; color: #006e40;        padding: 2px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+.status-warn    { background: #fff3e0; color: #b85c00;        padding: 2px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+.status-danger  { background: #fde8e8; color: var(--red);     padding: 2px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+
+/* Grade level colours */
+.grade-3 { color: var(--blue); }
+.grade-2 { color: var(--orange); }
+.grade-1 { color: var(--green); }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1.5px solid var(--border); padding: 20px;
+}
+
+/* Elementary redirect card */
+.elementary-card {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--surface); border: 2px solid var(--orange);
+  border-radius: var(--radius); padding: 20px; max-width: 300px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 1500;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .ue-nav__links { display: none; }
+  .modal-card { padding: 20px; }
+}
+
+/* ── PRINT STYLES for report-view.html (FIX #14) ── */
+@media print {
+  body { background: #fff; color: #000; font-size: 12pt; }
+  .ue-nav, #defaulter-banner, .toast,
+  .modal-backdrop, .btn, .no-print { display: none !important; }
+  .card { border: 1px solid #ccc; box-shadow: none; break-inside: avoid; }
+  .report-container { width: 210mm; margin: 0 auto; padding: 15mm; }
+  h1, h2, h3 { color: #000; font-family: serif; }
+  a { color: #000; text-decoration: none; }
+  .status-good, .status-warn, .status-nil, .status-danger {
+    background: none !important; border: 1px solid #999;
+  }
+  @page { size: A4 portrait; margin: 15mm; }
+}
