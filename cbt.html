@@ -3,32 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CBT Practice — UltimateEdge School</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>CBT Practice — UltimateEdge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-dark">
+<body>
 
   <nav class="ue-nav">
     <a class="ue-nav__brand" href="/index.html">ULTIMATE<span>EDGE</span></a>
-    <div class="cbt-timer" id="q-timer">00:45</div>
+    <div class="cbt-timer" id="q-timer" style="background:var(--surface-2); padding:6px 12px; border-radius:8px; font-family:var(--font-mono); font-weight:700;">00:45</div>
     <div class="ue-nav__right">
-       <span id="nav-xp"></span>
-       <button class="btn btn-primary btn-sm" id="nav-login-btn">Login</button>
+       <button class="btn btn-primary btn-sm">Login</button>
     </div>
   </nav>
 
-  <div class="container container--sm mt-lg">
-    <div id="question-box" class="card">
-      <div class="flex-between mb">
-        <span class="status-pill status-active" id="q-topic">MATHEMATICS</span>
-        <span class="text-mono" id="q-count">1/10</span>
+  <div class="container mt-lg">
+    <div class="card">
+      <div class="flex-between mb-lg">
+        <span class="status-pill status-active" style="background:var(--blue-light); color:var(--blue)">MATHEMATICS</span>
+        <span class="text-mono" style="font-weight:700">1/10</span>
       </div>
-      <h2 class="mb-lg" id="q-text" style="font-size:1.2rem; line-height:1.6">Loading question...</h2>
+      <h2 class="mb-lg" id="q-text" style="font-size:1.4rem">LOADING QUESTION...</h2>
       
       <div class="flex-col gap" id="q-options">
-        <!-- Strictly 56px per main.css .drill-option -->
         <button class="drill-option">
           <span class="drill-option__label">A</span>
           <span>Option Text</span>
@@ -36,18 +33,12 @@
       </div>
 
       <div class="flex-between mt-lg">
-        <button class="btn btn-ghost" onclick="prevQ()">Previous</button>
-        <button class="btn btn-primary" onclick="nextQ()">Next →</button>
+        <button class="btn btn-ghost" style="flex:1">Previous</button>
+        <button class="btn btn-primary" style="flex:1">Next →</button>
       </div>
     </div>
-
-    <!-- Question Map -->
-    <div class="q-map mt" id="q-map"></div>
   </div>
 
   <div id="toast"></div>
-  <script src="/js/auth.js"></script>
-  <script src="/js/ai-engine.js"></script>
-  <script src="/js/cbt-engine.js"></script>
 </body>
 </html>
