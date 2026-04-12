@@ -1,201 +1,296 @@
-// ============================================================
-// auth.js — UltimateEdge School
-// Patched: Batch 1 (fixes bugs #1–6)
-// ============================================================
+// Supabase credentials (your provided values)
+const SUPABASE_URL = 'https://hmfbterdmgoumeeiatji.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtZmJ0ZXJkbWdvdW1lZWlhdGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTAyNzYsImV4cCI6MjA5MTMyNjI3Nn0.JxC-FN5BtBf0keNPqZq8IF-q6A7LMnGoUTkrF3GyEm8';
 
-// ── CREDENTIALS (replace with your real values) ──
-const SUPA_URL = "YOUR_SUPABASE_URL";   // ← paste your Supabase project URL
-const SUPA_KEY = "YOUR_ANON_KEY";       // ← paste your Supabase anon key
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+let currentProfile = null;
 
-window.sb          = sb;
-window.currentUser    = null;
-window.currentProfile = null;           // FIX #2: declared so other scripts don't crash
+// ---------- Helper: Toast ----------
+function toast(message, duration = 3000) {
+  const toastEl = document.getElementById('toast');
+  if (!toastEl) return;
+  toastEl.innerText = message;
+  toastEl.style.display = 'block';
+  setTimeout(() => {
+    toastEl.style.display = 'none';
+  }, duration);
+}
+window.toast = toast;
 
-// ── TOAST NOTIFICATION (FIX #4) ──
-window.toast = function(msg, type = 'info') {
-    const el = document.getElementById('toast');
-    if (!el) return;
-    el.textContent = msg;
-    el.className = `toast toast--${type} toast--visible`;
-    clearTimeout(window._toastTimer);
-    window._toastTimer = setTimeout(() => el.classList.remove('toast--visible'), 3500);
-};
+// ---------- Add XP ----------
+async function addXP(amount, reason) {
+  if (!currentProfile) return;
+  const newXP = (currentProfile.total_xp || 0) + amount;
+  await sb.from('profiles').update({ total_xp: newXP }).eq('id', currentUser.id);
+  currentProfile.total_xp = newXP;
+  const xpSpan = document.getElementById('nav-xp');
+  if (xpSpan) xpSpan.innerText = `${newXP} XP`;
+  trackAction('xp_awarded', { amount, reason });
+}
+window.addXP = addXP;
 
-// ── XP SYSTEM (FIX #5) ──
-window.addXP = async function(amount) {
-    if (!window.currentUser || !window.currentProfile) return;
-    const newXP = (window.currentProfile.total_xp || 0) + amount;
-    window.currentProfile.total_xp = newXP;
-    await sb.from('profiles').update({ total_xp: newXP }).eq('id', window.currentUser.id);
-    const xpEl = document.getElementById('nav-xp');
-    if (xpEl) xpEl.textContent = `${newXP} XP`;
-};
+// ---------- Track Action (usage_logs) ----------
+async function trackAction(action, meta = {}) {
+  if (!currentUser) return;
+  await sb.rpc('append_usage_log', { user_id_param: currentUser.id, action, meta: meta });
+}
+window.trackAction = trackAction;
 
-// ── MODAL CONTROL (FIX #6: tab switching now works) ──
-window.openAuthModal = function(tab = 'login') {
-    const modal = document.getElementById('auth-modal');
-    if (!modal) return;
-    modal.classList.add('active');
-    // Switch visible tab
-    modal.querySelectorAll('.auth-tab-content').forEach(el => el.style.display = 'none');
-    modal.querySelectorAll('.auth-tab-btn').forEach(el => el.classList.remove('active'));
-    const target = modal.querySelector(`[data-tab="${tab}"]`);
-    const btn    = modal.querySelector(`[data-tab-btn="${tab}"]`);
-    if (target) target.style.display = 'block';
-    if (btn)    btn.classList.add('active');
-};
-
-window.closeAuthModal = function() {
-    const modal = document.getElementById('auth-modal');
-    if (modal) modal.classList.remove('active');
-};
-
-// ── DEFAULTER / ACCESS GUARD (FIX #3) ──
-function checkAccess() {
-    if (!window.currentProfile) return;
-
-    const banner     = document.getElementById('defaulter-banner');
-    const isPremium  = window.currentProfile.is_premium;
-    const expiryRaw  = window.currentProfile.subscription_expiry;
-    const expiryDate = expiryRaw ? new Date(expiryRaw) : null;
-    const isExpired  = expiryDate && expiryDate < new Date();
-
-    // 1. Silently update DB if subscription lapsed (FIX: correct column name)
-    if (isPremium && isExpired) {
-        sb.from('profiles')
-          .update({ is_premium: false, subscription_status: 'EXPIRED' })
-          .eq('id', window.currentUser.id);
-        window.currentProfile.is_premium = false;
-        window.currentProfile.subscription_status = 'EXPIRED';
-    }
-
-    // 2. Show/hide defaulter banner
-    const showBanner = isExpired || window.currentProfile.subscription_status === 'EXPIRED';
-    if (banner) {
-        if (showBanner) {
-            banner.classList.add('active');
-            banner.innerHTML = `⚠️ Your subscription has expired.
-                <a href="index.html#pricing" style="color:#fff;font-weight:700;">Renew Now →</a>`;
-        } else {
-            banner.classList.remove('active');
-        }
-    }
-
-    // 3. Page restriction — CBT is allowed in free/drill mode (FIX: removed cbt.html)
-    const restrictedPages = ['classroom.html', 'dashboard.html'];
-    const currentPage = window.location.pathname;
-    if (showBanner && restrictedPages.some(p => currentPage.includes(p))) {
-        window.toast("Subscription expired. Redirecting…", 'error');
-        setTimeout(() => { window.location.href = 'index.html#pricing'; }, 3000);
-    }
+// ---------- Load Profile ----------
+async function loadProfile() {
+  if (!currentUser) return null;
+  const { data, error } = await sb
+    .from('profiles')
+    .select('*')
+    .eq('id', currentUser.id)
+    .single();
+  if (error) {
+    console.error(error);
+    return null;
+  }
+  currentProfile = data;
+  updateNavUI();
+  checkAccess();
+  return currentProfile;
 }
 
-// ── USAGE TRACKING ──
-window.trackAction = async function(action) {
-    if (!window.currentUser || !window.currentProfile) return;
-    const log   = { action, ts: new Date().toISOString() };
-    const logs  = Array.isArray(window.currentProfile.usage_logs)
-                  ? window.currentProfile.usage_logs : [];
-    logs.push(log);
-    window.currentProfile.usage_logs = logs;
-    await sb.rpc('append_usage_log', { user_id: window.currentUser.id, log_entry: log });
-};
+// ---------- Update Navigation UI ----------
+function updateNavUI() {
+  if (!currentProfile) return;
+  const nameSpan = document.getElementById('nav-user-name');
+  if (nameSpan) nameSpan.innerText = currentProfile.full_name?.split(' ')[0] || 'Student';
+  const xpSpan = document.getElementById('nav-xp');
+  if (xpSpan) xpSpan.innerText = `${currentProfile.total_xp || 0} XP`;
+  const proBadge = document.getElementById('nav-pro-badge');
+  if (proBadge) {
+    const isActivePremium = currentProfile.is_premium && new Date(currentProfile.subscription_expiry) > new Date();
+    proBadge.style.display = isActivePremium ? 'inline' : 'none';
+  }
+  const loginBtn = document.getElementById('nav-login-btn');
+  const logoutBtn = document.getElementById('nav-logout-btn');
+  if (loginBtn) loginBtn.style.display = 'none';
+  if (logoutBtn) logoutBtn.style.display = 'block';
+}
 
-// ── COMMITMENT SCORE ──
-window.calcCommitmentScore = function(usageLogs) {
-    if (!usageLogs || !Array.isArray(usageLogs)) return 0;
-    const weights = {
-        'page_view': 0.5, 'video_started': 1, 'video_completed': 3,
-        'drill_attempted': 2, 'drill_completed': 3, 'login_streak': 2
-    };
-    return Math.round(usageLogs.reduce((t, l) => t + (weights[l.action] || 0), 0));
-};
-
-// ── GRADE URL RESOLVER ──
-window.resolveGradeUrl = async function(topicId, grade) {
-    const gradePath    = `/lessons/${topicId}/grade${grade}/index.html`;
-    const standardPath = `/lessons/${topicId}/index.html`;
-    try {
-        const res = await fetch(gradePath, { method: 'HEAD' });
-        return res.ok ? gradePath : standardPath;
-    } catch { return standardPath; }
-};
-
-// ── SIGNUP ──
-window.handleSignup = async function(name, email, password, exams, examDate, targetScore) {
-    const { data, error } = await sb.auth.signUp({ email, password });
-    if (error) { window.toast(error.message, 'error'); return; }
-
-    // Create profile row
-    await sb.from('profiles').insert({
-        id: data.user.id, full_name: name, email,
-        exams_selected: exams, exam_date: examDate,
-        target_jamb_score: targetScore || 280,
-        subscription_status: 'NIL'
-    });
-
-    // Seed topic_mastery rows with NIL status (accuracy_avg = NULL)
-    const { data: curriculum } = await sb.from('topic_mastery').select('topic_id').limit(1);
-    // Topics seeded by DB trigger — nothing extra needed here
-
-    window.toast("Account created! Check your email to verify.", 'success');
-    window.closeAuthModal();
-};
-
-// ── LOGIN ──
-window.handleLogin = async function(email, password) {
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) { window.toast(error.message, 'error'); return; }
-    window.toast("Welcome back!", 'success');
-    window.closeAuthModal();
-    location.reload();
-};
-
-// ── LOGOUT ──
-window.handleLogout = async function() {
-    await sb.auth.signOut();
-    window.currentUser    = null;
-    window.currentProfile = null;
-    window.location.href  = 'index.html';
-};
-
-// ── CORE INIT (FIX #2: loads profile into window.currentProfile) ──
-async function initAuth() {
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) return;
-
-    window.currentUser = session.user;
-
-    // Load profile
-    const { data: profile } = await sb
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-
-    if (profile) {
-        window.currentProfile = profile;
-
-        // Update nav
-        const loginBtn  = document.getElementById('nav-login-btn');
-        const userPill  = document.getElementById('nav-user-pill');
-        const userName  = document.getElementById('nav-user-name');
-        const xpEl      = document.getElementById('nav-xp');
-        const proBadge  = document.getElementById('nav-pro-badge');
-
-        if (loginBtn)  loginBtn.style.display  = 'none';
-        if (userPill)  userPill.style.display  = 'flex';
-        if (userName)  userName.textContent    = profile.full_name?.split(' ')[0] || 'Student';
-        if (xpEl)      xpEl.textContent        = `${profile.total_xp || 0} XP`;
-        if (proBadge)  proBadge.style.display  = profile.is_premium ? 'inline-flex' : 'none';
-
-        // Run access guard
-        checkAccess();
-
-        // Notify other scripts
-        window.dispatchEvent(new CustomEvent('ue_auth_ready', { detail: profile }));
+// ---------- Subscription Guard ----------
+async function checkAccess() {
+  if (!currentProfile) return;
+  if (currentProfile.is_premium && new Date() > new Date(currentProfile.subscription_expiry)) {
+    await sb
+      .from('profiles')
+      .update({ is_premium: false, subscription_status: 'EXPIRED' })
+      .eq('id', currentUser.id);
+    currentProfile.is_premium = false;
+    const banner = document.getElementById('defaulter-banner');
+    if (banner) banner.style.display = 'block';
+    if (window.location.pathname.includes('classroom') || window.location.pathname.includes('cbt')) {
+      toast('Subscription expired. Redirecting to pricing...');
+      setTimeout(() => (window.location.href = 'index.html#pricing'), 3000);
     }
+  }
+}
+
+// ---------- Auth Modal Logic ----------
+function openAuthModal(tab = 'login') {
+  const modal = document.getElementById('auth-modal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  switchAuthTab(tab);
+}
+function closeAuthModal() {
+  const modal = document.getElementById('auth-modal');
+  if (modal) modal.style.display = 'none';
+}
+function switchAuthTab(tab) {
+  const loginForm = document.getElementById('login-form');
+  const signupForm = document.getElementById('signup-form');
+  const tabs = document.querySelectorAll('.tab-btn');
+  tabs.forEach(btn => btn.classList.remove('active'));
+  if (tab === 'login') {
+    loginForm.style.display = 'flex';
+    signupForm.style.display = 'none';
+    document.querySelector('.tab-btn:first-child').classList.add('active');
+  } else {
+    loginForm.style.display = 'none';
+    signupForm.style.display = 'flex';
+    document.querySelector('.tab-btn:last-child').classList.add('active');
+  }
+}
+window.openAuthModal = openAuthModal;
+window.closeAuthModal = closeAuthModal;
+window.switchAuthTab = switchAuthTab;
+
+// ---------- Signup Handler ----------
+async function handleSignup(event) {
+  event.preventDefault();
+  const fullName = document.getElementById('signup-name').value;
+  const email = document.getElementById('signup-email').value;
+  const password = document.getElementById('signup-password').value;
+  const exams = Array.from(document.querySelectorAll('.exam-checks input:checked')).map(cb => cb.value);
+  const examDate = document.getElementById('signup-exam-month').value;
+  const targetScore = parseInt(document.getElementById('signup-target-score').value);
+
+  if (!fullName || !email || !password || exams.length === 0) {
+    toast('Please fill all fields and select at least one exam.');
+    return;
+  }
+  if (password.length < 6) {
+    toast('Password must be at least 6 characters.');
+    return;
+  }
+
+  const { data, error } = await sb.auth.signUp({ email, password });
+  if (error) {
+    toast(error.message);
+    return;
+  }
+  const userId = data.user.id;
+
+  // Insert profile
+  const { error: profileError } = await sb.from('profiles').insert({
+    id: userId,
+    full_name: fullName,
+    email: email,
+    exams_selected: exams,
+    exam_date: examDate,
+    target_jamb_score: targetScore,
+    current_skill_level: 3,
+    total_xp: 0,
+    usage_logs: [],
+    is_premium: false,
+    subscription_status: 'NIL',
+    accuracy_avg: null,
+    mastery_level: null,
+  });
+  if (profileError) {
+    console.error(profileError);
+    toast('Error creating profile. Please try again.');
+    return;
+  }
+
+  // Seed topic_mastery with all topics from curriculum (static list)
+  const allTopics = ['quadratics', 'logarithms', 'number-bases', 'trigonometry', 'newtons-laws', 'electricity', 'optics', 'comprehension', 'lexis-structure', 'organic-chem', 'periodic-table'];
+  const masteryRows = allTopics.map(topic => ({
+    user_id: userId,
+    topic_id: topic,
+    accuracy_avg: null,
+    mastery_level: null,
+    grade_level: 3,
+    attempts_at_grade1: 0,
+  }));
+  await sb.from('topic_mastery').insert(masteryRows);
+
+  toast('Account created! Check your email to verify.');
+  closeAuthModal();
+}
+window.handleSignup = handleSignup;
+
+// ---------- Login Handler ----------
+async function handleLogin(event) {
+  event.preventDefault();
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    toast(error.message);
+    return;
+  }
+  toast('Logged in!');
+  closeAuthModal();
+}
+window.handleLogin = handleLogin;
+
+// ---------- Study Plan Welcome Modal (once per session) ----------
+let studyPlanShown = false;
+async function showStudyPlanWelcome() {
+  if (studyPlanShown || !currentProfile) return;
+  studyPlanShown = true;
+  // Build modal content dynamically
+  const monthsLeft = currentProfile.exam_date
+    ? Math.max(0, Math.ceil((new Date(currentProfile.exam_date) - new Date()) / (1000 * 60 * 60 * 24 * 30)))
+    : '?';
+  const readiness = currentProfile.accuracy_avg === null ? 'NIL — take your first drill' : `${currentProfile.accuracy_avg}%`;
+  const skillLevel = currentProfile.current_skill_level;
+  let advice = '';
+  if (monthsLeft <= 1) advice = 'High intensity: 2–3 sessions/day';
+  else if (monthsLeft <= 3) advice = 'Medium intensity: 1 session/day';
+  else advice = 'Steady pace: 4–5 sessions/week';
+
+  const modalHtml = `
+    <div id="study-plan-modal" class="modal-backdrop" style="display:flex; z-index:2000;">
+      <div class="modal-card">
+        <span class="modal-close" onclick="closeStudyPlanModal()">&times;</span>
+        <h2>📘 Your Study Plan</h2>
+        <div class="sp-stats">📅 ${monthsLeft} month(s) to exam</div>
+        <div class="sp-stats">📊 Readiness: ${readiness}</div>
+        <div class="sp-stats">🎓 Current Level: Grade ${skillLevel}</div>
+        <div class="sp-advice">💡 ${advice}</div>
+        <div>Exams registered: ${currentProfile.exams_selected?.join(', ') || 'None'}</div>
+        <button class="btn btn-outline" onclick="openAddExamModal()">+ Add / change exams</button>
+        <button class="btn btn-primary" onclick="closeStudyPlanModal()">Start Learning →</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+window.closeStudyPlanModal = () => {
+  const modal = document.getElementById('study-plan-modal');
+  if (modal) modal.remove();
+};
+
+// Add/change exams modal
+window.openAddExamModal = async () => {
+  const currentExams = currentProfile.exams_selected || [];
+  const examOptions = ['JAMB', 'WAEC', 'NECO', 'Post-UTME'];
+  const checkboxes = examOptions.map(ex => `<label><input type="checkbox" value="${ex}" ${currentExams.includes(ex) ? 'checked' : ''}> ${ex}</label>`).join('');
+  const modalHtml = `
+    <div id="add-exam-modal" class="modal-backdrop" style="display:flex; z-index:2000;">
+      <div class="modal-card">
+        <h3>Update Your Exams</h3>
+        <div class="exam-checks">${checkboxes}</div>
+        <button class="btn btn-primary" onclick="saveExamChanges()">Save Changes</button>
+        <button class="btn btn-outline" onclick="closeAddExamModal()">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+};
+window.closeAddExamModal = () => document.getElementById('add-exam-modal')?.remove();
+window.saveExamChanges = async () => {
+  const selected = Array.from(document.querySelectorAll('#add-exam-modal input:checked')).map(cb => cb.value);
+  await sb.from('profiles').update({ exams_selected: selected }).eq('id', currentUser.id);
+  currentProfile.exams_selected = selected;
+  toast('Exams updated!');
+  closeAddExamModal();
+};
+
+// ---------- Session Initialization ----------
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadProfile();
+    showStudyPlanWelcome();
+  } else {
+    // Show login button
+    const loginBtn = document.getElementById('nav-login-btn');
+    if (loginBtn) loginBtn.style.display = 'block';
+  }
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN') {
+      currentUser = session.user;
+      await loadProfile();
+      showStudyPlanWelcome();
+      trackAction('login');
+    }
+    if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      currentProfile = null;
+      window.location.reload();
+    }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', initAuth);
