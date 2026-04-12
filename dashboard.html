@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — UltimateEdge School</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -18,61 +18,210 @@
   <nav class="ue-nav">
     <a class="ue-nav__brand" href="/index.html">ULTIMATE<span>EDGE</span></a>
     <div class="ue-nav__right">
-      <span id="nav-xp"></span>
-      <div id="nav-user-pill" style="display:none">
-        <div id="nav-avatar"></div>
-        <span id="nav-user-name"></span>
-      </div>
+       <span id="nav-xp">0 XP</span>
+       <div id="nav-user-pill" style="display:none">
+         <div id="nav-avatar">U</div>
+         <span id="nav-user-name">Student</span>
+       </div>
     </div>
   </nav>
 
-  <div class="container mt-lg">
-    <h1 class="text-head" style="font-size:2.5rem">Hello, <span id="greeting-name" class="text-blue">Student</span> 👋</h1>
+  <main class="container mt-lg mb-lg">
+    <h1 class="section-title">Good <span id="greeting-time">Day</span>, <span id="greeting-name" style="color:var(--blue)">Student</span></h1>
     
-    <!-- Triple Threat Panel -->
-    <div class="grid-3 mt">
+    <!-- 1. NIL CALLOUT (Sec 22) -->
+    <div id="nil-callout" class="card mt-lg" style="display:none; border-color:var(--blue); background:var(--blue-light);">
+        <div class="flex-between">
+            <div>
+                <h3>Welcome to your Smart Dashboard!</h3>
+                <p class="text-muted">Take your first drill to generate your readiness score and JAMB prediction.</p>
+            </div>
+            <a href="cbt.html" class="btn btn-primary">Start First Drill</a>
+        </div>
+    </div>
+
+    <!-- 2. TRIPLE-THREAT PANEL (Sec 15) -->
+    <div class="grid-3 mt-lg" id="prediction-panel">
       <div class="card card--blue text-center">
-        <p class="text-xs fw-700" style="letter-spacing:0.1em">JAMB PREDICTION</p>
+        <p class="text-xs fw-700" style="letter-spacing:0.1em">JAMB ESTIMATE</p>
         <div class="text-head" id="pred-jamb" style="font-size:3rem">NIL</div>
         <p class="text-sm">Target: <span id="target-score">280</span></p>
       </div>
       <div class="card text-center">
-        <p class="text-xs fw-700 text-muted">WAEC PREDICTION</p>
+        <p class="text-xs fw-700 text-muted">WAEC GRADE</p>
         <div class="text-head" id="pred-waec" style="font-size:3rem">NIL</div>
+        <p class="text-sm text-muted">Predicted Grade</p>
       </div>
       <div class="card text-center">
-        <p class="text-xs fw-700 text-muted">NECO PREDICTION</p>
+        <p class="text-xs fw-700 text-muted">NECO GRADE</p>
         <div class="text-head" id="pred-neco" style="font-size:3rem">NIL</div>
+        <p class="text-sm text-muted">Predicted Grade</p>
       </div>
     </div>
 
-    <!-- Chart and Stats Row -->
-    <div class="grid-2 mt">
+    <!-- 3. TREND CHART & COMMITMENT (Sec 18) -->
+    <div class="grid-2 mt-lg">
       <div class="card">
-        <h3 class="text-head mb">Mastery Progress</h3>
-        <canvas id="masteryChart" height="200"></canvas>
+        <h3 class="text-head mb">Score Trend (Last 10 Drills)</h3>
+        <div style="height:220px; width:100%;">
+            <canvas id="trendChart"></canvas>
+        </div>
       </div>
       <div class="card">
         <h3 class="text-head mb">Commitment Score</h3>
         <div class="flex-between mb-sm">
-          <span class="text-muted">Learning Activity</span>
-          <strong id="commitment-score">0</strong>
+          <span class="text-muted text-sm">Learning Volume</span>
+          <strong id="commitment-score" class="text-blue">0</strong>
         </div>
-        <div class="mastery-bar"><div class="mastery-bar__fill" id="commitment-bar" style="width:0%"></div></div>
+        <div class="mastery-bar">
+            <div class="mastery-bar__fill" id="commitment-bar" style="width:0%"></div>
+        </div>
+        <p class="text-xs text-muted mt-lg">Calculated from videos watched, sessions completed, and study streaks.</p>
       </div>
     </div>
 
-    <!-- SmartPath Section -->
-    <div class="card mt">
-      <h3 class="text-head mb">🧭 SmartPath™ Recommendations</h3>
-      <div id="smartpath-list">
-        <!-- Rendered by dashboard script -->
+    <!-- 4. SMARTPATH™ RECOMMENDATIONS (Sec 14) -->
+    <div class="card mt-lg">
+      <div class="flex-between mb">
+          <h3 class="text-head">🧭 SmartPath™ Recommendations</h3>
+          <span class="status-pill status-active">Top Weaknesses</span>
+      </div>
+      <div id="smartpath-list" class="flex-col gap">
+        <!-- Rendered via JS -->
       </div>
     </div>
-  </div>
+
+    <!-- 5. FULL TOPIC TABLE -->
+    <div class="card mt-lg" style="overflow-x:auto;">
+        <h3 class="text-head mb">Full Topic Mastery</h3>
+        <table style="width:100%; text-align:left; border-collapse:collapse;" id="mastery-table">
+            <thead>
+                <tr class="text-xs text-muted" style="border-bottom:1.5px solid var(--border);">
+                    <th style="padding:10px;">TOPIC</th>
+                    <th style="padding:10px;">ACCURACY</th>
+                    <th style="padding:10px;">GRADE</th>
+                    <th style="padding:10px;">STATUS</th>
+                </tr>
+            </thead>
+            <tbody id="mastery-tbody">
+                <!-- Rendered via JS -->
+            </tbody>
+        </table>
+    </div>
+
+  </main>
 
   <div id="toast"></div>
+
+  <!-- Shared Scripts -->
   <script src="/js/auth.js"></script>
   <script src="/js/ai-engine.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Poll for Auth Readiness
+        const checkAuth = setInterval(async () => {
+            if (window.currentUser && window.currentProfile) {
+                clearInterval(checkAuth);
+                initDashboard();
+            }
+        }, 500);
+    });
+
+    async function initDashboard() {
+        renderHeader();
+        
+        // Fetch Data
+        const { data: tm } = await sb.from('topic_mastery').select('*').eq('user_id', currentUser.id);
+        const { data: ss } = await sb.from('session_scores').select('*').eq('user_id', currentUser.id).order('created_at', {ascending: false}).limit(10);
+
+        if (!tm || tm.length === 0 || currentProfile.accuracy_avg === null) {
+            document.getElementById('nil-callout').style.display = 'block';
+            return;
+        }
+
+        renderPredictions(tm, ss);
+        renderTrendChart(ss);
+        renderCommitment();
+        renderSmartPath(tm);
+        renderMasteryTable(tm);
+    }
+
+    function renderHeader() {
+        const hour = new Date().getHours();
+        const greeting = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening';
+        document.getElementById('greeting-time').textContent = greeting;
+        document.getElementById('greeting-name').textContent = currentProfile.full_name.split(' ')[0];
+        document.getElementById('target-score').textContent = currentProfile.target_score;
+    }
+
+    function renderPredictions(tm, ss) {
+        const acc = currentProfile.accuracy_avg;
+        document.getElementById('pred-jamb').textContent = window.predictJAMB(acc);
+        document.getElementById('pred-waec').textContent = window.predictWAEC(acc);
+        document.getElementById('pred-neco').textContent = window.predictNECO(acc);
+    }
+
+    function renderTrendChart(ss) {
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        const data = [...ss].reverse();
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map((_, i) => i + 1),
+                datasets: [{
+                    label: 'Accuracy %',
+                    data: data.map(s => s.accuracy),
+                    borderColor: '#1a56ff',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(26, 86, 255, 0.05)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { min: 0, max: 100 } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    function renderCommitment() {
+        const score = window.calcCommitmentScore(currentProfile.usage_logs || []);
+        document.getElementById('commitment-score').textContent = score;
+        document.getElementById('commitment-bar').style.width = Math.min(score, 100) + '%';
+    }
+
+    function renderSmartPath(tm) {
+        const recommendations = window.getSmartPath(tm, 3);
+        const cont = document.getElementById('smartpath-list');
+        cont.innerHTML = recommendations.map(r => `
+            <div class="flex-between" style="background:var(--surface-2); padding:12px; border-radius:var(--radius);">
+                <div>
+                    <strong style="text-transform:uppercase; font-size:0.9rem;">${r.topic_id.replace('-', ' ')}</strong>
+                    <div class="text-xs text-muted">Current Mastery: ${Math.round(r.mastery_level * 100)}%</div>
+                </div>
+                <a href="cbt.html?topic=${r.topic_id}" class="btn btn-sm btn-outline">Improve →</a>
+            </div>
+        `).join('');
+    }
+
+    function renderMasteryTable(tm) {
+        const tbody = document.getElementById('mastery-tbody');
+        tbody.innerHTML = tm.map(r => {
+            const { label, cls } = window.getMasteryLabel(r.mastery_level);
+            return `
+                <tr style="border-bottom:1px solid var(--surface-2);">
+                    <td style="padding:12px; font-weight:700; font-size:0.85rem;">${r.topic_id.toUpperCase()}</td>
+                    <td style="padding:12px;">${Math.round(r.accuracy_avg)}%</td>
+                    <td style="padding:12px;"><span class="status-pill status-active" style="background:var(--surface-3);">G${r.grade_level}</span></td>
+                    <td style="padding:12px;"><span class="status-pill ${cls}">${label}</span></td>
+                </tr>
+            `;
+        }).join('');
+    }
+  </script>
 </body>
 </html>
