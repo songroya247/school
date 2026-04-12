@@ -1,91 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Classroom — UltimateEdge School</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/main.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    .classroom-shell { display: grid; grid-template-columns: 260px 1fr 300px; min-height: calc(100vh - 64px); }
-    .cls-sidebar { background: var(--surface); border-right: 1.5px solid var(--border); overflow-y: auto; }
-    .cls-main { display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
-    .cls-panel { background: var(--surface); border-left: 1.5px solid var(--border); overflow-y: auto; }
-    @media (max-width: 1024px) { .classroom-shell { grid-template-columns: 220px 1fr; } .cls-panel { display: none; } }
-    @media (max-width: 700px) { .classroom-shell { grid-template-columns: 1fr; } .cls-sidebar { max-height: 200px; } }
-  </style>
+    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
-  <div class="defaulter-banner" id="defaulter-banner">
-    ⚠️ Your subscription has expired. Free access is still active.
-    <a href="index.html#pricing">Renew Now →</a>
-  </div>
-
-  <nav class="ue-nav">
-    <a class="ue-nav__brand" href="/index.html">ULTIMATE<span>EDGE</span></a>
-    <div class="ue-nav__right">
-      <span id="nav-xp"></span>
-      <div id="nav-user-pill" style="display:none">
-        <div id="nav-avatar"></div>
-        <span id="nav-user-name"></span>
-        <span id="nav-pro-badge" style="display:none">PRO</span>
-      </div>
-      <button class="btn btn-primary btn-sm" id="nav-login-btn" onclick="openAuthModal('login')">Login / Sign Up</button>
-    </div>
-  </nav>
-
-  <div class="classroom-shell">
-    <aside class="cls-sidebar">
-      <div style="padding:16px;font-family:var(--font-head);font-size:1.2rem;border-bottom:1.5px solid var(--border)">📚 Subjects</div>
-      <!-- Subject items like Mathematics, Physics etc from your reference here -->
-      <div id="math-topics">
-        <button class="btn btn-ghost btn-block btn-sm" onclick="loadTopic('quadratics','Math','Quadratics')">Quadratics</button>
-      </div>
-    </aside>
-
-    <main class="cls-main">
-      <div class="cls-topbar" style="padding:16px; background:var(--surface); border-bottom:1.5px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-        <h2 id="cls-topic-title" style="font-family:var(--font-head)">Select a Topic</h2>
-        <span class="status-pill status-active" id="grade-indicator">Grade 3</span>
-      </div>
-      <div id="video-area" style="padding:24px; flex:1">
-        <div class="video-player-wrap">
-          <iframe id="lesson-frame" src="" style="width:100%; height:480px; border:none;"></iframe>
+    <nav class="ue-nav">
+        <div class="ue-nav__brand">ULTIMATE<span>EDGE</span></div>
+        <div class="ue-nav__right">
+            <span id="nav-xp">0 XP</span>
+            <div id="nav-user-pill" style="display:none"><span id="nav-user-name"></span></div>
         </div>
-      </div>
+    </nav>
+    <main class="container mt-lg">
+        <h1 class="section-title">Your Progress</h1>
+        <div class="grid-3 mt-lg">
+            <div class="card card--blue text-center">
+                <p>JAMB ESTIMATE</p>
+                <h2 id="res-jamb" style="font-size:2.5rem">NIL</h2>
+            </div>
+            <div class="card text-center">
+                <p>WAEC GRADE</p>
+                <h2 id="res-waec" style="font-size:2.5rem">NIL</h2>
+            </div>
+            <div class="card">
+                <p>COMMITMENT</p>
+                <h2 id="res-comm">0</h2>
+            </div>
+        </div>
+        <div class="card mt-lg">
+            <h3>🧭 SmartPath Tips</h3>
+            <div id="smartpath-list" class="mt"></div>
+        </div>
     </main>
-
-    <aside class="cls-panel">
-      <div class="cls-panel-section" style="padding:16px;">
-        <h3 class="text-head">Key Concepts</h3>
-        <ul id="concept-list" class="concept-list"></ul>
-      </div>
-      <div class="cls-panel-section" style="padding:16px;">
-        <h3 class="text-head">Quick Quiz</h3>
-        <div id="quiz-container"></div>
-        <button class="btn btn-primary btn-block mt" onclick="submitQuiz()">Submit Quiz</button>
-      </div>
-    </aside>
-  </div>
-
-  <div id="toast"></div>
-
-  <!-- Re-using modals from index.html (Required on all pages) -->
-  <div id="auth-modal-placeholder"></div>
-
-  <script src="/js/auth.js"></script>
-  <script src="/js/ai-engine.js"></script>
-  <!-- Iframe / Classroom Logic -->
-  <script>
-    async function loadTopic(id, subject, label) {
-       document.getElementById('cls-topic-title').textContent = label;
-       const grade = window.currentProfile?.current_skill_level || 3;
-       const url = await window.resolveGradeUrl(id, grade);
-       document.getElementById('lesson-frame').src = url;
-       // ... Load concepts and quiz from your TOPIC_CONTENT object ...
-    }
-  </script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/ai-engine.js"></script>
+    <script>
+        window.addEventListener('ue_auth_ready', async () => {
+            const acc = currentProfile.accuracy_avg;
+            document.getElementById('res-jamb').textContent = window.predictJAMB(acc);
+            document.getElementById('res-waec').textContent = window.predictWAEC(acc);
+            
+            const { data: tm } = await sb.from('topic_mastery').select('*').eq('user_id', currentUser.id).limit(3);
+            document.getElementById('smartpath-list').innerHTML = tm.map(t => `<div class="card" style="margin-bottom:10px">${t.topic_id.toUpperCase()} - ${Math.round(t.accuracy_avg)}%</div>`).join('');
+        });
+    </script>
 </body>
 </html>
