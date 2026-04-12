@@ -3,159 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Performance Report — UltimateEdge School</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+  <title>Performance Report – UltimateEdge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body class="bg-white">
-
-  <!-- Nav (Hidden during print) -->
-  <nav class="ue-nav btn-print-hide">
-    <a class="ue-nav__brand" href="/dashboard.html">ULTIMATE<span>EDGE</span></a>
-    <div class="ue-nav__right">
-        <button class="btn btn-primary btn-sm" onclick="window.print()">Print / Save PDF</button>
-    </div>
-  </nav>
-
-  <!-- Report Container -->
-  <main class="report-page container mt-lg">
-    
-    <!-- 1. Header Section -->
-    <div class="flex-between mb-lg" style="border-bottom: 2.5px solid var(--blue); padding-bottom: 20px;">
-        <div>
-            <h1 class="text-head" style="font-size:3rem; color:var(--text);">Student Performance Report</h1>
-            <p class="text-muted" id="report-date">Generated on: ...</p>
-        </div>
-        <div class="text-right">
-            <h2 id="student-name" class="text-head" style="font-size:2rem; color:var(--blue);">Loading...</h2>
-            <p id="student-email" class="text-sm text-muted">...</p>
-        </div>
-    </div>
-
-    <!-- 2. The Big Predictions -->
-    <div class="grid-3 mb-lg">
-        <div class="card text-center" style="border: 2px solid var(--blue);">
-            <p class="text-xs fw-700 text-muted">JAMB ESTIMATE</p>
-            <div id="res-jamb" class="text-head" style="font-size:3.5rem; color:var(--blue);">NIL</div>
-            <p class="text-xs">Target: <span id="res-target">...</span></p>
-        </div>
-        <div class="card text-center">
-            <p class="text-xs fw-700 text-muted">WAEC GRADE</p>
-            <div id="res-waec" class="text-head" style="font-size:3.5rem;">NIL</div>
-        </div>
-        <div class="card text-center">
-            <p class="text-xs fw-700 text-muted">NECO GRADE</p>
-            <div id="res-neco" class="text-head" style="font-size:3.5rem;">NIL</div>
-        </div>
-    </div>
-
-    <!-- 3. Commitment & Consistency -->
-    <div class="card mb-lg" style="background:var(--surface-2);">
-        <h3 class="text-head mb-sm">Academic Commitment Score</h3>
-        <div class="flex-between mb-sm">
-            <span class="text-muted">Study Volume & Consistency</span>
-            <strong id="res-commitment" class="text-blue" style="font-size:1.2rem;">0</strong>
-        </div>
-        <div class="mastery-bar" style="height:12px;">
-            <div id="res-commitment-bar" class="mastery-bar__fill" style="width:0%;"></div>
-        </div>
-        <p class="text-xs text-muted mt-sm">This score reflects the total time spent in lessons, CBT drills completed, and consecutive study days.</p>
-    </div>
-
-    <!-- 4. Weakness Map (Top 5 topics to improve) -->
-    <div class="mb-lg">
-        <h3 class="text-head mb">Topic Weakness Map</h3>
-        <table style="width:100%; text-align:left; border-collapse:collapse;">
-            <thead>
-                <tr class="text-xs text-muted" style="background:var(--surface-3); border-bottom:2px solid var(--border);">
-                    <th style="padding:12px;">TOPIC</th>
-                    <th style="padding:12px;">SUBJECT</th>
-                    <th style="padding:12px;">ACCURACY</th>
-                    <th style="padding:12px;">URGENCY</th>
-                </tr>
-            </thead>
-            <tbody id="weakness-tbody">
-                <!-- Populated via JS -->
-            </tbody>
-        </table>
-    </div>
-
-    <!-- 5. Verification Footer -->
-    <footer class="mt-lg pt-lg text-center" style="border-top:1px solid var(--border);">
-        <p class="text-sm text-muted">This report is an automated estimate based on the student's activity on school.ultimateedge.info.</p>
-        <div id="share-link-box" class="btn-print-hide mt-lg">
-            <p class="text-xs fw-700 text-muted mb-sm">SHAREABLE LINK</p>
-            <input type="text" id="share-url" readonly class="form-input text-center" style="max-width:400px; margin:0 auto;">
-        </div>
-    </footer>
-
-  </main>
-
   <script src="/js/auth.js"></script>
   <script src="/js/ai-engine.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('token');
-
-        if (token) {
-            // Public Share Mode
-            fetchReportByToken(token);
-        } else {
-            // Private Mode (must be logged in)
-            const check = setInterval(() => {
-                if (window.currentUser && window.currentProfile) {
-                    clearInterval(check);
-                    renderReport(window.currentProfile);
-                }
-            }, 500);
-        }
-    });
-
-    async function fetchReportByToken(token) {
-        const { data, error } = await sb.from('profiles').select('*').eq('report_share_token', token).single();
-        if (data) renderReport(data);
-        else document.body.innerHTML = "<h2 class='text-center mt-lg'>Invalid Report Token</h2>";
-    }
-
-    async function renderReport(profile) {
-        document.getElementById('student-name').textContent = profile.full_name;
-        document.getElementById('student-email').textContent = profile.email;
-        document.getElementById('report-date').textContent = "Generated on: " + new Date().toLocaleDateString();
-        
-        const acc = profile.accuracy_avg;
-        document.getElementById('res-jamb').textContent = window.predictJAMB(acc);
-        document.getElementById('res-waec').textContent = window.predictWAEC(acc);
-        document.getElementById('res-neco').textContent = window.predictNECO(acc);
-        document.getElementById('res-target').textContent = profile.target_score;
-
-        // Commitment
-        const cScore = window.calcCommitmentScore(profile.usage_logs || []);
-        document.getElementById('res-commitment').textContent = cScore;
-        document.getElementById('res-commitment-bar').style.width = Math.min(cScore, 100) + "%";
-
-        // Weakness Map
-        const { data: tm } = await sb.from('topic_mastery').select('*').eq('user_id', profile.id).lt('accuracy_avg', 60).order('accuracy_avg', {ascending: true}).limit(6);
-        const tbody = document.getElementById('weakness-tbody');
-        
-        if (tm && tm.length > 0) {
-            tbody.innerHTML = tm.map(r => `
-                <tr style="border-bottom:1px solid var(--border);">
-                    <td style="padding:12px; font-weight:700;">${r.topic_id.toUpperCase().replace('-', ' ')}</td>
-                    <td style="padding:12px; color:var(--text-muted);">Mathematics</td>
-                    <td style="padding:12px;">${Math.round(r.accuracy_avg)}%</td>
-                    <td style="padding:12px;"><span class="status-pill status-danger">HIGH</span></td>
-                </tr>
-            `).join('');
-        } else {
-            tbody.innerHTML = "<tr><td colspan='4' class='text-center p-lg'>No critical weaknesses detected yet.</td></tr>";
-        }
-
-        // Share Link
-        const shareUrl = window.location.origin + window.location.pathname + "?token=" + profile.report_share_token;
-        document.getElementById('share-url').value = shareUrl;
-    }
-  </script>
+</head>
+<body>
+<main class="report-a4" id="report-content">
+  <h1>UltimateEdge Performance Report</h1>
+  <div id="report-data">Loading...</div>
+</main>
+<button onclick="window.print()" class="btn btn-primary" style="margin:20px; display:block; margin-left:auto;">Print / Save PDF</button>
+<script>
+  const token = new URLSearchParams(location.search).get('token');
+  if(!token) document.getElementById('report-data').innerHTML = 'No token provided.';
+  else {
+    (async () => {
+      const { data: profile } = await sb.from('profiles').select('*').eq('report_share_token', token).single();
+      if(!profile) return;
+      const { data: topics } = await sb.from('topic_mastery').select('*').eq('user_id', profile.id);
+      let html = `<h2>${profile.full_name}</h2><p>Target Score: ${profile.target_jamb_score}</p><p>Overall Readiness: ${profile.accuracy_avg || 'NIL'}%</p><h3>Weakness Map</h3><table border="1"><tr><th>Topic</th><th>Accuracy</th></tr>`;
+      topics.forEach(t => { html += `<tr><td>${t.topic_id}</td><td>${t.accuracy_avg === null ? 'NIL' : t.accuracy_avg+'%'}</td></tr>`; });
+      html += `</table><p>Predicted JAMB: ${predictJAMB(profile.accuracy_avg)}</p><p>Predicted WAEC: ${predictWAEC(profile.accuracy_avg)}</p>`;
+      document.getElementById('report-data').innerHTML = html;
+    })();
+  }
+</script>
 </body>
 </html>
