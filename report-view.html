@@ -1,300 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mastery Report — UltimateEdge School</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/ai-engine.js"></script>
-<style>
-:root{
-  --accent:#1a56ff;--accent2:#00c97a;--red:#ef4444;--yellow:#ffd932;
-  --text:#0d1117;--muted:#6b7280;--border:rgba(0,0,0,.1);
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'DM Sans',sans-serif;background:#f7f9fc;color:var(--text);-webkit-font-smoothing:antialiased;}
-/* SCREEN CHROME */
-.screen-header{background:white;border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
-.screen-header h1{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.08em;color:var(--text);}
-.screen-header h1 span{color:var(--accent);}
-.print-btn{background:var(--accent);color:white;border:none;padding:10px 24px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;transition:opacity .2s;}
-.print-btn:hover{opacity:.88;}
-.screen-body{padding:32px;display:flex;justify-content:center;}
-/* REPORT A4 */
-.report{
-  width:210mm;min-height:297mm;background:white;
-  box-shadow:0 4px 32px rgba(0,0,0,.12);
-  padding:20mm 18mm;
-  font-size:11pt;
-}
-.report-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid var(--text);padding-bottom:12px;margin-bottom:20px;}
-.rh-logo{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.1em;}
-.rh-logo span{color:var(--accent);}
-.rh-meta{text-align:right;font-size:.75rem;color:var(--muted);}
-.rh-meta strong{display:block;font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text);}
-
-/* SUMMARY BOXES */
-.summary-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:22px;}
-.summary-box{border:1.5px solid var(--border);border-radius:8px;padding:14px;text-align:center;}
-.sb-label{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
-.sb-value{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.04em;line-height:1;}
-.sb-sub{font-size:.7rem;color:var(--muted);margin-top:3px;}
-.sb-good{border-color:var(--accent2);background:rgba(0,201,122,.06);}
-.sb-good .sb-value{color:#059669;}
-.sb-warn{border-color:#f59e0b;background:rgba(245,158,11,.06);}
-.sb-warn .sb-value{color:#b45309;}
-.sb-info{border-color:var(--accent);background:rgba(26,86,255,.06);}
-.sb-info .sb-value{color:var(--accent);}
-
-/* SECTION TITLE */
-.rpt-section{margin-bottom:20px;}
-.rpt-section-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.08em;border-bottom:1.5px solid var(--border);padding-bottom:5px;margin-bottom:12px;}
-
-/* TREND CHART */
-.chart-wrap{height:130px;margin-bottom:20px;}
-
-/* WEAKNESS TABLE */
-.weak-table{width:100%;border-collapse:collapse;font-size:.82rem;}
-.weak-table th{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:7px 8px;border-bottom:1.5px solid var(--border);text-align:left;}
-.weak-table td{padding:8px;border-bottom:1px solid var(--border);}
-.weak-table tr:last-child td{border-bottom:none;}
-.mastery-bar-wrap{width:120px;}
-.mastery-bar-bg{height:6px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden;}
-.mastery-bar-fill{height:100%;border-radius:3px;}
-.grade-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:700;letter-spacing:.06em;}
-
-/* RECOMMENDATION */
-.rec-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
-.rec-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:rgba(26,86,255,.04);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;font-size:.82rem;}
-.rec-icon{flex-shrink:0;font-size:1rem;}
-
-/* FOOTER */
-.report-footer{margin-top:auto;padding-top:14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);}
-
-/* LOADING */
-#loading-msg{text-align:center;padding:60px;color:var(--muted);}
-
-/* PRINT STYLES */
-@media print{
-  body{background:white;}
-  .screen-header,.screen-body > :not(.report){display:none !important;}
-  .screen-body{padding:0;}
-  .report{box-shadow:none;width:100%;min-height:0;}
-  @page{size:A4 portrait;margin:0;}
-}
-@media(max-width:720px){
-  .screen-body{padding:12px;}
-  .report{width:100%;padding:16px 14px;}
-  .summary-row{grid-template-columns:1fr;}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Performance Report — UltimateEdge School</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body class="bg-white">
 
-<div class="screen-header">
-  <h1>UE <span>School</span> — Mastery Report</h1>
-  <button class="print-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
-</div>
-
-<div class="screen-body">
-  <div id="loading-msg">⏳ Loading your report…</div>
-  <div class="report" id="report" style="display:none">
-
-    <!-- HEADER -->
-    <div class="report-header">
-      <div>
-        <div class="rh-logo">UE <span>School</span></div>
-        <div style="font-size:.75rem;color:var(--muted);margin-top:4px">school.ultimateedge.info</div>
-      </div>
-      <div class="rh-meta">
-        <strong>Mastery Progress Report</strong>
-        <span id="rpt-name">Student Name</span><br>
-        <span id="rpt-date">Generated: —</span>
-      </div>
+  <!-- Nav (Hidden during print) -->
+  <nav class="ue-nav btn-print-hide">
+    <a class="ue-nav__brand" href="/dashboard.html">ULTIMATE<span>EDGE</span></a>
+    <div class="ue-nav__right">
+        <button class="btn btn-primary btn-sm" onclick="window.print()">Print / Save PDF</button>
     </div>
+  </nav>
 
-    <!-- SUMMARY -->
-    <div class="rpt-section">
-      <div class="rpt-section-title">Summary</div>
-      <div class="summary-row">
-        <div class="summary-box sb-info">
-          <div class="sb-label">Predicted JAMB Range</div>
-          <div class="sb-value" id="rpt-jamb">—</div>
-          <div class="sb-sub">/ 400 points</div>
+  <!-- Report Container -->
+  <main class="report-page container mt-lg">
+    
+    <!-- 1. Header Section -->
+    <div class="flex-between mb-lg" style="border-bottom: 2.5px solid var(--blue); padding-bottom: 20px;">
+        <div>
+            <h1 class="text-head" style="font-size:3rem; color:var(--text);">Student Performance Report</h1>
+            <p class="text-muted" id="report-date">Generated on: ...</p>
         </div>
-        <div class="summary-box sb-good" id="rpt-waec-box">
-          <div class="sb-label">Likely WAEC Grade</div>
-          <div class="sb-value" id="rpt-waec">—</div>
-          <div class="sb-sub" id="rpt-waec-sub">—</div>
+        <div class="text-right">
+            <h2 id="student-name" class="text-head" style="font-size:2rem; color:var(--blue);">Loading...</h2>
+            <p id="student-email" class="text-sm text-muted">...</p>
         </div>
-        <div class="summary-box">
-          <div class="sb-label">Global Accuracy</div>
-          <div class="sb-value" id="rpt-acc">—%</div>
-          <div class="sb-sub" id="rpt-qs">— questions answered</div>
+    </div>
+
+    <!-- 2. The Big Predictions -->
+    <div class="grid-3 mb-lg">
+        <div class="card text-center" style="border: 2px solid var(--blue);">
+            <p class="text-xs fw-700 text-muted">JAMB ESTIMATE</p>
+            <div id="res-jamb" class="text-head" style="font-size:3.5rem; color:var(--blue);">NIL</div>
+            <p class="text-xs">Target: <span id="res-target">...</span></p>
         </div>
-      </div>
+        <div class="card text-center">
+            <p class="text-xs fw-700 text-muted">WAEC GRADE</p>
+            <div id="res-waec" class="text-head" style="font-size:3.5rem;">NIL</div>
+        </div>
+        <div class="card text-center">
+            <p class="text-xs fw-700 text-muted">NECO GRADE</p>
+            <div id="res-neco" class="text-head" style="font-size:3.5rem;">NIL</div>
+        </div>
     </div>
 
-    <!-- TREND LINE -->
-    <div class="rpt-section">
-      <div class="rpt-section-title">Score Prediction Trend (Last 10 Sessions)</div>
-      <div class="chart-wrap"><canvas id="rpt-chart"></canvas></div>
+    <!-- 3. Commitment & Consistency -->
+    <div class="card mb-lg" style="background:var(--surface-2);">
+        <h3 class="text-head mb-sm">Academic Commitment Score</h3>
+        <div class="flex-between mb-sm">
+            <span class="text-muted">Study Volume & Consistency</span>
+            <strong id="res-commitment" class="text-blue" style="font-size:1.2rem;">0</strong>
+        </div>
+        <div class="mastery-bar" style="height:12px;">
+            <div id="res-commitment-bar" class="mastery-bar__fill" style="width:0%;"></div>
+        </div>
+        <p class="text-xs text-muted mt-sm">This score reflects the total time spent in lessons, CBT drills completed, and consecutive study days.</p>
     </div>
 
-    <!-- WEAKNESS TRACKER -->
-    <div class="rpt-section">
-      <div class="rpt-section-title">Weakness Tracker — Top 5 Topics Needing Attention</div>
-      <table class="weak-table">
-        <thead>
-          <tr>
-            <th>Topic</th>
-            <th>Subject</th>
-            <th>Mastery</th>
-            <th>WAEC Grade</th>
-            <th>Questions Done</th>
-          </tr>
-        </thead>
-        <tbody id="weak-tbody">
-          <tr><td colspan="5" style="color:var(--muted);font-style:italic;padding:12px">No weak topics identified yet — complete more sessions.</td></tr>
-        </tbody>
-      </table>
+    <!-- 4. Weakness Map (Top 5 topics to improve) -->
+    <div class="mb-lg">
+        <h3 class="text-head mb">Topic Weakness Map</h3>
+        <table style="width:100%; text-align:left; border-collapse:collapse;">
+            <thead>
+                <tr class="text-xs text-muted" style="background:var(--surface-3); border-bottom:2px solid var(--border);">
+                    <th style="padding:12px;">TOPIC</th>
+                    <th style="padding:12px;">SUBJECT</th>
+                    <th style="padding:12px;">ACCURACY</th>
+                    <th style="padding:12px;">URGENCY</th>
+                </tr>
+            </thead>
+            <tbody id="weakness-tbody">
+                <!-- Populated via JS -->
+            </tbody>
+        </table>
     </div>
 
-    <!-- RECOMMENDATIONS -->
-    <div class="rpt-section">
-      <div class="rpt-section-title">Recommended Next Steps</div>
-      <ul class="rec-list" id="rec-list"></ul>
-    </div>
+    <!-- 5. Verification Footer -->
+    <footer class="mt-lg pt-lg text-center" style="border-top:1px solid var(--border);">
+        <p class="text-sm text-muted">This report is an automated estimate based on the student's activity on school.ultimateedge.info.</p>
+        <div id="share-link-box" class="btn-print-hide mt-lg">
+            <p class="text-xs fw-700 text-muted mb-sm">SHAREABLE LINK</p>
+            <input type="text" id="share-url" readonly class="form-input text-center" style="max-width:400px; margin:0 auto;">
+        </div>
+    </footer>
 
-    <!-- FOOTER -->
-    <div class="report-footer">
-      <span>UltimateEdge School · school.ultimateedge.info · © 2026</span>
-      <span id="rpt-footer-name">—</span>
-    </div>
-  </div>
-</div>
+  </main>
 
-<script>
-const SUPA_URL = 'https://hmfbterdmgoumeeiatji.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtZmJ0ZXJkbWdvdW1lZWlhdGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTAyNzYsImV4cCI6MjA5MTMyNjI3Nn0.JxC-FN5BtBf0keNPqZq8IF-q6A7LMnGoUTkrF3GyEm8';
+  <script src="/js/auth.js"></script>
+  <script src="/js/ai-engine.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
 
-const TOPIC_TO_SUBJECT_MAP = {
-  quadratics:'Mathematics',algebra:'Mathematics',trigonometry:'Mathematics',calculus:'Mathematics',statistics:'Mathematics',geometry:'Mathematics',
-  mechanics:'Physics',waves:'Physics',electricity:'Physics',optics:'Physics',thermodynamics:'Physics',
-  comprehension:'English',lexis:'English','oral-english':'English',grammar:'English',
-  'organic-chemistry':'Chemistry','inorganic-chemistry':'Chemistry','physical-chemistry':'Chemistry',
-  genetics:'Biology',ecology:'Biology',physiology:'Biology'
-};
+        if (token) {
+            // Public Share Mode
+            fetchReportByToken(token);
+        } else {
+            // Private Mode (must be logged in)
+            const check = setInterval(() => {
+                if (window.currentUser && window.currentProfile) {
+                    clearInterval(check);
+                    renderReport(window.currentProfile);
+                }
+            }, 500);
+        }
+    });
 
-function waitForSB(cb){
-  if(typeof window.supabase!=='undefined') cb(window.supabase.createClient(SUPA_URL,SUPA_KEY));
-  else setTimeout(()=>waitForSB(cb),100);
-}
-
-waitForSB(async(sb)=>{
-  const {data:{session}}=await sb.auth.getSession();
-  if(!session?.user){
-    document.getElementById('loading-msg').textContent='Please log in to view your report.';
-    return;
-  }
-  const uid=session.user.id;
-
-  const [pR,mR,lR,sR]=await Promise.all([
-    sb.from('profiles').select('*').eq('id',uid).single(),
-    sb.from('topic_mastery').select('*').eq('user_id',uid).order('mastery_level',{ascending:true}),
-    sb.from('response_logs').select('is_correct,time_spent,topic_id').eq('user_id',uid),
-    sb.from('session_scores').select('predicted_score,accuracy,session_date').eq('user_id',uid).order('session_date',{ascending:false}).limit(10)
-  ]);
-
-  const profile=pR.data||{};
-  const mastery=mR.data||[];
-  const logs=lR.data||[];
-  const sessions=sR.data||[];
-
-  // Compute stats
-  const totalQ=logs.length;
-  const correct=logs.filter(l=>l.is_correct).length;
-  const accuracy=totalQ?Math.round(correct/totalQ*100):0;
-  const avgSpeed=totalQ?Math.round(logs.reduce((s,l)=>s+(l.time_spent||0),0)/totalQ):45;
-
-  // Subject mastery for JAMB prediction
-  const subjM={};
-  const subjectGroups={Mathematics:['quadratics','algebra','trigonometry','calculus','statistics','geometry'],Physics:['mechanics','waves','electricity','optics','thermodynamics'],English:['comprehension','lexis','oral-english','grammar']};
-  Object.entries(subjectGroups).forEach(([subj,topics])=>{
-    const rows=mastery.filter(m=>topics.includes(m.topic_id));
-    if(rows.length) subjM[subj]=rows.reduce((s,r)=>s+r.mastery_level,0)/rows.length;
-  });
-  const jambPred=typeof predictJAMB==='function'?predictJAMB(subjM,avgSpeed):{score:0,low:0,high:0};
-  const avgMastery=mastery.filter(m=>m.questions_solved>0).reduce((s,m)=>s+m.mastery_level,0)/Math.max(mastery.filter(m=>m.questions_solved>0).length,1);
-  const waecGrade=typeof predictWAECGrade==='function'?predictWAECGrade(avgMastery):{grade:'—',label:'—',color:'#6b7280'};
-
-  // Populate
-  document.getElementById('rpt-name').textContent=profile.full_name||session.user.email;
-  document.getElementById('rpt-date').textContent='Generated: '+new Date().toLocaleDateString('en-NG',{day:'numeric',month:'long',year:'numeric'});
-  document.getElementById('rpt-jamb').textContent=jambPred.low+'–'+jambPred.high;
-  document.getElementById('rpt-waec').textContent=waecGrade.grade;
-  document.getElementById('rpt-waec').style.color=waecGrade.color;
-  document.getElementById('rpt-waec-sub').textContent=waecGrade.label;
-  document.getElementById('rpt-acc').textContent=accuracy+'%';
-  document.getElementById('rpt-qs').textContent=totalQ+' questions answered';
-  document.getElementById('rpt-footer-name').textContent=profile.full_name||'';
-
-  // Weakness table
-  const weak=mastery.filter(m=>m.questions_solved>0).sort((a,b)=>a.mastery_level-b.mastery_level).slice(0,5);
-  if(weak.length){
-    const tbody=document.getElementById('weak-tbody');
-    tbody.innerHTML=weak.map(m=>{
-      const pct=Math.round(m.mastery_level*100);
-      const col=pct>=70?'#16a34a':pct>=50?'#d97706':'#dc2626';
-      const wg=typeof predictWAECGrade==='function'?predictWAECGrade(m.mastery_level):{grade:'—',color:'#6b7280'};
-      return `<tr>
-        <td style="font-weight:600;text-transform:capitalize">${(m.topic_id||'').replace(/-/g,' ')}</td>
-        <td style="color:var(--muted)">${TOPIC_TO_SUBJECT_MAP[m.topic_id]||'—'}</td>
-        <td><div class="mastery-bar-wrap"><div style="font-size:.72rem;font-weight:700;color:${col};margin-bottom:3px">${pct}%</div><div class="mastery-bar-bg"><div class="mastery-bar-fill" style="width:${pct}%;background:${col}"></div></div></div></td>
-        <td><span class="grade-badge" style="background:${wg.color}18;color:${wg.color}">${wg.grade}</span></td>
-        <td style="color:var(--muted)">${m.questions_solved}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  // Recommendations
-  const recs=[];
-  if(weak.length>0) recs.push({icon:'🎯',text:`Focus your next 3 study sessions on: <strong>${weak.slice(0,3).map(m=>(m.topic_id||'').replace(/-/g,' ')).join(', ')}</strong> — these are your lowest-scoring topics.`});
-  if(avgSpeed>65) recs.push({icon:'⏱',text:`Your average answer time is <strong>${avgSpeed}s</strong>. JAMB allows ~45s per question. Practise Exam Mode to build speed.`});
-  if(jambPred.score<profile.target_jamb_score) recs.push({icon:'📈',text:`Your current prediction of <strong>${jambPred.low}–${jambPred.high}</strong> is below your target of <strong>${profile.target_jamb_score}</strong>. Answer 20 more questions daily to close the gap.`});
-  recs.push({icon:'🔁',text:`Activate <strong>SmartPath™ Mastery Mode</strong> in your next CBT session — it will automatically prioritise your weak topics.`});
-  recs.push({icon:'📅',text:`Maintain your study streak. Daily practice of 15+ minutes increases predicted JAMB score by an average of 8 points per week.`});
-
-  document.getElementById('rec-list').innerHTML=recs.map(r=>`<li class="rec-item"><span class="rec-icon">${r.icon}</span><span>${r.text}</span></li>`).join('');
-
-  // Trend chart
-  const rev=[...sessions].reverse();
-  new Chart(document.getElementById('rpt-chart').getContext('2d'),{
-    type:'line',
-    data:{
-      labels:rev.length?rev.map((_,i)=>`S${i+1}`):['—'],
-      datasets:[{
-        label:'Predicted JAMB Score',
-        data:rev.length?rev.map(s=>s.predicted_score||0):[0],
-        borderColor:'#1a56ff',backgroundColor:'rgba(26,86,255,.07)',
-        borderWidth:2,pointRadius:3,pointBackgroundColor:'#1a56ff',tension:.4,fill:true
-      }]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{
-        y:{min:0,max:400,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{family:'DM Sans',size:9},color:'#6b7280'}},
-        x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:9},color:'#6b7280'}}
-      }
+    async function fetchReportByToken(token) {
+        const { data, error } = await sb.from('profiles').select('*').eq('report_share_token', token).single();
+        if (data) renderReport(data);
+        else document.body.innerHTML = "<h2 class='text-center mt-lg'>Invalid Report Token</h2>";
     }
-  });
 
-  document.getElementById('loading-msg').style.display='none';
-  document.getElementById('report').style.display='block';
-});
-</script>
+    async function renderReport(profile) {
+        document.getElementById('student-name').textContent = profile.full_name;
+        document.getElementById('student-email').textContent = profile.email;
+        document.getElementById('report-date').textContent = "Generated on: " + new Date().toLocaleDateString();
+        
+        const acc = profile.accuracy_avg;
+        document.getElementById('res-jamb').textContent = window.predictJAMB(acc);
+        document.getElementById('res-waec').textContent = window.predictWAEC(acc);
+        document.getElementById('res-neco').textContent = window.predictNECO(acc);
+        document.getElementById('res-target').textContent = profile.target_score;
+
+        // Commitment
+        const cScore = window.calcCommitmentScore(profile.usage_logs || []);
+        document.getElementById('res-commitment').textContent = cScore;
+        document.getElementById('res-commitment-bar').style.width = Math.min(cScore, 100) + "%";
+
+        // Weakness Map
+        const { data: tm } = await sb.from('topic_mastery').select('*').eq('user_id', profile.id).lt('accuracy_avg', 60).order('accuracy_avg', {ascending: true}).limit(6);
+        const tbody = document.getElementById('weakness-tbody');
+        
+        if (tm && tm.length > 0) {
+            tbody.innerHTML = tm.map(r => `
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:12px; font-weight:700;">${r.topic_id.toUpperCase().replace('-', ' ')}</td>
+                    <td style="padding:12px; color:var(--text-muted);">Mathematics</td>
+                    <td style="padding:12px;">${Math.round(r.accuracy_avg)}%</td>
+                    <td style="padding:12px;"><span class="status-pill status-danger">HIGH</span></td>
+                </tr>
+            `).join('');
+        } else {
+            tbody.innerHTML = "<tr><td colspan='4' class='text-center p-lg'>No critical weaknesses detected yet.</td></tr>";
+        }
+
+        // Share Link
+        const shareUrl = window.location.origin + window.location.pathname + "?token=" + profile.report_share_token;
+        document.getElementById('share-url').value = shareUrl;
+    }
+  </script>
 </body>
 </html>
