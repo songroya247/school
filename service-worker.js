@@ -1,109 +1,103 @@
-// ============================================================
-// UltimateEdge School — service-worker.js  (v3.1)
-// ⚠️  MUST be at ROOT of site, NOT in /js/ folder.
-// Handles offline caching and background sync.
-// ============================================================
+/* ── UltimateEdge School — service-worker.js v4.1 ── */
+/* PWA caching · offline support */
+/* IMPORTANT: This file must live at the ROOT of the site, not inside /js/ */
 
-const CACHE_NAME  = 'ue-school-v3';
-const SYNC_TAG    = 'ue-sync-logs';
+const CACHE_NAME = 'ue-school-v4-1';
 
-// Assets to pre-cache on install
-const PRECACHE_URLS = [
+// Files to pre-cache on install (shell resources)
+const PRECACHE = [
   '/',
   '/index.html',
+  '/login.html',
   '/dashboard.html',
   '/classroom.html',
   '/cbt.html',
+  '/report.html',
   '/css/main.css',
+  '/js/app.js',
   '/js/auth.js',
   '/js/ai-engine.js',
-  '/js/paystack.js',
   '/js/cbt-engine.js',
-  'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap',
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
 ];
 
-// ── Install — pre-cache shell ─────────────────────────────────
-self.addEventListener('install', (event) => {
+// ─── INSTALL ──────────────────────────────────────────────────────────────────
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      // Cache what we can — ignore failures (CDN may block)
-      return Promise.allSettled(
-        PRECACHE_URLS.map(url => cache.add(url).catch(() => {}))
-      );
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(PRECACHE))
+      .then(() => self.skipWaiting())
   );
 });
 
-// ── Activate — clean old caches ───────────────────────────────
-self.addEventListener('activate', (event) => {
+// ─── ACTIVATE ─────────────────────────────────────────────────────────────────
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then((keys) =>
+    caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
+          .filter(k => k !== CACHE_NAME)
+          .map(k => caches.delete(k))
       )
     ).then(() => self.clients.claim())
   );
 });
 
-// ── Fetch — network-first with cache fallback ─────────────────
-self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
-  if (event.request.method !== 'GET') return;
+// ─── FETCH STRATEGY ───────────────────────────────────────────────────────────
+// Strategy:
+//   - Supabase API calls → Network only (never cache auth/data requests)
+//   - CDN scripts (Supabase JS, Paystack, Chart.js, Google Fonts) → Cache then network update
+//   - Local HTML/CSS/JS → Stale-while-revalidate
+//   - Everything else → Network with cache fallback
 
-  // Skip Supabase API calls — always go to network
-  if (event.request.url.includes('supabase.co')) return;
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
 
-  // Skip Paystack calls
-  if (event.request.url.includes('paystack')) return;
+  // 1. Never intercept Supabase API calls
+  if (url.hostname.includes('supabase.co') ||
+      url.hostname.includes('supabase.io')) {
+    return; // Let it go to network directly
+  }
 
+  // 2. Never intercept Paystack calls
+  if (url.hostname.includes('paystack.co') ||
+      url.hostname.includes('paystack.com')) {
+    return;
+  }
+
+  // 3. CDN resources — cache with network update (stale-while-revalidate)
+  if (url.hostname.includes('cdn.jsdelivr.net') ||
+      url.hostname.includes('fonts.googleapis.com') ||
+      url.hostname.includes('fonts.gstatic.com')) {
+    event.respondWith(staleWhileRevalidate(event.request));
+    return;
+  }
+
+  // 4. Same-origin requests — stale-while-revalidate
+  if (url.origin === self.location.origin) {
+    event.respondWith(staleWhileRevalidate(event.request));
+    return;
+  }
+
+  // 5. Everything else — network with cache fallback
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Cache successful responses
-        if (response && response.status === 200) {
-          const cloned = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, cloned);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        // Network failed — serve from cache
-        return caches.match(event.request).then(cached => {
-          if (cached) return cached;
-          // Offline fallback for navigation
-          if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
-          }
-          return new Response('Offline', { status: 503 });
-        });
-      })
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
 
-// ── Background Sync — flush queued response_logs ──────────────
-self.addEventListener('sync', (event) => {
-  if (event.tag === SYNC_TAG) {
-    event.waitUntil(syncQueuedLogs());
-  }
-});
+// ─── STALE-WHILE-REVALIDATE ───────────────────────────────────────────────────
+async function staleWhileRevalidate(request) {
+  const cache    = await caches.open(CACHE_NAME);
+  const cached   = await cache.match(request);
 
-async function syncQueuedLogs() {
-  // The actual sync logic runs in cbt-engine.js via the 'online' event.
-  // This background sync is a belt-and-suspenders fallback.
-  const clients = await self.clients.matchAll();
-  clients.forEach(client => {
-    client.postMessage({ type: 'SW_SYNC_REQUEST' });
-  });
+  const fetchPromise = fetch(request)
+    .then(response => {
+      if (response && response.status === 200) {
+        cache.put(request, response.clone());
+      }
+      return response;
+    })
+    .catch(() => null);
+
+  // Return cached immediately if available, otherwise wait for network
+  return cached || await fetchPromise;
 }
-
-// ── Message handler ───────────────────────────────────────────
-self.addEventListener('message', (event) => {
-  if (event.data === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-});
