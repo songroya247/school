@@ -291,6 +291,26 @@
     </div>
   </section>
 
+
+  <!-- Study Mode Toggle (Â§26) -->
+  <section>
+    <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:12px">Study Preference</h2>
+    <div class="card card-body" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+      <div>
+        <div style="font-weight:700;margin-bottom:4px">How do you like to practise?</div>
+        <div style="font-size:.88rem;color:var(--muted)">Switch between guided drill mode and CBT-only practice at any time.</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-shrink:0" id="study-mode-btns">
+        <button id="btn-mode-drill" class="btn btn-outline" onclick="switchStudyMode('drill')">
+          ðŸ“– Video + Drills
+        </button>
+        <button id="btn-mode-cbt" class="btn btn-outline" onclick="switchStudyMode('cbt_only')">
+          âš¡ CBT Only
+        </button>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <div id="toast"></div>
@@ -314,6 +334,22 @@
       setTimeout(() => waitForProfile(cb, attempts + 1), 250);
     }
     // If no profile after 10s (logged-out visitor), leave demo content in place
+  }
+
+  
+  async function switchStudyMode(mode) {
+    if (typeof setStudyMode !== 'function') { toast('Not logged in'); return; }
+    await setStudyMode(mode);
+    highlightActiveStudyMode(mode);
+    toast(mode === 'cbt_only' ? 'âš¡ Switched to CBT-Only mode' : 'ðŸ“– Switched to Video + Drills mode');
+  }
+
+  function highlightActiveStudyMode(mode) {
+    const btnDrill = document.getElementById('btn-mode-drill');
+    const btnCbt   = document.getElementById('btn-mode-cbt');
+    if (!btnDrill || !btnCbt) return;
+    btnDrill.className = mode === 'drill'    ? 'btn btn-primary' : 'btn btn-outline';
+    btnCbt.className   = mode === 'cbt_only' ? 'btn btn-primary' : 'btn btn-outline';
   }
 
   async function populateDashboard() {
@@ -354,6 +390,7 @@
 
     // â”€â”€ SmartPath recommendations â”€â”€
     await populateSmartPath(p);
+    highlightActiveStudyMode(p.study_mode || 'drill');
   }
 
   // â”€â”€ Subject slideshow (filtered by exam_subjects) â”€â”€
