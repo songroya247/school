@@ -1,76 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Classroom – UltimateEdge</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/main.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/auth.js"></script>
-  <script src="/js/ai-engine.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classroom â€” UltimateEdge School</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="css/main.css">
 </head>
-<body>
-<div class="defaulter-banner" id="defaulter-banner">⚠️ Subscription expired. <a href="index.html#pricing">Renew</a></div>
-<nav class="ue-nav"><div class="nav-brand">ULTIMATE<span>EDGE</span></div><div class="nav-links"><a href="index.html">Home</a><a href="classroom.html">Classroom</a><a href="cbt.html">CBT</a><a href="dashboard.html">Dashboard</a></div><div class="nav-user" id="nav-user-pill"><div class="nav-avatar"></div><span id="nav-user-name"></span><span id="nav-pro-badge" class="pro-badge" style="display:none">PRO</span><span id="nav-xp"></span></div><button id="nav-login-btn" onclick="openAuthModal('login')">Login / Sign Up</button><button id="nav-logout-btn" style="display:none" onclick="sb.auth.signOut()">Log out</button></nav>
-<main class="classroom-layout" style="display:flex; gap:1rem; padding:1rem;">
-  <div class="subject-sidebar" style="width:200px; background:var(--dark-2); border-radius:20px; padding:1rem;">
-    <h3>Subjects</h3>
-    <div id="subject-list"></div>
-  </div>
-  <div style="flex:1;">
-    <iframe id="lesson-frame" src="/lessons/placeholder/index.html" style="width:100%; height:400px; border:none; border-radius:20px;"></iframe>
-    <div class="quiz-area card" style="margin-top:1rem;"><h3>Topic Quiz</h3><div id="quiz-questions"></div><button id="submit-quiz" class="btn btn-primary">Submit Quiz</button></div>
-  </div>
-</main>
-<div id="toast"></div>
-<!-- Auth Modal -->
-<div id="auth-modal" class="modal-backdrop" style="display:none"><div class="modal-card"><span class="modal-close" onclick="closeAuthModal()">&times;</span><div class="auth-tabs"><button class="tab-btn active" onclick="switchAuthTab('login')">Login</button><button class="tab-btn" onclick="switchAuthTab('signup')">Sign Up</button></div><div id="login-form" class="auth-form"><input type="email" id="login-email" placeholder="Email"><input type="password" id="login-password" placeholder="Password"><button class="btn btn-primary" onclick="handleLogin(event)">Login →</button></div><div id="signup-form" class="auth-form" style="display:none"><input type="text" id="signup-name" placeholder="Full Name"><input type="email" id="signup-email" placeholder="Email"><input type="password" id="signup-password" placeholder="Password (min 6 chars)"><div class="exam-checks"><label><input type="checkbox" value="JAMB"> JAMB</label><label><input type="checkbox" value="WAEC"> WAEC</label></div><select id="signup-exam-month"></select><select id="signup-target-score"></select><button class="btn btn-primary" onclick="handleSignup(event)">Create Free Account →</button></div></div></div>
-<script>
-  // Populate dropdowns same as before
-  const monthSelect = document.getElementById('signup-exam-month');
-  for(let i=1;i<=18;i++){ let d=new Date(); d.setMonth(d.getMonth()+i); monthSelect.innerHTML+=`<option value="${d.toISOString().slice(0,10)}">${d.toLocaleDateString('en-NG',{year:'numeric',month:'long'})}</option>`;}
-  for(let s=200;s<=320;s+=10) document.getElementById('signup-target-score').innerHTML+=`<option value="${s}">${s}</option>`;
+<body style="overflow:hidden;height:100vh;display:flex;flex-direction:column;">
 
-  // Load subjects from curriculum
-  fetch('/data/curriculum.json').then(r=>r.json()).then(data=>{
-    const subjDiv = document.getElementById('subject-list');
-    for(let [subject, topics] of Object.entries(data)){
-      let btn = document.createElement('button');
-      btn.innerText = subject;
-      btn.className = 'btn btn-outline';
-      btn.style.margin = '5px 0';
-      btn.onclick = () => loadTopic(topics[0]); // load first topic
-      subjDiv.appendChild(btn);
+<div id="defaulter-banner">Your subscription has expired. <a href="index.html#pricing">Renew Now</a></div>
+
+<!-- NAV -->
+<header style="border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;">
+  <div style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="dashboard.html" class="btn-icon" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;">&#8249;</a>
+      <a href="index.html" class="nav-logo" style="font-size:1.1rem;display:none;" id="nav-logo-desktop">ULTIMATEEDGE</a>
+    </div>
+    <div class="subject-tabs" id="subject-tabs">
+      <button class="subject-tab active" onclick="switchSubject('math',this)">Mathematics</button>
+      <button class="subject-tab" onclick="switchSubject('eng',this)">English</button>
+      <button class="subject-tab" onclick="switchSubject('phy',this)">Physics</button>
+      <button class="subject-tab" onclick="switchSubject('chem',this)">Chemistry</button>
+    </div>
+    <div style="width:40px;"></div>
+  </div>
+</header>
+
+<div class="classroom-layout" style="flex:1;">
+
+  <!-- Sidebar -->
+  <aside class="classroom-sidebar">
+    <div style="padding:16px 16px 12px;border-bottom:1px solid var(--border)">
+      <h2 style="font-family:var(--font-head);font-size:1.5rem;">Topics</h2>
+      <div style="font-size:.82rem;color:var(--muted)">Mathematics &bull; 45 Lessons</div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:8px;" id="topic-list">
+      <button class="topic-item" onclick="selectTopic('t1',this)"><span style="color:var(--accent2)">âœ“</span> <span class="topic-text">1. Number Bases</span></button>
+      <button class="topic-item" onclick="selectTopic('t2',this)"><span style="color:var(--accent2)">âœ“</span> <span class="topic-text">2. Fractions, Decimals &amp; Approx</span></button>
+      <button class="topic-item active" onclick="selectTopic('t3',this)"><span style="color:var(--accent)">â–¶</span> <span class="topic-text">3. Indices</span></button>
+      <button class="topic-item" onclick="selectTopic('t4',this)"><span style="color:var(--muted2)">ðŸ“–</span> <span class="topic-text">4. Logarithms</span></button>
+      <button class="topic-item" onclick="selectTopic('t5',this)"><span style="color:var(--muted2)">ðŸ“–</span> <span class="topic-text">5. Surds</span></button>
+      <button class="topic-item locked" title="Upgrade to unlock"><span style="color:var(--muted2)">ðŸ”’</span> <span class="topic-text" style="color:var(--muted)">6. Sets</span></button>
+      <button class="topic-item locked" title="Upgrade to unlock"><span style="color:var(--muted2)">ðŸ”’</span> <span class="topic-text" style="color:var(--muted)">7. Polynomials</span></button>
+      <button class="topic-item locked" title="Upgrade to unlock"><span style="color:var(--muted2)">ðŸ”’</span> <span class="topic-text" style="color:var(--muted)">8. Quadratics</span></button>
+      <button class="topic-item locked" title="Upgrade to unlock"><span style="color:var(--muted2)">ðŸ”’</span> <span class="topic-text" style="color:var(--muted)">9. Simultaneous Equations</span></button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="classroom-main">
+    <div style="max-width:760px;margin:0 auto;">
+
+      <!-- Video -->
+      <div class="video-area" id="video-area">
+        <div class="video-play-btn" id="video-play-icon">â–¶</div>
+        <div class="video-locked" id="video-locked" style="display:none;">
+          <div style="font-size:2rem;margin-bottom:12px;">ðŸ”’</div>
+          <h3 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Premium Content</h3>
+          <p style="color:rgba(255,255,255,.7);margin-bottom:20px">Upgrade your plan to unlock this lesson.</p>
+          <a href="index.html#pricing" class="btn btn-primary btn-lg">Unlock Premium</a>
+        </div>
+      </div>
+
+      <!-- Lesson Info -->
+      <div style="margin-top:24px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <span style="background:rgba(26,86,255,.1);color:var(--accent);font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:6px;" id="topic-tag">Topic 3</span>
+          <span style="color:var(--muted);font-size:.85rem;">15:24 mins</span>
+        </div>
+        <h1 style="font-family:var(--font-head);font-size:2.5rem;margin-bottom:20px;" id="topic-title">Indices</h1>
+        <div style="display:flex;gap:12px;padding-bottom:24px;border-bottom:1px solid var(--border);margin-bottom:24px;">
+          <button class="btn btn-primary btn-lg" onclick="toast('Take the quiz after watching the lesson')">Take Quiz</button>
+          <button class="btn btn-outline btn-lg" onclick="nextLesson()">Next Lesson</button>
+        </div>
+
+        <div id="lesson-content">
+          <p style="font-size:1.05rem;line-height:1.8;margin-bottom:24px;">Indices (or powers) provide a convenient way of writing numbers that are multiplied by themselves several times. In this lesson, we cover the fundamental laws of indices and how to apply them to solve equations.</p>
+
+          <h3 style="font-family:var(--font-head);font-size:1.5rem;margin-bottom:14px;margin-top:8px;">Key Points</h3>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
+            <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:var(--accent);margin-top:3px;">â€¢</span> Any number raised to the power of 0 is 1 (except 0).</li>
+            <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:var(--accent);margin-top:3px;">â€¢</span> When multiplying numbers with the same base, add the indices.</li>
+            <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:var(--accent);margin-top:3px;">â€¢</span> When dividing numbers with the same base, subtract the indices.</li>
+            <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:var(--accent);margin-top:3px;">â€¢</span> A negative index means the reciprocal of the number with a positive index.</li>
+          </ul>
+
+          <div class="formula-box" style="margin-bottom:28px;">
+            <div style="text-transform:uppercase;font-size:.75rem;font-weight:700;color:#1e40af;letter-spacing:.08em;margin-bottom:14px;">Formula Box</div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:1rem;">
+              <div>a<sup>m</sup> &times; a<sup>n</sup> = a<sup>m+n</sup></div>
+              <div>a<sup>m</sup> &divide; a<sup>n</sup> = a<sup>m&minus;n</sup></div>
+              <div>(a<sup>m</sup>)<sup>n</sup> = a<sup>m&times;n</sup></div>
+              <div>a<sup>&minus;n</sup> = 1 / a<sup>n</sup></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Topic Quiz -->
+        <div id="quiz-section" style="padding-top:32px;border-top:1px solid var(--border);">
+          <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:20px;">Quick Check</h2>
+          <div class="card card-body" id="quiz-card">
+            <div style="font-size:.82rem;font-weight:700;color:var(--muted);margin-bottom:14px;">Question <span id="quiz-q-num">1</span> of 3</div>
+            <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:20px;" id="quiz-question">Simplify: (2x&sup2;)&sup3;</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="quiz-options"></div>
+          </div>
+          <div id="quiz-feedback" style="display:none;margin-top:14px;padding:14px 18px;border-radius:10px;font-weight:700;"></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast"></div>
+<script src="js/auth.js"></script>
+<script src="js/ai-engine.js"></script>
+<script src="js/app.js"></script>
+<script>
+  const quizData = [
+    { q: 'Simplify: (2xÂ²)Â³', opts: ['6xâµ','8xâµ','6xâ¶','8xâ¶'], ans: 3 },
+    { q: 'Evaluate: 3â° + 4â»Â¹', opts: ['1','1.25','2','0.25'], ans: 1 },
+    { q: 'Express 2â»Â³ as a fraction', opts: ['1/2','1/4','1/6','1/8'], ans: 3 },
+  ];
+  let qIdx = 0;
+
+  function renderQuiz() {
+    const q = quizData[qIdx];
+    document.getElementById('quiz-q-num').textContent = qIdx + 1;
+    document.getElementById('quiz-question').innerHTML = q.q;
+    const optContainer = document.getElementById('quiz-options');
+    optContainer.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'drill-option';
+      btn.innerHTML = `<span class="opt-label">${String.fromCharCode(65+i)}.</span>${opt}`;
+      btn.onclick = () => checkAnswer(i, btn);
+      optContainer.appendChild(btn);
+    });
+    document.getElementById('quiz-feedback').style.display = 'none';
+  }
+
+  function checkAnswer(idx, btn) {
+    const q = quizData[qIdx];
+    const fb = document.getElementById('quiz-feedback');
+    const isCorrect = idx === q.ans;
+    document.querySelectorAll('.drill-option').forEach(b => b.style.pointerEvents = 'none');
+    btn.classList.add('selected');
+
+    // â”€â”€ Wire to cbt-engine.js / ai-engine.js â”€â”€
+    const topicId = document.getElementById('topic-tag')?.textContent?.toLowerCase()
+                      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'unknown';
+    if (typeof updateTopicMastery === 'function') updateTopicMastery(topicId, isCorrect);
+    if (typeof awardXP === 'function' && isCorrect) awardXP(isCorrect);
+    if (typeof recordResponse === 'function') {
+      recordResponse({
+        topicId,
+        isCorrect,
+        timeSpent: 0,
+        gradeLevel: (typeof currentProfile !== 'undefined' && currentProfile)
+                      ? (currentProfile.current_skill_level || 3) : 3,
+        examType: 'classroom_quiz',
+      });
+    }
+
+    if (isCorrect) {
+      fb.style.display = 'block';
+      fb.style.background = '#d1fae5'; fb.style.color = '#065f46';
+      fb.textContent = 'âœ“ Correct! Well done.';
+    } else {
+      fb.style.display = 'block';
+      fb.style.background = '#fee2e2'; fb.style.color = '#991b1b';
+      fb.textContent = `âœ— Not quite. The correct answer is ${quizData[qIdx].opts[q.ans]}.`;
+      document.querySelectorAll('.drill-option')[q.ans].style.borderColor = 'var(--accent2)';
+    }
+    setTimeout(() => {
+      if (qIdx < quizData.length - 1) {
+        qIdx++;
+        renderQuiz();
+      } else {
+        fb.textContent = 'ðŸŽ‰ Quiz complete! Great work.';
+        fb.style.background = '#eff6ff'; fb.style.color = 'var(--accent)';
+        fb.style.display = 'block';
+        document.getElementById('quiz-options').innerHTML = '';
+        // Track quiz completion
+        if (typeof trackAction === 'function') trackAction('drill_completed', { topicId, source: 'classroom_quiz' });
+      }
+    }, 1600);
+  }
+
+  // Listen for lesson_completed postMessage from /lessons/ iframes
+  window.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'lesson_completed') {
+      const topicId = e.data.topic || 'unknown';
+      if (typeof trackAction === 'function') trackAction('video_watched', { topicId });
+      if (typeof addXP === 'function') addXP(25, 'lesson completed');
     }
   });
-  async function loadTopic(topicId){
-    const grade = currentProfile?.current_skill_level || 3;
-    document.getElementById('lesson-frame').src = `/lessons/${topicId}/index.html?grade=${grade}`;
-    // Load quiz questions from question bank
-    const res = await fetch('/data/questions.json');
-    const all = await res.json();
-    const quizQ = all.filter(q=>q.topic===topicId).slice(0,3);
-    const quizDiv = document.getElementById('quiz-questions');
-    quizDiv.innerHTML = quizQ.map((q,i)=>`<div><p>${q.text}</p>${q.options.map((opt,idx)=>`<label><input type="radio" name="q${i}" value="${idx}"> ${opt}</label>`).join('')}</div>`).join('');
-    window.currentQuiz = { topicId, questions: quizQ };
+
+  function switchSubject(id, btn) {
+    document.querySelectorAll('.subject-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    toast('Loading ' + btn.textContent + ' topics...');
   }
-  document.getElementById('submit-quiz').onclick = async () => {
-    let correct=0;
-    window.currentQuiz.questions.forEach((q,i)=>{
-      const selected = document.querySelector(`input[name="q${i}"]:checked`);
-      if(selected && parseInt(selected.value)===q.correct) correct++;
+
+  function selectTopic(id, el) {
+    if (el.classList.contains('locked')) { toast('Upgrade to unlock this lesson'); return; }
+    document.querySelectorAll('.topic-item').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    const titles = { t1:'Number Bases', t2:'Fractions & Decimals', t3:'Indices', t4:'Logarithms', t5:'Surds' };
+    document.getElementById('topic-title').textContent = titles[id] || 'Topic';
+    document.getElementById('topic-tag').textContent = 'Topic ' + id.replace('t','');
+    document.getElementById('video-locked').style.display = 'none';
+    document.getElementById('video-play-icon').style.display = 'block';
+    qIdx = 0; renderQuiz();
+  }
+
+  function nextLesson() {
+    const items = document.querySelectorAll('.topic-item:not(.locked)');
+    const active = document.querySelector('.topic-item.active');
+    let next = false;
+    items.forEach(item => { if (next && !item.classList.contains('locked')) { item.click(); next = false; } if (item === active) next = true; });
+  }
+
+  document.addEventListener('DOMContentLoaded', renderQuiz);
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .catch(err => console.warn('SW registration failed:', err));
     });
-    const acc = (correct/window.currentQuiz.questions.length)*100;
-    toast(`Quiz score: ${acc}%`);
-    // Update mastery (simplified)
-    await sb.from('topic_mastery').upsert({ user_id: currentUser.id, topic_id: window.currentQuiz.topicId, accuracy_avg: acc, last_studied: new Date() });
-    addXP(20, 'Quiz completed');
-  };
-  // Listen for iframe completion
-  window.addEventListener('message', (e) => {
-    if(e.data.type === 'lesson_completed') addXP(25, 'Video completed');
-  });
+  }
 </script>
 </body>
 </html>
