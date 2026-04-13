@@ -1,438 +1,524 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classroom | UltimateEdge School</title>
-    
-    <!-- 1. Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    
-    <!-- 2. Unified Design System -->
-    <link rel="stylesheet" href="/css/main.css">
-    
-    <!-- 3. Supabase & Shared Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/js/auth.js"></script>
-    <script src="/js/ai-engine.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a56ff">
+<title>Classroom — UltimateEdge School</title>
+<!--
+  NOTE FOR DEPLOY: All classroom styles below live in /css/main.css
+  under the /* ── CLASSROOM ── */ section header. This page only
+  loads main.css — no page-level <style> block is permitted per §30.
+-->
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css">
+<!-- Supabase CDN — must load before auth.js -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <!-- SECTION 17: Defaulter Banner -->
-    <div id="defaulter-banner" style="display:none">
-        Your subscription has expired.
-        <a href="/index.html#pricing">Renew Now</a>
+<!-- Required: defaulter banner -->
+<div id="defaulter-banner" style="display:none">
+  Your subscription has expired. <a href="/index.html#pricing">Renew Now</a>
+</div>
+
+<!-- NAV -->
+<nav class="ue-nav">
+  <div class="container">
+    <a href="index.html" class="nav-logo">ULTIMATEEDGE SCHOOL</a>
+    <div class="nav-links">
+      <a href="classroom.html" style="color:var(--accent)">Classroom</a>
+      <a href="cbt.html">Practice (CBT)</a>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileNav()" aria-label="Open menu">&#9776;</button>
+    <div class="nav-right" id="nav-right">
+      <button class="btn btn-primary" onclick="openAuthModal('login')">Login / Sign Up</button>
+    </div>
+  </div>
+</nav>
+<div class="mobile-nav-drawer" id="mobile-nav-drawer">
+  <a href="classroom.html" onclick="closeMobileNav()">Classroom</a>
+  <a href="cbt.html" onclick="closeMobileNav()">Practice (CBT)</a>
+  <a href="dashboard.html" onclick="closeMobileNav()">Dashboard</a>
+  <button class="btn btn-primary btn-block" onclick="closeMobileNav();openAuthModal('login')">Login / Sign Up</button>
+</div>
+
+<!-- SUBJECT TAB BAR -->
+<div class="subject-tabs" id="subjectTabs">
+  <!-- Populated by JS from curriculum.json / getExamSubjects() -->
+</div>
+
+<!-- CLASSROOM LAYOUT: sidebar + main -->
+<div class="classroom-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-subject" id="sidebarSubject">Loading…</div>
+      <div class="sidebar-meta" id="sidebarMeta"></div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-label" id="progressLabel"></div>
+    </div>
+    <div id="topicList">
+      <div class="loading-spinner"><div class="spinner"></div>Loading curriculum…</div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content" id="mainContent">
+
+    <!-- VIDEO AREA -->
+    <div class="video-area">
+      <div class="video-placeholder" id="videoPlaceholder">
+        <div class="play-btn-large" onclick="playVideo()">▶</div>
+        <div class="video-label" id="videoLabel">Click to play lesson</div>
+      </div>
+      <iframe
+        class="video-embed"
+        id="videoEmbed"
+        allowfullscreen
+        allow="autoplay; encrypted-media"
+      ></iframe>
+      <!-- Premium locked overlay -->
+      <div class="locked-overlay" id="lockedOverlay">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-title">Premium Topic</div>
+        <div class="lock-sub">Unlock all video masterclasses across every subject. Subscribe from ₦1,500/month.</div>
+        <a href="/index.html#pricing" class="unlock-btn">Unlock Full Access</a>
+      </div>
     </div>
 
-    <!-- SECTION 2: Navigation -->
-    <nav>
-        <a href="/dashboard.html" class="nav-logo">
-            <div class="nav-logo-icon">🎓</div>
-            <span class="nav-logo-text">UE <span>School</span></span>
-        </a>
-        
-        <div style="display:flex;align-items:center;gap:16px;">
-            <a href="/dashboard.html" class="nav-back">← Dashboard</a>
-            <div id="nav-user-area">
-                <!-- Injected by auth.js -->
-            </div>
+    <!-- LESSON INFO PANEL -->
+    <div class="lesson-info">
+      <div class="lesson-tag" id="lessonTag">Loading…</div>
+      <div class="lesson-title" id="lessonTitle">Select a topic to begin</div>
+      <div class="lesson-meta">
+        <span class="lesson-meta-item">🎬 <span id="lessonDuration">—</span></span>
+        <span class="lesson-meta-item">📝 <span id="lessonQCount">—</span></span>
+        <span class="lesson-meta-item" id="lessonFreeTag" style="color:var(--accent2);font-weight:700;display:none">✓ Free Preview</span>
+      </div>
+      <div class="lesson-actions">
+        <button class="btn-quiz" onclick="scrollToQuiz()">📝 Take Topic Quiz</button>
+        <button class="btn-next-lesson" onclick="nextTopic()">Next Topic →</button>
+      </div>
+    </div>
+
+    <!-- LESSON BODY -->
+    <div class="lesson-body" id="lessonBody">
+      <div class="lesson-section-title">📌 Key Concepts</div>
+      <p class="lesson-notes" id="lessonNotes">Select a topic from the sidebar to begin.</p>
+      <ul class="key-points" id="keyPoints"></ul>
+
+      <div class="formula-box">
+        <div class="formula-label">Key Formula</div>
+        <div class="formula-text" id="formulaText">—</div>
+      </div>
+
+      <!-- TOPIC QUIZ -->
+      <div class="quiz-section" id="quizSection">
+        <div class="quiz-header">
+          <div class="quiz-title">Topic Quiz</div>
+          <div class="quiz-count" id="quizCount">Question 1 of 3</div>
         </div>
-    </nav>
-
-    <!-- SECTION 30: Subject Tabs -->
-    <div class="subject-tabs" id="subjectTabs">
-        <!-- Injected by classroom.js -->
+        <div id="quizBody"></div>
+        <div class="quiz-score-display" id="scoreDisplay">
+          <div class="score-badge" id="scoreBadge">0/3</div>
+          <p class="score-msg" id="scoreMsg"></p>
+          <button class="quiz-btn quiz-btn-primary" onclick="retryQuiz()">Retry Quiz</button>
+          <div class="upsell-strip">
+            <strong>🚀 Want more questions like these?</strong>
+            <p>Unlock 1,500+ past questions, full mock exams, and all remaining topics with full explanations.</p>
+            <a href="/index.html#pricing" class="upsell-btn">Get Full Access</a>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- SECTION 30: Classroom Layout -->
-    <div class="classroom-layout">
-        
-        <!-- SIDEBAR -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-subject" id="sidebarSubject">Loading...</div>
-                <div class="sidebar-meta" id="sidebarMeta">SELECT A SUBJECT</div>
-                <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-                <div class="progress-label" id="progressLabel">0% Complete</div>
-            </div>
-            <div id="topicList">
-                <!-- Topics injected by classroom.js -->
-            </div>
-        </aside>
+  </div><!-- /main-content -->
+</div><!-- /classroom-layout -->
 
-        <!-- MAIN CONTENT -->
-        <main class="main-content" id="mainContent">
-            
-            <!-- Video / Iframe Area -->
-            <div class="video-area">
-                <div class="video-placeholder" id="videoPlaceholder">
-                    <div class="play-btn-large" onclick="playLesson()">▶</div>
-                    <div class="video-label" id="videoLabel">Click to start lesson</div>
-                </div>
-                
-                <iframe class="video-embed" id="videoIframe" allowfullscreen allow="autoplay"></iframe>
-                
-                <!-- Locked Overlay (§30) -->
-                <div class="locked-overlay" id="lockedOverlay">
-                    <div class="lock-icon">🔒</div>
-                    <div class="lock-title">Premium Content</div>
-                    <div class="lock-sub">Gain access to all masterclasses and practice questions.</div>
-                    <a href="/index.html#pricing" class="btn btn-primary">Upgrade to PRO</a>
-                </div>
-            </div>
+<!-- Required: toast -->
+<div id="toast"></div>
 
-            <!-- Lesson Info (§30) -->
-            <div class="lesson-info">
-                <div class="lesson-tag" id="lessonTag">--</div>
-                <h1 class="lesson-title" id="lessonTitle">Welcome to Classroom</h1>
-                <div class="lesson-meta">
-                    <span class="lesson-meta-item">🎬 <span id="lessonDuration">0m</span></span>
-                    <span class="lesson-meta-item">📝 <span id="lessonQCount">0 Questions</span></span>
-                    <span class="status-pill status-good" id="freeBadge" style="display:none">Free</span>
-                </div>
-                <div class="lesson-actions">
-                    <button class="btn-quiz" onclick="scrollToQuiz()">📝 Take Topic Quiz</button>
-                    <button class="btn-next-lesson" onclick="nextTopic()">Next Topic →</button>
-                </div>
-            </div>
-
-            <!-- Lesson Details (§30) -->
-            <div class="lesson-body">
-                <div class="lesson-section-title">📌 Key Concepts</div>
-                <p class="lesson-notes" id="lessonNotes">Please select a topic from the sidebar to begin your study session.</p>
-                
-                <ul class="key-points" id="keyPoints">
-                    <!-- Injected -->
-                </ul>
-
-                <div class="formula-box">
-                    <div class="formula-label">Key Formula / Definition</div>
-                    <div class="formula-text" id="formulaText">--</div>
-                </div>
-
-                <!-- Topic Quiz (§30) -->
-                <section class="quiz-section" id="quizSection">
-                    <div class="quiz-header">
-                        <div class="quiz-title">Topic Quiz</div>
-                        <div class="quiz-count" id="quizCount">Question 1 of 3</div>
-                    </div>
-                    
-                    <div id="quizBody">
-                        <!-- Questions injected -->
-                    </div>
-
-                    <!-- Quiz Results Display -->
-                    <div class="quiz-score-display" id="scoreDisplay" style="display:none; text-align: center;">
-                        <div class="score-badge" id="scoreBadge">0/3</div>
-                        <p class="score-msg" id="scoreMsg">Good effort! Keep practicing.</p>
-                        <button class="btn btn-primary" onclick="retryQuiz()">Retry Quiz</button>
-                        
-                        <div class="upsell-strip">
-                            <strong>🚀 Go beyond the basics</strong>
-                            <p>Unlock the full curriculum and advanced questions with UltimateEdge Pro.</p>
-                            <a href="/index.html#pricing" class="upsell-btn">Upgrade Now</a>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </main>
+<!-- Auth modal (canonical copy) -->
+<div id="auth-modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-card" style="max-width:480px;width:100%">
+    <button onclick="closeAuthModal()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted);line-height:1">×</button>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchModalTab('login')" id="modal-tab-login">Login</button>
+      <button class="auth-tab" onclick="switchModalTab('signup')" id="modal-tab-signup">Sign Up</button>
     </div>
+    <div id="modal-login-form">
+      <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Welcome back</h2>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" placeholder="chioma@example.com" id="modal-login-email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" placeholder="••••••••" id="modal-login-password">
+      </div>
+      <button class="btn btn-primary btn-block btn-lg" style="margin-top:8px" onclick="handleModalLogin()">Login</button>
+    </div>
+    <div id="modal-signup-form" style="display:none">
+      <p style="color:var(--muted);font-size:.9rem">Please sign up from the <a href="/index.html">homepage</a>.</p>
+    </div>
+  </div>
+</div>
 
-    <!-- SECTION 4: Toast -->
-    <div id="toast"></div>
+<!-- Shared scripts — ORDER MATTERS -->
+<script src="/js/auth.js"></script>
+<script src="/js/ai-engine.js"></script>
 
-    <!-- SECTION 5: Auth Modal Snippet -->
-    <div id="modal-container"></div>
+<script>
+// ════════════════════════════════════════════════════════════════
+//  CLASSROOM PAGE CONTROLLER
+//  Data: /data/curriculum.json + /data/questions.json
+//  Saves quiz results to topic_mastery.accuracy_avg (§31 fix)
+// ════════════════════════════════════════════════════════════════
 
-    <script>
-        let curriculum = null;
-        let questions = null;
-        let currentSubject = 'mathematics';
-        let currentTopic = null;
-        let quizSession = { questions: [], index: 0, answers: {}, submitted: false };
+let CURRICULUM   = null;
+let QUESTIONS    = null;
+let activeSubject = 'mathematics';
+let activeTopic   = null;
+let quizState     = { questions: [], current: 0, answers: {}, submitted: false };
 
-        /**
-         * INITIALIZATION
-         */
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Wait for auth to initialize via auth.js
-            setTimeout(async () => {
-                await loadData();
-                setupIframeListener();
-                initUI();
-            }, 500);
-        });
+// ── Load curriculum and questions JSON ──────────────────────────
+async function loadData() {
+  try {
+    const [cRes, qRes] = await Promise.all([
+      fetch('/data/curriculum.json'),
+      fetch('/data/questions.json'),
+    ]);
+    CURRICULUM = await cRes.json();
+    QUESTIONS  = await qRes.json();
+    return true;
+  } catch (e) {
+    document.getElementById('topicList').innerHTML =
+      `<div class="error-banner">⚠️ Could not load curriculum data.<br><small>${e.message}</small></div>`;
+    return false;
+  }
+}
 
-        async function loadData() {
-            try {
-                const [curRes, qRes] = await Promise.all([
-                    fetch('/data/curriculum.json'),
-                    fetch('/data/questions.json')
-                ]);
-                curriculum = await curRes.json();
-                questions = await qRes.json();
-            } catch (err) {
-                console.error("Data load failed", err);
-                toast("Error loading classroom data");
-            }
-        }
+// ── Build subject tab bar ───────────────────────────────────────
+function buildTabs() {
+  const tabBar = document.getElementById('subjectTabs');
+  tabBar.innerHTML = '';
 
-        function initUI() {
-            const params = new URLSearchParams(window.location.search);
-            const subParam = params.get('subject');
-            if (subParam && curriculum.subjects[subParam]) {
-                currentSubject = subParam;
-            }
-            
-            renderSubjectTabs();
-            loadSubject(currentSubject);
-        }
+  // If logged in, only show the student's selected subjects
+  const examSubjects = (typeof getExamSubjects === 'function') ? getExamSubjects() : null;
 
-        /**
-         * SECTION 30: UI RENDERING
-         */
-        function renderSubjectTabs() {
-            const container = document.getElementById('subjectTabs');
-            container.innerHTML = '';
-            
-            // Filter by student's subjects if profile exists
-            const userSubjs = (window.currentProfile && window.currentProfile.exam_subjects) || Object.keys(curriculum.subjects);
+  Object.entries(CURRICULUM.subjects).forEach(([key, subj]) => {
+    // Filter by exam_subjects if available
+    if (examSubjects && examSubjects.length > 0 && !examSubjects.includes(key)) return;
 
-            Object.entries(curriculum.subjects).forEach(([id, data]) => {
-                if (!userSubjs.includes(id)) return;
+    const btn = document.createElement('button');
+    btn.className = 'subj-tab' + (key === activeSubject ? ' active' : '');
+    btn.style.cssText = `--tab-color:${subj.color || 'var(--accent)'}`;
+    btn.dataset.subject = key;
+    btn.innerHTML = `<span>${subj.icon || ''}</span> ${subj.label.replace(' Syllabus', '')}`;
+    btn.addEventListener('click', () => switchSubject(key, btn));
+    tabBar.appendChild(btn);
+  });
+}
 
-                const btn = document.createElement('button');
-                btn.className = `subj-tab ${id === currentSubject ? 'active' : ''}`;
-                btn.style.setProperty('--tab-color', data.color);
-                btn.innerHTML = `<span>${data.icon}</span> ${data.label}`;
-                btn.onclick = () => {
-                    currentSubject = id;
-                    document.querySelectorAll('.subj-tab').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    loadSubject(id);
-                };
-                container.appendChild(btn);
-            });
-        }
+function switchSubject(key, el) {
+  activeSubject = key;
+  document.querySelectorAll('.subj-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  activeTopic = null;
+  loadSubject(key);
+}
 
-        function loadSubject(id) {
-            const subj = curriculum.subjects[id];
-            document.getElementById('sidebarSubject').textContent = subj.label;
-            
-            const topicList = document.getElementById('topicList');
-            topicList.innerHTML = '';
+// ── Render sidebar for a subject ────────────────────────────────
+function loadSubject(key) {
+  const subj = CURRICULUM.subjects[key];
+  if (!subj) return;
 
-            subj.sections.forEach(sec => {
-                const label = document.createElement('div');
-                label.className = 'topic-section-label';
-                label.textContent = sec.title;
-                topicList.appendChild(label);
+  document.getElementById('sidebarSubject').textContent = subj.label;
+  document.getElementById('sidebarMeta').textContent   = subj.meta || '';
 
-                sec.topics.forEach(topic => {
-                    const item = document.createElement('div');
-                    item.className = 'topic-item';
-                    item.id = `topic-${topic.id}`;
-                    
-                    // Locked logic (§30)
-                    const isPremium = window.currentProfile?.is_premium;
-                    const isLocked = !topic.free && !isPremium;
-                    
-                    const statusClass = topic.free ? 'status-free' : (isLocked ? 'status-lock' : 'status-done');
-                    const statusIcon = topic.free ? '▶' : (isLocked ? '🔒' : '✓');
+  const allTopics = subj.sections.flatMap(s => s.topics);
+  const doneCount = allTopics.filter(t => t.done).length;
+  const pct = allTopics.length ? Math.round((doneCount / allTopics.length) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${doneCount} of ${allTopics.length} topics completed`;
 
-                    item.innerHTML = `
-                        <div class="topic-status ${statusClass}">${statusIcon}</div>
-                        <div class="topic-info">
-                            <div class="topic-name-text">${topic.name}</div>
-                            <div class="topic-detail">${topic.duration} · ${topic.questionCount}q</div>
-                        </div>
-                        ${topic.free ? '<span class="topic-badge badge-free">Free</span>' : ''}
-                    `;
-                    item.onclick = () => selectTopic(topic);
-                    topicList.appendChild(item);
-                });
-            });
+  const list = document.getElementById('topicList');
+  list.innerHTML = '';
+  subj.sections.forEach(section => {
+    const sec = document.createElement('div');
+    sec.className = 'topic-section';
+    sec.innerHTML = `<div class="topic-section-label">${section.title}</div>`;
+    section.topics.forEach(topic => {
+      const item = document.createElement('div');
+      const isActive = activeTopic?.id === topic.id;
+      item.className = `topic-item${isActive ? ' active' : ''}`;
+      item.id = 'ti-' + topic.id;
 
-            // Auto-select first topic
-            if (subj.sections[0]?.topics[0]) selectTopic(subj.sections[0].topics[0]);
-        }
+      // Status icon: done ✓, free ▶, locked 🔒
+      // Grade level is NEVER shown in the sidebar per §23 / §30
+      const statusCls  = topic.done ? 'status-done' : topic.free ? 'status-free' : 'status-lock';
+      const statusIcon = topic.done ? '✓' : topic.free ? '▶' : '🔒';
+      const badgeCls   = topic.free ? 'badge-free' : 'badge-lock';
+      const badgeTxt   = topic.free ? 'FREE' : 'UNLOCK';
 
-        /**
-         * LESSON LOGIC & ADAPTIVE PATHING (§19, §23)
-         */
-        async function selectTopic(topic) {
-            currentTopic = topic;
-            
-            // UI States
-            document.querySelectorAll('.topic-item').forEach(i => i.classList.remove('active'));
-            document.getElementById(`topic-${topic.id}`).classList.add('active');
+      item.innerHTML = `
+        <div class="topic-status ${statusCls}">${statusIcon}</div>
+        <div class="topic-info">
+          <div class="topic-name-text">${topic.name}</div>
+          <div class="topic-detail">${topic.duration} · ${topic.questionCount} questions</div>
+        </div>
+        <span class="topic-badge ${badgeCls}">${badgeTxt}</span>`;
+      item.addEventListener('click', () => openTopic(topic));
+      sec.appendChild(item);
+    });
+    list.appendChild(sec);
+  });
 
-            document.getElementById('lessonTitle').textContent = topic.name;
-            document.getElementById('lessonTag').textContent = topic.tag;
-            document.getElementById('lessonDuration').textContent = topic.duration;
-            document.getElementById('lessonQCount').textContent = `${topic.questionCount} practice questions`;
-            document.getElementById('lessonNotes').textContent = topic.notes;
-            document.getElementById('formulaText').textContent = topic.formula;
-            document.getElementById('freeBadge').style.display = topic.free ? 'inline-flex' : 'none';
+  // Auto-open first free topic
+  const firstFree = allTopics.find(t => t.free) || allTopics[0];
+  if (firstFree) openTopic(firstFree);
+}
 
-            const kpList = document.getElementById('keyPoints');
-            kpList.innerHTML = topic.keyPoints.map((p, i) => `<li class="key-point"><span class="kp-dot">${i+1}</span>${p}</li>`).join('');
+// ── Open a topic ────────────────────────────────────────────────
+function openTopic(topic) {
+  activeTopic = topic;
 
-            // Access Check (§30)
-            const isPremium = window.currentProfile?.is_premium;
-            const isLocked = !topic.free && !isPremium;
-            document.getElementById('lockedOverlay').classList.toggle('show', isLocked);
-            document.getElementById('videoPlaceholder').style.display = isLocked ? 'none' : 'flex';
-            document.getElementById('videoIframe').style.display = 'none';
+  // Sidebar active highlight
+  document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('ti-' + topic.id);
+  if (el) el.classList.add('active');
 
-            loadQuiz(topic.id);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+  // Lesson info panel
+  document.getElementById('lessonTag').textContent     = topic.tag || activeSubject;
+  document.getElementById('lessonTitle').textContent   = topic.name;
+  document.getElementById('lessonDuration').textContent = topic.duration || '—';
+  document.getElementById('lessonQCount').textContent  = `${topic.questionCount} practice questions`;
+  const freeTag = document.getElementById('lessonFreeTag');
+  freeTag.style.display = topic.free ? 'flex' : 'none';
 
-        async function playLesson() {
-            if (!currentTopic) return;
+  // Lesson body
+  document.getElementById('lessonNotes').textContent = topic.notes || '';
+  document.getElementById('formulaText').textContent = topic.formula || '—';
+  const kpList = document.getElementById('keyPoints');
+  kpList.innerHTML = (topic.keyPoints || []).map((kp, i) =>
+    `<li class="key-point"><span class="kp-dot">${i + 1}</span>${kp}</li>`
+  ).join('');
 
-            // SECTION 19 & 23: Silent Grade Pathing
-            let gradePath = "";
-            let gradeLevel = 3; // Default
+  // Video area
+  const overlay     = document.getElementById('lockedOverlay');
+  const placeholder = document.getElementById('videoPlaceholder');
+  const embed       = document.getElementById('videoEmbed');
+  embed.style.display     = 'none';
+  embed.src               = '';
+  placeholder.style.display = 'flex';
+  overlay.classList.toggle('show', !topic.free);
+  document.getElementById('videoLabel').textContent =
+    topic.videoUrl ? 'Click to play lesson' : 'Video coming soon — read notes below';
 
-            if (window.sb && window.currentUser) {
-                const { data } = await window.sb
-                    .from('topic_mastery')
-                    .select('grade_level')
-                    .eq('user_id', window.currentUser.id)
-                    .eq('topic_id', currentTopic.id)
-                    .single();
-                
-                if (data) gradeLevel = data.grade_level;
-            }
+  // Load quiz
+  loadQuiz(topic);
 
-            if (gradeLevel === 2) gradePath = "grade2/";
-            if (gradeLevel === 1) gradePath = "grade1/";
+  // Scroll main content back to top
+  document.getElementById('mainContent').scrollTo({ top: 0, behavior: 'smooth' });
 
-            const videoUrl = `/lessons/${currentTopic.id}/${gradePath}index.html`;
-            
-            const iframe = document.getElementById('videoIframe');
-            iframe.src = videoUrl;
-            iframe.style.display = 'block';
-            document.getElementById('videoPlaceholder').style.display = 'none';
-        }
+  // Track page view action (if auth.js loaded)
+  if (typeof trackAction === 'function') {
+    trackAction('topic_opened', { topic_id: topic.id, subject: activeSubject });
+  }
+}
 
-        /**
-         * SECTION 19: Iframe Bridge
-         */
-        function setupIframeListener() {
-            window.addEventListener('message', (e) => {
-                if (e.data?.type === 'lesson_completed') {
-                    window.addXP(20, 'Completed Video Lesson');
-                    window.trackAction('video_watched', { topic: e.data.topic });
-                    window.toast("20 XP Awarded! Lesson Completed.");
-                }
-            });
-        }
+// ── Play video ──────────────────────────────────────────────────
+function playVideo() {
+  if (!activeTopic?.videoUrl) return;
+  const embed = document.getElementById('videoEmbed');
+  const isYouTube = activeTopic.videoUrl.includes('youtube.com') || activeTopic.videoUrl.includes('youtu.be');
+  embed.src = isYouTube ? activeTopic.videoUrl + '?autoplay=1' : activeTopic.videoUrl;
+  embed.style.display = 'block';
+  document.getElementById('videoPlaceholder').style.display = 'none';
+}
 
-        /**
-         * TOPIC QUIZ LOGIC (§30, §31)
-         */
-        function loadQuiz(topicId) {
-            const allQ = questions[currentSubject] || [];
-            const topicQ = allQ.filter(q => q.topic_id === topicId).slice(0, 3);
-            
-            quizSession = { 
-                questions: topicQ.length > 0 ? topicQ : allQ.sort(() => 0.5 - Math.random()).slice(0, 3), 
-                index: 0, 
-                answers: {}, 
-                submitted: false 
-            };
-            
-            document.getElementById('scoreDisplay').style.display = 'none';
-            document.getElementById('quizBody').style.display = 'block';
-            renderQuizQuestion();
-        }
+function scrollToQuiz() {
+  document.getElementById('quizSection').scrollIntoView({ behavior: 'smooth' });
+}
 
-        function renderQuizQuestion() {
-            const q = quizSession.questions[quizSession.index];
-            if (!q) return;
+function nextTopic() {
+  const subj = CURRICULUM.subjects[activeSubject];
+  const all  = subj.sections.flatMap(s => s.topics);
+  const idx  = all.findIndex(t => t.id === activeTopic?.id);
+  if (all[idx + 1]) openTopic(all[idx + 1]);
+}
 
-            document.getElementById('quizCount').textContent = `Question ${quizSession.index + 1} of ${quizSession.questions.length}`;
-            
-            const container = document.getElementById('quizBody');
-            container.innerHTML = `
-                <div class="quiz-question">${q.q}</div>
-                <div class="quiz-options">
-                    ${q.opts.map((opt, i) => `
-                        <div class="quiz-opt ${quizSession.answers[quizSession.index] === i ? 'selected' : ''}" onclick="selectOption(${i})">
-                            <span class="opt-ltr">${String.fromCharCode(65 + i)}</span> ${opt}
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="quiz-nav">
-                    <button class="quiz-btn quiz-btn-secondary" onclick="moveQuiz(-1)" ${quizSession.index === 0 ? 'disabled' : ''}>Back</button>
-                    <button class="quiz-btn quiz-btn-primary" onclick="moveQuiz(1)">
-                        ${quizSession.index === quizSession.questions.length - 1 ? 'Finish' : 'Next'}
-                    </button>
-                </div>
-            `;
-        }
+// ════════════════════════════════════════════════════════════════
+//  QUIZ ENGINE
+// ════════════════════════════════════════════════════════════════
+function loadQuiz(topic) {
+  const allQ = QUESTIONS[activeSubject] || [];
+  let questions = [];
+  if (topic.quizIds && topic.quizIds.length) {
+    questions = topic.quizIds.map(id => allQ.find(q => q.id === id)).filter(Boolean);
+  }
+  if (!questions.length) {
+    questions = [...allQ].sort(() => Math.random() - 0.5).slice(0, 3);
+  }
+  quizState = { questions, current: 0, answers: {}, submitted: false };
+  document.getElementById('scoreDisplay').style.display = 'none';
+  document.getElementById('quizBody').style.display     = 'block';
+  renderQuizQ();
+}
 
-        function selectOption(idx) {
-            if (quizSession.submitted) return;
-            quizSession.answers[quizSession.index] = idx;
-            renderQuizQuestion();
-        }
+function renderQuizQ() {
+  const { questions, current, answers, submitted } = quizState;
+  const q = questions[current];
+  if (!q) return;
+  document.getElementById('quizCount').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('quizBody').innerHTML = `
+    <div class="quiz-question">${q.q}</div>
+    <div class="quiz-options">
+      ${q.opts.map((o, i) => {
+        let cls = 'quiz-opt';
+        if (submitted) {
+          if (i === q.ans) cls += ' correct';
+          else if (answers[current] === i) cls += ' wrong';
+        } else if (answers[current] === i) cls += ' selected';
+        return `<div class="${cls}" onclick="selectQ(${i})">
+          <span class="opt-ltr">${String.fromCharCode(65 + i)}</span>${o}
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="explanation-box${submitted ? ' show' : ''}">${submitted ? '💡 ' + q.exp : ''}</div>
+    <div class="quiz-nav">
+      <button class="quiz-btn quiz-btn-secondary" onclick="quizNav(-1)" ${current === 0 ? 'style="visibility:hidden"' : ''}>← Prev</button>
+      <button class="quiz-btn quiz-btn-primary" onclick="${current === questions.length - 1 ? 'submitQuiz()' : 'quizNav(1)'}">
+        ${current === questions.length - 1 ? (submitted ? 'See Results' : 'Submit') : 'Next →'}
+      </button>
+    </div>`;
+}
 
-        function moveQuiz(dir) {
-            if (dir === 1 && quizSession.index === quizSession.questions.length - 1) {
-                finishQuiz();
-                return;
-            }
-            quizSession.index += dir;
-            renderQuizQuestion();
-        }
+function selectQ(i) {
+  if (quizState.submitted) return;
+  quizState.answers[quizState.current] = i;
+  renderQuizQ();
+}
 
-        async function finishQuiz() {
-            quizSession.submitted = true;
-            let correct = 0;
-            quizSession.questions.forEach((q, i) => {
-                if (quizSession.answers[i] === q.ans) correct++;
-            });
+function quizNav(dir) {
+  quizState.current = Math.max(0, Math.min(quizState.questions.length - 1, quizState.current + dir));
+  renderQuizQ();
+}
 
-            const accuracy = (correct / quizSession.questions.length) * 100;
+function submitQuiz() {
+  quizState.submitted = true;
+  let correct = 0;
+  quizState.questions.forEach((q, i) => { if (quizState.answers[i] === q.ans) correct++; });
+  const total = quizState.questions.length;
+  renderQuizQ();
+  document.getElementById('quizBody').style.display     = 'none';
+  document.getElementById('scoreDisplay').style.display = 'block';
+  document.getElementById('scoreBadge').textContent     = `${correct}/${total}`;
+  const pct = Math.round((correct / total) * 100);
+  document.getElementById('scoreMsg').textContent =
+    pct === 100 ? '🎉 Perfect score! You have mastered this topic.' :
+    pct >= 66   ? '👍 Good job! Review the explanations and try again.' :
+                  '📚 Keep practising. Re-read the notes and retry.';
+  document.getElementById('quizCount').textContent = `Score: ${correct}/${total}`;
 
-            // SECTION 31 Fix: accuracy_avg
-            if (window.sb && window.currentUser) {
-                await window.sb.from('topic_mastery').upsert({
-                    user_id: window.currentUser.id,
-                    topic_id: currentTopic.id,
-                    accuracy_avg: accuracy,
-                    last_studied: new Date().toISOString()
-                }, { onConflict: 'user_id,topic_id' });
-                
-                window.addXP(correct * 10, 'Quiz Results');
-            }
+  // ── Save mastery — uses accuracy_avg (§31 fix: was accuracy_score) ──
+  saveQuizMastery(correct, total);
+}
 
-            document.getElementById('quizBody').style.display = 'none';
-            const display = document.getElementById('scoreDisplay');
-            display.style.display = 'block';
-            document.getElementById('scoreBadge').textContent = `${correct}/${quizSession.questions.length}`;
-            document.getElementById('scoreMsg').textContent = accuracy >= 60 ? "Great job! You're mastering this topic." : "Keep at it! Try reviewing the video again.";
-        }
+async function saveQuizMastery(correct, total) {
+  if (typeof sb === 'undefined' || !currentUser || !activeTopic) return;
+  const accuracy = Math.round((correct / total) * 100);
+  try {
+    await sb.from('topic_mastery').upsert({
+      user_id: currentUser.id,
+      topic_id: activeTopic.id,        // §31 fix: topic_id not topic
+      accuracy_avg: accuracy,           // §31 fix: accuracy_avg not accuracy_score
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id,topic_id' });
 
-        function retryQuiz() {
-            loadQuiz(currentTopic.id);
-        }
+    // Award XP and track action
+    if (typeof addXP === 'function') addXP(correct * 5, 'quiz_completed');
+    if (typeof trackAction === 'function') {
+      trackAction('quiz_completed', { topic_id: activeTopic.id, score: accuracy });
+    }
+    // Notify parent frame if embedded as lesson
+    window.parent.postMessage({ type: 'lesson_completed', topic: activeTopic.id }, '*');
+  } catch (e) {
+    console.warn('saveQuizMastery error:', e.message);
+  }
+}
 
-        function scrollToQuiz() {
-            document.getElementById('quizSection').scrollIntoView({ behavior: 'smooth' });
-        }
+function retryQuiz() {
+  document.getElementById('scoreDisplay').style.display = 'none';
+  document.getElementById('quizBody').style.display     = 'block';
+  loadQuiz(activeTopic);
+}
 
-        function nextTopic() {
-            const subj = curriculum.subjects[currentSubject];
-            const all = subj.sections.flatMap(s => s.topics);
-            const idx = all.findIndex(t => t.id === currentTopic.id);
-            if (all[idx+1]) selectTopic(all[idx+1]);
-            else toast("You've reached the end of this subject!");
-        }
-    </script>
+// ── Nav helpers ─────────────────────────────────────────────────
+function switchModalTab(tab) {
+  const loginForm = document.getElementById('modal-login-form');
+  const signupForm = document.getElementById('modal-signup-form');
+  document.getElementById('modal-tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('modal-tab-signup').classList.toggle('active', tab === 'signup');
+  loginForm.style.display  = tab === 'login'  ? 'block' : 'none';
+  signupForm.style.display = tab === 'signup' ? 'block' : 'none';
+}
+
+function handleModalLogin() {
+  const email = document.getElementById('modal-login-email').value.trim();
+  const pass  = document.getElementById('modal-login-password').value;
+  if (!email || !pass) { if (typeof toast === 'function') toast('Please fill in all fields'); return; }
+  if (typeof window._authHandleLogin === 'function') window._authHandleLogin(email, pass);
+}
+
+function toggleMobileNav() {
+  const drawer = document.getElementById('mobile-nav-drawer');
+  const isOpen = drawer.classList.contains('open');
+  drawer.classList.toggle('open', !isOpen);
+  document.getElementById('nav-hamburger').textContent = isOpen ? '\u2630' : '\u2715';
+}
+function closeMobileNav() {
+  document.getElementById('mobile-nav-drawer').classList.remove('open');
+  document.getElementById('nav-hamburger').textContent = '\u2630';
+}
+
+// ── Boot ────────────────────────────────────────────────────────
+(async () => {
+  const ok = await loadData();
+  if (!ok) return;
+
+  // Read ?subject= param from URL
+  const params = new URLSearchParams(window.location.search);
+  const subj = params.get('subject');
+  if (subj && CURRICULUM.subjects[subj]) activeSubject = subj;
+
+  buildTabs();
+  loadSubject(activeSubject);
+
+  // Track page load
+  if (typeof trackAction === 'function') {
+    trackAction('page_load', { page: 'classroom' });
+  }
+})();
+
+// Re-build tabs once auth loads (so student's exam_subjects filter applies)
+document.addEventListener('authReady', () => {
+  if (CURRICULUM) buildTabs();
+});
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .catch(err => console.warn('SW registration failed:', err));
+    });
+  }
+</script>
 </body>
 </html>
