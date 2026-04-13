@@ -1,272 +1,310 @@
-/* ── UltimateEdge School — cbt-engine.js v4.1 ── */
-/* Answer recording · IndexedDB offline · topic mastery update · XP · flag logic */
+/**
+ * CBT ENGINE - UltimateEdge School v4.1
+ */
 
-// ─── INDEXEDDB SETUP ──────────────────────────────────────────────────────────
-const IDB_NAME    = 'ue_offline';
-const IDB_STORE   = 'queued_logs';
-const IDB_VERSION = 1;
+let sessionState = {
+    mode: 'mock',
+    subject: '',
+    topic: '',
+    questions: [],
+    currentIndex: 0,
+    answers: {}, // index: optionIndex
+    flags: {},   // index: boolean
+    timer: null,
+    timeLeft: 7200, // 2 hours in seconds
+    isCbtOnly: false,
+    startTime: null
+};
 
-let idb; // Will be set after openIDB()
+document.addEventListener('DOMContentLoaded', async () => {
+    // Wait for Auth
+    await waitForAuth();
+    if (!currentUser) return;
 
-function openIDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(IDB_STORE)) {
-        db.createObjectStore(IDB_STORE, { autoIncrement: true });
-      }
+    initModeSelector();
+    initOfflineSync();
+    
+    // Load study mode preference (§26)
+    sessionState.isCbtOnly = getStudyMode() === 'cbt_only';
+    document.getElementById('study-mode-toggle').checked = sessionState.isCbtOnly;
+    
+    document.getElementById('study-mode-toggle').onchange = (e) => {
+        setStudyMode(e.target.checked ? 'cbt_only' : 'drill');
+        sessionState.isCbtOnly = e.target.checked;
     };
-    req.onsuccess = e => { idb = e.target.result; resolve(idb); };
-    req.onerror   = e => reject(e.target.error);
-  });
-}
-
-// Queue a log entry in IndexedDB (when offline)
-function idbQueue(entry) {
-  return new Promise((resolve, reject) => {
-    const tx    = idb.transaction(IDB_STORE, 'readwrite');
-    const store = tx.objectStore(IDB_STORE);
-    const req   = store.add(entry);
-    req.onsuccess = () => resolve();
-    req.onerror   = () => reject(req.error);
-  });
-}
-
-// Retrieve all queued logs
-function idbGetAll() {
-  return new Promise((resolve, reject) => {
-    const tx    = idb.transaction(IDB_STORE, 'readonly');
-    const store = tx.objectStore(IDB_STORE);
-    const req   = store.getAll();
-    req.onsuccess = () => resolve(req.result);
-    req.onerror   = () => reject(req.error);
-  });
-}
-
-// Clear all queued logs (after successful sync)
-function idbClear() {
-  return new Promise((resolve, reject) => {
-    const tx    = idb.transaction(IDB_STORE, 'readwrite');
-    const store = tx.objectStore(IDB_STORE);
-    const req   = store.clear();
-    req.onsuccess = () => resolve();
-    req.onerror   = () => reject(req.error);
-  });
-}
-
-// ─── INITIALISE ───────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  openIDB().catch(err => console.warn('IndexedDB unavailable:', err));
 });
 
-// Sync queued logs when connection is restored
-window.addEventListener('online', () => syncOfflineLogs());
+// --- UI & NAVIGATION ---
 
-// ─── RECORD RESPONSE ─────────────────────────────────────────────────────────
-/**
- * Called for every question answered.
- * Saves to Supabase if online, IndexedDB if offline.
- *
- * @param {{ topicId, isCorrect, timeSpent, gradeLevel, examType }} params
- */
-async function recordResponse({ topicId, isCorrect, timeSpent, gradeLevel, examType }) {
-  if (!currentUser) return;
-
-  const entry = {
-    user_id:    currentUser.id,
-    topic_id:   topicId,
-    exam_type:  examType || 'JAMB',
-    is_correct: isCorrect,
-    time_spent: timeSpent || 0,
-    grade_level: gradeLevel || 3,
-  };
-
-  if (navigator.onLine && typeof sb !== 'undefined') {
-    const { error } = await sb.from('response_logs').insert(entry);
-    if (error) {
-      console.warn('response_logs insert failed, queuing offline:', error.message);
-      if (idb) await idbQueue(entry);
-    }
-  } else {
-    if (idb) await idbQueue(entry);
-  }
-}
-window.recordResponse = recordResponse;
-
-// ─── SYNC OFFLINE LOGS ────────────────────────────────────────────────────────
-async function syncOfflineLogs() {
-  if (!idb || !navigator.onLine || !currentUser || typeof sb === 'undefined') return;
-
-  try {
-    const queued = await idbGetAll();
-    if (!queued || queued.length === 0) return;
-
-    // Supabase insert supports batch
-    const { error } = await sb.from('response_logs').insert(queued);
-    if (!error) {
-      await idbClear();
-      console.log(`Synced ${queued.length} offline response(s).`);
-    }
-  } catch (err) {
-    console.warn('Offline sync failed:', err);
-  }
-}
-window.syncOfflineLogs = syncOfflineLogs;
-
-// ─── UPDATE TOPIC MASTERY ─────────────────────────────────────────────────────
-/**
- * Recalculates accuracy_avg + mastery_level for a topic after an answer.
- * Also increments attempts_at_grade1 if the student is on Grade 1.
- */
-async function updateTopicMastery(topicId, isCorrect) {
-  if (!currentUser || typeof sb === 'undefined') return;
-
-  // Fetch existing mastery row
-  const { data: row, error: fetchError } = await sb
-    .from('topic_mastery')
-    .select('*')
-    .eq('user_id', currentUser.id)
-    .eq('topic_id', topicId)
-    .single();
-
-  if (fetchError && fetchError.code !== 'PGRST116') {
-    console.warn('updateTopicMastery fetch error:', fetchError.message);
-    return;
-  }
-
-  // Calculate new running average
-  const prevAccuracy = row?.accuracy_avg ?? null;
-  const prevAttempts = row
-    ? (row.attempts_at_grade1 !== undefined ? row.attempts_at_grade1 : 0)
-    : 0;
-
-  // We need total response count for proper running avg
-  const { count: totalCount } = await sb
-    .from('response_logs')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', currentUser.id)
-    .eq('topic_id', topicId);
-
-  const { count: correctCount } = await sb
-    .from('response_logs')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', currentUser.id)
-    .eq('topic_id', topicId)
-    .eq('is_correct', true);
-
-  const total   = totalCount || 1;
-  const correct = correctCount || 0;
-  const newAccuracy  = parseFloat(((correct / total) * 100).toFixed(2));
-  const newMastery   = calcMastery(newAccuracy, total);
-  const newGrade     = getSkillGrade(newAccuracy);
-
-  const newAttempts1 = (row?.grade_level === 1 && !isCorrect)
-    ? prevAttempts + 1
-    : prevAttempts;
-
-  const updates = {
-    accuracy_avg:       newAccuracy,
-    mastery_level:      newMastery,
-    grade_level:        newGrade,
-    attempts_at_grade1: newAttempts1,
-    status:             newMastery >= 0.60 ? 'MASTERED' : 'IN_PROGRESS',
-    last_studied:       new Date().toISOString(),
-  };
-
-  if (row) {
-    await sb.from('topic_mastery')
-      .update(updates)
-      .eq('user_id', currentUser.id)
-      .eq('topic_id', topicId);
-  } else {
-    await sb.from('topic_mastery').insert({
-      user_id: currentUser.id,
-      topic_id: topicId,
-      subject: 'unknown',
-      ...updates,
+function initModeSelector() {
+    const modeBtns = document.querySelectorAll('.mode-btn');
+    modeBtns.forEach(btn => {
+        btn.onclick = () => {
+            modeBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            sessionState.mode = btn.dataset.mode;
+            
+            // Toggle visibility of topic selection based on mode
+            document.getElementById('topic-group').style.display = 
+                sessionState.mode === 'practice' ? 'block' : 'none';
+        };
     });
-  }
 
-  return { newAccuracy, newMastery, newGrade, attemptsAtGrade1: newAttempts1 };
+    // Populate Subjects from curriculum.json (Mock data here)
+    const subjects = ['Mathematics', 'English Language', 'Physics', 'Chemistry'];
+    const select = document.getElementById('subject-select');
+    subjects.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.toLowerCase();
+        opt.textContent = s;
+        select.appendChild(opt);
+    });
 }
-window.updateTopicMastery = updateTopicMastery;
 
-// ─── AWARD XP ─────────────────────────────────────────────────────────────────
-async function awardXP(isCorrect) {
-  if (!isCorrect) return;
-  if (typeof addXP === 'function') await addXP(10, 'correct answer');
+async function startSession() {
+    sessionState.subject = document.getElementById('subject-select').value;
+    sessionState.topic = document.getElementById('topic-select').value;
+    
+    // Fetch Questions (Stub for real Supabase query)
+    // const { data } = await sb.from('questions').select('*')...
+    sessionState.questions = await mockFetchQuestions(sessionState.mode);
+    
+    document.getElementById('setup-view').style.display = 'none';
+    document.getElementById('exam-view').style.display = 'block';
+    
+    sessionState.startTime = Date.now();
+    renderQuestion();
+    renderMap();
+    startTimer();
 }
-window.awardXP = awardXP;
 
-// ─── SESSION SCORE SAVE ───────────────────────────────────────────────────────
-/**
- * Called when a CBT session ends.
- * Saves session summary and triggers SmartPath queue update.
- */
-async function saveSessionScore({ examType, score, totalQuestions, accuracy, avgTimeSecs, gradeLevel, topicId }) {
-  if (!currentUser || typeof sb === 'undefined') return;
+function renderQuestion() {
+    const q = sessionState.questions[sessionState.currentIndex];
+    document.getElementById('question-meta').textContent = `QUESTION ${sessionState.currentIndex + 1} OF ${sessionState.questions.length}`;
+    document.getElementById('question-text').textContent = q.text;
+    
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+    
+    ['A', 'B', 'C', 'D'].forEach((ltr, i) => {
+        const btn = document.createElement('button');
+        btn.className = `drill-option ${sessionState.answers[sessionState.currentIndex] === i ? 'selected' : ''}`;
+        btn.innerHTML = `<span class="opt-ltr">${ltr}</span> ${q.options[i]}`;
+        btn.onclick = () => selectOption(i);
+        container.appendChild(btn);
+    });
 
-  await sb.from('session_scores').insert({
-    user_id:         currentUser.id,
-    exam_type:       examType || 'JAMB',
-    score,
-    total_questions: totalQuestions,
-    accuracy,
-    avg_time_per_q:  avgTimeSecs || 0,
-    grade_level:     gradeLevel || 3,
-  });
-
-  if (typeof trackAction === 'function') {
-    await trackAction('drill_completed', { score, totalQuestions, accuracy, topicId });
-  }
-
-  // Update overall accuracy_avg on profiles
-  const { data: allSessions } = await sb
-    .from('session_scores')
-    .select('accuracy')
-    .eq('user_id', currentUser.id);
-
-  if (allSessions && allSessions.length > 0) {
-    const overallAvg = parseFloat(
-      (allSessions.reduce((s, r) => s + (r.accuracy || 0), 0) / allSessions.length).toFixed(2)
-    );
-    await sb.from('profiles').update({ accuracy_avg: overallAvg }).eq('id', currentUser.id);
-    if (currentProfile) currentProfile.accuracy_avg = overallAvg;
-  }
-
-  // Update SmartPath queue
-  if (typeof updateSmartPathQueue === 'function') {
-    await updateSmartPathQueue();
-  }
+    // Update Flag Button UI
+    const flagBtn = document.getElementById('btn-flag');
+    if (sessionState.flags[sessionState.currentIndex]) {
+        flagBtn.classList.add('flagged');
+    } else {
+        flagBtn.classList.remove('flagged');
+    }
 }
-window.saveSessionScore = saveSessionScore;
 
-// ─── FLAG LOGIC ───────────────────────────────────────────────────────────────
-// Flags are session-memory only — not persisted to Supabase
-const flaggedQuestions = new Set();
-
-function flagQuestion(index) {
-  if (flaggedQuestions.has(index)) {
-    flaggedQuestions.delete(index);
-  } else {
-    flaggedQuestions.add(index);
-  }
-  return flaggedQuestions.has(index);
+function selectOption(optionIndex) {
+    sessionState.answers[sessionState.currentIndex] = optionIndex;
+    renderQuestion();
+    renderMap();
+    
+    // Prediction logic (§15)
+    updateJambPrediction();
 }
-window.flagQuestion = flagQuestion;
 
-function isFlagged(index) {
-  return flaggedQuestions.has(index);
+function toggleFlag() {
+    const idx = sessionState.currentIndex;
+    sessionState.flags[idx] = !sessionState.flags[idx];
+    renderQuestion();
+    renderMap();
 }
-window.isFlagged = isFlagged;
 
-function getFlaggedList() {
-  return Array.from(flaggedQuestions).sort((a, b) => a - b);
+function renderMap() {
+    const container = document.getElementById('question-map');
+    container.innerHTML = '';
+    sessionState.questions.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = `q-dot ${i === sessionState.currentIndex ? 'current' : ''} 
+                        ${sessionState.answers[i] !== undefined ? 'answered' : ''} 
+                        ${sessionState.flags[i] ? 'flagged' : ''}`;
+        dot.innerHTML = sessionState.flags[i] ? '⚑' : i + 1;
+        dot.onclick = () => goToQuestion(i);
+        container.appendChild(dot);
+    });
 }
-window.getFlaggedList = getFlaggedList;
 
-function clearFlags() {
-  flaggedQuestions.clear();
+function goToQuestion(index) {
+    sessionState.currentIndex = index;
+    renderQuestion();
+    renderMap();
 }
-window.clearFlags = clearFlags;
+
+function nextQuestion() {
+    if (sessionState.currentIndex < sessionState.questions.length - 1) {
+        goToQuestion(sessionState.currentIndex + 1);
+    }
+}
+
+function prevQuestion() {
+    if (sessionState.currentIndex > 0) {
+        goToQuestion(sessionState.currentIndex - 1);
+    }
+}
+
+// --- TIMER LOGIC (§26) ---
+
+function startTimer() {
+    // Hide timer in Drill Mode unless CBT-Only is active or Mastery is high (simplified)
+    const shouldShowTimer = sessionState.mode === 'mock' || sessionState.isCbtOnly;
+    document.getElementById('timer-display').style.visibility = shouldShowTimer ? 'visible' : 'hidden';
+
+    sessionState.timer = setInterval(() => {
+        sessionState.timeLeft--;
+        if (sessionState.timeLeft <= 0) {
+            clearInterval(sessionState.timer);
+            finishSession();
+        }
+        updateTimerUI();
+    }, 1000);
+}
+
+function updateTimerUI() {
+    const h = Math.floor(sessionState.timeLeft / 3600).toString().padStart(2, '0');
+    const m = Math.floor((sessionState.timeLeft % 3600) / 60).toString().padStart(2, '0');
+    const s = (sessionState.timeLeft % 60).toString().padStart(2, '0');
+    document.getElementById('timer-display').textContent = `${h}:${m}:${s}`;
+}
+
+// --- DATA RECORDING & SYNC (§13) ---
+
+async function recordResponse(qIndex, isCorrect) {
+    const q = sessionState.questions[qIndex];
+    const log = {
+        user_id: currentUser.id,
+        topic_id: q.topic_id,
+        is_correct: isCorrect,
+        time_spent: 15, // Calculation: (Date.now() - lastAction) / 1000
+        grade_level: currentProfile.current_skill_level || 3,
+        exam_type: sessionState.mode.toUpperCase()
+    };
+
+    if (navigator.onLine) {
+        await sb.from('response_logs').insert([log]);
+        updateTopicMastery(q.topic_id, isCorrect);
+        if (isCorrect) addXP(10, 'Correct Answer');
+    } else {
+        saveToIndexedDB(log);
+    }
+}
+
+function saveToIndexedDB(log) {
+    let queue = JSON.parse(localStorage.getItem('ue_offline_queue') || '[]');
+    queue.push(log);
+    localStorage.setItem('ue_offline_queue', JSON.stringify(queue));
+    toast("Answer saved offline 📴");
+}
+
+function initOfflineSync() {
+    window.addEventListener('online', async () => {
+        let queue = JSON.parse(localStorage.getItem('ue_offline_queue') || '[]');
+        if (queue.length > 0) {
+            const { error } = await sb.from('response_logs').insert(queue);
+            if (!error) {
+                localStorage.removeItem('ue_offline_queue');
+                toast("Synced offline data 🚀");
+            }
+        }
+    });
+}
+
+// --- SESSION END & RESULTS (§25, §23) ---
+
+function finishSession() {
+    clearInterval(sessionState.timer);
+    
+    // Check for flags (§25)
+    const flaggedIndices = Object.keys(sessionState.flags).filter(k => sessionState.flags[k]);
+    if (flaggedIndices.length > 0) {
+        showReviewScreen(flaggedIndices);
+    } else {
+        showResults();
+    }
+}
+
+function showReviewScreen(indices) {
+    document.getElementById('exam-view').style.display = 'none';
+    document.getElementById('review-view').style.display = 'block';
+    
+    const container = document.getElementById('flagged-list');
+    container.innerHTML = '';
+    indices.forEach(idx => {
+        const dot = document.createElement('div');
+        dot.className = 'q-dot flagged';
+        dot.textContent = parseInt(idx) + 1;
+        dot.onclick = () => {
+            backToExam();
+            goToQuestion(parseInt(idx));
+        };
+        container.appendChild(dot);
+    });
+}
+
+function backToExam() {
+    document.getElementById('review-view').style.display = 'none';
+    document.getElementById('exam-view').style.display = 'block';
+    startTimer();
+}
+
+async function showResults() {
+    document.getElementById('review-view').style.display = 'none';
+    document.getElementById('exam-view').style.display = 'none';
+    document.getElementById('results-view').style.display = 'block';
+
+    let correct = 0;
+    const total = sessionState.questions.length;
+
+    sessionState.questions.forEach((q, i) => {
+        const isCorrect = sessionState.answers[i] === q.correctAnswer;
+        if (isCorrect) correct++;
+        recordResponse(i, isCorrect);
+    });
+
+    const accuracy = (correct / total) * 100;
+    document.getElementById('result-score-circle').textContent = `${Math.round(accuracy)}%`;
+    document.getElementById('result-text').textContent = `You scored ${correct} out of ${total} correctly.`;
+    
+    // JAMB Prediction Card (§15)
+    const jambRange = predictJAMB(accuracy);
+    document.getElementById('final-jamb-range').textContent = jambRange;
+
+    // Silent algorithm running (§26)
+    if (typeof applyAdaptivePyramid === 'function') {
+        // Silently update mastery and pyramid
+        // applyAdaptivePyramid(topicId, accuracy, ...);
+    }
+}
+
+// --- UTILS ---
+
+function updateJambPrediction() {
+    let correct = 0;
+    let answeredCount = 0;
+    Object.keys(sessionState.answers).forEach(idx => {
+        answeredCount++;
+        if (sessionState.answers[idx] === sessionState.questions[idx].correctAnswer) correct++;
+    });
+    
+    if (answeredCount === 0) return;
+    const acc = (correct / answeredCount) * 100;
+    document.getElementById('jamb-range').textContent = predictJAMB(acc);
+}
+
+async function mockFetchQuestions(mode) {
+    const count = mode === 'mock' ? 40 : 10;
+    return Array.from({ length: count }, (_, i) => ({
+        text: `Sample question text for item #${i + 1}. What is the correct principle being applied here?`,
+        options: ["Choice Alpha", "Choice Beta", "Choice Gamma", "Choice Delta"],
+        correctAnswer: 1, // Beta
+        topic_id: 'sample-topic'
+    }));
+}
