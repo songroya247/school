@@ -1,239 +1,438 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Classroom â€” UltimateEdge School</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="css/main.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom | UltimateEdge School</title>
+    
+    <!-- 1. Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- 2. Unified Design System -->
+    <link rel="stylesheet" href="/css/main.css">
+    
+    <!-- 3. Supabase & Shared Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/ai-engine.js"></script>
 </head>
-<body style="overflow:hidden;height:100vh;display:flex;flex-direction:column;">
+<body>
 
-<div id="defaulter-banner">Your subscription has expired. <a href="index.html#pricing">Renew Now</a></div>
-
-<!-- NAV -->
-<header style="border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;">
-  <div style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <a href="dashboard.html" class="btn-icon" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;">&#8249;</a>
-      <a href="index.html" class="nav-logo" style="font-size:1.1rem;display:none;" id="nav-logo-desktop">ULTIMATEEDGE</a>
+    <!-- SECTION 17: Defaulter Banner -->
+    <div id="defaulter-banner" style="display:none">
+        Your subscription has expired.
+        <a href="/index.html#pricing">Renew Now</a>
     </div>
-    <div class="subject-tabs" id="subject-tabs">
-      <button class="subject-tab active" onclick="switchSubject('math',this)">Mathematics</button>
-      <button class="subject-tab" onclick="switchSubject('eng',this)">English</button>
-      <button class="subject-tab" onclick="switchSubject('phy',this)">Physics</button>
-      <button class="subject-tab" onclick="switchSubject('chem',this)">Chemistry</button>
-    </div>
-    <div style="width:40px;"></div>
-  </div>
-</header>
 
-<div class="classroom-layout" style="flex:1;">
-
-  <!-- Sidebar -->
-  <aside class="classroom-sidebar">
-    <div style="padding:16px 16px 12px;border-bottom:1px solid var(--border)">
-      <h2 style="font-family:var(--font-head);font-size:1.5rem;">Topics</h2>
-      <div style="font-size:.82rem;color:var(--muted)">Mathematics &bull; 45 Lessons</div>
-    </div>
-    <div style="flex:1;overflow-y:auto;padding:8px;" id="topic-list">
-      <button class="topic-item" onclick="selectTopic('t1',this)"><span style="color:var(--accent2)">âœ“</span> <span class="topic-text">1. Number Bases</span></button>
-      <button class="topic-item" onclick="selectTopic('t2',this)"><span style="color:var(--accent2)">âœ“</span> <span class="topic-text">2. Fractions, Decimals &amp; Approx</span></button>
-      <button class="topic-item active" onclick="selectTopic('t3',this)"><span style="color:var(--accent)">â–¶</span> <span class="topic-text">3. Indices</span></button>
-      <button class="topic-item" onclick="selectTopic('t4',this)"><span style="color:var(--muted2)">ðŸ“–</span> <span class="topic-text">4. Logarithms</span></button>
-      <button class="topic-item" onclick="selectTopic('t5',this)"><span style="color:var(--muted2)">ðŸ“–</span> <span class="topic-text">5. Surds</span></button>
-      <button class="topic-item locked" title="Upgrade to unlock"><span style="color:var(--muted2)">ðŸ”’</span> <span class="topic-text" style="color:var(--muted)">6. Sets</span></button>
-      <button class="topic-item locked" title="Upgrade to unlock"><span style="color:var(--muted2)">ðŸ”’</span> <span class="topic-text" style="color:var(--muted)">7. Polynomials</span></button>
-      <button class="topic-item locked" title="Upgrade to unlock"><span style="color:var(--muted2)">ðŸ”’</span> <span class="topic-text" style="color:var(--muted)">8. Quadratics</span></button>
-      <button class="topic-item locked" title="Upgrade to unlock"><span style="color:var(--muted2)">ðŸ”’</span> <span class="topic-text" style="color:var(--muted)">9. Simultaneous Equations</span></button>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="classroom-main">
-    <div style="max-width:760px;margin:0 auto;">
-
-      <!-- Video -->
-      <div class="video-area" id="video-area">
-        <div class="video-play-btn" id="video-play-icon">â–¶</div>
-        <div class="video-locked" id="video-locked" style="display:none;">
-          <div style="font-size:2rem;margin-bottom:12px;">ðŸ”’</div>
-          <h3 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Premium Content</h3>
-          <p style="color:rgba(255,255,255,.7);margin-bottom:20px">Upgrade your plan to unlock this lesson.</p>
-          <a href="index.html#pricing" class="btn btn-primary btn-lg">Unlock Premium</a>
-        </div>
-      </div>
-
-      <!-- Lesson Info -->
-      <div style="margin-top:24px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          <span style="background:rgba(26,86,255,.1);color:var(--accent);font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:6px;" id="topic-tag">Topic 3</span>
-          <span style="color:var(--muted);font-size:.85rem;">15:24 mins</span>
-        </div>
-        <h1 style="font-family:var(--font-head);font-size:2.5rem;margin-bottom:20px;" id="topic-title">Indices</h1>
-        <div style="display:flex;gap:12px;padding-bottom:24px;border-bottom:1px solid var(--border);margin-bottom:24px;">
-          <button class="btn btn-primary btn-lg" onclick="toast('Take the quiz after watching the lesson')">Take Quiz</button>
-          <button class="btn btn-outline btn-lg" onclick="nextLesson()">Next Lesson</button>
-        </div>
-
-        <div id="lesson-content">
-          <p style="font-size:1.05rem;line-height:1.8;margin-bottom:24px;">Indices (or powers) provide a convenient way of writing numbers that are multiplied by themselves several times. In this lesson, we cover the fundamental laws of indices and how to apply them to solve equations.</p>
-
-          <h3 style="font-family:var(--font-head);font-size:1.5rem;margin-bottom:14px;margin-top:8px;">Key Points</h3>
-          <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
-            <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:var(--accent);margin-top:3px;">â€¢</span> Any number raised to the power of 0 is 1 (except 0).</li>
-            <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:var(--accent);margin-top:3px;">â€¢</span> When multiplying numbers with the same base, add the indices.</li>
-            <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:var(--accent);margin-top:3px;">â€¢</span> When dividing numbers with the same base, subtract the indices.</li>
-            <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:var(--accent);margin-top:3px;">â€¢</span> A negative index means the reciprocal of the number with a positive index.</li>
-          </ul>
-
-          <div class="formula-box" style="margin-bottom:28px;">
-            <div style="text-transform:uppercase;font-size:.75rem;font-weight:700;color:#1e40af;letter-spacing:.08em;margin-bottom:14px;">Formula Box</div>
-            <div style="display:flex;flex-direction:column;gap:10px;font-size:1rem;">
-              <div>a<sup>m</sup> &times; a<sup>n</sup> = a<sup>m+n</sup></div>
-              <div>a<sup>m</sup> &divide; a<sup>n</sup> = a<sup>m&minus;n</sup></div>
-              <div>(a<sup>m</sup>)<sup>n</sup> = a<sup>m&times;n</sup></div>
-              <div>a<sup>&minus;n</sup> = 1 / a<sup>n</sup></div>
+    <!-- SECTION 2: Navigation -->
+    <nav>
+        <a href="/dashboard.html" class="nav-logo">
+            <div class="nav-logo-icon">🎓</div>
+            <span class="nav-logo-text">UE <span>School</span></span>
+        </a>
+        
+        <div style="display:flex;align-items:center;gap:16px;">
+            <a href="/dashboard.html" class="nav-back">← Dashboard</a>
+            <div id="nav-user-area">
+                <!-- Injected by auth.js -->
             </div>
-          </div>
         </div>
+    </nav>
 
-        <!-- Topic Quiz -->
-        <div id="quiz-section" style="padding-top:32px;border-top:1px solid var(--border);">
-          <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:20px;">Quick Check</h2>
-          <div class="card card-body" id="quiz-card">
-            <div style="font-size:.82rem;font-weight:700;color:var(--muted);margin-bottom:14px;">Question <span id="quiz-q-num">1</span> of 3</div>
-            <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:20px;" id="quiz-question">Simplify: (2x&sup2;)&sup3;</h3>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="quiz-options"></div>
-          </div>
-          <div id="quiz-feedback" style="display:none;margin-top:14px;padding:14px 18px;border-radius:10px;font-weight:700;"></div>
-        </div>
-
-      </div>
+    <!-- SECTION 30: Subject Tabs -->
+    <div class="subject-tabs" id="subjectTabs">
+        <!-- Injected by classroom.js -->
     </div>
-  </main>
-</div>
 
-<div id="toast"></div>
-<script src="js/auth.js"></script>
-<script src="js/ai-engine.js"></script>
-<script src="js/app.js"></script>
-<script>
-  const quizData = [
-    { q: 'Simplify: (2xÂ²)Â³', opts: ['6xâµ','8xâµ','6xâ¶','8xâ¶'], ans: 3 },
-    { q: 'Evaluate: 3â° + 4â»Â¹', opts: ['1','1.25','2','0.25'], ans: 1 },
-    { q: 'Express 2â»Â³ as a fraction', opts: ['1/2','1/4','1/6','1/8'], ans: 3 },
-  ];
-  let qIdx = 0;
+    <!-- SECTION 30: Classroom Layout -->
+    <div class="classroom-layout">
+        
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-subject" id="sidebarSubject">Loading...</div>
+                <div class="sidebar-meta" id="sidebarMeta">SELECT A SUBJECT</div>
+                <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                <div class="progress-label" id="progressLabel">0% Complete</div>
+            </div>
+            <div id="topicList">
+                <!-- Topics injected by classroom.js -->
+            </div>
+        </aside>
 
-  function renderQuiz() {
-    const q = quizData[qIdx];
-    document.getElementById('quiz-q-num').textContent = qIdx + 1;
-    document.getElementById('quiz-question').innerHTML = q.q;
-    const optContainer = document.getElementById('quiz-options');
-    optContainer.innerHTML = '';
-    q.opts.forEach((opt, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'drill-option';
-      btn.innerHTML = `<span class="opt-label">${String.fromCharCode(65+i)}.</span>${opt}`;
-      btn.onclick = () => checkAnswer(i, btn);
-      optContainer.appendChild(btn);
-    });
-    document.getElementById('quiz-feedback').style.display = 'none';
-  }
+        <!-- MAIN CONTENT -->
+        <main class="main-content" id="mainContent">
+            
+            <!-- Video / Iframe Area -->
+            <div class="video-area">
+                <div class="video-placeholder" id="videoPlaceholder">
+                    <div class="play-btn-large" onclick="playLesson()">▶</div>
+                    <div class="video-label" id="videoLabel">Click to start lesson</div>
+                </div>
+                
+                <iframe class="video-embed" id="videoIframe" allowfullscreen allow="autoplay"></iframe>
+                
+                <!-- Locked Overlay (§30) -->
+                <div class="locked-overlay" id="lockedOverlay">
+                    <div class="lock-icon">🔒</div>
+                    <div class="lock-title">Premium Content</div>
+                    <div class="lock-sub">Gain access to all masterclasses and practice questions.</div>
+                    <a href="/index.html#pricing" class="btn btn-primary">Upgrade to PRO</a>
+                </div>
+            </div>
 
-  function checkAnswer(idx, btn) {
-    const q = quizData[qIdx];
-    const fb = document.getElementById('quiz-feedback');
-    const isCorrect = idx === q.ans;
-    document.querySelectorAll('.drill-option').forEach(b => b.style.pointerEvents = 'none');
-    btn.classList.add('selected');
+            <!-- Lesson Info (§30) -->
+            <div class="lesson-info">
+                <div class="lesson-tag" id="lessonTag">--</div>
+                <h1 class="lesson-title" id="lessonTitle">Welcome to Classroom</h1>
+                <div class="lesson-meta">
+                    <span class="lesson-meta-item">🎬 <span id="lessonDuration">0m</span></span>
+                    <span class="lesson-meta-item">📝 <span id="lessonQCount">0 Questions</span></span>
+                    <span class="status-pill status-good" id="freeBadge" style="display:none">Free</span>
+                </div>
+                <div class="lesson-actions">
+                    <button class="btn-quiz" onclick="scrollToQuiz()">📝 Take Topic Quiz</button>
+                    <button class="btn-next-lesson" onclick="nextTopic()">Next Topic →</button>
+                </div>
+            </div>
 
-    // â”€â”€ Wire to cbt-engine.js / ai-engine.js â”€â”€
-    const topicId = document.getElementById('topic-tag')?.textContent?.toLowerCase()
-                      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'unknown';
-    if (typeof updateTopicMastery === 'function') updateTopicMastery(topicId, isCorrect);
-    if (typeof awardXP === 'function' && isCorrect) awardXP(isCorrect);
-    if (typeof recordResponse === 'function') {
-      recordResponse({
-        topicId,
-        isCorrect,
-        timeSpent: 0,
-        gradeLevel: (typeof currentProfile !== 'undefined' && currentProfile)
-                      ? (currentProfile.current_skill_level || 3) : 3,
-        examType: 'classroom_quiz',
-      });
-    }
+            <!-- Lesson Details (§30) -->
+            <div class="lesson-body">
+                <div class="lesson-section-title">📌 Key Concepts</div>
+                <p class="lesson-notes" id="lessonNotes">Please select a topic from the sidebar to begin your study session.</p>
+                
+                <ul class="key-points" id="keyPoints">
+                    <!-- Injected -->
+                </ul>
 
-    if (isCorrect) {
-      fb.style.display = 'block';
-      fb.style.background = '#d1fae5'; fb.style.color = '#065f46';
-      fb.textContent = 'âœ“ Correct! Well done.';
-    } else {
-      fb.style.display = 'block';
-      fb.style.background = '#fee2e2'; fb.style.color = '#991b1b';
-      fb.textContent = `âœ— Not quite. The correct answer is ${quizData[qIdx].opts[q.ans]}.`;
-      document.querySelectorAll('.drill-option')[q.ans].style.borderColor = 'var(--accent2)';
-    }
-    setTimeout(() => {
-      if (qIdx < quizData.length - 1) {
-        qIdx++;
-        renderQuiz();
-      } else {
-        fb.textContent = 'ðŸŽ‰ Quiz complete! Great work.';
-        fb.style.background = '#eff6ff'; fb.style.color = 'var(--accent)';
-        fb.style.display = 'block';
-        document.getElementById('quiz-options').innerHTML = '';
-        // Track quiz completion
-        if (typeof trackAction === 'function') trackAction('drill_completed', { topicId, source: 'classroom_quiz' });
-      }
-    }, 1600);
-  }
+                <div class="formula-box">
+                    <div class="formula-label">Key Formula / Definition</div>
+                    <div class="formula-text" id="formulaText">--</div>
+                </div>
 
-  // Listen for lesson_completed postMessage from /lessons/ iframes
-  window.addEventListener('message', (e) => {
-    if (e.data && e.data.type === 'lesson_completed') {
-      const topicId = e.data.topic || 'unknown';
-      if (typeof trackAction === 'function') trackAction('video_watched', { topicId });
-      if (typeof addXP === 'function') addXP(25, 'lesson completed');
-    }
-  });
+                <!-- Topic Quiz (§30) -->
+                <section class="quiz-section" id="quizSection">
+                    <div class="quiz-header">
+                        <div class="quiz-title">Topic Quiz</div>
+                        <div class="quiz-count" id="quizCount">Question 1 of 3</div>
+                    </div>
+                    
+                    <div id="quizBody">
+                        <!-- Questions injected -->
+                    </div>
 
-  function switchSubject(id, btn) {
-    document.querySelectorAll('.subject-tab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-    toast('Loading ' + btn.textContent + ' topics...');
-  }
+                    <!-- Quiz Results Display -->
+                    <div class="quiz-score-display" id="scoreDisplay" style="display:none; text-align: center;">
+                        <div class="score-badge" id="scoreBadge">0/3</div>
+                        <p class="score-msg" id="scoreMsg">Good effort! Keep practicing.</p>
+                        <button class="btn btn-primary" onclick="retryQuiz()">Retry Quiz</button>
+                        
+                        <div class="upsell-strip">
+                            <strong>🚀 Go beyond the basics</strong>
+                            <p>Unlock the full curriculum and advanced questions with UltimateEdge Pro.</p>
+                            <a href="/index.html#pricing" class="upsell-btn">Upgrade Now</a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
 
-  function selectTopic(id, el) {
-    if (el.classList.contains('locked')) { toast('Upgrade to unlock this lesson'); return; }
-    document.querySelectorAll('.topic-item').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    const titles = { t1:'Number Bases', t2:'Fractions & Decimals', t3:'Indices', t4:'Logarithms', t5:'Surds' };
-    document.getElementById('topic-title').textContent = titles[id] || 'Topic';
-    document.getElementById('topic-tag').textContent = 'Topic ' + id.replace('t','');
-    document.getElementById('video-locked').style.display = 'none';
-    document.getElementById('video-play-icon').style.display = 'block';
-    qIdx = 0; renderQuiz();
-  }
+    <!-- SECTION 4: Toast -->
+    <div id="toast"></div>
 
-  function nextLesson() {
-    const items = document.querySelectorAll('.topic-item:not(.locked)');
-    const active = document.querySelector('.topic-item.active');
-    let next = false;
-    items.forEach(item => { if (next && !item.classList.contains('locked')) { item.click(); next = false; } if (item === active) next = true; });
-  }
+    <!-- SECTION 5: Auth Modal Snippet -->
+    <div id="modal-container"></div>
 
-  document.addEventListener('DOMContentLoaded', renderQuiz);
-</script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
-        .catch(err => console.warn('SW registration failed:', err));
-    });
-  }
-</script>
+    <script>
+        let curriculum = null;
+        let questions = null;
+        let currentSubject = 'mathematics';
+        let currentTopic = null;
+        let quizSession = { questions: [], index: 0, answers: {}, submitted: false };
+
+        /**
+         * INITIALIZATION
+         */
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for auth to initialize via auth.js
+            setTimeout(async () => {
+                await loadData();
+                setupIframeListener();
+                initUI();
+            }, 500);
+        });
+
+        async function loadData() {
+            try {
+                const [curRes, qRes] = await Promise.all([
+                    fetch('/data/curriculum.json'),
+                    fetch('/data/questions.json')
+                ]);
+                curriculum = await curRes.json();
+                questions = await qRes.json();
+            } catch (err) {
+                console.error("Data load failed", err);
+                toast("Error loading classroom data");
+            }
+        }
+
+        function initUI() {
+            const params = new URLSearchParams(window.location.search);
+            const subParam = params.get('subject');
+            if (subParam && curriculum.subjects[subParam]) {
+                currentSubject = subParam;
+            }
+            
+            renderSubjectTabs();
+            loadSubject(currentSubject);
+        }
+
+        /**
+         * SECTION 30: UI RENDERING
+         */
+        function renderSubjectTabs() {
+            const container = document.getElementById('subjectTabs');
+            container.innerHTML = '';
+            
+            // Filter by student's subjects if profile exists
+            const userSubjs = (window.currentProfile && window.currentProfile.exam_subjects) || Object.keys(curriculum.subjects);
+
+            Object.entries(curriculum.subjects).forEach(([id, data]) => {
+                if (!userSubjs.includes(id)) return;
+
+                const btn = document.createElement('button');
+                btn.className = `subj-tab ${id === currentSubject ? 'active' : ''}`;
+                btn.style.setProperty('--tab-color', data.color);
+                btn.innerHTML = `<span>${data.icon}</span> ${data.label}`;
+                btn.onclick = () => {
+                    currentSubject = id;
+                    document.querySelectorAll('.subj-tab').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    loadSubject(id);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function loadSubject(id) {
+            const subj = curriculum.subjects[id];
+            document.getElementById('sidebarSubject').textContent = subj.label;
+            
+            const topicList = document.getElementById('topicList');
+            topicList.innerHTML = '';
+
+            subj.sections.forEach(sec => {
+                const label = document.createElement('div');
+                label.className = 'topic-section-label';
+                label.textContent = sec.title;
+                topicList.appendChild(label);
+
+                sec.topics.forEach(topic => {
+                    const item = document.createElement('div');
+                    item.className = 'topic-item';
+                    item.id = `topic-${topic.id}`;
+                    
+                    // Locked logic (§30)
+                    const isPremium = window.currentProfile?.is_premium;
+                    const isLocked = !topic.free && !isPremium;
+                    
+                    const statusClass = topic.free ? 'status-free' : (isLocked ? 'status-lock' : 'status-done');
+                    const statusIcon = topic.free ? '▶' : (isLocked ? '🔒' : '✓');
+
+                    item.innerHTML = `
+                        <div class="topic-status ${statusClass}">${statusIcon}</div>
+                        <div class="topic-info">
+                            <div class="topic-name-text">${topic.name}</div>
+                            <div class="topic-detail">${topic.duration} · ${topic.questionCount}q</div>
+                        </div>
+                        ${topic.free ? '<span class="topic-badge badge-free">Free</span>' : ''}
+                    `;
+                    item.onclick = () => selectTopic(topic);
+                    topicList.appendChild(item);
+                });
+            });
+
+            // Auto-select first topic
+            if (subj.sections[0]?.topics[0]) selectTopic(subj.sections[0].topics[0]);
+        }
+
+        /**
+         * LESSON LOGIC & ADAPTIVE PATHING (§19, §23)
+         */
+        async function selectTopic(topic) {
+            currentTopic = topic;
+            
+            // UI States
+            document.querySelectorAll('.topic-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(`topic-${topic.id}`).classList.add('active');
+
+            document.getElementById('lessonTitle').textContent = topic.name;
+            document.getElementById('lessonTag').textContent = topic.tag;
+            document.getElementById('lessonDuration').textContent = topic.duration;
+            document.getElementById('lessonQCount').textContent = `${topic.questionCount} practice questions`;
+            document.getElementById('lessonNotes').textContent = topic.notes;
+            document.getElementById('formulaText').textContent = topic.formula;
+            document.getElementById('freeBadge').style.display = topic.free ? 'inline-flex' : 'none';
+
+            const kpList = document.getElementById('keyPoints');
+            kpList.innerHTML = topic.keyPoints.map((p, i) => `<li class="key-point"><span class="kp-dot">${i+1}</span>${p}</li>`).join('');
+
+            // Access Check (§30)
+            const isPremium = window.currentProfile?.is_premium;
+            const isLocked = !topic.free && !isPremium;
+            document.getElementById('lockedOverlay').classList.toggle('show', isLocked);
+            document.getElementById('videoPlaceholder').style.display = isLocked ? 'none' : 'flex';
+            document.getElementById('videoIframe').style.display = 'none';
+
+            loadQuiz(topic.id);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function playLesson() {
+            if (!currentTopic) return;
+
+            // SECTION 19 & 23: Silent Grade Pathing
+            let gradePath = "";
+            let gradeLevel = 3; // Default
+
+            if (window.sb && window.currentUser) {
+                const { data } = await window.sb
+                    .from('topic_mastery')
+                    .select('grade_level')
+                    .eq('user_id', window.currentUser.id)
+                    .eq('topic_id', currentTopic.id)
+                    .single();
+                
+                if (data) gradeLevel = data.grade_level;
+            }
+
+            if (gradeLevel === 2) gradePath = "grade2/";
+            if (gradeLevel === 1) gradePath = "grade1/";
+
+            const videoUrl = `/lessons/${currentTopic.id}/${gradePath}index.html`;
+            
+            const iframe = document.getElementById('videoIframe');
+            iframe.src = videoUrl;
+            iframe.style.display = 'block';
+            document.getElementById('videoPlaceholder').style.display = 'none';
+        }
+
+        /**
+         * SECTION 19: Iframe Bridge
+         */
+        function setupIframeListener() {
+            window.addEventListener('message', (e) => {
+                if (e.data?.type === 'lesson_completed') {
+                    window.addXP(20, 'Completed Video Lesson');
+                    window.trackAction('video_watched', { topic: e.data.topic });
+                    window.toast("20 XP Awarded! Lesson Completed.");
+                }
+            });
+        }
+
+        /**
+         * TOPIC QUIZ LOGIC (§30, §31)
+         */
+        function loadQuiz(topicId) {
+            const allQ = questions[currentSubject] || [];
+            const topicQ = allQ.filter(q => q.topic_id === topicId).slice(0, 3);
+            
+            quizSession = { 
+                questions: topicQ.length > 0 ? topicQ : allQ.sort(() => 0.5 - Math.random()).slice(0, 3), 
+                index: 0, 
+                answers: {}, 
+                submitted: false 
+            };
+            
+            document.getElementById('scoreDisplay').style.display = 'none';
+            document.getElementById('quizBody').style.display = 'block';
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            const q = quizSession.questions[quizSession.index];
+            if (!q) return;
+
+            document.getElementById('quizCount').textContent = `Question ${quizSession.index + 1} of ${quizSession.questions.length}`;
+            
+            const container = document.getElementById('quizBody');
+            container.innerHTML = `
+                <div class="quiz-question">${q.q}</div>
+                <div class="quiz-options">
+                    ${q.opts.map((opt, i) => `
+                        <div class="quiz-opt ${quizSession.answers[quizSession.index] === i ? 'selected' : ''}" onclick="selectOption(${i})">
+                            <span class="opt-ltr">${String.fromCharCode(65 + i)}</span> ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="quiz-nav">
+                    <button class="quiz-btn quiz-btn-secondary" onclick="moveQuiz(-1)" ${quizSession.index === 0 ? 'disabled' : ''}>Back</button>
+                    <button class="quiz-btn quiz-btn-primary" onclick="moveQuiz(1)">
+                        ${quizSession.index === quizSession.questions.length - 1 ? 'Finish' : 'Next'}
+                    </button>
+                </div>
+            `;
+        }
+
+        function selectOption(idx) {
+            if (quizSession.submitted) return;
+            quizSession.answers[quizSession.index] = idx;
+            renderQuizQuestion();
+        }
+
+        function moveQuiz(dir) {
+            if (dir === 1 && quizSession.index === quizSession.questions.length - 1) {
+                finishQuiz();
+                return;
+            }
+            quizSession.index += dir;
+            renderQuizQuestion();
+        }
+
+        async function finishQuiz() {
+            quizSession.submitted = true;
+            let correct = 0;
+            quizSession.questions.forEach((q, i) => {
+                if (quizSession.answers[i] === q.ans) correct++;
+            });
+
+            const accuracy = (correct / quizSession.questions.length) * 100;
+
+            // SECTION 31 Fix: accuracy_avg
+            if (window.sb && window.currentUser) {
+                await window.sb.from('topic_mastery').upsert({
+                    user_id: window.currentUser.id,
+                    topic_id: currentTopic.id,
+                    accuracy_avg: accuracy,
+                    last_studied: new Date().toISOString()
+                }, { onConflict: 'user_id,topic_id' });
+                
+                window.addXP(correct * 10, 'Quiz Results');
+            }
+
+            document.getElementById('quizBody').style.display = 'none';
+            const display = document.getElementById('scoreDisplay');
+            display.style.display = 'block';
+            document.getElementById('scoreBadge').textContent = `${correct}/${quizSession.questions.length}`;
+            document.getElementById('scoreMsg').textContent = accuracy >= 60 ? "Great job! You're mastering this topic." : "Keep at it! Try reviewing the video again.";
+        }
+
+        function retryQuiz() {
+            loadQuiz(currentTopic.id);
+        }
+
+        function scrollToQuiz() {
+            document.getElementById('quizSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function nextTopic() {
+            const subj = curriculum.subjects[currentSubject];
+            const all = subj.sections.flatMap(s => s.topics);
+            const idx = all.findIndex(t => t.id === currentTopic.id);
+            if (all[idx+1]) selectTopic(all[idx+1]);
+            else toast("You've reached the end of this subject!");
+        }
+    </script>
 </body>
 </html>
