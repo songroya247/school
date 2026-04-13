@@ -155,6 +155,9 @@ function startExam() {
   const timerEl = document.getElementById('timer-display');
   if (timerEl) timerEl.closest && (timerEl.parentElement.style.display = inDrillMode ? 'none' : '');
 
+  // §26 CBT-Only Mode: note the mode for use in submit/results
+  const _isCBTOnly = (typeof getStudyMode === 'function') && getStudyMode() === 'cbt_only';
+
   document.getElementById('setup-screen').style.display = 'none';
   document.getElementById('exam-screen').style.display = 'flex';
 
@@ -300,6 +303,8 @@ async function submitExam() {
 
   // ── cbt-engine.js: save session score ──
   const topicId = QUESTIONS[0]?.topicId || 'unknown';
+  // In CBT-only mode, grade banners are suppressed (handled in ai-engine.js)
+  // No drill prompts shown — algorithm still runs silently
   if (typeof saveSessionScore === 'function') {
     await saveSessionScore({
       examType:       'JAMB',
