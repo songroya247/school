@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a56ff">
 <title>UltimateEdge School — Ace Your JAMB, WAEC & NECO Exams</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
@@ -13,31 +16,42 @@
 <nav class="ue-nav">
   <div class="container">
     <a href="index.html" class="nav-logo">ULTIMATEEDGE SCHOOL</a>
-    <div class="nav-right">
-      <a href="login.html" class="btn btn-primary">Login / Sign Up</a>
+    <div class="nav-links">
+      <a href="classroom.html">Classroom</a>
+      <a href="cbt.html">Practice (CBT)</a>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileNav()" aria-label="Open menu">&#9776;</button>
+    <div class="nav-right" id="nav-right">
+      <button class="btn btn-primary" onclick="openAuthModal('login')">Login / Sign Up</button>
     </div>
   </div>
 </nav>
+<div class="mobile-nav-drawer" id="mobile-nav-drawer">
+  <a href="classroom.html" onclick="closeMobileNav()">Classroom</a>
+  <a href="cbt.html" onclick="closeMobileNav()">Practice (CBT)</a>
+  <a href="dashboard.html" onclick="closeMobileNav()">Dashboard</a>
+  <button class="btn btn-primary btn-block" onclick="closeMobileNav();openAuthModal('login')">Login / Sign Up</button>
+</div>
 
 <!-- HERO -->
 <section class="hero-section">
   <div class="container">
     <div class="hero-grid">
-      <div class="hero-text-content">
+      <div>
         <h1 class="hero-headline">ACE YOUR JAMB, WAEC &amp; NECO EXAMS</h1>
         <p class="hero-sub">Master every topic with adaptive CBT prep, expert video lessons, and AI-powered score predictions.</p>
         <div class="hero-ctas">
-          <a href="login.html" class="btn btn-primary btn-lg">Start Free Today</a>
+          <button class="btn btn-primary btn-lg" onclick="openAuthModal('signup')">Start Free Today</button>
           <a href="cbt.html" class="btn btn-outline btn-lg">Take a Practice Test</a>
         </div>
       </div>
       <div class="hero-cbt-card">
-        <div class="hero-card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
           <span class="hero-timer">Time Left: 01:45:20</span>
           <span class="hero-jamb-badge">Predicted JAMB: 285</span>
         </div>
-        <!-- CHARACTER FIX HERE -->
-        <div class="hero-question">If <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--font-mono)">x<sup>2</sup> - 5x + 6 = 0</code>, what are the values of x?</div>
+        <div class="hero-question">If <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--font-mono)">x² - 5x + 6 = 0</code>, what are the values of x?</div>
         <div class="hero-opts">
           <div class="hero-opt selected">A. x = 2 or x = 3</div>
           <div class="hero-opt">B. x = -2 or x = -3</div>
@@ -63,14 +77,14 @@
 </section>
 
 <!-- FEATURES SLIDER -->
-<section class="features-section" style="padding:72px 0;background:rgba(240,244,255,.5);">
+<section style="padding:72px 0;background:rgba(240,244,255,.5);">
   <div class="container">
-    <div class="section-flex-header" style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;">
+    <div class="slider-header">
       <div>
         <h2 class="section-title">Why UltimateEdge?</h2>
         <p class="section-sub">Everything you need to succeed, all in one place.</p>
       </div>
-      <div class="slider-controls" style="display:flex;gap:8px;">
+      <div class="slider-btns">
         <button class="btn-icon" id="feat-prev">&#8249;</button>
         <button class="btn-icon" id="feat-next">&#8250;</button>
       </div>
@@ -91,14 +105,14 @@
 </section>
 
 <!-- SUBJECTS SLIDER -->
-<section class="subjects-section" style="padding:72px 0;">
+<section style="padding:72px 0;">
   <div class="container">
-    <div class="section-flex-header" style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;">
+    <div class="slider-header">
       <div>
         <h2 class="section-title">Master Every Subject</h2>
         <p class="section-sub">Comprehensive coverage for science, arts, and commercial students.</p>
       </div>
-      <div class="slider-controls" style="display:flex;gap:8px;">
+      <div class="slider-btns">
         <button class="btn-icon" id="subj-prev">&#8249;</button>
         <button class="btn-icon" id="subj-next">&#8250;</button>
       </div>
@@ -120,7 +134,7 @@
 </section>
 
 <!-- EXAM COVERAGE -->
-<section class="exams-section" style="padding:72px 0;background:rgba(240,244,255,.5);">
+<section style="padding:72px 0;background:rgba(240,244,255,.5);">
   <div class="container">
     <div class="section-header" style="text-align:center">
       <h2 class="section-title">Full Exam Coverage</h2>
@@ -150,15 +164,15 @@
 <section class="classroom-band">
   <div class="container">
     <div class="classroom-band-inner">
-      <div class="classroom-band-text">
+      <div>
         <div class="topic-pills">
           <span class="topic-pill">Quadratics</span>
           <span class="topic-pill">Indices</span>
           <span class="topic-pill">Logarithms</span>
           <span class="topic-pill">Calculus</span>
         </div>
-        <h2 class="band-headline" style="font-family:var(--font-head);font-size:2.8rem;color:#fff;margin-bottom:16px">Enter the Classroom</h2>
-        <p class="band-sub" style="color:rgba(255,255,255,.6);margin-bottom:28px;max-width:400px;line-height:1.7">Expert-taught video lessons for every topic on your exam syllabus. Adaptive content that matches your skill level.</p>
+        <h2 class="classroom-band-heading">Enter the Classroom</h2>
+        <p style="color:rgba(255,255,255,.6);margin-bottom:28px;max-width:400px;line-height:1.7">Expert-taught video lessons for every topic on your exam syllabus. Adaptive content that matches your skill level.</p>
         <a href="classroom.html" class="btn btn-primary btn-lg">Start Learning</a>
       </div>
       <div class="classroom-video-mock">
@@ -172,7 +186,7 @@
 </section>
 
 <!-- PRICING -->
-<section id="pricing" class="pricing-section" style="padding:80px 0;">
+<section id="pricing" style="padding:80px 0;">
   <div class="container">
     <div class="section-header" style="text-align:center">
       <h2 class="section-title">Invest in Your Future</h2>
@@ -188,7 +202,7 @@
           <li><span class="pricing-check">✓</span> Score prediction</li>
           <li><span class="pricing-check">✓</span> Basic analytics</li>
         </ul>
-        <button class="btn btn-outline btn-block" onclick="toast('Paystack integration coming soon!')">Subscribe</button>
+        <button class="btn btn-outline btn-block" onclick="openPaystack('monthly')">Subscribe</button>
       </div>
       <div class="pricing-card featured">
         <div class="pricing-badge">Most Popular</div>
@@ -201,7 +215,7 @@
           <li><span class="pricing-check">✓</span> Weakness tracker</li>
           <li><span class="pricing-check">✓</span> Priority support</li>
         </ul>
-        <button class="btn btn-primary btn-block" onclick="toast('Paystack integration coming soon!')">Subscribe</button>
+        <button class="btn btn-primary btn-block" onclick="openPaystack('threeMonth')">Subscribe</button>
       </div>
       <div class="pricing-card">
         <h3 style="font-weight:700;font-size:1.15rem;margin-bottom:8px">Annual</h3>
@@ -213,29 +227,96 @@
           <li><span class="pricing-check">✓</span> Downloadable reports</li>
           <li><span class="pricing-check">✓</span> 1-on-1 tutoring discount</li>
         </ul>
-        <button class="btn btn-outline btn-block" onclick="toast('Paystack integration coming soon!')">Subscribe</button>
+        <button class="btn btn-outline btn-block" onclick="openPaystack('annual')">Subscribe</button>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
+<!-- HOW IT WORKS -->
+<section style="padding:72px 0;background:rgba(240,244,255,.5);">
+  <div class="container">
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-sub">From signup to exam success in 4 simple steps</p>
+    </div>
+    <div class="how-it-works-grid">
+      <div class="how-step">
+        <div class="how-step-number">1</div>
+        <div class="how-step-title">Sign Up Free</div>
+        <div class="how-step-desc">Create your account and select your subjects and exam type</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-number">2</div>
+        <div class="how-step-title">Watch Lessons</div>
+        <div class="how-step-desc">Study topic-by-topic video masterclasses at your own pace</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-number">3</div>
+        <div class="how-step-title">Practise CBT</div>
+        <div class="how-step-desc">Take adaptive mock exams with real timers and question maps</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-number">4</div>
+        <div class="how-step-title">Track & Improve</div>
+        <div class="how-step-desc">Monitor your JAMB score prediction and follow SmartPath guidance</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section style="padding:72px 0;">
+  <div class="container">
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">Student Success Stories</h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="card card-body">
+        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"I scored 312 in JAMB after 6 weeks on UltimateEdge. The score predictions kept me motivated and on track."</div>
+        <div style="font-weight:700">Emeka O.</div>
+        <div style="font-size:.82rem;color:var(--muted)">JAMB 2024 — 312/400</div>
+      </div>
+      <div class="card card-body">
+        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"The flag-and-review feature is exactly like the real CBT centre. I walked in knowing exactly what to expect."</div>
+        <div style="font-weight:700">Aisha B.</div>
+        <div style="font-size:.82rem;color:var(--muted)">WAEC 2024 — 5 A1s</div>
+      </div>
+      <div class="card card-body">
+        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"As a student in a remote area with poor internet, the offline mode was a lifesaver. Practised everywhere!"</div>
+        <div style="font-weight:700">Fatima D.</div>
+        <div style="font-size:.82rem;color:var(--muted)">NECO 2024 — 6 distinctions</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<section style="background:var(--accent);padding:72px 0;text-align:center;">
+  <div class="container">
+    <h2 class="cta-heading">Ready to Start Your Journey?</h2>
+    <p style="color:rgba(255,255,255,.75);font-size:1.05rem;margin-bottom:32px;">Join 12,000+ students already preparing smarter with UltimateEdge.</p>
+    <button class="btn btn-lg" style="background:#fff;color:var(--accent);font-weight:700" onclick="openAuthModal('signup')">Start Free Today</button>
+  </div>
+</section>
+
 <footer class="site-footer">
   <div class="container">
     <div class="footer-grid">
-      <div class="footer-brand">
+      <div>
         <div class="footer-logo">ULTIMATEEDGE SCHOOL</div>
         <div class="footer-tagline">The cockpit for your exam preparation. Pass your JAMB, WAEC, and NECO exams with confidence.</div>
       </div>
-      <div class="footer-nav-col">
+      <div>
         <div class="footer-heading">Platform</div>
         <ul class="footer-links">
           <li><a href="classroom.html">Classroom</a></li>
           <li><a href="cbt.html">Practice CBT</a></li>
           <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="payment-success.html">Payment Confirmation</a></li>
         </ul>
       </div>
-      <div class="footer-nav-col">
+      <div>
         <div class="footer-heading">Legal</div>
         <ul class="footer-links">
           <li><a href="#">Terms of Service</a></li>
@@ -249,15 +330,277 @@
 </footer>
 
 <div id="toast"></div>
-
-<!-- SHARED APP JS -->
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ai-engine.js"></script>
+<script src="js/paystack.js"></script>
 <script src="js/app.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // These functions now reside in js/app.js
     initSlider('feat-track', 'feat-prev', 'feat-next');
     initSlider('subj-track', 'subj-prev', 'subj-next');
   });
+</script>
+
+<!-- ── AUTH MODAL (canonical copy — auth.js controls open/close) ── -->
+<div id="auth-modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-card" style="max-width:480px;width:100%">
+    <button onclick="closeAuthModal()"
+      style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted);line-height:1">×</button>
+
+    <div class="auth-tabs" id="modal-auth-tabs">
+      <button class="auth-tab active" onclick="switchModalTab('login')" id="modal-tab-login">Login</button>
+      <button class="auth-tab" onclick="switchModalTab('signup')" id="modal-tab-signup">Sign Up</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="modal-login-form">
+      <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Welcome back</h2>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" placeholder="chioma@example.com" id="modal-login-email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" placeholder="••••••••" id="modal-login-password">
+      </div>
+      <button class="btn btn-primary btn-block btn-lg" style="margin-top:8px" onclick="handleModalLogin()">Login</button>
+      <div style="text-align:center;margin-top:14px"><a href="#" style="font-size:.85rem;color:var(--muted)" onclick="triggerPasswordReset()">Forgot Password?</a></div>
+    </div>
+
+    <!-- SIGNUP MULTI-STEP -->
+    <div id="modal-signup-form" style="display:none">
+      <!-- Step 1 -->
+      <div id="modal-step-1">
+        <div class="step-indicator">Step 1 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Create your account</h2>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-input" placeholder="Chioma Adebayo" id="modal-su-name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" placeholder="chioma@example.com" id="modal-su-email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" placeholder="Min. 8 characters" id="modal-su-pass">
+          <div class="form-hint">At least 8 characters</div>
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="goModalStep(2)">Continue &rarr;</button>
+      </div>
+
+      <!-- Step 2 -->
+      <div id="modal-step-2" style="display:none">
+        <div class="step-indicator">Step 2 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Your exam goals</h2>
+        <div class="form-group">
+          <label class="form-label">Which exams are you sitting?</label>
+          <div class="exam-checks">
+            <label class="exam-check-label"><input type="checkbox" value="JAMB" onchange="checkModalJAMB()"> JAMB</label>
+            <label class="exam-check-label"><input type="checkbox" value="WAEC"> WAEC</label>
+            <label class="exam-check-label"><input type="checkbox" value="NECO"> NECO</label>
+            <label class="exam-check-label"><input type="checkbox" value="Post-UTME"> Post-UTME</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">When is your exam?</label>
+          <select class="form-select" id="modal-su-date">
+            <option value="">Select month...</option>
+            <option>May 2026</option><option>June 2026</option><option>July 2026</option>
+            <option>August 2026</option><option>September 2026</option><option>October 2026</option>
+            <option>November 2026</option><option>December 2026</option><option>January 2027</option>
+            <option>February 2027</option><option>March 2027</option><option>April 2027</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target JAMB Score</label>
+          <select class="form-select" id="modal-su-target">
+            <option>200–220</option><option>221–240</option><option>241–260</option>
+            <option>261–280</option><option selected>281–300</option><option>301–320</option><option>320+</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline" onclick="goModalStep(1)">&larr; Back</button>
+          <button class="btn btn-primary" style="flex:1" onclick="goModalStep(3)">Continue &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div id="modal-step-3" style="display:none">
+        <div class="step-indicator">Step 3 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Your subjects</h2>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">Select all the subjects you are sitting for.</p>
+        <div id="modal-jamb-hint" class="jamb-hint" style="display:none">
+          JAMB requires exactly 4 subjects. You've selected <span id="modal-jamb-count">0</span>.
+        </div>
+        <div class="subject-grid" id="modal-subj-grid">
+          <div class="subj-card" onclick="toggleModalSubj(this,'mathematics')"><div class="subj-check">✓</div><div class="subj-card-icon">📐</div><div class="subj-card-name" style="color:#1a56ff">Mathematics</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'english')"><div class="subj-check">✓</div><div class="subj-card-icon">📖</div><div class="subj-card-name" style="color:#00c97a">English Language</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'physics')"><div class="subj-check">✓</div><div class="subj-card-icon">⚛️</div><div class="subj-card-name" style="color:#7c3aed">Physics</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'chemistry')"><div class="subj-check">✓</div><div class="subj-card-icon">🧪</div><div class="subj-card-name" style="color:#ff6b35">Chemistry</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'biology')"><div class="subj-check">✓</div><div class="subj-card-icon">🌿</div><div class="subj-card-name" style="color:#0891b2">Biology</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'economics')"><div class="subj-check">✓</div><div class="subj-card-icon">📈</div><div class="subj-card-name" style="color:#f59e0b">Economics</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'government')"><div class="subj-check">✓</div><div class="subj-card-icon">🏛️</div><div class="subj-card-name" style="color:#6366f1">Government</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'literature')"><div class="subj-check">✓</div><div class="subj-card-icon">📚</div><div class="subj-card-name" style="color:#ec4899">Literature</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'geography')"><div class="subj-check">✓</div><div class="subj-card-icon">🌍</div><div class="subj-card-name" style="color:#10b981">Geography</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'commerce')"><div class="subj-check">✓</div><div class="subj-card-icon">🏪</div><div class="subj-card-name" style="color:#8b5cf6">Commerce</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'accounts')"><div class="subj-check">✓</div><div class="subj-card-icon">💼</div><div class="subj-card-name" style="color:#14b8a6">Financial Acc.</div></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button class="btn btn-outline" onclick="goModalStep(2)">&larr; Back</button>
+          <button class="btn btn-primary" style="flex:1" onclick="goModalStep(4)">Continue &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div id="modal-step-4" style="display:none">
+        <div class="step-indicator">Step 4 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Study preference</h2>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:20px">How do you like to study?</p>
+        <label class="study-pref-option">
+          <input type="radio" name="modal_study_mode" value="drill" checked>
+          <div>
+            <div style="font-weight:700">Mix of video + practice drills</div>
+            <div style="font-size:.82rem;color:var(--muted)">Watch lessons, then practise with guided drills. Recommended for most students.</div>
+          </div>
+        </label>
+        <label class="study-pref-option">
+          <input type="radio" name="modal_study_mode" value="cbt_only">
+          <div>
+            <div style="font-weight:700">CBT practice only</div>
+            <div style="font-size:.82rem;color:var(--muted)">Skip drills, go straight to full CBT sessions. The algorithm still tracks your progress.</div>
+          </div>
+        </label>
+        <div style="display:flex;gap:10px;margin-top:24px">
+          <button class="btn btn-outline" onclick="goModalStep(3)">&larr; Back</button>
+          <button class="btn btn-success" style="flex:1" onclick="handleModalSignup()">Create Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Modal auth controller ────────────────────────────────────────────────────
+let _modalJambSelected = false;
+const _modalSelectedSubjects = new Set();
+
+function openAuthModal(tab) {
+  document.getElementById('auth-modal').style.display = 'flex';
+  switchModalTab(tab || 'login');
+}
+window.openAuthModal = openAuthModal;
+
+function closeAuthModal() {
+  document.getElementById('auth-modal').style.display = 'none';
+}
+window.closeAuthModal = closeAuthModal;
+
+function switchModalTab(tab) {
+  const loginForm  = document.getElementById('modal-login-form');
+  const signupForm = document.getElementById('modal-signup-form');
+  const tabLogin   = document.getElementById('modal-tab-login');
+  const tabSignup  = document.getElementById('modal-tab-signup');
+  loginForm.style.display  = tab === 'login'  ? 'block' : 'none';
+  signupForm.style.display = tab === 'signup' ? 'block' : 'none';
+  tabLogin.classList.toggle('active',  tab === 'login');
+  tabSignup.classList.toggle('active', tab === 'signup');
+}
+
+function goModalStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('modal-step-' + i);
+    if (el) el.style.display = i === n ? 'block' : 'none';
+  }
+}
+
+function checkModalJAMB() {
+  const checked = document.querySelectorAll('#modal-step-2 .exam-checks input:checked');
+  _modalJambSelected = Array.from(checked).some(c => c.value === 'JAMB');
+  updateModalJAMBHint();
+}
+
+function toggleModalSubj(el, id) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) _modalSelectedSubjects.add(id);
+  else _modalSelectedSubjects.delete(id);
+  updateModalJAMBHint();
+}
+
+function updateModalJAMBHint() {
+  const hint    = document.getElementById('modal-jamb-hint');
+  const countEl = document.getElementById('modal-jamb-count');
+  if (_modalJambSelected) {
+    hint.style.display = 'block';
+    countEl.textContent = _modalSelectedSubjects.size;
+    hint.classList.toggle('ok', _modalSelectedSubjects.size === 4);
+  } else {
+    hint.style.display = 'none';
+  }
+}
+
+async function handleModalLogin() {
+  const email = document.getElementById('modal-login-email').value.trim();
+  const pass  = document.getElementById('modal-login-password').value;
+  if (!email || !pass) { toast('Please fill in all fields'); return; }
+  window._authHandleLogin(email, pass);
+}
+
+async function handleModalSignup() {
+  if (_modalSelectedSubjects.size === 0) { toast('Please select at least one subject'); return; }
+  const name   = document.getElementById('modal-su-name').value.trim();
+  const email  = document.getElementById('modal-su-email').value.trim();
+  const pass   = document.getElementById('modal-su-pass').value;
+  const exams  = Array.from(document.querySelectorAll('#modal-step-2 .exam-checks input:checked')).map(c => c.value);
+  const date   = document.getElementById('modal-su-date').value;
+  const target = document.getElementById('modal-su-target').value;
+  const mode   = document.querySelector('input[name=modal_study_mode]:checked').value;
+  window._authHandleSignup({
+    name, email, pass, exams, examDate: date, target,
+    subjects: Array.from(_modalSelectedSubjects),
+    studyMode: mode,
+  });
+}
+
+function toggleMobileNav() {
+  const drawer = document.getElementById('mobile-nav-drawer');
+  const isOpen = drawer.classList.contains('open');
+  drawer.classList.toggle('open', !isOpen);
+  document.getElementById('nav-hamburger').textContent = isOpen ? '\u2630' : '\u2715';
+}
+function closeMobileNav() {
+  document.getElementById('mobile-nav-drawer').classList.remove('open');
+  document.getElementById('nav-hamburger').textContent = '\u2630';
+}
+// Close drawer on outside click
+document.addEventListener('click', function(e) {
+  const drawer = document.getElementById('mobile-nav-drawer');
+  const hamburger = document.getElementById('nav-hamburger');
+  if (drawer.classList.contains('open') && !drawer.contains(e.target) && !hamburger.contains(e.target)) {
+    closeMobileNav();
+  }
+});
+
+async function triggerPasswordReset() {
+  const email = document.getElementById('modal-login-email').value.trim();
+  if (!email) { toast('Enter your email address first'); return; }
+  if (typeof sb === 'undefined') { toast('Auth not ready — try again in a moment'); return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/login.html'
+  });
+  if (error) toast('Error: ' + error.message);
+  else toast('Password reset email sent! Check your inbox.');
+}
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .catch(err => console.warn('SW registration failed:', err));
+    });
+  }
 </script>
 </body>
 </html>
