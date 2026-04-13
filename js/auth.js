@@ -467,3 +467,42 @@ async function _saveSubjects() {
   setTimeout(() => location.reload(), 600);
 }
 window._saveSubjects = _saveSubjects;
+
+// ─── AUTH MODAL OPENERS (stubs for pages without the modal HTML) ──────────────
+// On index.html these are overridden by the inline modal script.
+// On other pages (dashboard, classroom, cbt) they redirect to login.html.
+if (typeof window.openAuthModal === 'undefined') {
+  window.openAuthModal = function(tab) {
+    window.location.href = 'login.html' + (tab === 'signup' ? '#signup' : '');
+  };
+}
+if (typeof window.closeAuthModal === 'undefined') {
+  window.closeAuthModal = function() {};
+}
+
+// ─── STREAK BROKEN CHECK ──────────────────────────────────────────────────────
+// §18: track 'streak_broken' if no activity for 24+ hours
+function checkStreakBroken(logs) {
+  if (!logs || logs.length === 0) return false;
+  const sorted = logs
+    .filter(l => l.action === 'page_load' && l.ts)
+    .map(l => new Date(l.ts).getTime())
+    .sort((a, b) => b - a);
+  if (sorted.length < 2) return false;
+  const gapHours = (sorted[0] - sorted[1]) / 3600000;
+  return gapHours > 24;
+}
+
+// Extend initAuth to track streak_broken on login
+const _origInitAuth = typeof initAuth === 'function' ? initAuth : null;
+// Patch: after loadProfile, check for streak broken
+const _origLoadProfile = loadProfile;
+async function loadProfile() {
+  await _origLoadProfile();
+  if (currentProfile) {
+    const broken = checkStreakBroken(currentProfile.usage_logs || []);
+    if (broken && currentUser) {
+      await trackAction('streak_broken', { ts: new Date().toISOString() });
+    }
+  }
+}
