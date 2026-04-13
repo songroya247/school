@@ -1,43 +1,399 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CBT Exam – UltimateEdge</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/main.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/auth.js"></script>
-  <script src="/js/ai-engine.js"></script>
-  <script src="/js/cbt-engine.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBT Practice — UltimateEdge School</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<div class="defaulter-banner" id="defaulter-banner">⚠️ Subscription expired. <a href="index.html#pricing">Renew</a></div>
-<nav class="ue-nav"><div class="nav-brand">ULTIMATE<span>EDGE</span></div><div class="nav-links"><a href="index.html">Home</a><a href="classroom.html">Classroom</a><a href="cbt.html">CBT</a><a href="dashboard.html">Dashboard</a></div><div class="nav-user" id="nav-user-pill"><div class="nav-avatar"></div><span id="nav-user-name"></span><span id="nav-pro-badge" class="pro-badge" style="display:none">PRO</span><span id="nav-xp"></span></div><button id="nav-login-btn" onclick="openAuthModal('login')">Login / Sign Up</button><button id="nav-logout-btn" style="display:none" onclick="sb.auth.signOut()">Log out</button></nav>
-<main class="cbt-container" style="max-width:800px; margin:2rem auto; padding:1rem;">
-  <div class="cbt-header" style="display:flex; justify-content:space-between; align-items:center;">
-    <select id="mode-select" class="form-select"><option value="drill">Topic Practice (Drill)</option><option value="mock">Full Mock Exam</option></select>
-    <select id="topic-select" class="form-select"><option value="quadratics">Quadratics</option><option value="logarithms">Logarithms</option><option value="trigonometry">Trigonometry</option></select>
-    <span id="timer" class="cbt-timer" style="display:none">02:00:00</span>
-  </div>
-  <div id="question-panel" style="margin: 2rem 0;"></div>
-  <div id="question-map" class="question-map"></div>
-  <button id="start-btn" class="btn btn-primary">Start Exam</button>
-</main>
-<div id="toast"></div>
-<!-- Auth Modal snippet (same as previous) -->
-<div id="auth-modal" class="modal-backdrop" style="display:none"><div class="modal-card"><span class="modal-close" onclick="closeAuthModal()">&times;</span><div class="auth-tabs"><button class="tab-btn active" onclick="switchAuthTab('login')">Login</button><button class="tab-btn" onclick="switchAuthTab('signup')">Sign Up</button></div><div id="login-form" class="auth-form"><input type="email" id="login-email" placeholder="Email"><input type="password" id="login-password" placeholder="Password"><button class="btn btn-primary" onclick="handleLogin(event)">Login →</button></div><div id="signup-form" class="auth-form" style="display:none"><input type="text" id="signup-name" placeholder="Full Name"><input type="email" id="signup-email" placeholder="Email"><input type="password" id="signup-password" placeholder="Password (min 6 chars)"><div class="exam-checks"><label><input type="checkbox" value="JAMB"> JAMB</label><label><input type="checkbox" value="WAEC"> WAEC</label></div><select id="signup-exam-month"></select><select id="signup-target-score"></select><button class="btn btn-primary" onclick="handleSignup(event)">Create Free Account →</button></div></div></div>
-<script>
-  // Populate month/score selects
-  for(let i=1;i<=18;i++){ let d=new Date(); d.setMonth(d.getMonth()+i); document.getElementById('signup-exam-month').innerHTML+=`<option value="${d.toISOString().slice(0,10)}">${d.toLocaleDateString('en-NG',{year:'numeric',month:'long'})}</option>`;}
-  for(let s=200;s<=320;s+=10) document.getElementById('signup-target-score').innerHTML+=`<option value="${s}">${s}</option>`;
 
-  document.getElementById('start-btn').onclick = () => {
-    const mode = document.getElementById('mode-select').value;
-    const topic = document.getElementById('topic-select').value;
-    if(mode === 'drill') startDrill(topic);
-    else startMock(topic);
-  };
+<div id="defaulter-banner">Your subscription has expired. <a href="index.html#pricing">Renew Now</a></div>
+
+<!-- SETUP SCREEN -->
+<div id="setup-screen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);">
+  <div class="card" style="max-width:480px;width:100%;">
+    <div class="card-body">
+      <h1 style="font-family:var(--font-head);font-size:2rem;text-align:center;margin-bottom:6px;">Exam Engine</h1>
+      <p style="text-align:center;color:var(--muted);margin-bottom:32px;">Configure your practice session.</p>
+      <div class="form-group">
+        <label class="form-label">Mode</label>
+        <select class="form-select" id="sel-mode">
+          <option>Full Mock Exam (40 questions, 2hrs)</option>
+          <option>Topic Practice (10 questions)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <select class="form-select" id="sel-subject">
+          <option>Mathematics</option>
+          <option>English Language</option>
+          <option>Physics</option>
+          <option>Chemistry</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-block btn-lg" style="margin-top:8px" onclick="startExam()">Start Exam</button>
+      <div style="text-align:center;margin-top:16px;"><a href="dashboard.html" style="font-size:.85rem;color:var(--muted)">Back to Dashboard</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- EXAM SCREEN -->
+<div id="exam-screen" style="display:none;height:100vh;display:none;flex-direction:column;">
+  <header style="background:var(--text);color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <div style="font-family:var(--font-head);font-size:1.3rem;letter-spacing:.05em;" id="exam-title">Mathematics Mock</div>
+    <div style="display:flex;align-items:center;gap:20px;">
+      <div style="font-size:.85rem;background:rgba(255,255,255,.1);padding:5px 12px;border-radius:6px;">
+        Pred. JAMB: <span style="font-weight:700;color:var(--accent2);" id="jamb-pred">280</span>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700;" id="timer-display">02:00:00</div>
+    </div>
+  </header>
+
+  <div style="display:flex;flex:1;overflow:hidden;">
+    <!-- Main -->
+    <main style="flex:1;padding:24px 32px;overflow-y:auto;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div style="font-weight:700;background:var(--bg);padding:6px 16px;border-radius:999px;" id="q-counter">Question 1 of 5</div>
+        <button class="btn-flag" id="flag-btn" onclick="toggleFlag()">⚑ Flag Question</button>
+      </div>
+
+      <div class="card" style="flex:1;display:flex;flex-direction:column;">
+        <div class="card-body" style="flex:1;display:flex;flex-direction:column;">
+          <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:32px;line-height:1.5;" id="q-text"></h2>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:auto;" id="q-options"></div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;margin-top:16px;">
+        <button class="btn btn-outline" onclick="navQ(-1)" id="prev-btn">&#8592; Previous</button>
+        <button class="btn btn-primary" onclick="navQ(1)" id="next-btn">Next &#8594;</button>
+      </div>
+    </main>
+
+    <!-- Sidebar -->
+    <aside style="width:280px;border-left:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;flex-shrink:0;">
+      <div style="padding:16px;border-bottom:1px solid var(--border);">
+        <div style="font-family:var(--font-head);font-size:1.3rem;">Question Map</div>
+      </div>
+      <div style="padding:16px;flex:1;overflow-y:auto;">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;" id="q-map"></div>
+        <div style="margin-top:20px;font-size:.8rem;color:var(--muted);display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;"><div style="width:12px;height:12px;background:var(--accent);border-radius:3px;"></div> Current</div>
+          <div style="display:flex;align-items:center;gap:8px;"><div style="width:12px;height:12px;background:rgba(26,86,255,.15);border:1.5px solid rgba(26,86,255,.4);border-radius:3px;"></div> Answered</div>
+          <div style="display:flex;align-items:center;gap:8px;"><div style="width:12px;height:12px;background:rgba(255,107,53,.1);border:1.5px solid var(--warning);border-radius:3px;"></div> Flagged</div>
+          <div style="display:flex;align-items:center;gap:8px;"><div style="width:12px;height:12px;border:1.5px solid var(--border2);border-radius:3px;"></div> Unanswered</div>
+        </div>
+      </div>
+      <div style="padding:16px;border-top:1px solid var(--border);">
+        <button class="btn btn-block btn-lg" style="background:var(--text);color:#fff;font-weight:700;" onclick="submitExam()">Submit Exam</button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div id="results-screen" style="display:none;min-height:100vh;background:var(--bg);display:none;align-items:center;justify-content:center;padding:24px;">
+  <div class="card" style="max-width:600px;width:100%;border-top:4px solid var(--accent);">
+    <div class="card-body" style="text-align:center;">
+      <div style="width:88px;height:88px;border-radius:50%;background:rgba(0,201,122,.1);color:var(--accent2);display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin:0 auto 20px;">✓</div>
+      <h1 style="font-family:var(--font-head);font-size:2.5rem;margin-bottom:6px;">Exam Completed</h1>
+      <p style="color:var(--muted);margin-bottom:28px;">Here is your performance breakdown.</p>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;" id="results-grid"></div>
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button class="btn btn-outline btn-lg" onclick="retryExam()">Retry Exam</button>
+        <a href="dashboard.html" class="btn btn-primary btn-lg">Back to Dashboard</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="js/auth.js"></script>
+<script src="js/ai-engine.js"></script>
+<script src="js/cbt-engine.js"></script>
+<script src="js/app.js"></script>
+<script>
+// ── Demo question bank (placeholder until real questions are loaded from Supabase) ──
+const QUESTIONS = [
+  { text: 'If x² - 5x + 6 = 0, what are the values of x?', opts: ['x = 2 or x = 3','x = -2 or x = -3','x = 1 or x = 6','x = -1 or x = -6'], ans: 0, topicId: 'quadratics' },
+  { text: 'Simplify (2x²)³', opts: ['6x⁵','8x⁵','6x⁶','8x⁶'], ans: 3, topicId: 'indices' },
+  { text: 'Find the derivative of y = 3x² + 2x - 5', opts: ['6x + 2','6x - 5','3x + 2','6x'], ans: 0, topicId: 'calculus-differentiation' },
+  { text: 'What is the probability of rolling a sum of 7 with two dice?', opts: ['1/6','1/12','1/36','7/36'], ans: 0, topicId: 'probability' },
+  { text: 'If a = 3 and b = -2, evaluate a² - b²', opts: ['13','5','1','9'], ans: 1, topicId: 'indices' },
+];
+
+let currentQ = 0;
+let answers = {};
+let timeLeft = 7200;
+let timerInterval;
+let sessionStartTime;
+let questionStartTime;
+// Per-question time tracking
+const questionTimes = {};
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function startExam() {
+  // Clear engine flags from any previous session
+  if (typeof clearFlags === 'function') clearFlags();
+
+  sessionStartTime = Date.now();
+  questionStartTime = Date.now();
+
+  // Determine timer duration: Full Mock = 7200s, Topic Practice = 600s
+  const mode = document.getElementById('sel-mode').value;
+  timeLeft = mode.includes('40') ? 7200 : 600;
+
+  // Hide timer entirely in drill mode (mastery < 0.50 AND study_mode = 'drill')
+  const masteryLevel = (typeof currentProfile !== 'undefined' && currentProfile)
+    ? currentProfile.mastery_level
+    : null;
+  const inDrillMode = (typeof isDrillMode === 'function') ? isDrillMode(masteryLevel) : false;
+  const timerEl = document.getElementById('timer-display');
+  if (timerEl) timerEl.closest && (timerEl.parentElement.style.display = inDrillMode ? 'none' : '');
+
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'flex';
+
+  // Track session start
+  if (typeof trackAction === 'function') trackAction('drill_started', {
+    mode, subject: document.getElementById('sel-subject').value
+  });
+
+  renderQ();
+  renderMap();
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const h = Math.floor(timeLeft/3600), m = Math.floor((timeLeft%3600)/60), s = timeLeft%60;
+    if (timerEl) timerEl.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+    if (timeLeft <= 0) submitExam();
+  }, 1000);
+}
+
+function renderQ() {
+  const q = QUESTIONS[currentQ];
+  document.getElementById('q-counter').textContent = `Question ${currentQ+1} of ${QUESTIONS.length}`;
+  document.getElementById('q-text').textContent = q.text;
+
+  // Sync flag button with cbt-engine.js flag state
+  const flagBtn = document.getElementById('flag-btn');
+  const flagged = (typeof isFlagged === 'function') ? isFlagged(currentQ) : false;
+  flagBtn.classList.toggle('flagged', flagged);
+  flagBtn.textContent = flagged ? '⚑ Flagged for Review' : '⚑ Flag Question';
+
+  const optContainer = document.getElementById('q-options');
+  optContainer.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'drill-option' + (answers[currentQ] === i ? ' selected' : '');
+    btn.innerHTML = `<span class="opt-label">${String.fromCharCode(65+i)}.</span>${opt}`;
+    btn.onclick = () => selectAnswer(i);
+    optContainer.appendChild(btn);
+  });
+
+  document.getElementById('prev-btn').disabled = currentQ === 0;
+  document.getElementById('next-btn').textContent = currentQ === QUESTIONS.length-1 ? 'Submit ✓' : 'Next →';
+  document.getElementById('next-btn').onclick = currentQ === QUESTIONS.length-1 ? submitExam : () => navQ(1);
+
+  // Live JAMB prediction via ai-engine.js
+  const answered = Object.keys(answers).length;
+  const correct  = QUESTIONS.filter((qq, ii) => answers[ii] === qq.ans).length;
+  const liveAcc  = answered > 0 ? correct / answered : null;
+  const liveM    = liveAcc !== null ? liveAcc * 0.7 : null;
+  const predStr  = (typeof predictJAMB === 'function' && liveM !== null)
+    ? predictJAMB(liveM)
+    : (180 + Math.round((answered / QUESTIONS.length) * 120));
+  document.getElementById('jamb-pred').textContent = predStr;
+
+  // Record time spent on previous question
+  questionStartTime = Date.now();
+}
+
+async function selectAnswer(idx) {
+  const q = QUESTIONS[currentQ];
+  const isCorrect = idx === q.ans;
+  const timeSpent = Math.round((Date.now() - questionStartTime) / 1000);
+  questionTimes[currentQ] = timeSpent;
+
+  answers[currentQ] = idx;
+
+  // ── cbt-engine.js integration ──
+  if (typeof recordResponse === 'function') {
+    await recordResponse({
+      topicId:    q.topicId || 'unknown',
+      isCorrect,
+      timeSpent,
+      gradeLevel: (typeof currentProfile !== 'undefined' && currentProfile)
+                    ? (currentProfile.current_skill_level || 3) : 3,
+      examType:   'JAMB',
+    });
+  }
+
+  if (typeof updateTopicMastery === 'function') {
+    updateTopicMastery(q.topicId || 'unknown', isCorrect);
+  }
+
+  if (typeof awardXP === 'function') {
+    awardXP(isCorrect);
+  }
+
+  renderQ();
+  renderMap();
+  if (currentQ < QUESTIONS.length - 1) setTimeout(() => { currentQ++; renderQ(); renderMap(); }, 300);
+}
+
+function navQ(dir) {
+  questionTimes[currentQ] = Math.round((Date.now() - questionStartTime) / 1000);
+  currentQ = Math.max(0, Math.min(QUESTIONS.length-1, currentQ+dir));
+  renderQ();
+  renderMap();
+}
+
+function toggleFlag() {
+  // Delegate to cbt-engine.js flagQuestion()
+  if (typeof flagQuestion === 'function') {
+    flagQuestion(currentQ);
+  }
+  renderQ();
+  renderMap();
+}
+
+function renderMap() {
+  const map = document.getElementById('q-map');
+  map.innerHTML = '';
+  QUESTIONS.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'q-dot';
+    const flagged = (typeof isFlagged === 'function') ? isFlagged(i) : false;
+    if (i === currentQ) dot.classList.add('current');
+    else if (flagged) { dot.classList.add('flagged'); dot.textContent = '⚑'; }
+    else if (answers[i] !== undefined) dot.classList.add('answered');
+    if (!dot.textContent) dot.textContent = i + 1;
+    dot.onclick = () => { currentQ = i; renderQ(); renderMap(); };
+    map.appendChild(dot);
+  });
+}
+
+async function submitExam() {
+  clearInterval(timerInterval);
+
+  const correct = QUESTIONS.filter((q,i) => answers[i] === q.ans).length;
+  const total   = QUESTIONS.length;
+  const pct     = Math.round(correct / total * 100);
+  const timeSpent = 7200 - timeLeft;
+  const mins = Math.floor(timeSpent/60), secs = timeSpent%60;
+  const avgTime = total > 0
+    ? Math.round(Object.values(questionTimes).reduce((a,b) => a+b, 0) / total)
+    : 0;
+
+  // ai-engine.js JAMB prediction using real mastery value
+  const mastery = (typeof calcMastery === 'function')
+    ? calcMastery(pct, total)
+    : pct / 100;
+  const jambRange = (typeof predictJAMB === 'function')
+    ? predictJAMB(mastery, avgTime)
+    : `${Math.round(mastery*400-15)}–${Math.round(mastery*400+15)}`;
+
+  // ── cbt-engine.js: save session score ──
+  const topicId = QUESTIONS[0]?.topicId || 'unknown';
+  if (typeof saveSessionScore === 'function') {
+    await saveSessionScore({
+      examType:       'JAMB',
+      score:          correct,
+      totalQuestions: total,
+      accuracy:       pct,
+      avgTimeSecs:    avgTime,
+      gradeLevel:     (typeof currentProfile !== 'undefined' && currentProfile)
+                        ? (currentProfile.current_skill_level || 3) : 3,
+      topicId,
+    });
+  }
+
+  // ── Adaptive pyramid (per unique topic in session) ──
+  if (typeof applyAdaptivePyramid === 'function') {
+    const uniqueTopics = [...new Set(QUESTIONS.map(q => q.topicId))];
+    for (const tId of uniqueTopics) {
+      const topicQs = QUESTIONS.filter(q => q.topicId === tId);
+      const topicCorrect = topicQs.filter((q,_) => {
+        const idx = QUESTIONS.indexOf(q);
+        return answers[idx] === q.ans;
+      }).length;
+      const topicPct = Math.round(topicCorrect / topicQs.length * 100);
+      await applyAdaptivePyramid(tId, topicPct, 0);
+    }
+  }
+
+  // ── Show results ──
+  document.getElementById('exam-screen').style.display = 'none';
+  const rs = document.getElementById('results-screen');
+  rs.style.display = 'flex';
+
+  // Show flagged questions review before final results if any flags set
+  const flaggedList = (typeof getFlaggedList === 'function') ? getFlaggedList() : [];
+  let flagReview = '';
+  if (flaggedList.length > 0) {
+    const items = flaggedList.map(i =>
+      `<li style="margin-bottom:8px">Q${i+1}: ${QUESTIONS[i].text.slice(0,60)}…
+       <button class="btn btn-sm btn-outline" style="margin-left:8px"
+         onclick="reviewFlagged(${i})">Review</button></li>`
+    ).join('');
+    flagReview = `
+      <div style="background:rgba(255,107,53,.08);border:1.5px solid var(--warning);border-radius:10px;padding:16px;margin-bottom:20px;text-align:left">
+        <div style="font-weight:700;margin-bottom:8px">⚑ ${flaggedList.length} flagged question(s) — review before final submission</div>
+        <ul style="list-style:none;padding:0;margin:0">${items}</ul>
+      </div>`;
+  }
+
+  document.getElementById('results-grid').innerHTML = `
+    ${flagReview}
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:16px;">
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:6px;">Score</div>
+      <div style="font-size:1.6rem;font-weight:700;">${correct}/${total}</div>
+    </div>
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:16px;">
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:6px;">Accuracy</div>
+      <div style="font-size:1.6rem;font-weight:700;">${pct}%</div>
+    </div>
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:16px;">
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:6px;">Time</div>
+      <div style="font-size:1.6rem;font-weight:700;">${pad(mins)}:${pad(secs)}</div>
+    </div>
+    <div style="background:var(--accent);border-radius:10px;padding:16px;color:#fff;">
+      <div style="font-size:.8rem;opacity:.8;margin-bottom:6px;">Pred. JAMB</div>
+      <div style="font-size:1.6rem;font-weight:700;">${jambRange}</div>
+    </div>
+  `;
+}
+
+function reviewFlagged(qIdx) {
+  // Jump back into exam screen at the flagged question
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'flex';
+  currentQ = qIdx;
+  renderQ();
+  renderMap();
+}
+
+function retryExam() {
+  answers = {};
+  currentQ = 0;
+  timeLeft = 7200;
+  if (typeof clearFlags === 'function') clearFlags();
+  document.getElementById('results-screen').style.display = 'none';
+  startExam();
+}
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .catch(err => console.warn('SW registration failed:', err));
+    });
+  }
 </script>
 </body>
 </html>
