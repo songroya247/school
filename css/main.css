@@ -1,87 +1,187 @@
-/* ── SURGICAL RESPONSIVE UPDATES ── */
+/* ── FONTS ── */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap');
 
-/* 1. Global Container Tweak */
-@media (max-width: 768px) {
-  .container { padding: 0 20px; }
-  section { padding: 48px 0 !important; } /* Reduce vertical padding on mobile */
+/* ── DESIGN TOKENS §7 ── */
+:root {
+  --accent: #1a56ff;
+  --accent-dark: #1040cc;
+  --accent-glow: rgba(26,86,255,.18);
+  --accent2: #00c97a;
+  --warning: #ff6b35;
+  --bg: #f5f7fa;
+  --surface: #ffffff;
+  --surface2: #f0f4ff;
+  --border: #e8ecf0;
+  --border2: #d0d5de;
+  --text: #0d1117;
+  --muted: #6b7280;
+  --muted2: #9ca3af;
+  --shadow: 0 1px 4px rgba(0,0,0,.06), 0 2px 12px rgba(0,0,0,.04);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,.10), 0 8px 40px rgba(0,0,0,.06);
+  --radius: 10px;
+  --font-head: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
 }
 
-/* 2. Navigation - Hide links, keep logo and primary CTA */
+/* ── RESET ── */
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { font-family: var(--font-body); background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+h1,h2,h3,h4,h5 { font-family: var(--font-head); line-height: 1.1; letter-spacing: .03em; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: var(--font-body); border: none; background: none; outline: none; }
+img { max-width: 100%; display: block; }
+select, input, textarea { font-family: var(--font-body); }
+
+/* ── LAYOUT ── */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; width: 100%; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-4 { gap: 16px; }
+
+/* ── NAVIGATION ── */
+.ue-nav {
+  position: sticky; top: 0; z-index: 1000;
+  background: rgba(255,255,255,.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border); height: 64px;
+  display: flex; align-items: center;
+}
+.ue-nav .container { display: flex; align-items: center; justify-content: space-between; height: 100%; }
+.nav-logo { font-family: var(--font-head); font-size: 1.5rem; color: var(--accent); letter-spacing: .07em; }
+.nav-links { display: flex; gap: 28px; }
+.nav-links a { font-size: .9rem; font-weight: 600; color: var(--muted); transition: color .15s; }
+.nav-links a:hover, .nav-links a.active { color: var(--accent); }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 42px; padding: 0 20px; border-radius: var(--radius); font-weight: 700;
+  font-size: .9rem; transition: all .15s; letter-spacing: .01em; white-space: nowrap;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
+.btn-outline { background: transparent; color: var(--text); border: 1.5px solid var(--border2); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-lg { height: 52px; padding: 0 28px; font-size: 1.05rem; border-radius: 12px; }
+.btn-block { width: 100%; }
+.btn-icon { width: 40px; height: 40px; border-radius: 8px; border: 1.5px solid var(--border2); background: var(--surface); display: flex; align-items: center; justify-content: center; }
+
+/* ── HERO SECTION ── */
+.hero-section { padding: 80px 0; }
+.hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.hero-headline { font-family: var(--font-head); font-size: 4rem; line-height: 1; margin-bottom: 20px; }
+.hero-sub { font-size: 1.15rem; color: var(--muted); max-width: 480px; margin-bottom: 32px; }
+.hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
+
+.hero-cbt-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-lg); padding: 32px; }
+.hero-question { font-size: 1.25rem; font-weight: 700; margin: 24px 0; line-height: 1.4; }
+.hero-opts { display: flex; flex-direction: column; gap: 12px; }
+.hero-opt { padding: 14px 18px; border-radius: 12px; border: 2px solid var(--border); font-weight: 700; font-size: 0.95rem; }
+.hero-opt.selected { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+
+/* ── STATS STRIP ── */
+.stats-strip { background: var(--accent); color: #fff; padding: 40px 0; }
+.stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); text-align: center; }
+.stat-value { font-family: var(--font-head); font-size: 2.2rem; }
+.stat-label { font-size: 0.85rem; opacity: 0.8; font-weight: 600; text-transform: uppercase; }
+
+/* ── SLIDERS §27 ── */
+.slider-wrap { overflow: hidden; position: relative; padding: 10px 0; }
+.slider-track { display: flex; gap: 20px; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+.feature-slide { flex: 0 0 300px; }
+.feature-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 32px; height: 100%; transition: transform 0.2s; }
+.feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.feature-icon { font-size: 2.5rem; margin-bottom: 16px; }
+.feature-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
+.feature-desc { font-size: 0.9rem; color: var(--muted); }
+
+/* ── PRICING §16 ── */
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 40px; }
+.pricing-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 20px; padding: 40px; position: relative; }
+.pricing-card.featured { border-color: var(--accent); box-shadow: var(--shadow-lg); transform: scale(1.05); z-index: 10; }
+.pricing-badge { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 4px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+.pricing-price { font-family: var(--font-head); font-size: 3rem; margin: 10px 0; }
+
+/* ── DASHBOARD PERFORMANCE BARS §24 ── */
+.perf-bar-row { display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: 12px; cursor: pointer; transition: background 0.2s; }
+.perf-bar-row:hover { background: var(--bg); }
+.perf-subject-name { font-weight: 700; min-width: 140px; }
+.perf-bar-track { flex: 1; height: 12px; background: var(--border); border-radius: 10px; overflow: hidden; }
+.perf-bar-fill { height: 100%; border-radius: 10px; transition: width 0.8s ease-out; }
+.perf-expand-chevron { transition: transform 0.3s; color: var(--muted); }
+.perf-bar-row.open .perf-expand-chevron { transform: rotate(180deg); }
+.perf-subject-detail { display: none; padding: 10px 20px 20px 156px; }
+.perf-subject-detail.open { display: block; }
+
+/* ── CBT OPTIONS & DOTS §25 ── */
+.drill-option {
+  display: flex; align-items: center; width: 100%; min-height: 56px; padding: 12px 20px;
+  border-radius: 12px; border: 2px solid var(--border2); background: var(--surface);
+  font-weight: 700; font-size: 1.1rem; gap: 16px;
+}
+.drill-option.selected { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+.q-dot { width: 36px; height: 36px; border-radius: 8px; border: 2px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem; }
+.q-dot.current { background: var(--accent); color: #fff; border-color: var(--accent); }
+.q-dot.flagged { background: var(--warning); color: #fff; border-color: var(--warning); }
+.btn-flag { height: 44px; border: 2px solid var(--warning); color: var(--warning); border-radius: 10px; font-weight: 700; padding: 0 20px; display: flex; align-items: center; gap: 8px; }
+.btn-flag.flagged { background: rgba(255,107,53,0.15); }
+
+/* ── STATUS & TOAST ── */
+#toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; padding: 12px 24px; border-radius: 12px; font-weight: 700; z-index: 9999; opacity: 0; transition: 0.3s; pointer-events: none; }
+#toast.show { opacity: 1; bottom: 50px; }
+#defaulter-banner { background: #dc2626; color: #fff; text-align: center; padding: 12px; font-weight: 700; display: none; }
+
+/* ── SURGICAL MOBILE RESPONSIVE REPAIR ── */
 @media (max-width: 768px) {
-  .nav-links { display: none !important; } 
-  .nav-logo { font-size: 1.2rem; }
+  /* Fix space issues §29 */
+  .container { padding: 0 16px; }
+  
+  /* Nav repair */
+  .nav-links { display: none !important; }
   .ue-nav .container { justify-content: space-between; }
-}
+  .nav-logo { font-size: 1.1rem; }
 
-/* 3. Hero Section - Stack and Resize */
-@media (max-width: 768px) {
-  .hero-section { padding: 40px 0; text-align: center; }
+  /* Hero Section Reset */
+  .hero-section { padding: 32px 0; }
   .hero-grid { grid-template-columns: 1fr; gap: 32px; }
-  .hero-headline { font-size: 2.5rem; line-height: 1.1; }
-  .hero-sub { margin: 0 auto 24px; }
-  .hero-ctas { justify-content: center; }
-  .hero-cbt-card { padding: 20px; }
-  .hero-question { font-size: 1rem; margin: 15px 0; }
-}
+  .hero-headline { font-size: 2.5rem; text-align: left; width: 100%; }
+  .hero-sub { font-size: 1rem; width: 100%; max-width: none; margin-bottom: 24px; }
+  
+  .hero-ctas { flex-direction: column; width: 100%; }
+  .hero-ctas .btn { width: 100%; height: 56px; }
 
-/* 4. Stats Strip - 2 columns instead of 5 */
-@media (max-width: 600px) {
-  .stats-grid { 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 20px; 
-  }
-  .stat-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
-  .stat-item:last-child { border-bottom: none; }
-}
+  /* Card and CBT repair */
+  .hero-cbt-card { padding: 20px; width: 100%; }
+  .hero-card-header { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+  .hero-question { font-size: 1.1rem; margin: 16px 0; }
+  
+  /* Stats Strip */
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .stat-item { border-right: none; border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; }
 
-/* 5. Sliders - Make cards almost full width so users know to swipe */
-@media (max-width: 768px) {
-  .feature-slide { flex: 0 0 85%; } /* Shows 85% of one card + peek of next */
-  .subj-slide { flex: 0 0 150px !important; } 
-  .dash-subj-slide { flex: 0 0 85%; }
-}
+  /* Pricing §16 */
+  .pricing-grid { grid-template-columns: 1fr; gap: 24px; }
+  .pricing-card.featured { transform: none; margin: 0; }
 
-/* 6. Grids - Pricing, Exam Cards, Testimonials */
-@media (max-width: 900px) {
-  .pricing-grid, .exam-cards, .footer-grid { 
-    grid-template-columns: 1fr; 
-    gap: 24px; 
-  }
-  .pricing-card.featured { transform: none; } /* Remove hover lift on mobile to save space */
-}
+  /* Slider "Peek" Effect §27 */
+  .feature-slide { flex: 0 0 85%; }
+  .subj-slide { flex: 0 0 160px !important; }
 
-/* 7. How It Works - Stack the 4 steps */
-@media (max-width: 768px) {
-  section[style*="grid-template-columns:repeat(4,1fr)"] { /* Target the How It Works grid */
-    grid-template-columns: 1fr !important;
-  }
-  .stats-strip + section .container > div[style*="grid-template-columns:repeat(4,1fr)"] {
-     grid-template-columns: 1fr !important;
-     margin-top: 20px;
-  }
-}
-
-/* 8. Classroom Band - Stack Video and Text */
-@media (max-width: 768px) {
-  .classroom-band-inner { 
-    grid-template-columns: 1fr; 
-    text-align: center; 
-    gap: 40px; 
-  }
-  .classroom-band h2 { font-size: 2rem; }
-  .topic-pills { justify-content: center; }
-  .classroom-video-mock { aspect-ratio: 16/10; }
-}
-
-/* 9. Footer - Center items */
-@media (max-width: 768px) {
-  .footer-grid { text-align: center; }
+  /* Dashboard Bar Chart §24 */
+  .perf-subject-name { min-width: 90px; font-size: 0.85rem; }
+  .perf-subject-detail { padding-left: 0; }
+  .perf-topic-name { min-width: 80px; font-size: 0.8rem; }
+  
+  /* Footer §29 */
+  .footer-grid { grid-template-columns: 1fr; text-align: center; gap: 32px; }
   .footer-tagline { margin: 0 auto; }
 }
 
-/* 10. Dashboard Tweak (Mobile Bar Chart) */
-@media (max-width: 768px) {
-  .perf-subject-name { min-width: 80px; font-size: 0.85rem; }
-  .perf-subject-detail { padding-left: 0; }
-  .perf-topic-name { min-width: 80px; font-size: 0.8rem; }
+@media (max-width: 480px) {
+  .hero-headline { font-size: 2.1rem; }
+  .stat-value { font-size: 1.8rem; }
 }
