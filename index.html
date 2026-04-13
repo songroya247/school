@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UltimateEdge School — Ace Your JAMB, WAEC &amp; NECO Exams</title>
+<meta name="theme-color" content="#1a56ff">
+<title>UltimateEdge School — Ace Your JAMB, WAEC & NECO Exams</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/main.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
 
@@ -13,24 +15,24 @@
 
 <nav class="ue-nav">
   <div class="container">
-    <a href="/index.html" class="nav-logo">ULTIMATEEDGE SCHOOL</a>
+    <a href="index.html" class="nav-logo">ULTIMATEEDGE SCHOOL</a>
     <div class="nav-links">
-      <a href="/classroom.html">Classroom</a>
-      <a href="/cbt.html">Practice (CBT)</a>
-      <a href="/dashboard.html">Dashboard</a>
+      <a href="classroom.html">Classroom</a>
+      <a href="cbt.html">Practice (CBT)</a>
+      <a href="dashboard.html">Dashboard</a>
     </div>
-    <div class="nav-right">
-      <button id="nav-login-btn" class="btn btn-primary" onclick="openAuthModal('login')">Login / Sign Up</button>
-      <div class="nav-user-pill" id="nav-user-pill" style="display:none">
-        <div class="nav-avatar" id="nav-avatar">U<span class="nav-pro-badge" id="nav-pro" style="display:none">PRO</span></div>
-        <div>
-          <div style="font-weight:700;font-size:.88rem" id="nav-name">Student</div>
-          <div class="nav-xp" id="nav-xp">0 XP</div>
-        </div>
-      </div>
+    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileNav()" aria-label="Open menu">&#9776;</button>
+    <div class="nav-right" id="nav-right">
+      <button class="btn btn-primary" onclick="openAuthModal('login')">Login / Sign Up</button>
     </div>
   </div>
 </nav>
+<div class="mobile-nav-drawer" id="mobile-nav-drawer">
+  <a href="classroom.html" onclick="closeMobileNav()">Classroom</a>
+  <a href="cbt.html" onclick="closeMobileNav()">Practice (CBT)</a>
+  <a href="dashboard.html" onclick="closeMobileNav()">Dashboard</a>
+  <button class="btn btn-primary btn-block" onclick="closeMobileNav();openAuthModal('login')">Login / Sign Up</button>
+</div>
 
 <!-- HERO -->
 <section class="hero-section">
@@ -41,7 +43,7 @@
         <p class="hero-sub">Master every topic with adaptive CBT prep, expert video lessons, and AI-powered score predictions.</p>
         <div class="hero-ctas">
           <button class="btn btn-primary btn-lg" onclick="openAuthModal('signup')">Start Free Today</button>
-          <a href="/cbt.html" class="btn btn-outline btn-lg">Take a Practice Test</a>
+          <a href="cbt.html" class="btn btn-outline btn-lg">Take a Practice Test</a>
         </div>
       </div>
       <div class="hero-cbt-card">
@@ -49,7 +51,7 @@
           <span class="hero-timer">Time Left: 01:45:20</span>
           <span class="hero-jamb-badge">Predicted JAMB: 285</span>
         </div>
-        <div class="hero-question">If <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--font-mono)">x&sup2; - 5x + 6 = 0</code>, what are the values of x?</div>
+        <div class="hero-question">If <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--font-mono)">x² - 5x + 6 = 0</code>, what are the values of x?</div>
         <div class="hero-opts">
           <div class="hero-opt selected">A. x = 2 or x = 3</div>
           <div class="hero-opt">B. x = -2 or x = -3</div>
@@ -69,53 +71,63 @@
       <div class="stat-item"><div class="stat-value">50,000+</div><div class="stat-label">Questions</div></div>
       <div class="stat-item"><div class="stat-value">95%</div><div class="stat-label">Pass Rate</div></div>
       <div class="stat-item"><div class="stat-value">200+</div><div class="stat-label">Video Lessons</div></div>
-      <div class="stat-item"><div class="stat-value">&#8358;1,500</div><div class="stat-label">/month</div></div>
+      <div class="stat-item"><div class="stat-value">1,500</div><div class="stat-label">/month</div></div>
     </div>
   </div>
 </section>
 
-<!-- FEATURES SLIDER (new — between stats and subject cards) -->
+<!-- FEATURES SLIDER -->
 <section style="padding:72px 0;background:rgba(240,244,255,.5);">
   <div class="container">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;">
-      <div><h2 class="section-title">Why UltimateEdge?</h2><p class="section-sub">Everything you need to succeed, all in one place.</p></div>
-      <div style="display:flex;gap:8px;"><button class="btn-icon" id="feat-prev">&#8249;</button><button class="btn-icon" id="feat-next">&#8250;</button></div>
+    <div class="slider-header">
+      <div>
+        <h2 class="section-title">Why UltimateEdge?</h2>
+        <p class="section-sub">Everything you need to succeed, all in one place.</p>
+      </div>
+      <div class="slider-btns">
+        <button class="btn-icon" id="feat-prev">&#8249;</button>
+        <button class="btn-icon" id="feat-next">&#8250;</button>
+      </div>
     </div>
     <div class="slider-wrap">
       <div class="slider-track" id="feat-track">
-        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">&#127919;</div><div class="feature-title">Smart Score Prediction</div><div class="feature-desc">Know your JAMB range before exam day</div></div></div>
-        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">&#128249;</div><div class="feature-title">200+ Video Masterclasses</div><div class="feature-desc">Full curriculum covered topic by topic</div></div></div>
-        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">&#129504;</div><div class="feature-title">Adaptive Practice</div><div class="feature-desc">Questions adjust to your level automatically</div></div></div>
-        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">&#9873;</div><div class="feature-title">Real CBT Experience</div><div class="feature-desc">Timer, question map, flag &amp; review &mdash; just like the real exam</div></div></div>
-        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">&#128202;</div><div class="feature-title">Weakness Tracker</div><div class="feature-desc">Instantly see which topics need the most attention</div></div></div>
-        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">&#128640;</div><div class="feature-title">SmartPath&#8482; Engine</div><div class="feature-desc">AI-powered recommendations after every session</div></div></div>
-        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">&#128244;</div><div class="feature-title">Works Offline</div><div class="feature-desc">Practise anywhere &mdash; syncs when you&rsquo;re back online</div></div></div>
-        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">&#128176;</div><div class="feature-title">From &#8358;1,500/month</div><div class="feature-desc">Less than a data bundle. No &#8358;50,000 coaching fees.</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon"></div><div class="feature-title">Smart Score Prediction</div><div class="feature-desc">Know your JAMB range before exam day</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon"></div><div class="feature-title">200+ Video Masterclasses</div><div class="feature-desc">Full curriculum covered topic by topic</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon"></div><div class="feature-title">Adaptive Practice</div><div class="feature-desc">Questions adjust to your level automatically</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon"></div><div class="feature-title">Real CBT Experience</div><div class="feature-desc">Timer, question map, flag &amp; review — just like the real exam</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon"></div><div class="feature-title">Weakness Tracker</div><div class="feature-desc">Instantly see which topics need the most attention</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon"></div><div class="feature-title">SmartPath™ Engine</div><div class="feature-desc">AI-powered recommendations after every session</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon"></div><div class="feature-title">Works Offline</div><div class="feature-desc">Practise anywhere — syncs when you're back online</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon"></div><div class="feature-title">From 1,500/month</div><div class="feature-desc">Less than a data bundle. No 50,000 coaching fees.</div></div></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- SUBJECT CARDS (existing — kept exactly as-is) -->
+<!-- SUBJECTS SLIDER -->
 <section style="padding:72px 0;">
   <div class="container">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;">
-      <div><h2 class="section-title">Master Every Subject</h2><p class="section-sub">Comprehensive coverage for science, arts, and commercial students.</p></div>
-      <div style="display:flex;gap:8px;"><button class="btn-icon" id="subj-prev">&#8249;</button><button class="btn-icon" id="subj-next">&#8250;</button></div>
+    <div class="slider-header">
+      <div>
+        <h2 class="section-title">Master Every Subject</h2>
+        <p class="section-sub">Comprehensive coverage for science, arts, and commercial students.</p>
+      </div>
+      <div class="slider-btns">
+        <button class="btn-icon" id="subj-prev">&#8249;</button>
+        <button class="btn-icon" id="subj-next">&#8250;</button>
+      </div>
     </div>
     <div class="slider-wrap">
       <div class="slider-track" id="subj-track">
-        <div class="subj-slide" style="flex:0 0 180px"><a href="/classroom.html?subject=mathematics" class="subject-card"><div class="subject-icon" style="background:#dbeafe;color:#1d4ed8">&#128208;</div><div class="subject-name">Mathematics</div></a></div>
-        <div class="subj-slide" style="flex:0 0 180px"><a href="/classroom.html?subject=english" class="subject-card"><div class="subject-icon" style="background:#d1fae5;color:#065f46">&#128214;</div><div class="subject-name">English</div></a></div>
-        <div class="subj-slide" style="flex:0 0 180px"><a href="/classroom.html?subject=physics" class="subject-card"><div class="subject-icon" style="background:#ede9fe;color:#5b21b6">&#9883;&#65039;</div><div class="subject-name">Physics</div></a></div>
-        <div class="subj-slide" style="flex:0 0 180px"><a href="/classroom.html?subject=chemistry" class="subject-card"><div class="subject-icon" style="background:#ffedd5;color:#c2410c">&#129514;</div><div class="subject-name">Chemistry</div></a></div>
-        <div class="subj-slide" style="flex:0 0 180px"><a href="/classroom.html?subject=biology" class="subject-card"><div class="subject-icon" style="background:#ccfbf1;color:#0f766e">&#127807;</div><div class="subject-name">Biology</div></a></div>
-        <div class="subj-slide" style="flex:0 0 180px"><a href="/classroom.html?subject=economics" class="subject-card"><div class="subject-icon" style="background:#fef3c7;color:#b45309">&#128200;</div><div class="subject-name">Economics</div></a></div>
-        <div class="subj-slide" style="flex:0 0 180px"><a href="/classroom.html?subject=government" class="subject-card"><div class="subject-icon" style="background:#e0e7ff;color:#3730a3">&#127963;&#65039;</div><div class="subject-name">Government</div></a></div>
-        <div class="subj-slide" style="flex:0 0 180px"><a href="/classroom.html?subject=literature" class="subject-card"><div class="subject-icon" style="background:#fce7f3;color:#9d174d">&#128218;</div><div class="subject-name">Literature</div></a></div>
-        <div class="subj-slide" style="flex:0 0 180px"><a href="/classroom.html?subject=geography" class="subject-card"><div class="subject-icon" style="background:#d1fae5;color:#065f46">&#127757;</div><div class="subject-name">Geography</div></a></div>
-        <div class="subj-slide" style="flex:0 0 180px"><a href="/classroom.html?subject=commerce" class="subject-card"><div class="subject-icon" style="background:#ede9fe;color:#6d28d9">&#127978;</div><div class="subject-name">Commerce</div></a></div>
-        <div class="subj-slide" style="flex:0 0 180px"><a href="/classroom.html?subject=accounts" class="subject-card"><div class="subject-icon" style="background:#ccfbf1;color:#0f766e">&#128188;</div><div class="subject-name">Accounts</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#dbeafe;color:#1d4ed8"></div><div class="subject-name">Mathematics</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#d1fae5;color:#065f46"></div><div class="subject-name">English</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#ede9fe;color:#5b21b6"></div><div class="subject-name">Physics</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#ffedd5;color:#c2410c"></div><div class="subject-name">Chemistry</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#ccfbf1;color:#0f766e"></div><div class="subject-name">Biology</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#fef3c7;color:#b45309"></div><div class="subject-name">Economics</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#e0e7ff;color:#3730a3"></div><div class="subject-name">Government</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#fce7f3;color:#9d174d"></div><div class="subject-name">Literature</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#d1fae5;color:#065f46"></div><div class="subject-name">Geography</div></a></div>
       </div>
     </div>
   </div>
@@ -124,11 +136,26 @@
 <!-- EXAM COVERAGE -->
 <section style="padding:72px 0;background:rgba(240,244,255,.5);">
   <div class="container">
-    <div class="section-header" style="text-align:center"><h2 class="section-title">Full Exam Coverage</h2><p class="section-sub">We prepare you for every major exam in Nigeria</p></div>
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">Full Exam Coverage</h2>
+      <p class="section-sub">We prepare you for every major exam in Nigeria</p>
+    </div>
     <div class="exam-cards">
-      <div class="exam-card"><div class="exam-card-icon">&#127891;</div><div class="exam-card-title">JAMB / UTME</div><div class="exam-card-desc">Complete preparation for the Joint Admissions and Matriculation Board exam. 40 subject questions, 1h40m &mdash; we cover all of it.</div></div>
-      <div class="exam-card"><div class="exam-card-icon">&#128221;</div><div class="exam-card-title">WAEC / GCE</div><div class="exam-card-desc">West Africa Senior School Certificate Examination preparation across all science, arts, and commercial subjects.</div></div>
-      <div class="exam-card"><div class="exam-card-icon">&#127979;</div><div class="exam-card-title">NECO / Post-UTME</div><div class="exam-card-desc">National Examinations Council and university screening preparation. Subject-specific, past question powered practice.</div></div>
+      <div class="exam-card">
+        <div class="exam-card-icon"></div>
+        <div class="exam-card-title">JAMB / UTME</div>
+        <div class="exam-card-desc">Complete preparation for the Joint Admissions and Matriculation Board exam. 40 subject questions, 1h40m — we cover all of it.</div>
+      </div>
+      <div class="exam-card">
+        <div class="exam-card-icon"></div>
+        <div class="exam-card-title">WAEC / GCE</div>
+        <div class="exam-card-desc">West Africa Senior School Certificate Examination preparation across all science, arts, and commercial subjects.</div>
+      </div>
+      <div class="exam-card">
+        <div class="exam-card-icon"></div>
+        <div class="exam-card-title">NECO / Post-UTME</div>
+        <div class="exam-card-desc">National Examinations Council and university screening preparation. Subject-specific, past question powered practice.</div>
+      </div>
     </div>
   </div>
 </section>
@@ -139,20 +166,18 @@
     <div class="classroom-band-inner">
       <div>
         <div class="topic-pills">
-          <span class="topic-pill">Quadratics</span><span class="topic-pill">Indices</span>
-          <span class="topic-pill">Logarithms</span><span class="topic-pill">Calculus</span>
+          <span class="topic-pill">Quadratics</span>
+          <span class="topic-pill">Indices</span>
+          <span class="topic-pill">Logarithms</span>
+          <span class="topic-pill">Calculus</span>
         </div>
-        <h2 style="font-family:var(--font-head);font-size:2.8rem;color:#fff;margin-bottom:16px">Enter the Classroom</h2>
+        <h2 class="classroom-band-heading">Enter the Classroom</h2>
         <p style="color:rgba(255,255,255,.6);margin-bottom:28px;max-width:400px;line-height:1.7">Expert-taught video lessons for every topic on your exam syllabus. Adaptive content that matches your skill level.</p>
-        <a href="/classroom.html" class="btn btn-primary btn-lg">Start Learning</a>
+        <a href="classroom.html" class="btn btn-primary btn-lg">Start Learning</a>
       </div>
-      <div class="classroom-video-mock" style="position:relative;">
-        <!-- Wire real lesson video URL into src below -->
-        <video id="classroom-video" style="width:100%;height:100%;object-fit:cover;border-radius:14px;display:none" controls>
-          <source src="" type="video/mp4">
-        </video>
-        <div id="classroom-video-placeholder" style="text-align:center;color:rgba(255,255,255,.25)">
-          <div style="font-size:3.5rem;margin-bottom:8px">&#9654;</div>
+      <div class="classroom-video-mock">
+        <div style="text-align:center;color:rgba(255,255,255,.25)">
+          <div style="font-size:3.5rem;margin-bottom:8px"></div>
           <div style="font-size:.85rem;font-weight:600">Sample Lesson Preview</div>
         </div>
       </div>
@@ -163,39 +188,44 @@
 <!-- PRICING -->
 <section id="pricing" style="padding:80px 0;">
   <div class="container">
-    <div class="section-header" style="text-align:center"><h2 class="section-title">Invest in Your Future</h2><p class="section-sub">Less than the cost of a data bundle. No expensive coaching fees.</p></div>
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">Invest in Your Future</h2>
+      <p class="section-sub">Less than the cost of a data bundle. No expensive coaching fees.</p>
+    </div>
     <div class="pricing-grid">
       <div class="pricing-card">
         <h3 style="font-weight:700;font-size:1.15rem;margin-bottom:8px">Monthly</h3>
-        <div class="pricing-price">&#8358;1,500<span style="font-family:var(--font-body);font-size:1rem;color:var(--muted)">/mo</span></div>
+        <div class="pricing-price">1,500<span style="font-family:var(--font-body);font-size:1rem;color:var(--muted)">/mo</span></div>
         <ul class="pricing-features" style="margin-top:20px">
-          <li><span class="pricing-check">&#10003;</span> Full CBT access</li>
-          <li><span class="pricing-check">&#10003;</span> All video lessons</li>
-          <li><span class="pricing-check">&#10003;</span> Score prediction</li>
-          <li><span class="pricing-check">&#10003;</span> Basic analytics</li>
+          <li><span class="pricing-check"></span> Full CBT access</li>
+          <li><span class="pricing-check"></span> All video lessons</li>
+          <li><span class="pricing-check"></span> Score prediction</li>
+          <li><span class="pricing-check"></span> Basic analytics</li>
         </ul>
         <button class="btn btn-outline btn-block" onclick="openPaystack('monthly')">Subscribe</button>
       </div>
       <div class="pricing-card featured">
         <div class="pricing-badge">Most Popular</div>
         <h3 style="font-weight:700;font-size:1.15rem;margin-bottom:8px">3-Month</h3>
-        <div class="pricing-price">&#8358;3,500</div><div class="pricing-save">Save 22%</div>
+        <div class="pricing-price">3,500</div>
+        <div class="pricing-save">Save 22%</div>
         <ul class="pricing-features">
-          <li><span class="pricing-check">&#10003;</span> Everything in Monthly</li>
-          <li><span class="pricing-check">&#10003;</span> SmartPath&#8482; Engine</li>
-          <li><span class="pricing-check">&#10003;</span> Weakness tracker</li>
-          <li><span class="pricing-check">&#10003;</span> Priority support</li>
+          <li><span class="pricing-check"></span> Everything in Monthly</li>
+          <li><span class="pricing-check"></span> SmartPath™ Engine</li>
+          <li><span class="pricing-check"></span> Weakness tracker</li>
+          <li><span class="pricing-check"></span> Priority support</li>
         </ul>
-        <button class="btn btn-primary btn-block" onclick="openPaystack('3month')">Subscribe</button>
+        <button class="btn btn-primary btn-block" onclick="openPaystack('threeMonth')">Subscribe</button>
       </div>
       <div class="pricing-card">
         <h3 style="font-weight:700;font-size:1.15rem;margin-bottom:8px">Annual</h3>
-        <div class="pricing-price">&#8358;10,000</div><div class="pricing-save">Save 44%</div>
+        <div class="pricing-price">10,000</div>
+        <div class="pricing-save">Save 44%</div>
         <ul class="pricing-features">
-          <li><span class="pricing-check">&#10003;</span> Everything in 3-Month</li>
-          <li><span class="pricing-check">&#10003;</span> Post-UTME prep</li>
-          <li><span class="pricing-check">&#10003;</span> Downloadable reports</li>
-          <li><span class="pricing-check">&#10003;</span> 1-on-1 tutoring discount</li>
+          <li><span class="pricing-check"></span> Everything in 3-Month</li>
+          <li><span class="pricing-check"></span> Post-UTME prep</li>
+          <li><span class="pricing-check"></span> Downloadable reports</li>
+          <li><span class="pricing-check"></span> 1-on-1 tutoring discount</li>
         </ul>
         <button class="btn btn-outline btn-block" onclick="openPaystack('annual')">Subscribe</button>
       </div>
@@ -206,12 +236,31 @@
 <!-- HOW IT WORKS -->
 <section style="padding:72px 0;background:rgba(240,244,255,.5);">
   <div class="container">
-    <div class="section-header" style="text-align:center"><h2 class="section-title">How It Works</h2><p class="section-sub">From signup to exam success in 4 simple steps</p></div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:40px;">
-      <div style="text-align:center;padding:24px;"><div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;font-family:var(--font-head)">1</div><div style="font-weight:700;margin-bottom:8px">Sign Up Free</div><div style="font-size:.88rem;color:var(--muted)">Create your account and select your subjects and exam type</div></div>
-      <div style="text-align:center;padding:24px;"><div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;font-family:var(--font-head)">2</div><div style="font-weight:700;margin-bottom:8px">Watch Lessons</div><div style="font-size:.88rem;color:var(--muted)">Study topic-by-topic video masterclasses at your own pace</div></div>
-      <div style="text-align:center;padding:24px;"><div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;font-family:var(--font-head)">3</div><div style="font-weight:700;margin-bottom:8px">Practise CBT</div><div style="font-size:.88rem;color:var(--muted)">Take adaptive mock exams with real timers and question maps</div></div>
-      <div style="text-align:center;padding:24px;"><div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;font-family:var(--font-head)">4</div><div style="font-weight:700;margin-bottom:8px">Track &amp; Improve</div><div style="font-size:.88rem;color:var(--muted)">Monitor your JAMB score prediction and follow SmartPath guidance</div></div>
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-sub">From signup to exam success in 4 simple steps</p>
+    </div>
+    <div class="how-it-works-grid">
+      <div class="how-step">
+        <div class="how-step-number">1</div>
+        <div class="how-step-title">Sign Up Free</div>
+        <div class="how-step-desc">Create your account and select your subjects and exam type</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-number">2</div>
+        <div class="how-step-title">Watch Lessons</div>
+        <div class="how-step-desc">Study topic-by-topic video masterclasses at your own pace</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-number">3</div>
+        <div class="how-step-title">Practise CBT</div>
+        <div class="how-step-desc">Take adaptive mock exams with real timers and question maps</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-number">4</div>
+        <div class="how-step-title">Track & Improve</div>
+        <div class="how-step-desc">Monitor your JAMB score prediction and follow SmartPath guidance</div>
+      </div>
     </div>
   </div>
 </section>
@@ -219,11 +268,25 @@
 <!-- TESTIMONIALS -->
 <section style="padding:72px 0;">
   <div class="container">
-    <div class="section-header" style="text-align:center"><h2 class="section-title">Student Success Stories</h2></div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
-      <div class="card card-body"><div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">&ldquo;I scored 312 in JAMB after 6 weeks on UltimateEdge. The score predictions kept me motivated and on track.&rdquo;</div><div style="font-weight:700">Emeka O.</div><div style="font-size:.82rem;color:var(--muted)">JAMB 2024 &mdash; 312/400</div></div>
-      <div class="card card-body"><div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">&ldquo;The flag-and-review feature is exactly like the real CBT centre. I walked in knowing exactly what to expect.&rdquo;</div><div style="font-weight:700">Aisha B.</div><div style="font-size:.82rem;color:var(--muted)">WAEC 2024 &mdash; 5 A1s</div></div>
-      <div class="card card-body"><div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">&ldquo;As a student in a remote area with poor internet, the offline mode was a lifesaver. Practised everywhere!&rdquo;</div><div style="font-weight:700">Fatima D.</div><div style="font-size:.82rem;color:var(--muted)">NECO 2024 &mdash; 6 distinctions</div></div>
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">Student Success Stories</h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="card card-body">
+        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"I scored 312 in JAMB after 6 weeks on UltimateEdge. The score predictions kept me motivated and on track."</div>
+        <div style="font-weight:700">Emeka O.</div>
+        <div style="font-size:.82rem;color:var(--muted)">JAMB 2024 — 312/400</div>
+      </div>
+      <div class="card card-body">
+        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"The flag-and-review feature is exactly like the real CBT centre. I walked in knowing exactly what to expect."</div>
+        <div style="font-weight:700">Aisha B.</div>
+        <div style="font-size:.82rem;color:var(--muted)">WAEC 2024 — 5 A1s</div>
+      </div>
+      <div class="card card-body">
+        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"As a student in a remote area with poor internet, the offline mode was a lifesaver. Practised everywhere!"</div>
+        <div style="font-weight:700">Fatima D.</div>
+        <div style="font-size:.82rem;color:var(--muted)">NECO 2024 — 6 distinctions</div>
+      </div>
     </div>
   </div>
 </section>
@@ -231,7 +294,7 @@
 <!-- CTA BAND -->
 <section style="background:var(--accent);padding:72px 0;text-align:center;">
   <div class="container">
-    <h2 style="font-family:var(--font-head);font-size:2.8rem;color:#fff;margin-bottom:16px">Ready to Start Your Journey?</h2>
+    <h2 class="cta-heading">Ready to Start Your Journey?</h2>
     <p style="color:rgba(255,255,255,.75);font-size:1.05rem;margin-bottom:32px;">Join 12,000+ students already preparing smarter with UltimateEdge.</p>
     <button class="btn btn-lg" style="background:#fff;color:var(--accent);font-weight:700" onclick="openAuthModal('signup')">Start Free Today</button>
   </div>
@@ -240,149 +303,304 @@
 <footer class="site-footer">
   <div class="container">
     <div class="footer-grid">
-      <div><div class="footer-logo">ULTIMATEEDGE SCHOOL</div><div class="footer-tagline">The cockpit for your exam preparation. Pass your JAMB, WAEC, and NECO exams with confidence.</div></div>
-      <div><div class="footer-heading">Platform</div><ul class="footer-links"><li><a href="/classroom.html">Classroom</a></li><li><a href="/cbt.html">Practice CBT</a></li><li><a href="/dashboard.html">Dashboard</a></li></ul></div>
-      <div><div class="footer-heading">Legal</div><ul class="footer-links"><li><a href="#">Terms of Service</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Contact Us</a></li></ul></div>
+      <div>
+        <div class="footer-logo">ULTIMATEEDGE SCHOOL</div>
+        <div class="footer-tagline">The cockpit for your exam preparation. Pass your JAMB, WAEC, and NECO exams with confidence.</div>
+      </div>
+      <div>
+        <div class="footer-heading">Platform</div>
+        <ul class="footer-links">
+          <li><a href="classroom.html">Classroom</a></li>
+          <li><a href="cbt.html">Practice CBT</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="payment-success.html">Payment Confirmation</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">Legal</div>
+        <ul class="footer-links">
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
     </div>
     <div class="footer-divider">&copy; 2026 UltimateEdge School. All rights reserved.</div>
   </div>
 </footer>
 
 <div id="toast"></div>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ai-engine.js"></script>
+<script src="js/paystack.js"></script>
+<script src="js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    initSlider('feat-track', 'feat-prev', 'feat-next');
+    initSlider('subj-track', 'subj-prev', 'subj-next');
+  });
+</script>
 
-<!-- AUTH MODAL -->
-<div class="modal-backdrop" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
-  <div class="modal-card" style="max-width:520px;">
-    <button class="modal-close" onclick="closeAuthModal()">&#10005;</button>
-    <div class="auth-tabs">
-      <button class="auth-tab" id="auth-tab-login" onclick="switchAuthTab('login')">Login</button>
-      <button class="auth-tab active" id="auth-tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+<!--  AUTH MODAL (canonical copy — auth.js controls open/close)  -->
+<div id="auth-modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-card" style="max-width:480px;width:100%">
+    <button onclick="closeAuthModal()"
+      style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted);line-height:1">×</button>
+
+    <div class="auth-tabs" id="modal-auth-tabs">
+      <button class="auth-tab active" onclick="switchModalTab('login')" id="modal-tab-login">Login</button>
+      <button class="auth-tab" onclick="switchModalTab('signup')" id="modal-tab-signup">Sign Up</button>
     </div>
-    <div id="auth-login-form" style="display:none">
+
+    <!-- LOGIN FORM -->
+    <div id="modal-login-form">
       <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Welcome back</h2>
-      <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" placeholder="chioma@example.com" id="login-email"></div>
-      <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" id="login-password"></div>
-      <button class="btn btn-primary btn-block btn-lg" style="margin-top:8px" onclick="handleLogin()">Login</button>
-      <div style="text-align:center;margin-top:16px"><a href="#" style="font-size:.85rem;color:var(--muted)">Forgot Password?</a></div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" placeholder="chioma@example.com" id="modal-login-email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" placeholder="••••••••" id="modal-login-password">
+      </div>
+      <button class="btn btn-primary btn-block btn-lg" style="margin-top:8px" onclick="handleModalLogin()">Login</button>
+      <div style="text-align:center;margin-top:14px"><a href="#" style="font-size:.85rem;color:var(--muted)" onclick="triggerPasswordReset()">Forgot Password?</a></div>
     </div>
-    <div id="auth-signup-form">
-      <div id="su-step-1">
+
+    <!-- SIGNUP MULTI-STEP -->
+    <div id="modal-signup-form" style="display:none">
+      <!-- Step 1 -->
+      <div id="modal-step-1">
         <div class="step-indicator">Step 1 of 4</div>
         <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Create your account</h2>
-        <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" placeholder="Chioma Adebayo" id="su-name"></div>
-        <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" placeholder="chioma@example.com" id="su-email"></div>
-        <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" placeholder="Min. 8 characters" id="su-pass"><div class="form-hint">At least 8 characters</div></div>
-        <button class="btn btn-primary btn-block btn-lg" onclick="suGoStep(2)">Continue &rarr;</button>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-input" placeholder="Chioma Adebayo" id="modal-su-name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" placeholder="chioma@example.com" id="modal-su-email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" placeholder="Min. 8 characters" id="modal-su-pass">
+          <div class="form-hint">At least 8 characters</div>
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="goModalStep(2)">Continue &rarr;</button>
       </div>
-      <div id="su-step-2" style="display:none">
+
+      <!-- Step 2 -->
+      <div id="modal-step-2" style="display:none">
         <div class="step-indicator">Step 2 of 4</div>
         <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Your exam goals</h2>
-        <div class="form-group"><label class="form-label">Which exams are you sitting?</label>
+        <div class="form-group">
+          <label class="form-label">Which exams are you sitting?</label>
           <div class="exam-checks">
-            <label class="exam-check-label"><input type="checkbox" value="JAMB" onchange="suCheckJAMB()"> JAMB</label>
+            <label class="exam-check-label"><input type="checkbox" value="JAMB" onchange="checkModalJAMB()"> JAMB</label>
             <label class="exam-check-label"><input type="checkbox" value="WAEC"> WAEC</label>
             <label class="exam-check-label"><input type="checkbox" value="NECO"> NECO</label>
             <label class="exam-check-label"><input type="checkbox" value="Post-UTME"> Post-UTME</label>
           </div>
         </div>
-        <div class="form-group"><label class="form-label">When is your exam?</label>
-          <select class="form-select" id="su-date"><option value="">Select month&hellip;</option><option>May 2026</option><option>June 2026</option><option>July 2026</option><option>August 2026</option><option>September 2026</option><option>October 2026</option><option>November 2026</option><option>December 2026</option><option>January 2027</option><option>February 2027</option><option>March 2027</option><option>April 2027</option></select>
+        <div class="form-group">
+          <label class="form-label">When is your exam?</label>
+          <select class="form-select" id="modal-su-date">
+            <option value="">Select month...</option>
+            <option>May 2026</option><option>June 2026</option><option>July 2026</option>
+            <option>August 2026</option><option>September 2026</option><option>October 2026</option>
+            <option>November 2026</option><option>December 2026</option><option>January 2027</option>
+            <option>February 2027</option><option>March 2027</option><option>April 2027</option>
+          </select>
         </div>
-        <div class="form-group"><label class="form-label">Target JAMB Score</label>
-          <select class="form-select" id="su-target"><option>200&ndash;220</option><option>221&ndash;240</option><option>241&ndash;260</option><option>261&ndash;280</option><option selected>281&ndash;300</option><option>301&ndash;320</option><option>320+</option></select>
+        <div class="form-group">
+          <label class="form-label">Target JAMB Score</label>
+          <select class="form-select" id="modal-su-target">
+            <option>200–220</option><option>221–240</option><option>241–260</option>
+            <option>261–280</option><option selected>281–300</option><option>301–320</option><option>320+</option>
+          </select>
         </div>
-        <div style="display:flex;gap:10px"><button class="btn btn-outline" onclick="suGoStep(1)">&larr; Back</button><button class="btn btn-primary" style="flex:1" onclick="suGoStep(3)">Continue &rarr;</button></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline" onclick="goModalStep(1)">&larr; Back</button>
+          <button class="btn btn-primary" style="flex:1" onclick="goModalStep(3)">Continue &rarr;</button>
+        </div>
       </div>
-      <div id="su-step-3" style="display:none">
+
+      <!-- Step 3 -->
+      <div id="modal-step-3" style="display:none">
         <div class="step-indicator">Step 3 of 4</div>
         <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Your subjects</h2>
-        <p style="font-size:.88rem;color:var(--muted);margin-bottom:16px">Select all the subjects you are sitting for.</p>
-        <div id="su-jamb-hint" class="jamb-hint" style="display:none">JAMB requires exactly 4 subjects. You&rsquo;ve selected <span id="su-jamb-count">0</span>.</div>
-        <div class="subject-grid" id="su-subj-grid">
-          <div class="subj-card" data-subject-id="mathematics" onclick="suToggleSubj(this)"><div class="subj-check">&#10003;</div><div class="subj-card-icon">&#128208;</div><div class="subj-card-name" style="color:#1a56ff">Mathematics</div></div>
-          <div class="subj-card" data-subject-id="english" onclick="suToggleSubj(this)"><div class="subj-check">&#10003;</div><div class="subj-card-icon">&#128214;</div><div class="subj-card-name" style="color:#00c97a">English Language</div></div>
-          <div class="subj-card" data-subject-id="physics" onclick="suToggleSubj(this)"><div class="subj-check">&#10003;</div><div class="subj-card-icon">&#9883;&#65039;</div><div class="subj-card-name" style="color:#7c3aed">Physics</div></div>
-          <div class="subj-card" data-subject-id="chemistry" onclick="suToggleSubj(this)"><div class="subj-check">&#10003;</div><div class="subj-card-icon">&#129514;</div><div class="subj-card-name" style="color:#ff6b35">Chemistry</div></div>
-          <div class="subj-card" data-subject-id="biology" onclick="suToggleSubj(this)"><div class="subj-check">&#10003;</div><div class="subj-card-icon">&#127807;</div><div class="subj-card-name" style="color:#0891b2">Biology</div></div>
-          <div class="subj-card" data-subject-id="economics" onclick="suToggleSubj(this)"><div class="subj-check">&#10003;</div><div class="subj-card-icon">&#128200;</div><div class="subj-card-name" style="color:#f59e0b">Economics</div></div>
-          <div class="subj-card" data-subject-id="government" onclick="suToggleSubj(this)"><div class="subj-check">&#10003;</div><div class="subj-card-icon">&#127963;&#65039;</div><div class="subj-card-name" style="color:#6366f1">Government</div></div>
-          <div class="subj-card" data-subject-id="literature" onclick="suToggleSubj(this)"><div class="subj-check">&#10003;</div><div class="subj-card-icon">&#128218;</div><div class="subj-card-name" style="color:#ec4899">Literature</div></div>
-          <div class="subj-card" data-subject-id="geography" onclick="suToggleSubj(this)"><div class="subj-check">&#10003;</div><div class="subj-card-icon">&#127757;</div><div class="subj-card-name" style="color:#10b981">Geography</div></div>
-          <div class="subj-card" data-subject-id="commerce" onclick="suToggleSubj(this)"><div class="subj-check">&#10003;</div><div class="subj-card-icon">&#127978;</div><div class="subj-card-name" style="color:#8b5cf6">Commerce</div></div>
-          <div class="subj-card" data-subject-id="accounts" onclick="suToggleSubj(this)"><div class="subj-check">&#10003;</div><div class="subj-card-icon">&#128188;</div><div class="subj-card-name" style="color:#14b8a6">Fin. Accounting</div></div>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">Select all the subjects you are sitting for.</p>
+        <div id="modal-jamb-hint" class="jamb-hint" style="display:none">
+          JAMB requires exactly 4 subjects. You've selected <span id="modal-jamb-count">0</span>.
         </div>
-        <div style="display:flex;gap:10px;margin-top:20px"><button class="btn btn-outline" onclick="suGoStep(2)">&larr; Back</button><button class="btn btn-primary" style="flex:1" onclick="suGoStep(4)">Continue &rarr;</button></div>
+        <div class="subject-grid" id="modal-subj-grid">
+          <div class="subj-card" onclick="toggleModalSubj(this,'mathematics')"><div class="subj-check"></div><div class="subj-card-icon"></div><div class="subj-card-name" style="color:#1a56ff">Mathematics</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'english')"><div class="subj-check"></div><div class="subj-card-icon"></div><div class="subj-card-name" style="color:#00c97a">English Language</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'physics')"><div class="subj-check"></div><div class="subj-card-icon"></div><div class="subj-card-name" style="color:#7c3aed">Physics</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'chemistry')"><div class="subj-check"></div><div class="subj-card-icon"></div><div class="subj-card-name" style="color:#ff6b35">Chemistry</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'biology')"><div class="subj-check"></div><div class="subj-card-icon"></div><div class="subj-card-name" style="color:#0891b2">Biology</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'economics')"><div class="subj-check"></div><div class="subj-card-icon"></div><div class="subj-card-name" style="color:#f59e0b">Economics</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'government')"><div class="subj-check"></div><div class="subj-card-icon"></div><div class="subj-card-name" style="color:#6366f1">Government</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'literature')"><div class="subj-check"></div><div class="subj-card-icon"></div><div class="subj-card-name" style="color:#ec4899">Literature</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'geography')"><div class="subj-check"></div><div class="subj-card-icon"></div><div class="subj-card-name" style="color:#10b981">Geography</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'commerce')"><div class="subj-check"></div><div class="subj-card-icon"></div><div class="subj-card-name" style="color:#8b5cf6">Commerce</div></div>
+          <div class="subj-card" onclick="toggleModalSubj(this,'accounts')"><div class="subj-check"></div><div class="subj-card-icon"></div><div class="subj-card-name" style="color:#14b8a6">Financial Acc.</div></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button class="btn btn-outline" onclick="goModalStep(2)">&larr; Back</button>
+          <button class="btn btn-primary" style="flex:1" onclick="goModalStep(4)">Continue &rarr;</button>
+        </div>
       </div>
-      <div id="su-step-4" style="display:none">
+
+      <!-- Step 4 -->
+      <div id="modal-step-4" style="display:none">
         <div class="step-indicator">Step 4 of 4</div>
         <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Study preference</h2>
         <p style="font-size:.88rem;color:var(--muted);margin-bottom:20px">How do you like to study?</p>
-        <label class="study-pref-option"><input type="radio" name="study_mode" value="drill" checked><div><div style="font-weight:700">Mix of video + practice drills</div><div style="font-size:.82rem;color:var(--muted)">Watch lessons, then practise with guided drills. Recommended for most students.</div></div></label>
-        <label class="study-pref-option"><input type="radio" name="study_mode" value="cbt_only"><div><div style="font-weight:700">CBT practice only</div><div style="font-size:.82rem;color:var(--muted)">Skip drills, go straight to full CBT sessions. The algorithm still tracks your progress.</div></div></label>
-        <div style="display:flex;gap:10px;margin-top:24px"><button class="btn btn-outline" onclick="suGoStep(3)">&larr; Back</button><button class="btn btn-success" style="flex:1" onclick="handleSignup()">Create Account</button></div>
+        <label class="study-pref-option">
+          <input type="radio" name="modal_study_mode" value="drill" checked>
+          <div>
+            <div style="font-weight:700">Mix of video + practice drills</div>
+            <div style="font-size:.82rem;color:var(--muted)">Watch lessons, then practise with guided drills. Recommended for most students.</div>
+          </div>
+        </label>
+        <label class="study-pref-option">
+          <input type="radio" name="modal_study_mode" value="cbt_only">
+          <div>
+            <div style="font-weight:700">CBT practice only</div>
+            <div style="font-size:.82rem;color:var(--muted)">Skip drills, go straight to full CBT sessions. The algorithm still tracks your progress.</div>
+          </div>
+        </label>
+        <div style="display:flex;gap:10px;margin-top:24px">
+          <button class="btn btn-outline" onclick="goModalStep(3)">&larr; Back</button>
+          <button class="btn btn-success" style="flex:1" onclick="handleModalSignup()">Create Account</button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- STUDY PLAN WELCOME MODAL -->
-<div class="modal-backdrop" id="study-plan-modal" onclick="if(event.target===this)closeStudyPlanModal()">
-  <div class="modal-card">
-    <button class="modal-close" onclick="closeStudyPlanModal()">&#10005;</button>
-    <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:6px">Your Study Plan</h2>
-    <p style="color:var(--muted);font-size:.9rem;margin-bottom:20px">Here&rsquo;s where you stand and what to focus on today.</p>
-    <div id="study-plan-body"></div>
-    <button class="btn btn-primary btn-block" style="margin-top:20px" onclick="closeStudyPlanModal()">Let&rsquo;s Go &#128640;</button>
-  </div>
-</div>
-
-<!-- SCRIPTS: ORDER MATTERS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="/js/auth.js"></script>
-<script src="/js/ai-engine.js"></script>
-<script src="/js/paystack.js"></script>
 <script>
-/* reusable slider factory — called for both feat-track and subj-track */
-function initSlider(trackId, prevBtnId, nextBtnId) {
-  const track = document.getElementById(trackId); if (!track) return;
-  const prevBtn = document.getElementById(prevBtnId), nextBtn = document.getElementById(nextBtnId);
-  let pos = 0, isDragging = false, startX = 0, startPos = 0, autoTimer;
-  function slide() { return track.querySelector('.feature-slide,.subj-slide') || null; }
-  function sw() { const s = slide(); return s ? s.offsetWidth + 16 : 296; }
-  function mx() { return Math.max(0, track.scrollWidth - track.parentElement.offsetWidth); }
-  function mv(p) { pos = Math.max(0, Math.min(p, mx())); track.style.transform = `translateX(-${pos}px)`; }
-  function next() { mv(pos + sw()); } function prev() { mv(pos - sw()); }
-  if (nextBtn) nextBtn.addEventListener('click', () => { next(); reset(); });
-  if (prevBtn) prevBtn.addEventListener('click', () => { prev(); reset(); });
-  track.addEventListener('mousedown', e => { isDragging=true; startX=e.pageX; startPos=pos; track.style.transition='none'; track.style.cursor='grabbing'; });
-  window.addEventListener('mousemove', e => { if (!isDragging) return; mv(startPos-(e.pageX-startX)); });
-  window.addEventListener('mouseup', () => { if (!isDragging) return; isDragging=false; track.style.transition=''; track.style.cursor=''; });
-  track.addEventListener('touchstart', e => { startX=e.touches[0].pageX; startPos=pos; track.style.transition='none'; },{passive:true});
-  track.addEventListener('touchmove', e => { mv(startPos-(e.touches[0].pageX-startX)); },{passive:true});
-  track.addEventListener('touchend', () => { track.style.transition=''; });
-  function go() { autoTimer=setInterval(()=>{ pos>=mx()?mv(0):next(); },3500); }
-  function reset() { clearInterval(autoTimer); go(); }
-  track.parentElement.addEventListener('mouseenter', ()=>clearInterval(autoTimer));
-  track.parentElement.addEventListener('mouseleave', go);
-  go();
+//  Modal auth controller 
+let _modalJambSelected = false;
+const _modalSelectedSubjects = new Set();
+
+function openAuthModal(tab) {
+  document.getElementById('auth-modal').style.display = 'flex';
+  switchModalTab(tab || 'login');
+}
+window.openAuthModal = openAuthModal;
+
+function closeAuthModal() {
+  document.getElementById('auth-modal').style.display = 'none';
+}
+window.closeAuthModal = closeAuthModal;
+
+function switchModalTab(tab) {
+  const loginForm  = document.getElementById('modal-login-form');
+  const signupForm = document.getElementById('modal-signup-form');
+  const tabLogin   = document.getElementById('modal-tab-login');
+  const tabSignup  = document.getElementById('modal-tab-signup');
+  loginForm.style.display  = tab === 'login'  ? 'block' : 'none';
+  signupForm.style.display = tab === 'signup' ? 'block' : 'none';
+  tabLogin.classList.toggle('active',  tab === 'login');
+  tabSignup.classList.toggle('active', tab === 'signup');
 }
 
-/* signup step logic */
-let suJambSelected = false;
-function suGoStep(n) {
-  for (let i=1;i<=4;i++){const e=document.getElementById('su-step-'+i);if(e)e.style.display=i===n?'block':'none';}
-  if (n===2){const nm=document.getElementById('su-name')?.value.trim(),em=document.getElementById('su-email')?.value.trim(),pw=document.getElementById('su-pass')?.value;if(!nm||!em||!pw||pw.length<8){toast('Please fill all fields correctly');suGoStep(1);return;}}
-  if (n===4){const c=document.querySelectorAll('#su-subj-grid .subj-card.selected');if(!c.length){toast('Please select at least one subject');suGoStep(3);return;}}
+function goModalStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('modal-step-' + i);
+    if (el) el.style.display = i === n ? 'block' : 'none';
+  }
 }
-function suCheckJAMB(){const c=document.querySelectorAll('.exam-checks input:checked');suJambSelected=Array.from(c).some(x=>x.value==='JAMB');suHint();}
-function suToggleSubj(el){el.classList.toggle('selected');suHint();}
-function suHint(){const h=document.getElementById('su-jamb-hint'),cn=document.getElementById('su-jamb-count'),s=document.querySelectorAll('#su-subj-grid .subj-card.selected');if(h){h.style.display=suJambSelected?'block':'none';h.classList.toggle('ok',s.length===4);}if(cn)cn.textContent=s.length;}
 
-document.addEventListener('DOMContentLoaded',()=>{
-  initSlider('feat-track','feat-prev','feat-next');
-  initSlider('subj-track','subj-prev','subj-next');
+function checkModalJAMB() {
+  const checked = document.querySelectorAll('#modal-step-2 .exam-checks input:checked');
+  _modalJambSelected = Array.from(checked).some(c => c.value === 'JAMB');
+  updateModalJAMBHint();
+}
+
+function toggleModalSubj(el, id) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) _modalSelectedSubjects.add(id);
+  else _modalSelectedSubjects.delete(id);
+  updateModalJAMBHint();
+}
+
+function updateModalJAMBHint() {
+  const hint    = document.getElementById('modal-jamb-hint');
+  const countEl = document.getElementById('modal-jamb-count');
+  if (_modalJambSelected) {
+    hint.style.display = 'block';
+    countEl.textContent = _modalSelectedSubjects.size;
+    hint.classList.toggle('ok', _modalSelectedSubjects.size === 4);
+  } else {
+    hint.style.display = 'none';
+  }
+}
+
+async function handleModalLogin() {
+  const email = document.getElementById('modal-login-email').value.trim();
+  const pass  = document.getElementById('modal-login-password').value;
+  if (!email || !pass) { toast('Please fill in all fields'); return; }
+  window._authHandleLogin(email, pass);
+}
+
+async function handleModalSignup() {
+  if (_modalSelectedSubjects.size === 0) { toast('Please select at least one subject'); return; }
+  const name   = document.getElementById('modal-su-name').value.trim();
+  const email  = document.getElementById('modal-su-email').value.trim();
+  const pass   = document.getElementById('modal-su-pass').value;
+  const exams  = Array.from(document.querySelectorAll('#modal-step-2 .exam-checks input:checked')).map(c => c.value);
+  const date   = document.getElementById('modal-su-date').value;
+  const target = document.getElementById('modal-su-target').value;
+  const mode   = document.querySelector('input[name=modal_study_mode]:checked').value;
+  window._authHandleSignup({
+    name, email, pass, exams, examDate: date, target,
+    subjects: Array.from(_modalSelectedSubjects),
+    studyMode: mode,
+  });
+}
+
+function toggleMobileNav() {
+  const drawer = document.getElementById('mobile-nav-drawer');
+  const isOpen = drawer.classList.contains('open');
+  drawer.classList.toggle('open', !isOpen);
+  document.getElementById('nav-hamburger').textContent = isOpen ? '\u2630' : '\u2715';
+}
+function closeMobileNav() {
+  document.getElementById('mobile-nav-drawer').classList.remove('open');
+  document.getElementById('nav-hamburger').textContent = '\u2630';
+}
+// Close drawer on outside click
+document.addEventListener('click', function(e) {
+  const drawer = document.getElementById('mobile-nav-drawer');
+  const hamburger = document.getElementById('nav-hamburger');
+  if (drawer.classList.contains('open') && !drawer.contains(e.target) && !hamburger.contains(e.target)) {
+    closeMobileNav();
+  }
 });
+
+async function triggerPasswordReset() {
+  const email = document.getElementById('modal-login-email').value.trim();
+  if (!email) { toast('Enter your email address first'); return; }
+  if (typeof sb === 'undefined') { toast('Auth not ready — try again in a moment'); return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/login.html'
+  });
+  if (error) toast('Error: ' + error.message);
+  else toast('Password reset email sent! Check your inbox.');
+}
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .catch(err => console.warn('SW registration failed:', err));
+    });
+  }
 </script>
 </body>
 </html>
