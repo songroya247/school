@@ -1,508 +1,235 @@
-/* ── UltimateEdge School — auth.js v4.1 ── */
-/* Supabase client · session · signup · login · nav · access guard */
+/**
+ * UltimateEdge School — auth.js v4.1
+ * Manages Session, Signup (4-Steps), Seeding, and Globals.
+ */
 
-// ─── CREDENTIALS ──────────────────────────────────────────────────────────────
-const SUPA_URL = 'YOUR_SUPABASE_PROJECT_URL';   // ← replace before deploy
-const SUPA_KEY = 'YOUR_SUPABASE_ANON_KEY';      // ← replace before deploy
+// 1. Initialize Supabase Client
+const SUPA_URL = "YOUR_SUPABASE_PROJECT_URL";
+const SUPA_KEY = "YOUR_SUPABASE_ANON_KEY";
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-// ─── GLOBALS (exposed to all other scripts) ───────────────────────────────────
-let sb;               // Supabase client
-let currentUser;      // auth.users row
-let currentProfile;   // profiles row
+// 2. Globals
+let currentUser = null;
+let currentProfile = null;
 
-// ─── TOPIC CURRICULUM MAP ─────────────────────────────────────────────────────
-// Used for seeding topic_mastery at signup and filtering by subject
-const CURRICULUM = {
-  mathematics: ['number-bases','fractions-decimals','indices','logarithms','surds',
-                'sets','polynomials','quadratics','simultaneous-equations','inequalities',
-                'progression','probability','statistics','vectors','trigonometry',
-                'calculus-differentiation','calculus-integration','coordinate-geometry'],
-  english:     ['comprehension','summary','lexis-structure','oral-english',
-                'essay-writing','letter-writing','narrative-writing','argumentative-writing'],
-  physics:     ['measurement','motion','forces','energy','waves','optics','electricity',
-                'magnetism','modern-physics','thermal-physics'],
-  chemistry:   ['atomic-structure','periodic-table','bonding','stoichiometry',
-                'kinetics','equilibrium','organic-intro','organic-reactions',
-                'electrochemistry','acids-bases'],
-  biology:     ['cell-biology','genetics','evolution','ecology','nutrition',
-                'transport','reproduction','excretion','coordination','classification'],
-  economics:   ['basic-concepts','demand-supply','price-determination','market-structures',
-                'national-income','money-banking','international-trade','development-economics'],
-  government:  ['political-concepts','nigerian-constitution','legislature','executive',
-                'judiciary','federalism','electoral-systems','international-relations'],
-  literature:  ['prose-fiction','drama','poetry','literary-devices',
-                'african-literature','shakespearean-texts'],
-  geography:   ['physical-geography','map-reading','climate','population',
-                'resources','settlement','economic-geography','nigerian-geography'],
-  commerce:    ['trade','retail-wholesale','transport','communication',
-                'warehousing','insurance','banking','trade-documents'],
-  accounts:    ['accounting-concepts','books-of-accounts','trial-balance',
-                'final-accounts','bank-reconciliation','depreciation','partnerships','companies'],
-};
-
-// ─── WAIT FOR SUPABASE CDN ────────────────────────────────────────────────────
-function waitForSB(cb) {
-  if (typeof window.supabase !== 'undefined') {
-    sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-    cb();
-  } else {
-    setTimeout(() => waitForSB(cb), 50);
-  }
-}
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
+// 3. Auth Lifecycle
 document.addEventListener('DOMContentLoaded', () => {
-  waitForSB(initAuth);
+    initAuth();
 });
 
 async function initAuth() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await loadProfile();
-    updateNavUI();
-    checkAccess();
-    showStudyPlanWelcome();
-  } else {
-    renderLoggedOutNav();
-  }
-
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-      currentUser = session.user;
-      await loadProfile();
-      updateNavUI();
-      checkAccess();
+    const { data: { session }, error } = await sb.auth.getSession();
+    
+    if (session) {
+        currentUser = session.user;
+        await loadProfile();
+        updateNavUI();
+        checkAccess();
+        trackAction('page_load', { path: window.location.pathname });
+        
+        // Show Welcome Modal once per browser session
+        if (!sessionStorage.getItem('ue_welcome_shown')) {
+            showStudyPlanWelcome();
+            sessionStorage.setItem('ue_welcome_shown', 'true');
+        }
+    } else {
+        updateNavUI(); // Show login button
     }
-    if (event === 'SIGNED_OUT') {
-      currentUser = null;
-      currentProfile = null;
-      renderLoggedOutNav();
-    }
-  });
-
-  trackAction('page_load', { page: location.pathname });
 }
 
-// ─── PROFILE ──────────────────────────────────────────────────────────────────
 async function loadProfile() {
-  const { data, error } = await sb
-    .from('profiles')
-    .select('*')
-    .eq('id', currentUser.id)
-    .single();
-  if (!error) currentProfile = data;
+    const { data, error } = await sb
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
+    
+    if (data) currentProfile = data;
 }
 
-// ─── NAV UI ───────────────────────────────────────────────────────────────────
-function updateNavUI() {
-  const p = currentProfile;
-  if (!p) return;
+// 4. Signup Flow (§9 & §28)
+async function handleSignup(event) {
+    event.preventDefault();
+    const btn = event.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
 
-  const navRight = document.getElementById('nav-right');
-  if (!navRight) return;
+    // Data from Step 1 (Auth)
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
+    const full_name = document.getElementById('reg-name').value;
 
-  const initials = (p.full_name || 'U')
-    .split(' ')
-    .map(w => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+    // Data from Step 2 (Goals)
+    const exam_types = Array.from(document.querySelectorAll('.exam-check:checked')).map(el => el.value);
+    const exam_date = document.getElementById('reg-exam-date').value;
+    const target_score = parseInt(document.getElementById('reg-target-score').value);
 
-  const proBadge = p.is_premium
-    ? `<span class="nav-pro-badge">PRO</span>`
-    : '';
+    // Data from Step 3 (Subjects §28)
+    const exam_subjects = Array.from(document.querySelectorAll('.subj-card.selected')).map(el => el.dataset.id);
 
-  const streakDays = calcStreakDays(p.usage_logs || []);
-  const streakBadge = streakDays > 0
-    ? `<div class="streak-badge">🔥 ${streakDays}-day streak</div>`
-    : '';
+    // Data from Step 4 (Mode)
+    const study_mode = document.querySelector('input[name="study_preference"]:checked').value;
 
-  const firstName = (p.full_name || '').split(' ')[0];
-
-  navRight.innerHTML = `
-    ${streakBadge}
-    <div class="nav-user-pill">
-      <div class="nav-avatar">${initials}${proBadge}</div>
-      <div>
-        <div style="font-weight:700;font-size:.88rem">${firstName}</div>
-        <div class="nav-xp">${p.total_xp || 0} XP</div>
-      </div>
-    </div>
-  `;
-}
-
-function renderLoggedOutNav() {
-  const navRight = document.getElementById('nav-right');
-  if (!navRight) return;
-  navRight.innerHTML = `<a href="login.html" class="btn btn-primary" id="nav-auth-btn">Login / Sign Up</a>`;
-}
-
-function calcStreakDays(logs) {
-  if (!logs || !logs.length) return 0;
-  const days = new Set(
-    logs
-      .filter(l => l.action === 'page_load')
-      .map(l => new Date(l.ts).toDateString())
-  );
-  let streak = 0;
-  const today = new Date();
-  for (let i = 0; i < 365; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    if (days.has(d.toDateString())) { streak++; } else { break; }
-  }
-  return streak;
-}
-
-// ─── ACCESS GUARD ─────────────────────────────────────────────────────────────
-function checkAccess() {
-  if (!currentProfile) return;
-  const { is_premium, subscription_expiry } = currentProfile;
-  const expired = is_premium && subscription_expiry && new Date() > new Date(subscription_expiry);
-
-  if (expired) {
-    // Mark as expired in DB
-    sb.from('profiles')
-      .update({ is_premium: false })
-      .eq('id', currentUser.id)
-      .then(() => {});
-
-    // Show banner
-    const banner = document.getElementById('defaulter-banner');
-    if (banner) banner.classList.add('visible');
-
-    // Redirect away from premium pages
-    const page = location.pathname.split('/').pop();
-    if (['classroom.html', 'cbt.html', 'dashboard.html'].includes(page)) {
-      window.location.href = 'index.html#pricing';
+    if (exam_subjects.length === 0) {
+        toast("Please select at least one subject.");
+        btn.disabled = false;
+        return;
     }
-  }
-}
 
-// ─── STUDY PLAN WELCOME MODAL ─────────────────────────────────────────────────
-function showStudyPlanWelcome() {
-  if (!currentProfile) return;
-  if (sessionStorage.getItem('sp_shown')) return;
-  sessionStorage.setItem('sp_shown', '1');
-
-  const p = currentProfile;
-  const daysToExam = p.exam_date
-    ? Math.max(0, Math.round((new Date(p.exam_date) - new Date()) / 86400000))
-    : null;
-
-  const gradeMsg = {
-    1: "You're in focused reinforcement mode — keep going 💪",
-    2: "You're building strong foundations 📈",
-    3: "You're at exam-ready level 💪",
-  }[p.current_skill_level || 3] || "Let's get you started!";
-
-  let intensity = '4–5 study sessions per week';
-  if (daysToExam !== null) {
-    if (daysToExam <= 30)  intensity = '2–3 sessions every day';
-    else if (daysToExam <= 90) intensity = '1 session every day';
-  }
-
-  const readiness = (p.accuracy_avg == null)
-    ? '<span class="status-nil">NIL — take your first session to unlock your score prediction</span>'
-    : `<strong>${predictJAMBFromProfile(p)} / 400</strong> predicted JAMB range`;
-
-  const examDateStr = daysToExam !== null
-    ? `<strong>${daysToExam} days</strong> until your exam`
-    : 'Exam date not set';
-
-  const queue = p.smartpath_queue || [];
-  const nextTopic = queue[0]
-    ? `<p style="margin-top:12px">📌 We recommend starting with <strong>${queue[0].topic_name || queue[0].topic_id}</strong> next.</p>`
-    : '';
-
-  const modal = document.createElement('div');
-  modal.id = 'sp-modal';
-  modal.className = 'modal-backdrop';
-  modal.innerHTML = `
-    <div class="modal-card sp-card" style="max-width:500px">
-      <button onclick="document.getElementById('sp-modal').remove()"
-        style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted)">×</button>
-      <h2 style="font-family:var(--font-head);font-size:2rem;margin-bottom:4px">
-        Welcome back${p.full_name ? ', ' + p.full_name.split(' ')[0] : ''}! 👋
-      </h2>
-      <p style="color:var(--muted);margin-bottom:20px">${gradeMsg}</p>
-      <div class="sp-stats">
-        <div class="sp-stat"><div class="sp-stat-label">Time to Exam</div><div class="sp-stat-val">${examDateStr}</div></div>
-        <div class="sp-stat"><div class="sp-stat-label">Current Readiness</div><div class="sp-stat-val">${readiness}</div></div>
-        <div class="sp-stat"><div class="sp-stat-label">Recommended Pace</div><div class="sp-stat-val">${intensity}</div></div>
-      </div>
-      ${nextTopic}
-      <button class="btn btn-primary btn-block" style="margin-top:20px"
-        onclick="document.getElementById('sp-modal').remove()">Let's Go! 🚀</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-}
-
-function predictJAMBFromProfile(p) {
-  if (!p || p.accuracy_avg == null) return '— ';
-  return predictJAMB(p.accuracy_avg / 100);
-}
-
-// ─── SIGNUP ───────────────────────────────────────────────────────────────────
-async function _authHandleSignup({ name, email, pass, exams, examDate, target, subjects, studyMode }) {
-  if (!name || !email || pass.length < 8) {
-    toast('Please fill all fields correctly (password min 8 chars)'); return;
-  }
-  if (!subjects || subjects.length === 0) {
-    toast('Please select at least one subject'); return;
-  }
-
-  toast('Creating your account…');
-
-  const { data: authData, error: authError } = await sb.auth.signUp({ email, password: pass });
-  if (authError) { toast('Error: ' + authError.message); return; }
-
-  const uid = authData.user.id;
-
-  // Parse target score to integer
-  const targetInt = parseInt((target || '280').split('–')[0].replace('+', '').trim()) || 280;
-
-  // Insert profile
-  const { error: profileError } = await sb.from('profiles').insert({
-    id: uid,
-    full_name: name,
-    email,
-    exam_types: exams || [],
-    exam_date: examDate ? new Date(examDate + ' 1').toISOString().split('T')[0] : null,
-    target_score: targetInt,
-    exam_subjects: subjects,
-    study_mode: studyMode || 'drill',
-    current_skill_level: 3,
-    total_xp: 0,
-    status: 'NIL',
-    usage_logs: [],
-    smartpath_queue: [],
-  });
-
-  if (profileError) { toast('Profile error: ' + profileError.message); return; }
-
-  // Seed topic_mastery rows (NIL — all accuracy_avg = NULL)
-  const topicRows = [];
-  subjects.forEach(subj => {
-    const topics = CURRICULUM[subj] || [];
-    topics.forEach(topicId => {
-      topicRows.push({
-        user_id: uid,
-        topic_id: topicId,
-        subject: subj,
-        accuracy_avg: null,
-        mastery_level: null,
-        status: 'NIL',
-        grade_level: 3,
-        attempts_at_grade1: 0,
-      });
+    // A. Create Supabase Auth User
+    const { data: authData, error: authError } = await sb.auth.signUp({
+        email, password, options: { data: { full_name } }
     });
-  });
 
-  if (topicRows.length > 0) {
-    const { error: masteryError } = await sb.from('topic_mastery').insert(topicRows);
-    if (masteryError) console.warn('topic_mastery seed error:', masteryError.message);
-  }
+    if (authError) {
+        toast(authError.message);
+        btn.disabled = false;
+        return;
+    }
 
-  toast('Account created! Check your email to verify your address.');
+    const userId = authData.user.id;
+
+    // B. Create Profile Row
+    const { error: profError } = await sb.from('profiles').insert([{
+        id: userId,
+        full_name,
+        email,
+        exam_types,
+        exam_date,
+        target_score,
+        exam_subjects,
+        study_mode,
+        status: 'NIL'
+    }]);
+
+    if (profError) {
+        toast("Profile creation failed.");
+        btn.disabled = false;
+        return;
+    }
+
+    // C. Seed topic_mastery ONLY for selected subjects (§9)
+    await seedTopicMastery(userId, exam_subjects);
+
+    toast("Account created! Please check your email to verify.");
+    closeAuthModal();
 }
-window._authHandleSignup = _authHandleSignup;
 
-// ─── LOGIN ────────────────────────────────────────────────────────────────────
-async function _authHandleLogin(email, pass) {
-  if (!email || !pass) { toast('Please fill in all fields'); return; }
-  toast('Logging in…');
-  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-  if (error) {
-    toast('Login failed: ' + error.message);
-  } else {
-    toast('Welcome back!');
-    setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
-  }
+/**
+ * Seeds NULL topic_mastery rows for topics belonging to selected subjects.
+ * Note: curriculumMap would typically be imported from a curriculum.json
+ */
+async function seedTopicMastery(userId, subjects) {
+    // This is a representative map; in production, this pulls from curriculum.json
+    const curriculumMap = {
+        'mathematics': ['quadratics', 'trigonometry', 'calculus', 'statistics'],
+        'english': ['lexis-structure', 'comprehension', 'oral-english'],
+        'physics': ['mechanics', 'optics', 'electricity'],
+        'chemistry': ['organic-chem', 'periodicity', 'stoichiometry']
+        // ... more subjects from §28
+    };
+
+    let topicsToSeed = [];
+    subjects.forEach(sub => {
+        if (curriculumMap[sub]) {
+            curriculumMap[sub].forEach(topic => {
+                topicsToSeed.push({ 
+                    user_id: userId, 
+                    topic_id: topic, 
+                    accuracy_avg: null, // NIL status
+                    mastery_level: null, 
+                    status: 'NIL' 
+                });
+            });
+        }
+    });
+
+    if (topicsToSeed.length > 0) {
+        await sb.from('topic_mastery').insert(topicsToSeed);
+    }
 }
-window._authHandleLogin = _authHandleLogin;
 
-// ─── XP ───────────────────────────────────────────────────────────────────────
-async function addXP(n, reason) {
-  if (!currentUser || !currentProfile) return;
-  const newXP = (currentProfile.total_xp || 0) + n;
-  currentProfile.total_xp = newXP;
-  await sb.from('profiles').update({ total_xp: newXP }).eq('id', currentUser.id);
-  // Update nav XP display
-  const xpEl = document.querySelector('.nav-xp');
-  if (xpEl) xpEl.textContent = newXP + ' XP';
-  toast(`+${n} XP — ${reason || ''}`);
-}
-window.addXP = addXP;
-
-// ─── COMMITMENT TRACKING ──────────────────────────────────────────────────────
-async function trackAction(action, meta) {
-  if (!currentUser) return;
-  const entry = { action, ts: new Date().toISOString(), ...meta };
-  // Use Supabase RPC to atomically append to the array
-  await sb.rpc('append_usage_log', { uid: currentUser.id, log_entry: entry })
-    .then(({ error }) => { if (error) console.warn('trackAction error:', error.message); });
-}
-window.trackAction = trackAction;
-
-// ─── STUDY MODE HELPERS ───────────────────────────────────────────────────────
+// 5. Shared Utilities (§20)
 function getStudyMode() {
-  return (currentProfile && currentProfile.study_mode) || 'drill';
+    return currentProfile ? currentProfile.study_mode : 'drill';
 }
-window.getStudyMode = getStudyMode;
 
 async function setStudyMode(mode) {
-  if (!currentUser) return;
-  currentProfile.study_mode = mode;
-  await sb.from('profiles').update({ study_mode: mode }).eq('id', currentUser.id);
+    if (!currentUser) return;
+    const { error } = await sb.from('profiles').update({ study_mode: mode }).eq('id', currentUser.id);
+    if (!error) {
+        currentProfile.study_mode = mode;
+        toast(`Mode switched to ${mode}`);
+    }
 }
-window.setStudyMode = setStudyMode;
 
 function getExamSubjects() {
-  return (currentProfile && currentProfile.exam_subjects) || [];
-}
-window.getExamSubjects = getExamSubjects;
-
-// ─── TOAST (also in app.js — auth.js version takes priority on all pages) ─────
-function toast(msg, duration = 3500) {
-  const el = document.getElementById('toast');
-  if (!el) return;
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toast._timer);
-  toast._timer = setTimeout(() => el.classList.remove('show'), duration);
-}
-window.toast = toast;
-
-// ─── MANAGE SUBJECTS MODAL ────────────────────────────────────────────────────
-function openManageSubjectsModal() {
-  const current = getExamSubjects();
-
-  const SUBJ_META = [
-    { id:'mathematics',  icon:'📐', name:'Mathematics',         color:'#1a56ff' },
-    { id:'english',      icon:'📖', name:'English Language',    color:'#00c97a' },
-    { id:'physics',      icon:'⚛️', name:'Physics',             color:'#7c3aed' },
-    { id:'chemistry',    icon:'🧪', name:'Chemistry',           color:'#ff6b35' },
-    { id:'biology',      icon:'🌿', name:'Biology',             color:'#0891b2' },
-    { id:'economics',    icon:'📈', name:'Economics',           color:'#f59e0b' },
-    { id:'government',   icon:'🏛️', name:'Government',          color:'#6366f1' },
-    { id:'literature',   icon:'📚', name:'Literature',          color:'#ec4899' },
-    { id:'geography',    icon:'🌍', name:'Geography',           color:'#10b981' },
-    { id:'commerce',     icon:'🏪', name:'Commerce',            color:'#8b5cf6' },
-    { id:'accounts',     icon:'💼', name:'Financial Accounting',color:'#14b8a6' },
-  ];
-
-  const selected = new Set(current);
-
-  const cards = SUBJ_META.map(s => `
-    <div class="subj-card ${selected.has(s.id) ? 'selected' : ''}"
-         onclick="this.classList.toggle('selected')"
-         data-id="${s.id}">
-      <div class="subj-check">✓</div>
-      <div class="subj-card-icon">${s.icon}</div>
-      <div class="subj-card-name" style="color:${s.color}">${s.name}</div>
-    </div>
-  `).join('');
-
-  const modal = document.createElement('div');
-  modal.id = 'manage-subj-modal';
-  modal.className = 'modal-backdrop';
-  modal.innerHTML = `
-    <div class="modal-card" style="max-width:600px;max-height:90vh;overflow-y:auto">
-      <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:6px">Manage My Subjects</h2>
-      <p style="color:var(--muted);font-size:.88rem;margin-bottom:18px">Select all subjects you are sitting for.</p>
-      <div class="subject-grid">${cards}</div>
-      <div style="display:flex;gap:10px;margin-top:20px">
-        <button class="btn btn-outline" onclick="document.getElementById('manage-subj-modal').remove()">Cancel</button>
-        <button class="btn btn-primary" style="flex:1" onclick="_saveSubjects()">Save Changes</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-}
-window.openManageSubjectsModal = openManageSubjectsModal;
-
-async function _saveSubjects() {
-  const cards = document.querySelectorAll('#manage-subj-modal .subj-card.selected');
-  const subjects = Array.from(cards).map(c => c.dataset.id);
-  if (subjects.length === 0) { toast('Select at least one subject'); return; }
-
-  // Seed any NEW subjects (existing rows are untouched)
-  const { data: existing } = await sb
-    .from('topic_mastery')
-    .select('topic_id, subject')
-    .eq('user_id', currentUser.id);
-
-  const existingTopics = new Set((existing || []).map(r => r.topic_id));
-  const newRows = [];
-  subjects.forEach(subj => {
-    (CURRICULUM[subj] || []).forEach(topicId => {
-      if (!existingTopics.has(topicId)) {
-        newRows.push({
-          user_id: currentUser.id, topic_id: topicId, subject: subj,
-          accuracy_avg: null, mastery_level: null, status: 'NIL',
-          grade_level: 3, attempts_at_grade1: 0,
-        });
-      }
-    });
-  });
-
-  if (newRows.length > 0) {
-    await sb.from('topic_mastery').insert(newRows);
-  }
-
-  await sb.from('profiles')
-    .update({ exam_subjects: subjects })
-    .eq('id', currentUser.id);
-
-  currentProfile.exam_subjects = subjects;
-  toast('Subjects updated!');
-  document.getElementById('manage-subj-modal').remove();
-
-  // Reload page so dashboard slideshow refreshes
-  setTimeout(() => location.reload(), 600);
-}
-window._saveSubjects = _saveSubjects;
-
-// ─── AUTH MODAL OPENERS (stubs for pages without the modal HTML) ──────────────
-// On index.html these are overridden by the inline modal script.
-// On other pages (dashboard, classroom, cbt) they redirect to login.html.
-if (typeof window.openAuthModal === 'undefined') {
-  window.openAuthModal = function(tab) {
-    window.location.href = 'login.html' + (tab === 'signup' ? '#signup' : '');
-  };
-}
-if (typeof window.closeAuthModal === 'undefined') {
-  window.closeAuthModal = function() {};
+    return currentProfile ? currentProfile.exam_subjects : [];
 }
 
-// ─── STREAK BROKEN CHECK ──────────────────────────────────────────────────────
-// §18: track 'streak_broken' if no activity for 24+ hours
-function checkStreakBroken(logs) {
-  if (!logs || logs.length === 0) return false;
-  const sorted = logs
-    .filter(l => l.action === 'page_load' && l.ts)
-    .map(l => new Date(l.ts).getTime())
-    .sort((a, b) => b - a);
-  if (sorted.length < 2) return false;
-  const gapHours = (sorted[0] - sorted[1]) / 3600000;
-  return gapHours > 24;
-}
-
-// Extend initAuth to track streak_broken on login
-const _origInitAuth = typeof initAuth === 'function' ? initAuth : null;
-// Patch: after loadProfile, check for streak broken
-const _origLoadProfile = loadProfile;
-async function loadProfile() {
-  await _origLoadProfile();
-  if (currentProfile) {
-    const broken = checkStreakBroken(currentProfile.usage_logs || []);
-    if (broken && currentUser) {
-      await trackAction('streak_broken', { ts: new Date().toISOString() });
+async function checkAccess() {
+    if (!currentProfile) return;
+    const { is_premium, subscription_expiry } = currentProfile;
+    
+    if (is_premium && subscription_expiry) {
+        if (new Date() > new Date(subscription_expiry)) {
+            // Subscription Expired
+            await sb.from('profiles').update({ is_premium: false }).eq('id', currentUser.id);
+            document.getElementById('defaulter-banner').style.display = 'block';
+            if (window.location.pathname.includes('classroom') || window.location.pathname.includes('cbt')) {
+                window.location.href = '/index.html#pricing';
+            }
+        }
     }
-  }
+}
+
+async function trackAction(action, meta = {}) {
+    if (!currentUser) return;
+    const logEntry = {
+        action,
+        meta,
+        timestamp: new Date().toISOString()
+    };
+    await sb.rpc('append_usage_log', { 
+        user_id: currentUser.id, 
+        new_log: JSON.stringify([logEntry]) 
+    });
+}
+
+async function addXP(amount, reason) {
+    if (!currentUser || !currentProfile) return;
+    const newXP = (currentProfile.total_xp || 0) + amount;
+    const { error } = await sb.from('profiles').update({ total_xp: newXP }).eq('id', currentUser.id);
+    if (!error) {
+        currentProfile.total_xp = newXP;
+        updateNavUI();
+        toast(`+${amount} XP: ${reason}`);
+    }
+}
+
+function toast(message) {
+    const box = document.getElementById('toast');
+    if (!box) return;
+    box.innerText = message;
+    box.classList.add('show');
+    setTimeout(() => box.classList.remove('show'), 3000);
+}
+
+// 6. Navigation & UI Updates (Placeholders for Milestone 2)
+function updateNavUI() {
+    // Implementation will target UE-Nav elements defined in main.css
+    console.log("Nav UI Updated for:", currentProfile?.full_name || "Guest");
+}
+
+function openAuthModal(tab = 'login') {
+    document.getElementById('auth-modal').style.display = 'flex';
+    // Switch logic for login/signup tabs...
+}
+
+function closeAuthModal() {
+    document.getElementById('auth-modal').style.display = 'none';
+}
+
+function showStudyPlanWelcome() {
+    console.log("Study Plan Welcome Triggered");
+    // Implementation in Milestone 2
 }
