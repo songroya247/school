@@ -1,34 +1,311 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Performance Report – UltimateEdge</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/main.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/auth.js"></script>
-  <script src="/js/ai-engine.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mastery Report â€” UltimateEdge School</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="css/main.css">
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    body { background: #fff; }
+    .report-card { box-shadow: none; border: none; }
+  }
+  .grade-pill { display:inline-block; padding:2px 10px; border-radius:6px; font-size:.78rem; font-weight:700; }
+  .grade-A1 { background:#d1fae5; color:#065f46; }
+  .grade-B2 { background:#dbeafe; color:#1d4ed8; }
+  .grade-B3 { background:#e0e7ff; color:#3730a3; }
+  .grade-C4, .grade-C5, .grade-C6 { background:#fef3c7; color:#b45309; }
+  .grade-D7 { background:#fee2e2; color:#991b1b; }
+  .grade-F9 { background:#fef2f2; color:#7f1d1d; }
+</style>
 </head>
-<body>
-<main class="report-a4" id="report-content">
-  <h1>UltimateEdge Performance Report</h1>
-  <div id="report-data">Loading...</div>
-</main>
-<button onclick="window.print()" class="btn btn-primary" style="margin:20px; display:block; margin-left:auto;">Print / Save PDF</button>
+<body style="background:var(--bg);padding:32px 0;">
+
+<div style="max-width:800px;margin:0 auto;padding:0 24px;">
+
+  <!-- Print button -->
+  <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <a href="dashboard.html" class="btn btn-outline">&larr; Back to Dashboard</a>
+    <button class="btn btn-primary" onclick="window.print()">ðŸ–¨ Print / Save PDF</button>
+  </div>
+
+  <!-- Report -->
+  <div class="report-card card" style="padding:48px;">
+
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;padding-bottom:24px;border-bottom:2px solid var(--border);">
+      <div>
+        <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--accent);letter-spacing:.06em;margin-bottom:4px;">ULTIMATEEDGE SCHOOL</div>
+        <div style="font-family:var(--font-head);font-size:2.2rem;margin-bottom:4px;">Student Mastery Report</div>
+        <div style="font-size:.82rem;color:var(--muted);">Generated: April 13, 2026 &bull; Admin / Teacher View</div>
+      </div>
+      <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px 18px;text-align:right;">
+        <div style="font-size:.75rem;color:var(--muted);margin-bottom:2px;">Report Token</div>
+        <div style="font-family:var(--font-mono);font-size:.82rem;color:var(--text);">RPT-8F3A-2026</div>
+      </div>
+    </div>
+
+    <!-- Student Info -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:36px;">
+      <div>
+        <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Student Name</div>
+        <div style="font-weight:700;font-size:1.05rem">Chioma Adebayo</div>
+      </div>
+      <div>
+        <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Exam Type</div>
+        <div style="font-weight:700;font-size:1.05rem">JAMB / WAEC</div>
+      </div>
+      <div>
+        <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Exam Date</div>
+        <div style="font-weight:700;font-size:1.05rem">June 2026</div>
+      </div>
+      <div>
+        <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Target Score</div>
+        <div style="font-weight:700;font-size:1.05rem">280 / 400</div>
+      </div>
+      <div>
+        <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Study Mode</div>
+        <div style="font-weight:700;font-size:1.05rem">Drill + Videos</div>
+      </div>
+      <div>
+        <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Commitment Score</div>
+        <div style="font-weight:700;font-size:1.05rem">72 / 100</div>
+      </div>
+    </div>
+
+    <!-- Score Predictions -->
+    <div style="background:var(--bg);border-radius:12px;padding:24px;margin-bottom:36px;">
+      <div style="font-family:var(--font-head);font-size:1.4rem;margin-bottom:16px;">Score Predictions</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <div>
+          <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:6px;">JAMB Score Range</div>
+          <div style="font-family:var(--font-head);font-size:2rem;color:var(--accent);">235â€“265 / 400</div>
+          <div style="font-size:.82rem;color:var(--muted);margin-top:4px;">Based on 47 sessions across 4 subjects</div>
+        </div>
+        <div>
+          <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:8px;">WAEC / NECO Grade Predictions</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:.9rem;font-weight:600">Mathematics</span><span class="grade-pill grade-B2">B2</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:.9rem;font-weight:600">English Language</span><span class="grade-pill grade-C4">C4</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:.9rem;font-weight:600">Physics</span><span class="grade-pill grade-C5">C5</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:.9rem;font-weight:600">Chemistry</span><span class="grade-pill grade-D7">D7</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Topic Weakness Table -->
+    <div style="margin-bottom:36px;">
+      <div style="font-family:var(--font-head);font-size:1.4rem;margin-bottom:16px;">Topic-Level Weakness Analysis</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.88rem;">
+        <thead>
+          <tr style="background:var(--bg);">
+            <th style="text-align:left;padding:10px 12px;border-bottom:2px solid var(--border);font-weight:700;">Topic</th>
+            <th style="text-align:left;padding:10px 12px;border-bottom:2px solid var(--border);font-weight:700;">Subject</th>
+            <th style="text-align:left;padding:10px 12px;border-bottom:2px solid var(--border);font-weight:700;">Mastery</th>
+            <th style="text-align:left;padding:10px 12px;border-bottom:2px solid var(--border);font-weight:700;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">Probability</td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">Mathematics</td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">
+              <div style="display:flex;align-items:center;gap:8px;"><div class="progress-track" style="width:80px;"><div class="progress-fill fill-blue" style="width:30%;"></div></div><span style="font-family:var(--font-mono);font-size:.78rem;">30%</span></div>
+            </td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);"><span class="status-danger">Needs Attention</span></td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">Essay Writing</td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">English Language</td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">
+              <div style="display:flex;align-items:center;gap:8px;"><div class="progress-track" style="width:80px;"><div class="progress-fill fill-blue" style="width:40%;"></div></div><span style="font-family:var(--font-mono);font-size:.78rem;">40%</span></div>
+            </td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);"><span class="status-warn">Building Up</span></td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">Waves</td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">Physics</td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">
+              <div style="display:flex;align-items:center;gap:8px;"><div class="progress-track" style="width:80px;"><div class="progress-fill fill-blue" style="width:25%;"></div></div><span style="font-family:var(--font-mono);font-size:.78rem;">25%</span></div>
+            </td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);"><span class="status-danger">Needs Attention</span></td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">Organic Chemistry</td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">Chemistry</td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">
+              <div style="display:flex;align-items:center;gap:8px;"><span class="status-nil">NIL</span></div>
+            </td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);"><span class="status-nil">Not Started</span></td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;">Quadratics</td>
+            <td style="padding:10px 12px;">Mathematics</td>
+            <td style="padding:10px 12px;">
+              <div style="display:flex;align-items:center;gap:8px;"><div class="progress-track" style="width:80px;"><div class="progress-fill fill-green" style="width:80%;"></div></div><span style="font-family:var(--font-mono);font-size:.78rem;">80%</span></div>
+            </td>
+            <td style="padding:10px 12px;"><span class="status-good">On Track</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer note -->
+    <div style="font-size:.78rem;color:var(--muted);border-top:1px solid var(--border);padding-top:16px;text-align:center;">
+      This report is for teacher and administrator use only. WAEC/NECO grade predictions are algorithmic estimates. &bull; UltimateEdge School &copy; 2026
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ai-engine.js"></script>
+<script src="js/app.js"></script>
 <script>
-  const token = new URLSearchParams(location.search).get('token');
-  if(!token) document.getElementById('report-data').innerHTML = 'No token provided.';
-  else {
-    (async () => {
-      const { data: profile } = await sb.from('profiles').select('*').eq('report_share_token', token).single();
-      if(!profile) return;
-      const { data: topics } = await sb.from('topic_mastery').select('*').eq('user_id', profile.id);
-      let html = `<h2>${profile.full_name}</h2><p>Target Score: ${profile.target_jamb_score}</p><p>Overall Readiness: ${profile.accuracy_avg || 'NIL'}%</p><h3>Weakness Map</h3><table border="1"><tr><th>Topic</th><th>Accuracy</th></tr>`;
-      topics.forEach(t => { html += `<tr><td>${t.topic_id}</td><td>${t.accuracy_avg === null ? 'NIL' : t.accuracy_avg+'%'}</td></tr>`; });
-      html += `</table><p>Predicted JAMB: ${predictJAMB(profile.accuracy_avg)}</p><p>Predicted WAEC: ${predictWAEC(profile.accuracy_avg)}</p>`;
-      document.getElementById('report-data').innerHTML = html;
-    })();
+  // Load live report data if a token is passed: report.html?token=UUID
+  document.addEventListener('DOMContentLoaded', async () => {
+    const token = new URLSearchParams(location.search).get('token');
+    if (!token) return; // Leave demo content in place
+
+    // Wait for Supabase to be ready
+    let attempts = 0;
+    while (typeof sb === 'undefined' && attempts++ < 40) {
+      await new Promise(r => setTimeout(r, 250));
+    }
+    if (typeof sb === 'undefined') return;
+
+    // Fetch profile by report_share_token
+    const { data: profile, error } = await sb
+      .from('profiles')
+      .select('*')
+      .eq('report_share_token', token)
+      .single();
+
+    if (error || !profile) {
+      document.querySelector('.report-card').innerHTML =
+        '<div style="text-align:center;padding:40px;color:var(--muted)">Report not found or token expired.</div>';
+      return;
+    }
+
+    // â”€â”€ Student info section â”€â”€
+    const infoFields = document.querySelectorAll('.report-card [style*="font-weight:700;font-size:1.05rem"]');
+    const vals = [
+      profile.full_name || 'â€”',
+      (profile.exam_types || []).join(' / ') || 'â€”',
+      profile.exam_date ? new Date(profile.exam_date).toLocaleDateString('en-GB', { month:'long', year:'numeric' }) : 'â€”',
+      `${profile.target_score || 'â€”'} / 400`,
+      profile.study_mode === 'cbt_only' ? 'CBT Only' : 'Drill + Videos',
+      typeof calcCommitmentScore === 'function'
+        ? calcCommitmentScore(profile.usage_logs || []) + ' / 100'
+        : 'â€”',
+    ];
+    infoFields.forEach((el, i) => { if (vals[i]) el.textContent = vals[i]; });
+
+    // â”€â”€ JAMB prediction â”€â”€
+    const jambEl = document.querySelector('.report-card [style*="font-size:2rem"][style*="color:var(--accent)"]');
+    if (jambEl && typeof predictJAMB === 'function') {
+      const mastery = typeof calcMastery === 'function'
+        ? calcMastery(profile.accuracy_avg, profile.total_xp / 10)
+        : null;
+      jambEl.textContent = mastery !== null
+        ? predictJAMB(mastery) + ' / 400'
+        : 'â€” / 400';
+    }
+
+    // â”€â”€ WAEC/NECO grades (admin view â€” permitted to show) â”€â”€
+    const waecContainer = document.querySelector('.report-card [style*="flex-direction:column;gap:6px"]');
+    if (waecContainer && profile.exam_subjects && profile.exam_subjects.length > 0) {
+      const { data: masteryRows } = await sb
+        .from('topic_mastery')
+        .select('subject, mastery_level')
+        .eq('user_id', profile.id)
+        .in('subject', profile.exam_subjects);
+
+      // Average mastery per subject
+      const bySubj = {};
+      (masteryRows || []).forEach(r => {
+        if (!bySubj[r.subject]) bySubj[r.subject] = [];
+        if (r.mastery_level !== null) bySubj[r.subject].push(r.mastery_level);
+      });
+
+      const gradeClass = g => ({
+        A1:'grade-A1', B2:'grade-B2', B3:'grade-B3', B4:'grade-B3',
+        C5:'grade-C5', D7:'grade-D7', E8:'grade-D7', F9:'grade-F9'
+      }[g] || 'grade-C5');
+
+      waecContainer.innerHTML = profile.exam_subjects.map(subj => {
+        const vals = bySubj[subj] || [];
+        const avg = vals.length > 0 ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+        const grade = typeof predictWAEC === 'function' ? predictWAEC(avg) : 'â€”';
+        const name = subj.charAt(0).toUpperCase() + subj.slice(1);
+        return `<div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:.9rem;font-weight:600">${name}</span>
+          <span class="grade-pill ${gradeClass(grade)}">${grade}</span>
+        </div>`;
+      }).join('');
+    }
+
+    // â”€â”€ Weakness table â”€â”€
+    const tbody = document.querySelector('.report-card tbody');
+    if (tbody) {
+      const { data: weakTopics } = await sb
+        .from('topic_mastery')
+        .select('topic_id, subject, mastery_level, status')
+        .eq('user_id', profile.id)
+        .order('mastery_level', { ascending: true })
+        .limit(8);
+
+      if (weakTopics && weakTopics.length > 0) {
+        tbody.innerHTML = weakTopics.map(t => {
+          const pct = t.mastery_level !== null ? Math.round(t.mastery_level * 100) : null;
+          const fillClass = pct === null ? 'fill-grey'
+                          : pct >= 60 ? 'fill-green'
+                          : pct >= 40 ? 'fill-orange'
+                          : 'fill-blue';
+          const statusSpan = pct === null
+            ? '<span class="status-nil">Not Started</span>'
+            : pct >= 60
+            ? '<span class="status-good">On Track</span>'
+            : pct >= 40
+            ? '<span class="status-warn">Building Up</span>'
+            : '<span class="status-danger">Needs Attention</span>';
+          const bar = pct !== null
+            ? `<div style="display:flex;align-items:center;gap:8px;">
+                <div class="progress-track" style="width:80px;">
+                  <div class="progress-fill ${fillClass}" style="width:${pct}%;"></div>
+                </div>
+                <span style="font-family:var(--font-mono);font-size:.78rem;">${pct}%</span>
+               </div>`
+            : '<span class="status-nil">NIL</span>';
+          const tName = (t.topic_id||'').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+          const sName = (t.subject||'').charAt(0).toUpperCase()+(t.subject||'').slice(1);
+          return `<tr>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">${tName}</td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">${sName}</td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">${bar}</td>
+            <td style="padding:10px 12px;border-bottom:1px solid var(--border);">${statusSpan}</td>
+          </tr>`;
+        }).join('');
+      }
+    }
+
+    // Update generated date
+    const dateEl = document.querySelector('.report-card [style*="font-size:.82rem"]');
+    if (dateEl) dateEl.textContent = `Generated: ${new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })} Â· Admin / Teacher View`;
+  });
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .catch(err => console.warn('SW registration failed:', err));
+    });
   }
 </script>
 </body>
