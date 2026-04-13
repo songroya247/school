@@ -1,73 +1,565 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard – UltimateEdge</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/main.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-  <script src="/js/auth.js"></script>
-  <script src="/js/ai-engine.js"></script>
-  <!-- no cbt-engine needed -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard â€” UltimateEdge School</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<div class="defaulter-banner" id="defaulter-banner">⚠️ Your subscription has expired. Free access is still active. <a href="index.html#pricing">Renew Now →</a></div>
-<nav class="ue-nav">
-  <div class="nav-brand">ULTIMATE<span>EDGE</span></div>
-  <div class="nav-links"><a href="index.html">Home</a><a href="classroom.html">Classroom</a><a href="cbt.html">CBT</a><a href="dashboard.html">Dashboard</a></div>
-  <div class="nav-user" id="nav-user-pill"><div class="nav-avatar"></div><span id="nav-user-name"></span><span id="nav-pro-badge" class="pro-badge" style="display:none">PRO</span><span id="nav-xp"></span></div>
-  <button id="nav-login-btn" onclick="openAuthModal('login')">Login / Sign Up</button>
-  <button id="nav-logout-btn" style="display:none" onclick="sb.auth.signOut()">Log out</button>
-</nav>
-<main class="dashboard-container">
-  <div class="triple-prediction">
-    <div class="card"><h3>🎯 JAMB Prediction</h3><span id="jamb-pred">—</span></div>
-    <div class="card"><h3>📘 WAEC Grade</h3><span id="waec-pred">—</span></div>
-    <div class="card"><h3>📗 NECO Grade</h3><span id="neco-pred">—</span></div>
-  </div>
-  <canvas id="trend-chart" height="200" style="background: var(--dark-2); border-radius: 20px; padding: 10px;"></canvas>
-  <div id="smartpath" class="card" style="margin-top: 2rem;"><h3>SmartPath™ Recommendations</h3><ul id="rec-list"></ul></div>
-  <table id="mastery-table" class="card"><thead><tr><th>Topic</th><th>Accuracy</th><th>Mastery</th><th>Grade</th></tr></thead><tbody id="mastery-body"></tbody></table>
-</main>
-<div id="toast"></div>
-<!-- Auth Modal (same snippet as index) -->
-<div id="auth-modal" class="modal-backdrop" style="display:none"><div class="modal-card"><span class="modal-close" onclick="closeAuthModal()">&times;</span><div class="auth-tabs"><button class="tab-btn active" onclick="switchAuthTab('login')">Login</button><button class="tab-btn" onclick="switchAuthTab('signup')">Sign Up</button></div><div id="login-form" class="auth-form"><input type="email" id="login-email" placeholder="Email" class="form-input"><input type="password" id="login-password" placeholder="Password" class="form-input"><button class="btn btn-primary" onclick="handleLogin(event)">Login →</button></div><div id="signup-form" class="auth-form" style="display:none"><input type="text" id="signup-name" placeholder="Full Name" class="form-input"><input type="email" id="signup-email" placeholder="Email" class="form-input"><input type="password" id="signup-password" placeholder="Password (min 6 chars)" class="form-input"><div class="exam-checks"><label><input type="checkbox" value="JAMB"> JAMB</label><label><input type="checkbox" value="WAEC"> WAEC</label><label><input type="checkbox" value="NECO"> NECO</label></div><select id="signup-exam-month" class="form-select"></select><select id="signup-target-score" class="form-select"></select><button class="btn btn-primary" onclick="handleSignup(event)">Create Free Account →</button></div></div></div>
-<script>
-  // Populate dropdowns (same as index)
-  const monthSelect = document.getElementById('signup-exam-month');
-  const today = new Date();
-  for(let i=1; i<=18; i++) { let d = new Date(today.getFullYear(), today.getMonth()+i, 1); monthSelect.innerHTML += `<option value="${d.toISOString().slice(0,10)}">${d.toLocaleDateString('en-NG', {year:'numeric', month:'long'})}</option>`; }
-  for(let s=200; s<=320; s+=10) document.getElementById('signup-target-score').innerHTML += `<option value="${s}">${s}</option>`;
 
-  async function loadDashboard() {
-    if(!currentProfile) return;
-    const overallAcc = currentProfile.accuracy_avg;
-    document.getElementById('jamb-pred').innerText = predictJAMB(overallAcc);
-    document.getElementById('waec-pred').innerText = predictWAEC(overallAcc);
-    document.getElementById('neco-pred').innerText = predictWAEC(overallAcc);
-    // Load topic mastery
-    const { data: topics } = await sb.from('topic_mastery').select('*').eq('user_id', currentUser.id);
-    const tbody = document.getElementById('mastery-body');
-    tbody.innerHTML = '';
-    let lowMastery = [];
-    topics.forEach(t => {
-      const acc = t.accuracy_avg === null ? 'NIL' : t.accuracy_avg.toFixed(1)+'%';
-      const mastery = t.mastery_level === null ? 'NIL' : (t.mastery_level*100).toFixed(0)+'%';
-      tbody.innerHTML += `<tr><td>${t.topic_id}</td><td>${acc}</td><td>${mastery}</td><td>Grade ${t.grade_level}</td></tr>`;
-      if(t.mastery_level !== null && t.mastery_level < 0.6) lowMastery.push(t.topic_id);
-    });
-    const recList = document.getElementById('rec-list');
-    recList.innerHTML = lowMastery.map(t => `<li>Review ${t} – mastery below 60%</li>`).join('');
-    // Chart (mock data – from session_scores)
-    const { data: sessions } = await sb.from('session_scores').select('accuracy, created_at').eq('user_id', currentUser.id).order('created_at', { ascending: true }).limit(7);
-    const labels = sessions?.map(s => new Date(s.created_at).toLocaleDateString()) || [];
-    const data = sessions?.map(s => s.accuracy) || [];
-    new Chart(document.getElementById('trend-chart'), { type: 'line', data: { labels, datasets: [{ label: 'Accuracy %', data, borderColor: '#1a56ff', tension: 0.2 }] } });
+<div id="defaulter-banner">Your subscription has expired. <a href="index.html#pricing">Renew Now</a></div>
+
+<nav class="ue-nav">
+  <div class="container">
+    <a href="index.html" class="nav-logo" style="font-size:1.2rem">ULTIMATEEDGE</a>
+    <div class="nav-links">
+      <a href="dashboard.html" class="active">Dashboard</a>
+      <a href="classroom.html">Classroom</a>
+      <a href="cbt.html">Practice</a>
+    </div>
+    <div class="nav-right" id="nav-right">
+      <div class="streak-badge">ðŸ”¥ 7-day streak</div>
+      <div class="nav-user-pill">
+        <div class="nav-avatar">CA<span class="nav-pro-badge">PRO</span></div>
+        <div>
+          <div style="font-weight:700;font-size:.88rem">Chioma A.</div>
+          <div class="nav-xp">2,450 XP</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main style="max-width:1100px;margin:0 auto;padding:32px 24px;display:flex;flex-direction:column;gap:32px;">
+
+  <!-- Welcome Banner + Score Prediction -->
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
+    <div class="card" style="background:linear-gradient(135deg,#1a56ff 0%,#2563eb 100%);border-color:transparent;">
+      <div class="card-body" style="color:#fff;">
+        <h1 style="font-family:var(--font-head);font-size:2rem;margin-bottom:8px">Welcome back, Chioma!</h1>
+        <p style="color:rgba(255,255,255,.8);margin-bottom:20px;font-size:1.05rem">47 days to your JAMB exam. You have 1 session planned for today.</p>
+        <div style="background:rgba(0,0,0,.2);border-radius:12px;padding:16px;display:inline-flex;align-items:center;gap:14px;">
+          <span style="font-size:1.5rem">ðŸŽ¯</span>
+          <div>
+            <div style="font-size:.82rem;opacity:.8;margin-bottom:2px">Next Recommended Topic</div>
+            <div style="font-weight:700">Mathematics: Quadratics</div>
+          </div>
+          <a href="classroom.html" class="btn" style="background:#fff;color:var(--accent);margin-left:8px;font-size:.85rem">Start Lesson</a>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="card-body">
+        <div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Predicted JAMB Score</div>
+        <div style="font-family:var(--font-head);font-size:2.8rem;color:var(--accent);margin-bottom:10px">235â€“265<span style="font-size:1.2rem;color:var(--muted)">/400</span></div>
+        <div class="progress-track" style="max-width:200px;margin:0 auto 12px">
+          <div class="progress-fill" style="width:65%;background:linear-gradient(90deg,var(--warning),var(--accent2))"></div>
+        </div>
+        <p style="font-size:.85rem;font-weight:600">15 points away from your target of 280. Keep pushing!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subject Slideshow -->
+  <section>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2 style="font-family:var(--font-head);font-size:1.8rem;">Your Subjects</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-icon" id="dash-prev">&#8249;</button>
+        <button class="btn-icon" id="dash-next">&#8250;</button>
+      </div>
+    </div>
+    <div class="slider-wrap">
+      <div class="slider-track" id="dash-track">
+
+        <div class="dash-subj-slide" style="flex:0 0 300px">
+          <div class="dash-subj-card">
+            <div class="dash-subj-head">
+              <div class="dash-subj-icon">ðŸ“</div>
+              <div class="dash-subj-name" style="color:#1a56ff">Mathematics</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;margin-bottom:6px"><span>Mastery</span><span style="font-family:var(--font-mono)">68%</span></div>
+            <div class="progress-track" style="margin-bottom:18px"><div class="progress-fill fill-green" style="width:68%"></div></div>
+            <div style="display:flex;gap:8px">
+              <a href="classroom.html" class="btn btn-primary" style="flex:1;font-size:.82rem">â–¶ Lesson</a>
+              <a href="cbt.html" class="btn btn-outline" style="flex:1;font-size:.82rem">Practice</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-subj-slide" style="flex:0 0 300px">
+          <div class="dash-subj-card">
+            <div class="dash-subj-head">
+              <div class="dash-subj-icon">ðŸ“–</div>
+              <div class="dash-subj-name" style="color:#00c97a">English Language</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;margin-bottom:6px"><span>Mastery</span><span style="font-family:var(--font-mono)">52%</span></div>
+            <div class="progress-track" style="margin-bottom:18px"><div class="progress-fill fill-orange" style="width:52%"></div></div>
+            <div style="display:flex;gap:8px">
+              <a href="classroom.html" class="btn btn-primary" style="flex:1;font-size:.82rem">â–¶ Lesson</a>
+              <a href="cbt.html" class="btn btn-outline" style="flex:1;font-size:.82rem">Practice</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-subj-slide" style="flex:0 0 300px">
+          <div class="dash-subj-card">
+            <div class="dash-subj-head">
+              <div class="dash-subj-icon">âš›ï¸</div>
+              <div class="dash-subj-name" style="color:#7c3aed">Physics</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;margin-bottom:6px"><span>Mastery</span><span style="font-family:var(--font-mono)">42%</span></div>
+            <div class="progress-track" style="margin-bottom:18px"><div class="progress-fill fill-blue" style="width:42%"></div></div>
+            <div style="display:flex;gap:8px">
+              <a href="classroom.html" class="btn btn-primary" style="flex:1;font-size:.82rem">â–¶ Lesson</a>
+              <a href="cbt.html" class="btn btn-outline" style="flex:1;font-size:.82rem">Practice</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-subj-slide" style="flex:0 0 300px">
+          <div class="dash-subj-card">
+            <div class="dash-subj-head">
+              <div class="dash-subj-icon">ðŸ§ª</div>
+              <div class="dash-subj-name" style="color:#ff6b35">Chemistry</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;margin-bottom:6px"><span>Mastery</span><span style="font-family:var(--font-mono);color:var(--muted)">NIL</span></div>
+            <div class="progress-track" style="margin-bottom:18px"><div class="progress-fill fill-grey" style="width:0%"></div></div>
+            <div style="display:flex;gap:8px">
+              <a href="classroom.html" class="btn" style="flex:1;font-size:.82rem;background:var(--bg);color:var(--text);border:1.5px solid var(--border2)">â–¶ Lesson</a>
+              <a href="cbt.html" class="btn btn-outline" style="flex:1;font-size:.82rem">Practice</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <button class="btn btn-outline" style="margin-top:12px;font-size:.85rem" onclick="openManageSubjectsModal()">Manage My Subjects</button>
+  </section>
+
+  <!-- Performance Bar Chart -->
+  <section>
+    <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:16px">Detailed Performance</h2>
+    <div class="card">
+      <!-- Mathematics -->
+      <div style="border-bottom:1px solid var(--border)">
+        <div class="perf-bar-row" onclick="toggleExpand('expand-math',this)">
+          <span class="perf-subject-name">ðŸ“ Mathematics</span>
+          <div class="perf-bar-track"><div class="perf-bar-fill fill-green" style="width:68%"></div></div>
+          <span style="font-family:var(--font-mono);font-weight:700;min-width:40px;text-align:right">68%</span>
+          <span class="perf-expand-chevron">â–¾</span>
+        </div>
+        <div class="perf-subject-detail" id="expand-math">
+          <div class="perf-topic-row">
+            <span class="perf-topic-name">Quadratics</span>
+            <div class="perf-topic-track"><div class="perf-topic-fill fill-green" style="width:80%"></div></div>
+            <span class="perf-topic-label">On Track</span>
+            <a href="classroom.html" class="btn btn-sm btn-outline">Study</a>
+            <a href="cbt.html" class="btn btn-sm btn-primary" style="margin-left:6px">Practice</a>
+          </div>
+          <div class="perf-topic-row">
+            <span class="perf-topic-name">Indices</span>
+            <div class="perf-topic-track"><div class="perf-topic-fill fill-orange" style="width:60%"></div></div>
+            <span class="perf-topic-label">Building Up</span>
+            <a href="classroom.html" class="btn btn-sm btn-outline">Study</a>
+            <a href="cbt.html" class="btn btn-sm btn-primary" style="margin-left:6px">Practice</a>
+          </div>
+          <div class="perf-topic-row">
+            <span class="perf-topic-name">Probability</span>
+            <div class="perf-topic-track"><div class="perf-topic-fill fill-blue" style="width:30%"></div></div>
+            <span class="perf-topic-label" style="color:#dc2626">Needs Attention</span>
+            <a href="classroom.html" class="btn btn-sm btn-outline">Study</a>
+            <a href="cbt.html" class="btn btn-sm btn-primary" style="margin-left:6px">Practice</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- English -->
+      <div style="border-bottom:1px solid var(--border)">
+        <div class="perf-bar-row" onclick="toggleExpand('expand-eng',this)">
+          <span class="perf-subject-name">ðŸ“– English Language</span>
+          <div class="perf-bar-track"><div class="perf-bar-fill fill-orange" style="width:52%"></div></div>
+          <span style="font-family:var(--font-mono);font-weight:700;min-width:40px;text-align:right">52%</span>
+          <span class="perf-expand-chevron">â–¾</span>
+        </div>
+        <div class="perf-subject-detail" id="expand-eng">
+          <div class="perf-topic-row">
+            <span class="perf-topic-name">Comprehension</span>
+            <div class="perf-topic-track"><div class="perf-topic-fill fill-green" style="width:75%"></div></div>
+            <span class="perf-topic-label">On Track</span>
+            <a href="classroom.html" class="btn btn-sm btn-outline">Study</a>
+            <a href="cbt.html" class="btn btn-sm btn-primary" style="margin-left:6px">Practice</a>
+          </div>
+          <div class="perf-topic-row">
+            <span class="perf-topic-name">Essay Writing</span>
+            <div class="perf-topic-track"><div class="perf-topic-fill fill-blue" style="width:40%"></div></div>
+            <span class="perf-topic-label" style="color:#dc2626">Needs Attention</span>
+            <a href="classroom.html" class="btn btn-sm btn-outline">Study</a>
+            <a href="cbt.html" class="btn btn-sm btn-primary" style="margin-left:6px">Practice</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Physics -->
+      <div style="border-bottom:1px solid var(--border)">
+        <div class="perf-bar-row" onclick="toggleExpand('expand-phy',this)">
+          <span class="perf-subject-name">âš›ï¸ Physics</span>
+          <div class="perf-bar-track"><div class="perf-bar-fill fill-blue" style="width:42%"></div></div>
+          <span style="font-family:var(--font-mono);font-weight:700;min-width:40px;text-align:right">42%</span>
+          <span class="perf-expand-chevron">â–¾</span>
+        </div>
+        <div class="perf-subject-detail" id="expand-phy">
+          <div class="perf-topic-row">
+            <span class="perf-topic-name">Mechanics</span>
+            <div class="perf-topic-track"><div class="perf-topic-fill fill-orange" style="width:55%"></div></div>
+            <span class="perf-topic-label">Building Up</span>
+            <a href="classroom.html" class="btn btn-sm btn-outline">Study</a>
+            <a href="cbt.html" class="btn btn-sm btn-primary" style="margin-left:6px">Practice</a>
+          </div>
+          <div class="perf-topic-row">
+            <span class="perf-topic-name">Waves</span>
+            <div class="perf-topic-track"><div class="perf-topic-fill fill-blue" style="width:25%"></div></div>
+            <span class="perf-topic-label" style="color:#dc2626">Needs Attention</span>
+            <a href="classroom.html" class="btn btn-sm btn-outline">Study</a>
+            <a href="cbt.html" class="btn btn-sm btn-primary" style="margin-left:6px">Practice</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chemistry -->
+      <div>
+        <div class="perf-bar-row" onclick="toggleExpand('expand-chem',this)">
+          <span class="perf-subject-name">ðŸ§ª Chemistry</span>
+          <div class="perf-bar-track"><div class="perf-bar-fill fill-grey" style="width:0%"></div></div>
+          <span style="font-family:var(--font-mono);font-weight:700;min-width:40px;text-align:right;color:var(--muted)">NIL</span>
+          <span class="perf-expand-chevron">â–¾</span>
+        </div>
+        <div class="perf-subject-detail" id="expand-chem">
+          <div class="perf-topic-row">
+            <span class="perf-topic-name">Organic Chem</span>
+            <div class="perf-topic-track"><div class="perf-topic-fill fill-grey" style="width:0%"></div></div>
+            <span class="perf-topic-label">Not Started</span>
+            <a href="classroom.html" class="btn btn-sm btn-outline">Study</a>
+            <a href="cbt.html" class="btn btn-sm btn-primary" style="margin-left:6px">Practice</a>
+          </div>
+          <div class="perf-topic-row">
+            <span class="perf-topic-name">Periodic Table</span>
+            <div class="perf-topic-track"><div class="perf-topic-fill fill-grey" style="width:0%"></div></div>
+            <span class="perf-topic-label">Not Started</span>
+            <a href="classroom.html" class="btn btn-sm btn-outline">Study</a>
+            <a href="cbt.html" class="btn btn-sm btn-primary" style="margin-left:6px">Practice</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SmartPath -->
+  <section>
+    <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:16px">SmartPathâ„¢ Recommendations</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+      <div class="smartpath-card">
+        <div class="smartpath-tag">Needs Attention</div>
+        <div style="font-weight:700;margin-bottom:6px">Probability</div>
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:16px">Your accuracy in this topic is below 40%. We recommend revisiting the fundamentals.</div>
+        <div style="display:flex;gap:8px">
+          <a href="classroom.html" class="btn btn-primary btn-sm">Watch Lesson</a>
+          <a href="cbt.html" class="btn btn-outline btn-sm">Practice</a>
+        </div>
+      </div>
+      <div class="smartpath-card">
+        <div class="smartpath-tag">Building Up</div>
+        <div style="font-weight:700;margin-bottom:6px">Essay Writing</div>
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:16px">You're making progress. A few more sessions here will push you to On Track status.</div>
+        <div style="display:flex;gap:8px">
+          <a href="classroom.html" class="btn btn-primary btn-sm">Watch Lesson</a>
+          <a href="cbt.html" class="btn btn-outline btn-sm">Practice</a>
+        </div>
+      </div>
+      <div class="smartpath-card">
+        <div class="smartpath-tag">Not Started</div>
+        <div style="font-weight:700;margin-bottom:6px">Organic Chemistry</div>
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:16px">You haven't started this topic yet. Start with the foundational lesson now.</div>
+        <div style="display:flex;gap:8px">
+          <a href="classroom.html" class="btn btn-primary btn-sm">Watch Lesson</a>
+          <a href="cbt.html" class="btn btn-outline btn-sm">Practice</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ai-engine.js"></script>
+<script src="js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    initSlider('dash-track', 'dash-prev', 'dash-next');
+    // Try to populate live data once auth.js has loaded the profile
+    // auth.js fires onAuthStateChange which calls updateNavUI â€” we piggyback here
+    waitForProfile(populateDashboard);
+  });
+
+  function waitForProfile(cb, attempts) {
+    attempts = attempts || 0;
+    if (typeof currentProfile !== 'undefined' && currentProfile) {
+      cb();
+    } else if (attempts < 40) {
+      setTimeout(() => waitForProfile(cb, attempts + 1), 250);
+    }
+    // If no profile after 10s (logged-out visitor), leave demo content in place
   }
-  // Wait for auth
-  const checkInterval = setInterval(() => { if(currentProfile) { clearInterval(checkInterval); loadDashboard(); } }, 500);
+
+  async function populateDashboard() {
+    const p = currentProfile;
+    if (!p) return;
+
+    const firstName = (p.full_name || '').split(' ')[0];
+
+    // â”€â”€ Welcome banner â”€â”€
+    const welcomeEl = document.querySelector('.hero-section h1, main h1');
+    const welcomeCard = document.querySelector('main .card h1');
+    if (welcomeCard) {
+      welcomeCard.textContent = `Welcome back, ${firstName}!`;
+    }
+
+    // Days to exam
+    const daysEl = document.querySelector('main .card p');
+    if (daysEl && p.exam_date) {
+      const days = Math.max(0, Math.round((new Date(p.exam_date) - new Date()) / 86400000));
+      daysEl.textContent = `${days} days to your JAMB exam. You have 1 session planned for today.`;
+    }
+
+    // â”€â”€ JAMB score prediction â”€â”€
+    const jambCard = document.querySelector('.card [style*="2.8rem"]');
+    if (jambCard && typeof predictJAMB === 'function') {
+      const mastery = (typeof calcMastery === 'function')
+        ? calcMastery(p.accuracy_avg, p.total_xp / 10)
+        : null;
+      const pred = mastery !== null ? predictJAMB(mastery) : 'â€” ';
+      jambCard.innerHTML = `${pred}<span style="font-family:var(--font-body);font-size:1.2rem;color:var(--muted)">/400</span>`;
+    }
+
+    // â”€â”€ Subject slideshow â”€â”€
+    await populateSubjectSlideshow(p);
+
+    // â”€â”€ Performance chart â”€â”€
+    await populatePerformanceChart(p);
+
+    // â”€â”€ SmartPath recommendations â”€â”€
+    await populateSmartPath(p);
+  }
+
+  // â”€â”€ Subject slideshow (filtered by exam_subjects) â”€â”€
+  const SUBJ_META = {
+    mathematics: { icon:'ðŸ“', name:'Mathematics',          color:'#1a56ff' },
+    english:     { icon:'ðŸ“–', name:'English Language',     color:'#00c97a' },
+    physics:     { icon:'âš›ï¸', name:'Physics',              color:'#7c3aed' },
+    chemistry:   { icon:'ðŸ§ª', name:'Chemistry',            color:'#ff6b35' },
+    biology:     { icon:'ðŸŒ¿', name:'Biology',              color:'#0891b2' },
+    economics:   { icon:'ðŸ“ˆ', name:'Economics',            color:'#f59e0b' },
+    government:  { icon:'ðŸ›ï¸', name:'Government',           color:'#6366f1' },
+    literature:  { icon:'ðŸ“š', name:'Literature',           color:'#ec4899' },
+    geography:   { icon:'ðŸŒ', name:'Geography',            color:'#10b981' },
+    commerce:    { icon:'ðŸª', name:'Commerce',             color:'#8b5cf6' },
+    accounts:    { icon:'ðŸ’¼', name:'Financial Accounting', color:'#14b8a6' },
+  };
+
+  async function populateSubjectSlideshow(p) {
+    const subjects = p.exam_subjects && p.exam_subjects.length > 0
+      ? p.exam_subjects
+      : null;
+    if (!subjects) return; // Leave demo content
+
+    // Fetch mastery data for all user's topics grouped by subject
+    const { data: masteryRows } = await sb
+      .from('topic_mastery')
+      .select('topic_id, subject, accuracy_avg, mastery_level, status')
+      .eq('user_id', currentUser.id)
+      .in('subject', subjects);
+
+    // Group by subject â†’ average mastery
+    const subjectMastery = {};
+    subjects.forEach(s => { subjectMastery[s] = { total: 0, count: 0, nil: true }; });
+    (masteryRows || []).forEach(row => {
+      if (!subjectMastery[row.subject]) return;
+      if (row.mastery_level !== null) {
+        subjectMastery[row.subject].total += row.mastery_level;
+        subjectMastery[row.subject].count++;
+        subjectMastery[row.subject].nil = false;
+      }
+    });
+
+    const track = document.getElementById('dash-track');
+    if (!track) return;
+
+    track.innerHTML = subjects.map(subj => {
+      const meta = SUBJ_META[subj] || { icon:'ðŸ“š', name: subj, color:'#888' };
+      const sm   = subjectMastery[subj];
+      const avg  = sm && !sm.nil && sm.count > 0 ? sm.total / sm.count : null;
+      const pct  = avg !== null ? Math.round(avg * 100) : null;
+      const fillClass = avg === null ? 'fill-grey'
+                      : avg >= 0.60 ? 'fill-green'
+                      : avg >= 0.40 ? 'fill-orange'
+                      : 'fill-blue';
+      const masteryLabel = pct !== null ? `${pct}%` : '<span style="font-family:var(--font-mono);color:var(--muted)">NIL</span>';
+      const barWidth     = pct !== null ? `${pct}%` : '0%';
+
+      return `
+        <div class="dash-subj-slide" style="flex:0 0 300px">
+          <div class="dash-subj-card">
+            <div class="dash-subj-head">
+              <div class="dash-subj-icon">${meta.icon}</div>
+              <div class="dash-subj-name" style="color:${meta.color}">${meta.name}</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;margin-bottom:6px">
+              <span>Mastery</span><span style="font-family:var(--font-mono)">${masteryLabel}</span>
+            </div>
+            <div class="progress-track" style="margin-bottom:18px">
+              <div class="progress-fill ${fillClass}" style="width:${barWidth}"></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <a href="classroom.html?subject=${subj}" class="btn btn-primary" style="flex:1;font-size:.82rem">â–¶ Lesson</a>
+              <a href="cbt.html?subject=${subj}" class="btn btn-outline" style="flex:1;font-size:.82rem">Practice</a>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    // Re-init slider with fresh content
+    initSlider('dash-track', 'dash-prev', 'dash-next');
+  }
+
+  // â”€â”€ Performance bar chart (live) â”€â”€
+  async function populatePerformanceChart(p) {
+    const subjects = p.exam_subjects && p.exam_subjects.length > 0
+      ? p.exam_subjects
+      : null;
+    if (!subjects) return;
+
+    const { data: rows } = await sb
+      .from('topic_mastery')
+      .select('topic_id, subject, accuracy_avg, mastery_level, status')
+      .eq('user_id', currentUser.id)
+      .in('subject', subjects);
+    if (!rows) return;
+
+    // Group topics by subject
+    const bySubject = {};
+    subjects.forEach(s => { bySubject[s] = []; });
+    rows.forEach(r => { if (bySubject[r.subject]) bySubject[r.subject].push(r); });
+
+    // Find the card that holds the performance rows
+    const perfCard = document.querySelector('.card .perf-bar-row')?.closest('.card');
+    if (!perfCard) return;
+
+    perfCard.innerHTML = subjects.map((subj, si) => {
+      const meta   = SUBJ_META[subj] || { icon:'ðŸ“š', name: subj, color:'#888' };
+      const topics = bySubject[subj] || [];
+      const activeMastery = topics.filter(t => t.mastery_level !== null);
+      const avg = activeMastery.length > 0
+        ? activeMastery.reduce((s, t) => s + t.mastery_level, 0) / activeMastery.length
+        : null;
+      const pct = avg !== null ? Math.round(avg * 100) : null;
+      const fillClass = avg === null ? 'fill-grey'
+                      : avg >= 0.60 ? 'fill-green'
+                      : avg >= 0.40 ? 'fill-orange'
+                      : 'fill-blue';
+      const pctLabel = pct !== null ? `${pct}%` : 'NIL';
+      const barWidth  = pct !== null ? `${pct}%` : '0%';
+      const expandId  = `expand-live-${si}`;
+      const isLast    = si === subjects.length - 1;
+
+      const topicRows = topics.map(t => {
+        const tm   = t.mastery_level;
+        const tpct = tm !== null ? Math.round(tm * 100) : null;
+        const tClass = tm === null ? 'fill-grey'
+                     : tm >= 0.60 ? 'fill-green'
+                     : tm >= 0.40 ? 'fill-orange'
+                     : 'fill-blue';
+        const label = tm === null ? 'Not Started'
+                    : tm >= 0.60 ? 'On Track'
+                    : tm >= 0.40 ? 'Building Up'
+                    : 'Needs Attention';
+        const labelColor = tm !== null && tm < 0.40 ? 'color:#dc2626' : '';
+        const tName = (t.topic_id || '').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+        return `
+          <div class="perf-topic-row">
+            <span class="perf-topic-name">${tName}</span>
+            <div class="perf-topic-track">
+              <div class="perf-topic-fill ${tClass}" style="width:${tpct !== null ? tpct+'%' : '0%'}"></div>
+            </div>
+            <span class="perf-topic-label" style="${labelColor}">${label}</span>
+            <a href="classroom.html?subject=${subj}&topic=${t.topic_id}" class="btn btn-sm btn-outline">Study</a>
+            <a href="cbt.html?topic=${t.topic_id}" class="btn btn-sm btn-primary" style="margin-left:6px">Practice</a>
+          </div>`;
+      }).join('');
+
+      return `
+        <div${isLast ? '' : ' style="border-bottom:1px solid var(--border)"'}>
+          <div class="perf-bar-row" onclick="toggleExpand('${expandId}',this)">
+            <span class="perf-subject-name">${meta.icon} ${meta.name}</span>
+            <div class="perf-bar-track"><div class="perf-bar-fill ${fillClass}" style="width:${barWidth}"></div></div>
+            <span style="font-family:var(--font-mono);font-weight:700;min-width:40px;text-align:right;${pct===null?'color:var(--muted)':''}">${pctLabel}</span>
+            <span class="perf-expand-chevron">â–¾</span>
+          </div>
+          <div class="perf-subject-detail" id="${expandId}">${topicRows}</div>
+        </div>`;
+    }).join('');
+  }
+
+  // â”€â”€ SmartPath recommendations (live) â”€â”€
+  async function populateSmartPath(p) {
+    const queue = p.smartpath_queue || [];
+    if (queue.length === 0) return;
+
+    const container = document.querySelector('.smartpath-card')?.parentElement;
+    if (!container) return;
+
+    const tagFor = (m) => m === null ? 'Not Started'
+                        : m >= 0.60 ? 'On Track'
+                        : m >= 0.40 ? 'Building Up'
+                        : 'Needs Attention';
+
+    const descFor = (item) => {
+      const m = item.mastery_level;
+      if (m === null) return `You haven't started ${item.topic_name} yet. Start with the foundational lesson now.`;
+      if (m < 0.40)   return `Your accuracy on ${item.topic_name} needs work. Revisit the core lesson to build a stronger foundation.`;
+      return `You're making progress on ${item.topic_name}. A few more sessions will push you to On Track status.`;
+    };
+
+    container.innerHTML = queue.slice(0, 3).map(item => `
+      <div class="smartpath-card">
+        <div class="smartpath-tag">${tagFor(item.mastery_level)}</div>
+        <div style="font-weight:700;margin-bottom:6px">${item.topic_name || item.topic_id}</div>
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:16px">${descFor(item)}</div>
+        <div style="display:flex;gap:8px">
+          <a href="${item.lesson_url || 'classroom.html'}" class="btn btn-primary btn-sm">Watch Lesson</a>
+          <a href="cbt.html?topic=${item.topic_id}" class="btn btn-outline btn-sm">Practice</a>
+        </div>
+      </div>`).join('');
+  }
+
+  function toggleExpand(id, rowEl) {
+    const detail = document.getElementById(id);
+    const isOpen = detail.classList.contains('open');
+    detail.classList.toggle('open', !isOpen);
+    rowEl.classList.toggle('open', !isOpen);
+  }
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .catch(err => console.warn('SW registration failed:', err));
+    });
+  }
 </script>
 </body>
 </html>
