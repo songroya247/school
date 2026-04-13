@@ -1,173 +1,272 @@
-// CBT Engine – handles questions, logging, offline sync, adaptive triggers
-let currentSession = {
-  mode: 'drill', // 'drill' or 'mock'
-  topicId: null,
-  questions: [],
-  answers: [],
-  startTime: null,
-  timerInterval: null,
-  currentIndex: 0
-};
+/* ── UltimateEdge School — cbt-engine.js v4.1 ── */
+/* Answer recording · IndexedDB offline · topic mastery update · XP · flag logic */
 
-let offlineQueue = JSON.parse(localStorage.getItem('queued_logs') || '[]');
+// ─── INDEXEDDB SETUP ──────────────────────────────────────────────────────────
+const IDB_NAME    = 'ue_offline';
+const IDB_STORE   = 'queued_logs';
+const IDB_VERSION = 1;
 
-// Sync offline logs when online
-window.addEventListener('online', async () => {
-  if (offlineQueue.length) {
-    const { error } = await sb.from('response_logs').insert(offlineQueue);
-    if (!error) {
-      localStorage.removeItem('queued_logs');
-      offlineQueue = [];
-      toast('Offline answers synced!');
-    }
-  }
-});
+let idb; // Will be set after openIDB()
 
-async function recordResponse(question, isCorrect, timeSpent) {
-  if (!currentUser) return;
-  const entry = {
-    user_id: currentUser.id,
-    topic_id: currentSession.topicId,
-    is_correct: isCorrect,
-    time_spent: timeSpent,
-    grade_at_time: currentProfile?.current_skill_level || 3
-  };
-  if (navigator.onLine) {
-    await sb.from('response_logs').insert(entry);
-  } else {
-    offlineQueue.push(entry);
-    localStorage.setItem('queued_logs', JSON.stringify(offlineQueue));
-    toast('Saved offline – will sync when connection returns.');
-  }
-  // Award XP for correct
-  if (isCorrect) addXP(10, 'Correct answer');
-  // Update topic mastery after each response
-  await updateTopicMastery(currentSession.topicId);
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE, { autoIncrement: true });
+      }
+    };
+    req.onsuccess = e => { idb = e.target.result; resolve(idb); };
+    req.onerror   = e => reject(e.target.error);
+  });
 }
 
-async function updateTopicMastery(topicId) {
-  // Fetch last 50 responses for this topic
-  const { data: logs } = await sb
-    .from('response_logs')
-    .select('is_correct')
-    .eq('user_id', currentUser.id)
-    .eq('topic_id', topicId)
-    .order('created_at', { ascending: false })
-    .limit(50);
-  if (!logs || logs.length === 0) return;
-  const total = logs.length;
-  const correct = logs.filter(l => l.is_correct).length;
-  const accuracyAvg = (correct / total) * 100;
-  const mastery = calcMastery(accuracyAvg, total);
-  await sb.from('topic_mastery').upsert({
-    user_id: currentUser.id,
-    topic_id: topicId,
-    accuracy_avg: accuracyAvg,
-    mastery_level: mastery,
-    last_studied: new Date().toISOString()
+// Queue a log entry in IndexedDB (when offline)
+function idbQueue(entry) {
+  return new Promise((resolve, reject) => {
+    const tx    = idb.transaction(IDB_STORE, 'readwrite');
+    const store = tx.objectStore(IDB_STORE);
+    const req   = store.add(entry);
+    req.onsuccess = () => resolve();
+    req.onerror   = () => reject(req.error);
   });
-  // Also update profile's overall accuracy if needed (optional)
-  if (currentProfile.accuracy_avg === null) {
-    await sb.from('profiles').update({ accuracy_avg: accuracyAvg, status: 'ACTIVE' }).eq('id', currentUser.id);
-    currentProfile.accuracy_avg = accuracyAvg;
+}
+
+// Retrieve all queued logs
+function idbGetAll() {
+  return new Promise((resolve, reject) => {
+    const tx    = idb.transaction(IDB_STORE, 'readonly');
+    const store = tx.objectStore(IDB_STORE);
+    const req   = store.getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+// Clear all queued logs (after successful sync)
+function idbClear() {
+  return new Promise((resolve, reject) => {
+    const tx    = idb.transaction(IDB_STORE, 'readwrite');
+    const store = tx.objectStore(IDB_STORE);
+    const req   = store.clear();
+    req.onsuccess = () => resolve();
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+// ─── INITIALISE ───────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  openIDB().catch(err => console.warn('IndexedDB unavailable:', err));
+});
+
+// Sync queued logs when connection is restored
+window.addEventListener('online', () => syncOfflineLogs());
+
+// ─── RECORD RESPONSE ─────────────────────────────────────────────────────────
+/**
+ * Called for every question answered.
+ * Saves to Supabase if online, IndexedDB if offline.
+ *
+ * @param {{ topicId, isCorrect, timeSpent, gradeLevel, examType }} params
+ */
+async function recordResponse({ topicId, isCorrect, timeSpent, gradeLevel, examType }) {
+  if (!currentUser) return;
+
+  const entry = {
+    user_id:    currentUser.id,
+    topic_id:   topicId,
+    exam_type:  examType || 'JAMB',
+    is_correct: isCorrect,
+    time_spent: timeSpent || 0,
+    grade_level: gradeLevel || 3,
+  };
+
+  if (navigator.onLine && typeof sb !== 'undefined') {
+    const { error } = await sb.from('response_logs').insert(entry);
+    if (error) {
+      console.warn('response_logs insert failed, queuing offline:', error.message);
+      if (idb) await idbQueue(entry);
+    }
+  } else {
+    if (idb) await idbQueue(entry);
   }
-  // Trigger adaptive pyramid
-  // Get attempts_at_grade1 from topic_mastery
-  const { data: topicData } = await sb
+}
+window.recordResponse = recordResponse;
+
+// ─── SYNC OFFLINE LOGS ────────────────────────────────────────────────────────
+async function syncOfflineLogs() {
+  if (!idb || !navigator.onLine || !currentUser || typeof sb === 'undefined') return;
+
+  try {
+    const queued = await idbGetAll();
+    if (!queued || queued.length === 0) return;
+
+    // Supabase insert supports batch
+    const { error } = await sb.from('response_logs').insert(queued);
+    if (!error) {
+      await idbClear();
+      console.log(`Synced ${queued.length} offline response(s).`);
+    }
+  } catch (err) {
+    console.warn('Offline sync failed:', err);
+  }
+}
+window.syncOfflineLogs = syncOfflineLogs;
+
+// ─── UPDATE TOPIC MASTERY ─────────────────────────────────────────────────────
+/**
+ * Recalculates accuracy_avg + mastery_level for a topic after an answer.
+ * Also increments attempts_at_grade1 if the student is on Grade 1.
+ */
+async function updateTopicMastery(topicId, isCorrect) {
+  if (!currentUser || typeof sb === 'undefined') return;
+
+  // Fetch existing mastery row
+  const { data: row, error: fetchError } = await sb
     .from('topic_mastery')
-    .select('attempts_at_grade1')
+    .select('*')
     .eq('user_id', currentUser.id)
     .eq('topic_id', topicId)
     .single();
-  let attempts = topicData?.attempts_at_grade1 || 0;
-  if (accuracyAvg < 40 && currentProfile.current_skill_level === 1) {
-    attempts++;
-    await sb.from('topic_mastery').update({ attempts_at_grade1: attempts }).eq('user_id', currentUser.id).eq('topic_id', topicId);
+
+  if (fetchError && fetchError.code !== 'PGRST116') {
+    console.warn('updateTopicMastery fetch error:', fetchError.message);
+    return;
   }
-  await applyAdaptivePyramid(topicId, accuracyAvg, attempts);
-}
 
-// Load questions from JSON (mock)
-async function loadQuestions(topicId, count = 10) {
-  const res = await fetch('/data/questions.json');
-  const all = await res.json();
-  const filtered = all.filter(q => q.topic === topicId);
-  // Shuffle and take count
-  const shuffled = filtered.sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
-}
+  // Calculate new running average
+  const prevAccuracy = row?.accuracy_avg ?? null;
+  const prevAttempts = row
+    ? (row.attempts_at_grade1 !== undefined ? row.attempts_at_grade1 : 0)
+    : 0;
 
-// Render current question in CBT UI
-function renderQuestion() {
-  const q = currentSession.questions[currentSession.currentIndex];
-  if (!q) return;
-  const panel = document.getElementById('question-panel');
-  panel.innerHTML = `
-    <div class="question-text">${q.text}</div>
-    <div class="options-grid">
-      ${q.options.map((opt, idx) => `<button class="cbt-answer-btn" data-opt="${idx}">${opt}</button>`).join('')}
-    </div>
-  `;
-  document.querySelectorAll('.cbt-answer-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const selected = parseInt(e.currentTarget.dataset.opt);
-      const isCorrect = (selected === q.correct);
-      const timeSpent = Math.floor((Date.now() - currentSession.startTime) / 1000);
-      recordResponse(q, isCorrect, timeSpent);
-      // Mark on map
-      const mapDot = document.querySelector(`.map-dot[data-qidx="${currentSession.currentIndex}"]`);
-      if (mapDot) mapDot.classList.add(isCorrect ? 'correct' : 'wrong');
-      // Move to next or finish
-      if (currentSession.currentIndex + 1 < currentSession.questions.length) {
-        currentSession.currentIndex++;
-        currentSession.startTime = Date.now();
-        renderQuestion();
-      } else {
-        endSession();
-      }
-    });
-  });
-}
+  // We need total response count for proper running avg
+  const { count: totalCount } = await sb
+    .from('response_logs')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', currentUser.id)
+    .eq('topic_id', topicId);
 
-async function startSession(mode, topicId) {
-  currentSession.mode = mode;
-  currentSession.topicId = topicId;
-  currentSession.questions = await loadQuestions(topicId, mode === 'mock' ? 40 : 10);
-  currentSession.currentIndex = 0;
-  currentSession.startTime = Date.now();
-  // Build question map
-  const mapDiv = document.getElementById('question-map');
-  mapDiv.innerHTML = currentSession.questions.map((_, idx) => `<div class="map-dot" data-qidx="${idx}">${idx+1}</div>`).join('');
-  renderQuestion();
-  // Timer logic for mock
-  if (mode === 'mock') {
-    let seconds = 2 * 60 * 60; // 2 hours
-    const timerSpan = document.getElementById('timer');
-    timerSpan.style.display = 'block';
-    currentSession.timerInterval = setInterval(() => {
-      seconds--;
-      const h = Math.floor(seconds / 3600);
-      const m = Math.floor((seconds % 3600) / 60);
-      const s = seconds % 60;
-      timerSpan.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-      if (seconds <= 0) endSession();
-    }, 1000);
+  const { count: correctCount } = await sb
+    .from('response_logs')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', currentUser.id)
+    .eq('topic_id', topicId)
+    .eq('is_correct', true);
+
+  const total   = totalCount || 1;
+  const correct = correctCount || 0;
+  const newAccuracy  = parseFloat(((correct / total) * 100).toFixed(2));
+  const newMastery   = calcMastery(newAccuracy, total);
+  const newGrade     = getSkillGrade(newAccuracy);
+
+  const newAttempts1 = (row?.grade_level === 1 && !isCorrect)
+    ? prevAttempts + 1
+    : prevAttempts;
+
+  const updates = {
+    accuracy_avg:       newAccuracy,
+    mastery_level:      newMastery,
+    grade_level:        newGrade,
+    attempts_at_grade1: newAttempts1,
+    status:             newMastery >= 0.60 ? 'MASTERED' : 'IN_PROGRESS',
+    last_studied:       new Date().toISOString(),
+  };
+
+  if (row) {
+    await sb.from('topic_mastery')
+      .update(updates)
+      .eq('user_id', currentUser.id)
+      .eq('topic_id', topicId);
   } else {
-    // Drill mode – hide timer
-    document.getElementById('timer').style.display = 'none';
+    await sb.from('topic_mastery').insert({
+      user_id: currentUser.id,
+      topic_id: topicId,
+      subject: 'unknown',
+      ...updates,
+    });
+  }
+
+  return { newAccuracy, newMastery, newGrade, attemptsAtGrade1: newAttempts1 };
+}
+window.updateTopicMastery = updateTopicMastery;
+
+// ─── AWARD XP ─────────────────────────────────────────────────────────────────
+async function awardXP(isCorrect) {
+  if (!isCorrect) return;
+  if (typeof addXP === 'function') await addXP(10, 'correct answer');
+}
+window.awardXP = awardXP;
+
+// ─── SESSION SCORE SAVE ───────────────────────────────────────────────────────
+/**
+ * Called when a CBT session ends.
+ * Saves session summary and triggers SmartPath queue update.
+ */
+async function saveSessionScore({ examType, score, totalQuestions, accuracy, avgTimeSecs, gradeLevel, topicId }) {
+  if (!currentUser || typeof sb === 'undefined') return;
+
+  await sb.from('session_scores').insert({
+    user_id:         currentUser.id,
+    exam_type:       examType || 'JAMB',
+    score,
+    total_questions: totalQuestions,
+    accuracy,
+    avg_time_per_q:  avgTimeSecs || 0,
+    grade_level:     gradeLevel || 3,
+  });
+
+  if (typeof trackAction === 'function') {
+    await trackAction('drill_completed', { score, totalQuestions, accuracy, topicId });
+  }
+
+  // Update overall accuracy_avg on profiles
+  const { data: allSessions } = await sb
+    .from('session_scores')
+    .select('accuracy')
+    .eq('user_id', currentUser.id);
+
+  if (allSessions && allSessions.length > 0) {
+    const overallAvg = parseFloat(
+      (allSessions.reduce((s, r) => s + (r.accuracy || 0), 0) / allSessions.length).toFixed(2)
+    );
+    await sb.from('profiles').update({ accuracy_avg: overallAvg }).eq('id', currentUser.id);
+    if (currentProfile) currentProfile.accuracy_avg = overallAvg;
+  }
+
+  // Update SmartPath queue
+  if (typeof updateSmartPathQueue === 'function') {
+    await updateSmartPathQueue();
   }
 }
+window.saveSessionScore = saveSessionScore;
 
-async function endSession() {
-  if (currentSession.timerInterval) clearInterval(currentSession.timerInterval);
-  // Calculate score and save session_scores
-  // For simplicity, we skip session_scores in this MVP but you can add later
-  toast('Session completed! Mastery updated.');
-  // Optionally redirect to dashboard
-  setTimeout(() => (window.location.href = 'dashboard.html'), 2000);
+// ─── FLAG LOGIC ───────────────────────────────────────────────────────────────
+// Flags are session-memory only — not persisted to Supabase
+const flaggedQuestions = new Set();
+
+function flagQuestion(index) {
+  if (flaggedQuestions.has(index)) {
+    flaggedQuestions.delete(index);
+  } else {
+    flaggedQuestions.add(index);
+  }
+  return flaggedQuestions.has(index);
 }
+window.flagQuestion = flagQuestion;
 
-// Expose for HTML buttons
-window.startCBT = startSession;
-window.startDrill = (topicId) => startSession('drill', topicId);
-window.startMock = (topicId) => startSession('mock', topicId);
+function isFlagged(index) {
+  return flaggedQuestions.has(index);
+}
+window.isFlagged = isFlagged;
+
+function getFlaggedList() {
+  return Array.from(flaggedQuestions).sort((a, b) => a - b);
+}
+window.getFlaggedList = getFlaggedList;
+
+function clearFlags() {
+  flaggedQuestions.clear();
+}
+window.clearFlags = clearFlags;
