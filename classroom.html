@@ -3,522 +3,582 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1a56ff">
 <title>Classroom — UltimateEdge School</title>
-<!--
-  NOTE FOR DEPLOY: All classroom styles below live in /css/main.css
-  under the /* ── CLASSROOM ── */ section header. This page only
-  loads main.css — no page-level <style> block is permitted per §30.
--->
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/main.css">
-<!-- Supabase CDN — must load before auth.js -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/ai-engine.js"></script>
 </head>
-<body>
+<body style="height:100vh;overflow:hidden;display:flex;flex-direction:column">
 
-<!-- Required: defaulter banner -->
-<div id="defaulter-banner" style="display:none">
-  Your subscription has expired. <a href="/index.html#pricing">Renew Now</a>
-</div>
+<div id="defaulter-banner">Your subscription has expired. <a href="/index.html#pricing">Renew Now</a></div>
 
-<!-- NAV -->
-<nav class="ue-nav">
+<!-- ── NAV ── -->
+<nav class="ue-nav" style="flex-shrink:0">
   <div class="container">
-    <a href="index.html" class="nav-logo">ULTIMATEEDGE SCHOOL</a>
+    <a href="/index.html" class="nav-logo">ULTIMATEEDGE SCHOOL</a>
     <div class="nav-links">
-      <a href="classroom.html" style="color:var(--accent)">Classroom</a>
-      <a href="cbt.html">Practice (CBT)</a>
-      <a href="dashboard.html">Dashboard</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/classroom.html" class="active">Classroom</a>
+      <a href="/cbt.html">Practice</a>
     </div>
-    <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileNav()" aria-label="Open menu">&#9776;</button>
-    <div class="nav-right" id="nav-right">
-      <button class="btn btn-primary" onclick="openAuthModal('login')">Login / Sign Up</button>
+    <button class="nav-hamburger" aria-label="Toggle menu" onclick="this.closest('.ue-nav').classList.toggle('nav-mobile-open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-right">
+      <div class="nav-user-pill" id="nav-user-pill" style="display:none">
+        <div class="nav-avatar">
+          <span id="nav-avatar-initials">??</span>
+          <span class="nav-pro-badge" id="nav-pro-badge" style="display:none">PRO</span>
+        </div>
+        <div>
+          <div class="nav-user-name" id="nav-user-name">Student</div>
+          <div class="nav-xp" id="nav-xp">0 XP</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="nav-login-btn" onclick="openAuthModal('login')">Login</button>
     </div>
   </div>
 </nav>
-<div class="mobile-nav-drawer" id="mobile-nav-drawer">
-  <a href="classroom.html" onclick="closeMobileNav()">Classroom</a>
-  <a href="cbt.html" onclick="closeMobileNav()">Practice (CBT)</a>
-  <a href="dashboard.html" onclick="closeMobileNav()">Dashboard</a>
-  <button class="btn btn-primary btn-block" onclick="closeMobileNav();openAuthModal('login')">Login / Sign Up</button>
-</div>
 
-<!-- SUBJECT TAB BAR -->
-<div class="subject-tabs" id="subjectTabs">
-  <!-- Populated by JS from curriculum.json / getExamSubjects() -->
-</div>
+<!-- ── CLASSROOM BODY ── -->
+<div class="classroom-body" style="flex:1;overflow:hidden">
 
-<!-- CLASSROOM LAYOUT: sidebar + main -->
-<div class="classroom-layout">
-
-  <!-- SIDEBAR -->
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-subject" id="sidebarSubject">Loading…</div>
-      <div class="sidebar-meta" id="sidebarMeta"></div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-      <div class="progress-label" id="progressLabel"></div>
-    </div>
-    <div id="topicList">
-      <div class="loading-spinner"><div class="spinner"></div>Loading curriculum…</div>
-    </div>
+  <!-- Subject tabs bar -->
+  <div class="subject-tabs-bar" id="subject-tabs-bar">
+    <!-- Populated by JS from student's exam_subjects -->
+    <button class="subject-tab active" data-subject="mathematics" onclick="switchSubject('mathematics',this)">📐 Mathematics</button>
+    <button class="subject-tab" data-subject="english"     onclick="switchSubject('english',this)">📖 English</button>
+    <button class="subject-tab" data-subject="physics"     onclick="switchSubject('physics',this)">⚛️ Physics</button>
+    <button class="subject-tab" data-subject="chemistry"   onclick="switchSubject('chemistry',this)">🧪 Chemistry</button>
+    <button class="subject-tab" data-subject="biology"     onclick="switchSubject('biology',this)">🌿 Biology</button>
+    <button class="subject-tab" data-subject="economics"   onclick="switchSubject('economics',this)">📈 Economics</button>
+    <button class="subject-tab" data-subject="government"  onclick="switchSubject('government',this)">🏛️ Government</button>
+    <button class="subject-tab" data-subject="literature"  onclick="switchSubject('literature',this)">📚 Literature</button>
+    <button class="subject-tab" data-subject="geography"   onclick="switchSubject('geography',this)">🌍 Geography</button>
   </div>
 
-  <!-- MAIN CONTENT -->
-  <div class="main-content" id="mainContent">
+  <div class="classroom-layout">
 
-    <!-- VIDEO AREA -->
-    <div class="video-area">
-      <div class="video-placeholder" id="videoPlaceholder">
-        <div class="play-btn-large" onclick="playVideo()">▶</div>
-        <div class="video-label" id="videoLabel">Click to play lesson</div>
+    <!-- ── SIDEBAR ── -->
+    <aside class="classroom-sidebar">
+      <div class="sidebar-head">
+        <h2 id="sidebar-subject-title">Mathematics</h2>
+        <p style="font-size:.82rem;color:var(--muted);margin-top:4px" id="sidebar-topic-count">10 topics</p>
       </div>
-      <iframe
-        class="video-embed"
-        id="videoEmbed"
-        allowfullscreen
-        allow="autoplay; encrypted-media"
-      ></iframe>
-      <!-- Premium locked overlay -->
-      <div class="locked-overlay" id="lockedOverlay">
-        <div class="lock-icon">🔒</div>
-        <div class="lock-title">Premium Topic</div>
-        <div class="lock-sub">Unlock all video masterclasses across every subject. Subscribe from ₦1,500/month.</div>
-        <a href="/index.html#pricing" class="unlock-btn">Unlock Full Access</a>
+      <div id="topic-list" style="flex:1;overflow-y:auto;padding:8px 0">
+        <!-- Rendered by JS -->
       </div>
-    </div>
+    </aside>
 
-    <!-- LESSON INFO PANEL -->
-    <div class="lesson-info">
-      <div class="lesson-tag" id="lessonTag">Loading…</div>
-      <div class="lesson-title" id="lessonTitle">Select a topic to begin</div>
-      <div class="lesson-meta">
-        <span class="lesson-meta-item">🎬 <span id="lessonDuration">—</span></span>
-        <span class="lesson-meta-item">📝 <span id="lessonQCount">—</span></span>
-        <span class="lesson-meta-item" id="lessonFreeTag" style="color:var(--accent2);font-weight:700;display:none">✓ Free Preview</span>
-      </div>
-      <div class="lesson-actions">
-        <button class="btn-quiz" onclick="scrollToQuiz()">📝 Take Topic Quiz</button>
-        <button class="btn-next-lesson" onclick="nextTopic()">Next Topic →</button>
-      </div>
-    </div>
+    <!-- ── MAIN CONTENT ── -->
+    <main class="classroom-main" id="classroom-main">
 
-    <!-- LESSON BODY -->
-    <div class="lesson-body" id="lessonBody">
-      <div class="lesson-section-title">📌 Key Concepts</div>
-      <p class="lesson-notes" id="lessonNotes">Select a topic from the sidebar to begin.</p>
-      <ul class="key-points" id="keyPoints"></ul>
-
-      <div class="formula-box">
-        <div class="formula-label">Key Formula</div>
-        <div class="formula-text" id="formulaText">—</div>
-      </div>
-
-      <!-- TOPIC QUIZ -->
-      <div class="quiz-section" id="quizSection">
-        <div class="quiz-header">
-          <div class="quiz-title">Topic Quiz</div>
-          <div class="quiz-count" id="quizCount">Question 1 of 3</div>
+      <!-- Video area -->
+      <div class="video-area" id="video-area">
+        <div class="video-locked" id="video-locked" style="display:none">
+          <div style="font-size:2.5rem;margin-bottom:12px">🔒</div>
+          <div style="font-weight:700;font-size:1.1rem;margin-bottom:8px">Premium Content</div>
+          <p style="font-size:.88rem;color:rgba(255,255,255,.7);margin-bottom:20px;max-width:260px;text-align:center">Subscribe to unlock all video lessons and adaptive content.</p>
+          <a href="/index.html#pricing" class="btn btn-primary btn-sm">Unlock for ₦1,500/month</a>
         </div>
-        <div id="quizBody"></div>
-        <div class="quiz-score-display" id="scoreDisplay">
-          <div class="score-badge" id="scoreBadge">0/3</div>
-          <p class="score-msg" id="scoreMsg"></p>
-          <button class="quiz-btn quiz-btn-primary" onclick="retryQuiz()">Retry Quiz</button>
-          <div class="upsell-strip">
-            <strong>🚀 Want more questions like these?</strong>
-            <p>Unlock 1,500+ past questions, full mock exams, and all remaining topics with full explanations.</p>
-            <a href="/index.html#pricing" class="upsell-btn">Get Full Access</a>
-          </div>
+        <div id="video-play-placeholder" style="text-align:center;color:rgba(255,255,255,.3)">
+          <div style="font-size:4rem;margin-bottom:8px;cursor:pointer" onclick="playLesson()">▶</div>
+          <div style="font-size:.85rem;font-weight:600">Select a topic to begin</div>
+        </div>
+        <iframe id="lesson-iframe" src="" style="display:none;width:100%;height:100%;border:none"
+                onload="onIframeLoad()"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+      </div>
+
+      <!-- Lesson info panel -->
+      <div class="lesson-info" id="lesson-info">
+        <span class="lesson-tag" id="lesson-subject-tag">Mathematics</span>
+        <h1 class="lesson-title" id="lesson-title">Select a Topic</h1>
+        <div class="lesson-meta">
+          <span id="lesson-duration">⏱ — min</span>
+          <span id="lesson-topics-count">📚 — topics</span>
+        </div>
+        <div class="lesson-actions">
+          <button class="btn btn-primary" onclick="openTopicQuiz()" id="quiz-btn">Take Quiz</button>
+          <button class="btn btn-outline" onclick="nextTopic()" id="next-lesson-btn">Next Lesson →</button>
+          <a href="#" id="practice-link" class="btn btn-outline">Practice Questions</a>
         </div>
       </div>
-    </div>
 
-  </div><!-- /main-content -->
-</div><!-- /classroom-layout -->
+      <!-- Lesson body -->
+      <div class="lesson-body" id="lesson-body" style="display:none">
+        <h3>Key Concepts</h3>
+        <ul class="key-points" id="key-points-list"></ul>
+        <div class="formula-box" id="formula-box" style="display:none"></div>
+        <p id="lesson-notes" style="font-size:.9rem;color:var(--muted);line-height:1.7"></p>
+      </div>
 
-<!-- Required: toast -->
+      <!-- Topic Quiz -->
+      <div class="topic-quiz" id="topic-quiz" style="display:none">
+        <h3>Topic Quiz</h3>
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:20px">Test your understanding — 3 quick questions.</p>
+        <div id="quiz-questions"></div>
+        <button class="btn btn-primary" onclick="submitQuiz()" id="quiz-submit-btn" style="margin-top:16px">Submit Quiz</button>
+      </div>
+
+      <!-- Adaptive banner slot -->
+      <div id="adaptive-banner-slot" style="display:none;margin-top:16px"></div>
+
+    </main>
+  </div><!-- .classroom-layout -->
+</div><!-- .classroom-body -->
+
 <div id="toast"></div>
 
-<!-- Auth modal (canonical copy) -->
-<div id="auth-modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeAuthModal()">
-  <div class="modal-card" style="max-width:480px;width:100%">
-    <button onclick="closeAuthModal()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted);line-height:1">×</button>
-    <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchModalTab('login')" id="modal-tab-login">Login</button>
-      <button class="auth-tab" onclick="switchModalTab('signup')" id="modal-tab-signup">Sign Up</button>
+<!-- Study Plan Modal -->
+<div class="modal-backdrop" id="sp-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:4px">Welcome back, <span id="sp-name">Student</span>! 👋</h2>
+    <p style="font-size:.9rem;color:var(--muted);margin-bottom:20px" id="sp-months">Loading your plan…</p>
+    <div class="sp-stats">
+      <div class="sp-stat"><div class="sp-stat-val" id="sp-readiness">NIL</div><div class="sp-stat-lbl">Current Readiness</div></div>
+      <div class="sp-stat"><div class="sp-stat-val" id="sp-intensity" style="font-size:.95rem">—</div><div class="sp-stat-lbl">Recommended Study Rate</div></div>
     </div>
-    <div id="modal-login-form">
-      <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Welcome back</h2>
-      <div class="form-group">
-        <label class="form-label">Email Address</label>
-        <input type="email" class="form-input" placeholder="chioma@example.com" id="modal-login-email">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Password</label>
-        <input type="password" class="form-input" placeholder="••••••••" id="modal-login-password">
-      </div>
-      <button class="btn btn-primary btn-block btn-lg" style="margin-top:8px" onclick="handleModalLogin()">Login</button>
-    </div>
-    <div id="modal-signup-form" style="display:none">
-      <p style="color:var(--muted);font-size:.9rem">Please sign up from the <a href="/index.html">homepage</a>.</p>
+    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Your Level</div><div style="font-weight:700" id="sp-grade-msg">Loading…</div></div>
+    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">SmartPath™ Suggestion</div><div style="font-size:.9rem" id="sp-smartpath">Complete your first session to unlock recommendations</div></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="closeAuthModal()">Start Studying</button>
+      <a href="/cbt.html" class="btn btn-outline" style="flex:1">Practice CBT</a>
     </div>
   </div>
 </div>
 
-<!-- Shared scripts — ORDER MATTERS -->
-<script src="/js/auth.js"></script>
-<script src="/js/ai-engine.js"></script>
+<div class="modal-backdrop" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-card" style="text-align:center;padding:40px">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <div style="font-size:2.5rem;margin-bottom:16px">📚</div>
+    <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Login to Access Lessons</h2>
+    <p style="color:var(--muted);margin-bottom:24px">Create a free account to watch lessons and track your progress.</p>
+    <a href="/index.html" class="btn btn-primary btn-block">Get Started Free</a>
+  </div>
+</div>
 
 <script>
-// ════════════════════════════════════════════════════════════════
-//  CLASSROOM PAGE CONTROLLER
-//  Data: /data/curriculum.json + /data/questions.json
-//  Saves quiz results to topic_mastery.accuracy_avg (§31 fix)
-// ════════════════════════════════════════════════════════════════
+/* ── CURRICULUM DATA ── */
+const CURRICULUM = {
+  mathematics: {
+    name: 'Mathematics', icon: '📐', color: '#1a56ff',
+    topics: [
+      { id:'quadratics',   name:'Quadratic Equations',    free:true,  duration:18, keys:['Factorisation method','Completing the square','Quadratic formula'], formula:'x = (-b ± √(b² - 4ac)) / 2a', notes:'Quadratic equations are polynomials of degree 2. They have at most two solutions, called roots.' },
+      { id:'indices',      name:'Indices & Surds',        free:true,  duration:15, keys:['Laws of indices','Negative indices','Fractional indices'], formula:'aᵐ × aⁿ = aᵐ⁺ⁿ', notes:'Indices are a shorthand way of expressing repeated multiplication.' },
+      { id:'logarithms',   name:'Logarithms',             free:false, duration:20, keys:['Log laws','Change of base','Natural logarithm'], formula:'log_a(xy) = log_a(x) + log_a(y)', notes:'Logarithms are the inverse of exponential functions.' },
+      { id:'calculus',     name:'Differentiation',        free:false, duration:25, keys:['Power rule','Chain rule','Product rule'], formula:'d/dx(xⁿ) = nxⁿ⁻¹', notes:'Differentiation measures the rate of change of a function.' },
+      { id:'probability',  name:'Probability',            free:false, duration:22, keys:['Sample space','Mutually exclusive events','Conditional probability'], formula:'P(A∪B) = P(A) + P(B) - P(A∩B)', notes:'Probability is a measure of how likely an event is to occur.' },
+      { id:'statistics',   name:'Statistics',             free:false, duration:20, keys:['Mean, median, mode','Standard deviation','Frequency tables'], formula:'Mean = Σx / n', notes:'Statistics involves collecting, organising, and interpreting data.' },
+      { id:'geometry',     name:'Plane Geometry',         free:false, duration:18, keys:['Angles','Triangles','Circles','Polygons'], formula:'Area of circle = πr²', notes:'Geometry studies shapes, sizes, and properties of figures.' },
+      { id:'trigonometry', name:'Trigonometry',           free:false, duration:24, keys:['SOHCAHTOA','Sine rule','Cosine rule'], formula:'sin²θ + cos²θ = 1', notes:'Trigonometry deals with relationships between angles and sides of triangles.' },
+      { id:'algebra',      name:'Algebraic Processes',    free:false, duration:16, keys:['Factorisation','Expansion','Simultaneous equations'], formula:'(a+b)² = a² + 2ab + b²', notes:'Algebra uses symbols to represent numbers in equations and formulae.' },
+      { id:'arithmetic',   name:'Number &amp; Numeration', free:true,  duration:14, keys:['Number bases','Fractions','Percentages','Ratios'], formula:'Percentage = (Part/Whole) × 100', notes:'Number and numeration form the foundation of all mathematics.' },
+    ]
+  },
+  english: {
+    name: 'English Language', icon: '📖', color: '#00c97a',
+    topics: [
+      { id:'comprehension',    name:'Comprehension',    free:true,  duration:20, keys:['Inference','Main idea','Vocabulary in context'] },
+      { id:'essay-writing',    name:'Essay Writing',    free:true,  duration:25, keys:['Introduction','Body paragraphs','Conclusion','Transitions'] },
+      { id:'summary',          name:'Summary Writing',  free:false, duration:18, keys:['Identifying key points','Paraphrasing','Conciseness'] },
+      { id:'vocabulary',       name:'Vocabulary',       free:false, duration:15, keys:['Synonyms','Antonyms','Idioms and phrases'] },
+      { id:'oral-english',     name:'Oral English',     free:false, duration:20, keys:['Phonetics','Stress patterns','Intonation'] },
+      { id:'figures-of-speech',name:'Literary Devices', free:false, duration:16, keys:['Simile','Metaphor','Personification','Hyperbole'] },
+    ]
+  },
+  physics: {
+    name: 'Physics', icon: '⚛️', color: '#7c3aed',
+    topics: [
+      { id:'mechanics',        name:'Mechanics',        free:true,  duration:25, keys:["Newton's Laws","Momentum","Work, Energy & Power"], formula:'F = ma', notes:"Newton's second law: Force equals mass times acceleration." },
+      { id:'waves',            name:'Waves & Sound',    free:false, duration:20, keys:['Wave properties','Interference','Resonance'], formula:'v = fλ', notes:'Wave speed equals frequency multiplied by wavelength.' },
+      { id:'electricity',      name:'Electricity',      free:false, duration:22, keys:["Ohm's Law","Resistors in series/parallel","Electrical power"], formula:'V = IR', notes:"Ohm's Law: Voltage = Current × Resistance." },
+      { id:'magnetism',        name:'Magnetism',        free:false, duration:18, keys:['Magnetic fields','Electromagnetic induction','Lenz\'s Law'] },
+      { id:'optics',           name:'Optics',           free:false, duration:20, keys:['Reflection','Refraction','Lenses','Mirrors'], formula:'1/f = 1/v + 1/u' },
+      { id:'thermodynamics',   name:'Thermodynamics',   free:false, duration:22, keys:['Temperature','Heat transfer','Gas laws'] },
+      { id:'modern-physics',   name:'Modern Physics',   free:false, duration:18, keys:['Radioactivity','Nuclear reactions','Photoelectric effect'] },
+    ]
+  },
+  chemistry: {
+    name: 'Chemistry', icon: '🧪', color: '#ff6b35',
+    topics: [
+      { id:'periodic-table',   name:'Periodic Table',   free:true,  duration:20, keys:['Groups & periods','Electron configuration','Trends'] },
+      { id:'bonding',          name:'Chemical Bonding', free:false, duration:22, keys:['Ionic bonding','Covalent bonding','Metallic bonding'] },
+      { id:'organic-chem',     name:'Organic Chemistry',free:false, duration:28, keys:['Hydrocarbons','Functional groups','IUPAC naming'] },
+      { id:'acids-bases',      name:'Acids & Bases',    free:false, duration:18, keys:['pH scale','Neutralisation','Buffer solutions'], formula:'pH = -log[H⁺]' },
+      { id:'equilibrium',      name:'Equilibrium',      free:false, duration:20, keys:["Le Chatelier's principle","Equilibrium constant Kc"] },
+      { id:'electrochemistry', name:'Electrochemistry', free:false, duration:20, keys:['Electrolysis','Electrochemical cells','Faraday\'s laws'] },
+      { id:'organic-reactions',name:'Organic Reactions',free:false, duration:24, keys:['Addition','Substitution','Elimination','Polymerisation'] },
+    ]
+  },
+  biology: {
+    name: 'Biology', icon: '🌿', color: '#0891b2',
+    topics: [
+      { id:'cell-biology',  name:'Cell Biology',      free:true,  duration:20, keys:['Cell organelles','Cell division','Osmosis & diffusion'] },
+      { id:'genetics',      name:'Genetics',          free:false, duration:24, keys:["Mendel's laws","DNA structure","Inheritance patterns"] },
+      { id:'ecology',       name:'Ecology',           free:false, duration:18, keys:['Food chains','Ecosystems','Population dynamics'] },
+      { id:'reproduction',  name:'Reproduction',      free:false, duration:22, keys:['Sexual vs asexual','Human reproduction','Fertilisation'] },
+      { id:'nutrition',     name:'Nutrition',         free:false, duration:16, keys:['Nutrients','Digestion','Photosynthesis'] },
+      { id:'transport',     name:'Transport Systems', free:false, duration:18, keys:['Blood','Heart','Xylem & phloem'] },
+      { id:'evolution',     name:'Evolution',         free:false, duration:16, keys:["Darwin's theory","Natural selection","Adaptation"] },
+    ]
+  },
+  economics: {
+    name: 'Economics', icon: '📈', color: '#f59e0b',
+    topics: [
+      { id:'demand-supply',         name:'Demand & Supply',        free:true,  duration:20, keys:['Law of demand','Supply curves','Equilibrium price'] },
+      { id:'national-income',       name:'National Income',        free:false, duration:22, keys:['GDP','GNP','NNP','Circular flow'] },
+      { id:'money-banking',         name:'Money & Banking',        free:false, duration:18, keys:['Functions of money','Commercial banks','Central bank'] },
+      { id:'public-finance',        name:'Public Finance',         free:false, duration:16, keys:['Taxation','Government expenditure','Budget'] },
+      { id:'international-trade',   name:'International Trade',    free:false, duration:18, keys:['Comparative advantage','Balance of payments','Exchange rates'] },
+      { id:'development-economics', name:'Development Economics',  free:false, duration:20, keys:['Economic growth','Development indicators','Poverty'] },
+    ]
+  },
+  government: {
+    name: 'Government', icon: '🏛️', color: '#6366f1',
+    topics: [
+      { id:'constitution',           name:'Constitution',          free:true,  duration:18, keys:['Types of constitution','Constitutionalism','Nigerian constitution'] },
+      { id:'legislature',            name:'Legislature',           free:false, duration:16, keys:['Functions of legislature','Bicameral system','Law-making process'] },
+      { id:'executive',              name:'Executive',             free:false, duration:16, keys:['Presidential system','Parliamentary system','Cabinet'] },
+      { id:'judiciary',              name:'Judiciary',             free:false, duration:16, keys:['Independence of judiciary','Court system','Rule of law'] },
+      { id:'federalism',             name:'Federalism',            free:false, duration:18, keys:['Features of federalism','Devolution of power','Nigerian federalism'] },
+      { id:'electoral-process',      name:'Electoral Process',     free:false, duration:16, keys:['Electoral systems','INEC','Voting behaviour'] },
+      { id:'international-relations',name:'International Relations',free:false, duration:20, keys:['UN','AU','Foreign policy','Diplomacy'] },
+    ]
+  },
+  literature: {
+    name: 'Literature', icon: '📚', color: '#ec4899',
+    topics: [
+      { id:'prose',          name:'Prose',          free:true,  duration:20, keys:['Plot','Character','Theme','Setting','Point of view'] },
+      { id:'drama',          name:'Drama',          free:false, duration:20, keys:['Acts & scenes','Stage directions','Dramatic irony'] },
+      { id:'poetry',         name:'Poetry',         free:false, duration:22, keys:['Rhythm','Rhyme scheme','Imagery','Tone','Persona'] },
+      { id:'oral-literature',name:'Oral Literature',free:false, duration:16, keys:['Folktales','Proverbs','Riddles','Legends'] },
+      { id:'literary-devices',name:'Literary Devices',free:false,duration:18,keys:['Metaphor','Simile','Alliteration','Irony','Symbolism'] },
+    ]
+  },
+  geography: {
+    name: 'Geography', icon: '🌍', color: '#10b981',
+    topics: [
+      { id:'physical-geography',name:'Physical Geography', free:true,  duration:20, keys:['Landforms','Rivers','Mountains','Weathering'] },
+      { id:'human-geography',   name:'Human Geography',   free:false, duration:18, keys:['Population','Settlement','Migration','Urbanisation'] },
+      { id:'map-work',          name:'Map Work',           free:false, duration:16, keys:['Scale','Contours','Grid references','Map types'] },
+      { id:'climate',           name:'Climate',            free:false, duration:20, keys:['Weather vs climate','Climate zones','Nigerian climate'] },
+      { id:'population',        name:'Population Studies', free:false, duration:18, keys:['Population growth','Demographics','Census'] },
+      { id:'resources',         name:'Natural Resources',  free:false, duration:18, keys:['Minerals','Agriculture','Energy resources'] },
+    ]
+  },
+};
 
-let CURRICULUM   = null;
-let QUESTIONS    = null;
-let activeSubject = 'mathematics';
-let activeTopic   = null;
-let quizState     = { questions: [], current: 0, answers: {}, submitted: false };
+/* ── STATE ── */
+let currentSubjectId = 'mathematics';
+let currentTopicId   = null;
+let quizAnswers      = {};
+let quizData         = [];
+const QUIZ_BANK = {
+  quadratics: [
+    { q:'Solve x² - 5x + 6 = 0', opts:['x=2,3','x=-2,-3','x=1,6','x=-1,-6'], ans:0 },
+    { q:'The discriminant of ax² + bx + c = 0 is:', opts:['b²-4ac','b²+4ac','√b-4ac','-b/2a'], ans:0 },
+    { q:'Which method solves x² + 4x + 4 = 0?', opts:['Perfect square','Quadratic formula','Factorisation','All of the above'], ans:3 },
+  ],
+  default: [
+    { q:'This topic is important for your exam. How confident are you?', opts:['Very confident','Fairly confident','Not very confident','Not at all confident'], ans:0 },
+    { q:'Practice makes perfect. How often do you revise this topic?', opts:['Daily','Weekly','Monthly','Rarely'], ans:0 },
+    { q:'Would you like SmartPath to recommend more practice here?', opts:['Yes please','Maybe','No, I\'m fine','Not sure'], ans:0 },
+  ],
+};
 
-// ── Load curriculum and questions JSON ──────────────────────────
-async function loadData() {
-  try {
-    const [cRes, qRes] = await Promise.all([
-      fetch('/data/curriculum.json'),
-      fetch('/data/questions.json'),
-    ]);
-    CURRICULUM = await cRes.json();
-    QUESTIONS  = await qRes.json();
-    return true;
-  } catch (e) {
-    document.getElementById('topicList').innerHTML =
-      `<div class="error-banner">⚠️ Could not load curriculum data.<br><small>${e.message}</small></div>`;
-    return false;
-  }
+/* ── SWITCH SUBJECT ── */
+function switchSubject(subjectId, tabEl) {
+  currentSubjectId = subjectId;
+  /* Update tabs */
+  document.querySelectorAll('.subject-tab').forEach(t => t.classList.remove('active'));
+  if (tabEl) tabEl.classList.add('active');
+  /* Update sidebar */
+  renderSidebar(subjectId);
+  /* Reset main panel */
+  resetMainPanel();
 }
 
-// ── Build subject tab bar ───────────────────────────────────────
-function buildTabs() {
-  const tabBar = document.getElementById('subjectTabs');
-  tabBar.innerHTML = '';
-
-  // If logged in, only show the student's selected subjects
-  const examSubjects = (typeof getExamSubjects === 'function') ? getExamSubjects() : null;
-
-  Object.entries(CURRICULUM.subjects).forEach(([key, subj]) => {
-    // Filter by exam_subjects if available
-    if (examSubjects && examSubjects.length > 0 && !examSubjects.includes(key)) return;
-
-    const btn = document.createElement('button');
-    btn.className = 'subj-tab' + (key === activeSubject ? ' active' : '');
-    btn.style.cssText = `--tab-color:${subj.color || 'var(--accent)'}`;
-    btn.dataset.subject = key;
-    btn.innerHTML = `<span>${subj.icon || ''}</span> ${subj.label.replace(' Syllabus', '')}`;
-    btn.addEventListener('click', () => switchSubject(key, btn));
-    tabBar.appendChild(btn);
-  });
-}
-
-function switchSubject(key, el) {
-  activeSubject = key;
-  document.querySelectorAll('.subj-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  activeTopic = null;
-  loadSubject(key);
-}
-
-// ── Render sidebar for a subject ────────────────────────────────
-function loadSubject(key) {
-  const subj = CURRICULUM.subjects[key];
+function renderSidebar(subjectId) {
+  const subj = CURRICULUM[subjectId];
   if (!subj) return;
+  document.getElementById('sidebar-subject-title').textContent = subj.name;
+  document.getElementById('sidebar-topic-count').textContent = `${subj.topics.length} topics`;
 
-  document.getElementById('sidebarSubject').textContent = subj.label;
-  document.getElementById('sidebarMeta').textContent   = subj.meta || '';
+  const isPremium = currentProfile?.is_premium;
+  const list = document.getElementById('topic-list');
+  list.innerHTML = subj.topics.map((t, i) => {
+    const isLocked   = !t.free && !isPremium;
+    const statusIcon = isLocked ? '🔒' : (i === 0 ? '▶' : '○');
+    return `
+      <div class="topic-item${isLocked ? ' locked' : ''}" data-topic="${t.id}" onclick="${isLocked ? `toast('Subscribe to unlock this lesson')` : `loadTopic('${t.id}')`}">
+        <span class="topic-status">${statusIcon}</span>
+        <span class="topic-name">${t.name}</span>
+        ${t.free ? '<span style="font-size:.68rem;font-weight:700;color:var(--accent2);background:rgba(0,201,122,.1);padding:2px 6px;border-radius:4px">FREE</span>' : ''}
+      </div>`;
+  }).join('');
+}
 
-  const allTopics = subj.sections.flatMap(s => s.topics);
-  const doneCount = allTopics.filter(t => t.done).length;
-  const pct = allTopics.length ? Math.round((doneCount / allTopics.length) * 100) : 0;
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressLabel').textContent = `${doneCount} of ${allTopics.length} topics completed`;
+/* ── LOAD TOPIC ── */
+function loadTopic(topicId) {
+  currentTopicId = topicId;
+  const subj  = CURRICULUM[currentSubjectId];
+  const topic = subj?.topics.find(t => t.id === topicId);
+  if (!topic) return;
 
-  const list = document.getElementById('topicList');
-  list.innerHTML = '';
-  subj.sections.forEach(section => {
-    const sec = document.createElement('div');
-    sec.className = 'topic-section';
-    sec.innerHTML = `<div class="topic-section-label">${section.title}</div>`;
-    section.topics.forEach(topic => {
-      const item = document.createElement('div');
-      const isActive = activeTopic?.id === topic.id;
-      item.className = `topic-item${isActive ? ' active' : ''}`;
-      item.id = 'ti-' + topic.id;
-
-      // Status icon: done ✓, free ▶, locked 🔒
-      // Grade level is NEVER shown in the sidebar per §23 / §30
-      const statusCls  = topic.done ? 'status-done' : topic.free ? 'status-free' : 'status-lock';
-      const statusIcon = topic.done ? '✓' : topic.free ? '▶' : '🔒';
-      const badgeCls   = topic.free ? 'badge-free' : 'badge-lock';
-      const badgeTxt   = topic.free ? 'FREE' : 'UNLOCK';
-
-      item.innerHTML = `
-        <div class="topic-status ${statusCls}">${statusIcon}</div>
-        <div class="topic-info">
-          <div class="topic-name-text">${topic.name}</div>
-          <div class="topic-detail">${topic.duration} · ${topic.questionCount} questions</div>
-        </div>
-        <span class="topic-badge ${badgeCls}">${badgeTxt}</span>`;
-      item.addEventListener('click', () => openTopic(topic));
-      sec.appendChild(item);
-    });
-    list.appendChild(sec);
+  /* Active state in sidebar */
+  document.querySelectorAll('.topic-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.topic === topicId);
   });
 
-  // Auto-open first free topic
-  const firstFree = allTopics.find(t => t.free) || allTopics[0];
-  if (firstFree) openTopic(firstFree);
-}
+  /* Lesson info */
+  document.getElementById('lesson-subject-tag').textContent = subj.name;
+  document.getElementById('lesson-title').textContent = topic.name;
+  document.getElementById('lesson-duration').textContent = `⏱ ${topic.duration || '—'} min`;
+  document.getElementById('lesson-topics-count').textContent = `📚 ${subj.topics.length} topics`;
+  document.getElementById('practice-link').href = `/cbt.html?subject=${currentSubjectId}&topic=${topicId}`;
 
-// ── Open a topic ────────────────────────────────────────────────
-function openTopic(topic) {
-  activeTopic = topic;
+  /* Determine lesson path based on grade level */
+  const grade    = currentProfile?.current_skill_level || 3;
+  const lessonPath = recommendVideoForTopic(topicId, grade);
 
-  // Sidebar active highlight
-  document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active'));
-  const el = document.getElementById('ti-' + topic.id);
-  if (el) el.classList.add('active');
+  /* Show/hide video locked overlay */
+  const isPremium = currentProfile?.is_premium;
+  const isLocked  = !topic.free && !isPremium;
+  const lockedEl  = document.getElementById('video-locked');
+  const placeholder = document.getElementById('video-play-placeholder');
+  const iframe    = document.getElementById('lesson-iframe');
 
-  // Lesson info panel
-  document.getElementById('lessonTag').textContent     = topic.tag || activeSubject;
-  document.getElementById('lessonTitle').textContent   = topic.name;
-  document.getElementById('lessonDuration').textContent = topic.duration || '—';
-  document.getElementById('lessonQCount').textContent  = `${topic.questionCount} practice questions`;
-  const freeTag = document.getElementById('lessonFreeTag');
-  freeTag.style.display = topic.free ? 'flex' : 'none';
-
-  // Lesson body
-  document.getElementById('lessonNotes').textContent = topic.notes || '';
-  document.getElementById('formulaText').textContent = topic.formula || '—';
-  const kpList = document.getElementById('keyPoints');
-  kpList.innerHTML = (topic.keyPoints || []).map((kp, i) =>
-    `<li class="key-point"><span class="kp-dot">${i + 1}</span>${kp}</li>`
-  ).join('');
-
-  // Video area
-  const overlay     = document.getElementById('lockedOverlay');
-  const placeholder = document.getElementById('videoPlaceholder');
-  const embed       = document.getElementById('videoEmbed');
-  embed.style.display     = 'none';
-  embed.src               = '';
-  placeholder.style.display = 'flex';
-  overlay.classList.toggle('show', !topic.free);
-  document.getElementById('videoLabel').textContent =
-    topic.videoUrl ? 'Click to play lesson' : 'Video coming soon — read notes below';
-
-  // Load quiz
-  loadQuiz(topic);
-
-  // Scroll main content back to top
-  document.getElementById('mainContent').scrollTo({ top: 0, behavior: 'smooth' });
-
-  // Track page view action (if auth.js loaded)
-  if (typeof trackAction === 'function') {
-    trackAction('topic_opened', { topic_id: topic.id, subject: activeSubject });
+  if (isLocked) {
+    lockedEl.style.display    = 'flex';
+    placeholder.style.display = 'none';
+    iframe.style.display      = 'none';
+  } else {
+    lockedEl.style.display    = 'none';
+    placeholder.style.display = 'flex';
+    iframe.style.display      = 'none';
+    /* Store path for play button */
+    iframe.dataset.src = lessonPath;
   }
-}
 
-// ── Play video ──────────────────────────────────────────────────
-function playVideo() {
-  if (!activeTopic?.videoUrl) return;
-  const embed = document.getElementById('videoEmbed');
-  const isYouTube = activeTopic.videoUrl.includes('youtube.com') || activeTopic.videoUrl.includes('youtu.be');
-  embed.src = isYouTube ? activeTopic.videoUrl + '?autoplay=1' : activeTopic.videoUrl;
-  embed.style.display = 'block';
-  document.getElementById('videoPlaceholder').style.display = 'none';
-}
+  /* Lesson body */
+  const bodyEl = document.getElementById('lesson-body');
+  bodyEl.style.display = 'block';
+  const keysList = document.getElementById('key-points-list');
+  keysList.innerHTML = (topic.keys || []).map(k => `<li>${k}</li>`).join('');
 
-function scrollToQuiz() {
-  document.getElementById('quizSection').scrollIntoView({ behavior: 'smooth' });
-}
-
-function nextTopic() {
-  const subj = CURRICULUM.subjects[activeSubject];
-  const all  = subj.sections.flatMap(s => s.topics);
-  const idx  = all.findIndex(t => t.id === activeTopic?.id);
-  if (all[idx + 1]) openTopic(all[idx + 1]);
-}
-
-// ════════════════════════════════════════════════════════════════
-//  QUIZ ENGINE
-// ════════════════════════════════════════════════════════════════
-function loadQuiz(topic) {
-  const allQ = QUESTIONS[activeSubject] || [];
-  let questions = [];
-  if (topic.quizIds && topic.quizIds.length) {
-    questions = topic.quizIds.map(id => allQ.find(q => q.id === id)).filter(Boolean);
+  const formulaBox = document.getElementById('formula-box');
+  if (topic.formula) {
+    formulaBox.style.display = 'block';
+    formulaBox.textContent   = topic.formula;
+  } else {
+    formulaBox.style.display = 'none';
   }
-  if (!questions.length) {
-    questions = [...allQ].sort(() => Math.random() - 0.5).slice(0, 3);
-  }
-  quizState = { questions, current: 0, answers: {}, submitted: false };
-  document.getElementById('scoreDisplay').style.display = 'none';
-  document.getElementById('quizBody').style.display     = 'block';
-  renderQuizQ();
+
+  const notesEl = document.getElementById('lesson-notes');
+  notesEl.textContent = topic.notes || '';
+
+  /* Hide quiz until triggered */
+  document.getElementById('topic-quiz').style.display  = 'none';
+  document.getElementById('adaptive-banner-slot').style.display = 'none';
+
+  /* Track */
+  trackAction('topic_viewed', { subject: currentSubjectId, topicId });
 }
 
-function renderQuizQ() {
-  const { questions, current, answers, submitted } = quizState;
-  const q = questions[current];
-  if (!q) return;
-  document.getElementById('quizCount').textContent = `Question ${current + 1} of ${questions.length}`;
-  document.getElementById('quizBody').innerHTML = `
-    <div class="quiz-question">${q.q}</div>
-    <div class="quiz-options">
-      ${q.opts.map((o, i) => {
-        let cls = 'quiz-opt';
-        if (submitted) {
-          if (i === q.ans) cls += ' correct';
-          else if (answers[current] === i) cls += ' wrong';
-        } else if (answers[current] === i) cls += ' selected';
-        return `<div class="${cls}" onclick="selectQ(${i})">
-          <span class="opt-ltr">${String.fromCharCode(65 + i)}</span>${o}
-        </div>`;
-      }).join('')}
-    </div>
-    <div class="explanation-box${submitted ? ' show' : ''}">${submitted ? '💡 ' + q.exp : ''}</div>
-    <div class="quiz-nav">
-      <button class="quiz-btn quiz-btn-secondary" onclick="quizNav(-1)" ${current === 0 ? 'style="visibility:hidden"' : ''}>← Prev</button>
-      <button class="quiz-btn quiz-btn-primary" onclick="${current === questions.length - 1 ? 'submitQuiz()' : 'quizNav(1)'}">
-        ${current === questions.length - 1 ? (submitted ? 'See Results' : 'Submit') : 'Next →'}
-      </button>
-    </div>`;
+function playLesson() {
+  const iframe = document.getElementById('lesson-iframe');
+  const ph     = document.getElementById('video-play-placeholder');
+  const src    = iframe.dataset.src;
+  if (!src) return;
+  iframe.src = src;
+  iframe.style.display = 'block';
+  ph.style.display     = 'none';
 }
 
-function selectQ(i) {
-  if (quizState.submitted) return;
-  quizState.answers[quizState.current] = i;
-  renderQuizQ();
-}
-
-function quizNav(dir) {
-  quizState.current = Math.max(0, Math.min(quizState.questions.length - 1, quizState.current + dir));
-  renderQuizQ();
-}
-
-function submitQuiz() {
-  quizState.submitted = true;
-  let correct = 0;
-  quizState.questions.forEach((q, i) => { if (quizState.answers[i] === q.ans) correct++; });
-  const total = quizState.questions.length;
-  renderQuizQ();
-  document.getElementById('quizBody').style.display     = 'none';
-  document.getElementById('scoreDisplay').style.display = 'block';
-  document.getElementById('scoreBadge').textContent     = `${correct}/${total}`;
-  const pct = Math.round((correct / total) * 100);
-  document.getElementById('scoreMsg').textContent =
-    pct === 100 ? '🎉 Perfect score! You have mastered this topic.' :
-    pct >= 66   ? '👍 Good job! Review the explanations and try again.' :
-                  '📚 Keep practising. Re-read the notes and retry.';
-  document.getElementById('quizCount').textContent = `Score: ${correct}/${total}`;
-
-  // ── Save mastery — uses accuracy_avg (§31 fix: was accuracy_score) ──
-  saveQuizMastery(correct, total);
-}
-
-async function saveQuizMastery(correct, total) {
-  if (typeof sb === 'undefined' || !currentUser || !activeTopic) return;
-  const accuracy = Math.round((correct / total) * 100);
+function onIframeLoad() {
+  /* If the grade-specific path returned a 404, fall back to the standard lesson.
+     We detect this by checking whether the iframe landed on a browser error page
+     (contentDocument will be accessible but will have no <title> matching our lessons). */
+  const iframe = document.getElementById('lesson-iframe');
+  if (!iframe || !iframe.src) return;
   try {
+    const iDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (iDoc && iDoc.title && iDoc.title.toLowerCase().includes('not found')) {
+      /* Grade variant missing — strip /grade1 or /grade2 segment and reload standard */
+      const fallback = iframe.src.replace(/\/grade[12]\/index\.html$/, '/index.html');
+      if (fallback !== iframe.src) { iframe.src = fallback; }
+    }
+  } catch (_) { /* cross-origin — no fallback needed, lesson loaded fine */ }
+}
+
+/* Listen for lesson_completed message from iframe */
+window.addEventListener('message', async (e) => {
+  if (e.data?.type === 'lesson_completed') {
+    await addXP(20, '📹 lesson completed');
+    trackAction('video_watched', { topicId: e.data.topic || currentTopicId });
+    toast('+20 XP — Lesson completed! 📹');
+  }
+});
+
+/* ── TOPIC QUIZ ── */
+function openTopicQuiz() {
+  if (!currentTopicId) { toast('Please select a topic first'); return; }
+  const questions = QUIZ_BANK[currentTopicId] || QUIZ_BANK['default'];
+  quizData    = questions;
+  quizAnswers = {};
+
+  const container = document.getElementById('quiz-questions');
+  container.innerHTML = questions.map((q, qi) => `
+    <div class="quiz-q">
+      <div class="quiz-q-text">${qi + 1}. ${q.q}</div>
+      <div class="quiz-opts">
+        ${q.opts.map((opt, oi) => `
+          <button class="drill-option" id="quiz-opt-${qi}-${oi}" onclick="selectQuizAnswer(${qi},${oi})">
+            <span class="opt-label">${String.fromCharCode(65+oi)}</span>
+            <span class="opt-text">${opt}</span>
+          </button>`).join('')}
+      </div>
+    </div>`).join('');
+
+  document.getElementById('topic-quiz').style.display = 'block';
+  document.getElementById('classroom-main').scrollTo({ top: document.getElementById('classroom-main').scrollHeight, behavior: 'smooth' });
+}
+
+function selectQuizAnswer(qi, oi) {
+  quizAnswers[qi] = oi;
+  /* Highlight selected */
+  const q = quizData[qi];
+  q.opts.forEach((_, i) => {
+    const btn = document.getElementById(`quiz-opt-${qi}-${i}`);
+    if (btn) btn.classList.toggle('selected', i === oi);
+  });
+}
+
+async function submitQuiz() {
+  if (Object.keys(quizAnswers).length < quizData.length) {
+    toast('Please answer all questions before submitting'); return;
+  }
+
+  let correct = 0;
+  quizData.forEach((q, qi) => {
+    const isCorrect = quizAnswers[qi] === q.ans;
+    if (isCorrect) correct++;
+    /* Show correct/wrong */
+    q.opts.forEach((_, oi) => {
+      const btn = document.getElementById(`quiz-opt-${qi}-${oi}`);
+      if (!btn) return;
+      if (oi === q.ans) btn.classList.add('correct');
+      else if (oi === quizAnswers[qi]) btn.classList.add('wrong');
+    });
+  });
+
+  const accuracy = Math.round((correct / quizData.length) * 100);
+  toast(`Quiz complete! ${correct}/${quizData.length} correct (${accuracy}%)`);
+
+  /* Save mastery — uses accuracy_avg (fix per §31) */
+  if (currentUser && currentTopicId) {
     await sb.from('topic_mastery').upsert({
-      user_id: currentUser.id,
-      topic_id: activeTopic.id,        // §31 fix: topic_id not topic
-      accuracy_avg: accuracy,           // §31 fix: accuracy_avg not accuracy_score
-      updated_at: new Date().toISOString(),
+      user_id:      currentUser.id,
+      topic_id:     currentTopicId,
+      accuracy_avg: accuracy,     /* ← correct column name per §31 */
+      mastery_level: calcMastery(accuracy, quizData.length),
+      status:       accuracy >= 75 ? 'MASTERED' : 'IN_PROGRESS',
+      last_studied: new Date().toISOString(),
     }, { onConflict: 'user_id,topic_id' });
 
-    // Award XP and track action
-    if (typeof addXP === 'function') addXP(correct * 5, 'quiz_completed');
-    if (typeof trackAction === 'function') {
-      trackAction('quiz_completed', { topic_id: activeTopic.id, score: accuracy });
+    /* Record individual responses */
+    for (const [qi, oi] of Object.entries(quizAnswers)) {
+      await recordQuizResponse(currentTopicId, quizAnswers[qi] === quizData[qi].ans);
     }
-    // Notify parent frame if embedded as lesson
-    window.parent.postMessage({ type: 'lesson_completed', topic: activeTopic.id }, '*');
-  } catch (e) {
-    console.warn('saveQuizMastery error:', e.message);
+
+    await addXP(correct * 5, '📝 quiz');
+    /* Apply adaptive pyramid */
+    await applyAdaptivePyramid(currentTopicId, accuracy, 0);
   }
+
+  document.getElementById('quiz-submit-btn').textContent = '✓ Submitted';
+  document.getElementById('quiz-submit-btn').disabled = true;
 }
 
-function retryQuiz() {
-  document.getElementById('scoreDisplay').style.display = 'none';
-  document.getElementById('quizBody').style.display     = 'block';
-  loadQuiz(activeTopic);
+async function recordQuizResponse(topicId, isCorrect) {
+  if (!currentUser) return;
+  const entry = {
+    user_id:    currentUser.id,
+    topic_id:   topicId,
+    exam_type:  currentProfile?.exam_types?.[0] || 'JAMB',
+    is_correct: isCorrect,
+    time_spent: 0,
+    grade_level: currentProfile?.current_skill_level || 3,
+  };
+  await sb.from('response_logs').insert(entry).catch(console.warn);
 }
 
-// ── Nav helpers ─────────────────────────────────────────────────
-function switchModalTab(tab) {
-  const loginForm = document.getElementById('modal-login-form');
-  const signupForm = document.getElementById('modal-signup-form');
-  document.getElementById('modal-tab-login').classList.toggle('active', tab === 'login');
-  document.getElementById('modal-tab-signup').classList.toggle('active', tab === 'signup');
-  loginForm.style.display  = tab === 'login'  ? 'block' : 'none';
-  signupForm.style.display = tab === 'signup' ? 'block' : 'none';
+/* ── NEXT TOPIC ── */
+function nextTopic() {
+  const subj   = CURRICULUM[currentSubjectId];
+  if (!subj) return;
+  const idx    = subj.topics.findIndex(t => t.id === currentTopicId);
+  const next   = subj.topics[idx + 1];
+  if (next) loadTopic(next.id);
+  else toast('You\'ve reached the last topic in this subject! 🎉');
 }
 
-function handleModalLogin() {
-  const email = document.getElementById('modal-login-email').value.trim();
-  const pass  = document.getElementById('modal-login-password').value;
-  if (!email || !pass) { if (typeof toast === 'function') toast('Please fill in all fields'); return; }
-  if (typeof window._authHandleLogin === 'function') window._authHandleLogin(email, pass);
+function resetMainPanel() {
+  currentTopicId = null;
+  document.getElementById('lesson-title').textContent = 'Select a Topic';
+  document.getElementById('lesson-body').style.display  = 'none';
+  document.getElementById('topic-quiz').style.display   = 'none';
+  document.getElementById('video-play-placeholder').style.display = 'flex';
+  document.getElementById('video-locked').style.display = 'none';
+  const iframe = document.getElementById('lesson-iframe');
+  iframe.src   = '';
+  iframe.style.display = 'none';
 }
 
-function toggleMobileNav() {
-  const drawer = document.getElementById('mobile-nav-drawer');
-  const isOpen = drawer.classList.contains('open');
-  drawer.classList.toggle('open', !isOpen);
-  document.getElementById('nav-hamburger').textContent = isOpen ? '\u2630' : '\u2715';
-}
-function closeMobileNav() {
-  document.getElementById('mobile-nav-drawer').classList.remove('open');
-  document.getElementById('nav-hamburger').textContent = '\u2630';
-}
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded', () => {
+  /* Init sidebar with defaults */
+  renderSidebar('mathematics');
 
-// ── Boot ────────────────────────────────────────────────────────
-(async () => {
-  const ok = await loadData();
-  if (!ok) return;
+  /* Wait for auth, then personalise tabs */
+  const poll = setInterval(() => {
+    if (typeof sb !== 'undefined') {
+      clearInterval(poll);
+      setTimeout(() => {
+        const subjects = getExamSubjects();
+        if (subjects.length) {
+          /* Rebuild tabs from student's subjects */
+          const tabBar = document.getElementById('subject-tabs-bar');
+          const subjectMeta = {
+            mathematics:'📐 Mathematics', english:'📖 English', physics:'⚛️ Physics',
+            chemistry:'🧪 Chemistry', biology:'🌿 Biology', economics:'📈 Economics',
+            government:'🏛️ Government', literature:'📚 Literature', geography:'🌍 Geography',
+            commerce:'🏪 Commerce', accounts:'💼 Accounts',
+          };
+          tabBar.innerHTML = subjects.map((id, i) => `
+            <button class="subject-tab${i===0?' active':''}" data-subject="${id}"
+                    onclick="switchSubject('${id}',this)">${subjectMeta[id]||id}</button>`).join('');
+          currentSubjectId = subjects[0];
+          renderSidebar(subjects[0]);
+        }
 
-  // Read ?subject= param from URL
-  const params = new URLSearchParams(window.location.search);
-  const subj = params.get('subject');
-  if (subj && CURRICULUM.subjects[subj]) activeSubject = subj;
-
-  buildTabs();
-  loadSubject(activeSubject);
-
-  // Track page load
-  if (typeof trackAction === 'function') {
-    trackAction('page_load', { page: 'classroom' });
-  }
-})();
-
-// Re-build tabs once auth loads (so student's exam_subjects filter applies)
-document.addEventListener('authReady', () => {
-  if (CURRICULUM) buildTabs();
+        /* Check URL params */
+        const params   = new URLSearchParams(location.search);
+        const subjParam = params.get('subject');
+        const topicParam = params.get('topic');
+        if (subjParam) {
+          switchSubject(subjParam, document.querySelector(`[data-subject="${subjParam}"]`));
+          if (topicParam) setTimeout(() => loadTopic(topicParam), 100);
+        }
+      }, 300);
+    }
+  }, 100);
 });
-</script>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
-        .catch(err => console.warn('SW registration failed:', err));
-    });
-  }
 </script>
 </body>
 </html>
