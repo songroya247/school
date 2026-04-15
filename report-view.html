@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Performance Report — UltimateEdge School</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/ai-engine.js"></script>
+<style>
+body { background: #f5f7fa; }
+.report-wrap { max-width: 860px; margin: 40px auto; padding: 0 24px; }
+.report-card { background: #fff; border-radius: 14px; box-shadow: 0 2px 16px rgba(0,0,0,.08); padding: 48px; margin-bottom: 24px; }
+.report-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid var(--border); }
+.report-logo { font-family: var(--font-head); font-size: 2rem; color: var(--accent); letter-spacing: .07em; }
+.report-meta { font-size: .85rem; color: var(--muted); text-align: right; line-height: 1.7; }
+.report-student-name { font-family: var(--font-head); font-size: 2.5rem; color: var(--text); margin-bottom: 6px; }
+.report-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+.report-stat { background: var(--surface2); border-radius: 10px; padding: 16px; text-align: center; }
+.report-stat-label { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+.report-stat-val { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 700; color: var(--text); }
+.report-stat-val.accent { color: var(--accent); }
+.report-stat-val.success { color: var(--accent2); }
+.report-stat-val.warn { color: var(--warning); }
+.section-divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+.report-section-title { font-family: var(--font-head); font-size: 1.6rem; margin-bottom: 16px; color: var(--text); }
+.weakness-table { width: 100%; border-collapse: collapse; font-size: .88rem; margin-bottom: 24px; }
+.weakness-table th { text-align: left; padding: 10px 12px; background: var(--surface2); font-weight: 700; font-size: .78rem; text-transform: uppercase; color: var(--muted); letter-spacing: .04em; border-bottom: 2px solid var(--border); }
+.weakness-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.weakness-table tr:last-child td { border-bottom: none; }
+.grade-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .75rem; font-weight: 700; }
+.grade-A { background: #d1fae5; color: #065f46; }
+.grade-B { background: #dbeafe; color: #1e40af; }
+.grade-C { background: #fef3c7; color: #92400e; }
+.grade-D { background: #fee2e2; color: #991b1b; }
+.grade-F { background: #fee2e2; color: #991b1b; }
+.commitment-bar-wrap { margin: 12px 0; }
+.commitment-bar-label { display: flex; justify-content: space-between; font-size: .82rem; font-weight: 700; margin-bottom: 6px; }
+.no-print { margin-bottom: 20px; }
+@media print {
+  body { background: #fff; }
+  .no-print { display: none !important; }
+  .report-wrap { margin: 0; padding: 0; }
+  .report-card { box-shadow: none; border-radius: 0; padding: 32px; margin: 0; }
+}
+@media (max-width: 600px) {
+  .report-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .report-card { padding: 24px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- No nav on print report — kept minimal intentionally -->
+<div class="report-wrap">
+
+  <!-- Print / Save button (hidden on print) -->
+  <div class="no-print" style="display:flex;justify-content:space-between;align-items:center">
+    <a href="/dashboard.html" style="color:var(--muted);font-size:.9rem;font-weight:600">← Back to Dashboard</a>
+    <button class="btn btn-primary" onclick="window.print()">🖨 Print / Save as PDF</button>
+  </div>
+
+  <!-- Loading state -->
+  <div id="report-loading" class="report-card" style="text-align:center;padding:48px">
+    <div style="font-size:2rem;margin-bottom:12px">⏳</div>
+    <div style="font-family:var(--font-head);font-size:1.6rem;margin-bottom:8px">Loading Report…</div>
+    <div style="color:var(--muted);font-size:.9rem">Fetching student data from Supabase…</div>
+  </div>
+
+  <!-- Report content (hidden until data loads) -->
+  <div id="report-content" style="display:none">
+
+    <!-- Header -->
+    <div class="report-card">
+      <div class="report-header">
+        <div>
+          <div class="report-logo">ULTIMATEEDGE SCHOOL</div>
+          <div style="font-size:.8rem;color:var(--muted);margin-top:4px">school.ultimateedge.info</div>
+        </div>
+        <div class="report-meta">
+          <div>Performance Report</div>
+          <div id="report-date"></div>
+          <div style="margin-top:4px">Internal use · Teacher / Admin</div>
+        </div>
+      </div>
+
+      <div class="report-student-name" id="report-student-name">Student Name</div>
+      <div style="font-size:.9rem;color:var(--muted)" id="report-student-email"></div>
+
+      <div class="report-stats-grid">
+        <div class="report-stat">
+          <div class="report-stat-label">JAMB Prediction</div>
+          <div class="report-stat-val accent" id="r-jamb-pred">—</div>
+        </div>
+        <div class="report-stat">
+          <div class="report-stat-label">Overall Accuracy</div>
+          <div class="report-stat-val" id="r-accuracy">NIL</div>
+        </div>
+        <div class="report-stat">
+          <div class="report-stat-label">Total XP</div>
+          <div class="report-stat-val success" id="r-xp">0</div>
+        </div>
+        <div class="report-stat">
+          <div class="report-stat-label">Commitment Score</div>
+          <div class="report-stat-val" id="r-commitment">—</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+        <div>
+          <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Exam Types</div>
+          <div id="r-exam-types" style="font-weight:600">—</div>
+        </div>
+        <div>
+          <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Target Score</div>
+          <div id="r-target" style="font-weight:600;font-family:var(--font-mono)">—</div>
+        </div>
+        <div>
+          <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Exam Date</div>
+          <div id="r-exam-date" style="font-weight:600">—</div>
+        </div>
+        <div>
+          <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Subscription</div>
+          <div id="r-subscription" style="font-weight:600">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WAEC/NECO Grade Predictions (ADMIN VIEW — permitted per §15) -->
+    <div class="report-card">
+      <div class="report-section-title">Subject Grade Predictions</div>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px">Internal algorithm — based on mastery level. Not shown to students.</p>
+      <table class="weakness-table" id="grade-predictions-table">
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Mastery</th>
+            <th>WAEC/NECO Grade</th>
+            <th>JAMB Contribution</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="grade-predictions-body">
+          <!-- Rendered by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Per-Topic Weakness Table -->
+    <div class="report-card">
+      <div class="report-section-title">Topic-Level Analysis</div>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px">Topics ranked by mastery level, lowest first.</p>
+      <table class="weakness-table" id="weakness-table">
+        <thead>
+          <tr>
+            <th>Topic</th>
+            <th>Accuracy</th>
+            <th>Mastery</th>
+            <th>WAEC Grade</th>
+            <th>Status</th>
+            <th>Last Studied</th>
+          </tr>
+        </thead>
+        <tbody id="weakness-tbody">
+          <!-- Rendered by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Commitment Score -->
+    <div class="report-card">
+      <div class="report-section-title">Commitment & Engagement</div>
+      <div class="commitment-bar-wrap">
+        <div class="commitment-bar-label">
+          <span>Commitment Score</span>
+          <span id="r-commitment-score" style="font-family:var(--font-mono);color:var(--accent)">—</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill fill-blue" id="r-commitment-bar" style="width:0%"></div></div>
+      </div>
+      <div id="r-commitment-breakdown" style="font-size:.85rem;color:var(--muted);margin-top:12px;line-height:1.7"></div>
+    </div>
+
+  </div><!-- #report-content -->
+</div><!-- .report-wrap -->
+
+<div id="toast"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  /* Set date */
+  document.getElementById('report-date').textContent = new Date().toLocaleDateString('en-NG', { year:'numeric', month:'long', day:'numeric' });
+
+  /* Get token from URL or use current user */
+  const params = new URLSearchParams(location.search);
+  const token  = params.get('token');
+
+  const poll = setInterval(async () => {
+    if (typeof sb !== 'undefined') {
+      clearInterval(poll);
+      await loadReport(token);
+    }
+  }, 100);
+});
+
+async function loadReport(token) {
+  let profile = null;
+
+  if (token) {
+    /* Public report via share token */
+    const { data } = await sb.from('profiles').select('*').eq('report_share_token', token).single();
+    profile = data;
+  } else if (currentProfile) {
+    /* Logged in user viewing own report */
+    profile = currentProfile;
+  } else {
+    document.getElementById('report-loading').innerHTML = `
+      <div style="font-size:2rem;margin-bottom:12px">🔐</div>
+      <div style="font-family:var(--font-head);font-size:1.4rem;margin-bottom:8px">Access Denied</div>
+      <div style="color:var(--muted)">Please provide a valid report token or log in.</div>
+      <a href="/index.html" class="btn btn-primary" style="margin-top:20px">Go to Homepage</a>`;
+    return;
+  }
+
+  if (!profile) {
+    document.getElementById('report-loading').innerHTML = '<div style="color:var(--muted)">Report not found.</div>';
+    return;
+  }
+
+  /* Load topic mastery */
+  const { data: masteryRows } = await sb
+    .from('topic_mastery')
+    .select('*')
+    .eq('user_id', profile.id)
+    .order('mastery_level', { ascending: true, nullsFirst: true });
+
+  /* Load session scores */
+  const { data: sessions } = await sb
+    .from('session_scores')
+    .select('*')
+    .eq('user_id', profile.id)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  /* Render header */
+  document.getElementById('report-student-name').textContent = profile.full_name || 'Unknown Student';
+  document.getElementById('report-student-email').textContent = profile.email || '';
+  document.getElementById('r-jamb-pred').textContent = predictJAMB(profile.accuracy_avg) + ' / 400';
+  document.getElementById('r-accuracy').textContent = profile.accuracy_avg !== null ? `${Math.round(profile.accuracy_avg)}%` : 'NIL';
+  document.getElementById('r-xp').textContent = profile.total_xp || 0;
+  document.getElementById('r-exam-types').textContent = (profile.exam_types || []).join(', ') || '—';
+  document.getElementById('r-target').textContent = profile.target_score ? `${profile.target_score} / 400` : '—';
+  document.getElementById('r-exam-date').textContent = profile.exam_date ? new Date(profile.exam_date).toLocaleDateString('en-NG', { month:'long', year:'numeric' }) : 'Not set';
+  document.getElementById('r-subscription').textContent = profile.is_premium ? '✅ Premium' : '❌ Free';
+
+  /* Commitment score */
+  const commitScore = calcCommitmentScore(profile.usage_logs || []);
+  document.getElementById('r-commitment').textContent  = commitScore;
+  document.getElementById('r-commitment-score').textContent = `${commitScore} / 100`;
+  document.getElementById('r-commitment-bar').style.width = `${commitScore}%`;
+  const logs = profile.usage_logs || [];
+  const drillCount = logs.filter(l => l.action === 'drill_completed').length;
+  const videoCount = logs.filter(l => l.action === 'video_watched').length;
+  document.getElementById('r-commitment-breakdown').innerHTML = `
+    Sessions completed: <strong>${drillCount}</strong> &nbsp;·&nbsp;
+    Videos watched: <strong>${videoCount}</strong> &nbsp;·&nbsp;
+    Total activity logs: <strong>${logs.length}</strong>`;
+
+  /* Subject grade predictions (ADMIN VIEW — permitted) */
+  const subjects = profile.exam_subjects || [];
+  const subjectMeta = {
+    mathematics:'Mathematics', english:'English Language', physics:'Physics',
+    chemistry:'Chemistry', biology:'Biology', economics:'Economics',
+    government:'Government', literature:'Literature', geography:'Geography',
+    commerce:'Commerce', accounts:'Accounts',
+  };
+  const topicSubjectMap = {};
+  const TOPIC_SEEDS_LOCAL = {
+    mathematics:['quadratics','indices','logarithms','calculus','probability','statistics','geometry','trigonometry','algebra','arithmetic'],
+    english:['comprehension','essay-writing','summary','vocabulary','oral-english','figures-of-speech'],
+    physics:['mechanics','waves','electricity','magnetism','optics','thermodynamics','modern-physics'],
+    chemistry:['organic-chem','periodic-table','bonding','acids-bases','equilibrium','electrochemistry'],
+    biology:['cell-biology','genetics','ecology','reproduction','nutrition','transport','evolution'],
+    economics:['demand-supply','national-income','money-banking','public-finance','international-trade'],
+    government:['constitution','legislature','executive','judiciary','federalism','electoral-process'],
+    literature:['prose','drama','poetry','oral-literature','literary-devices'],
+    geography:['physical-geography','human-geography','map-work','climate','population','resources'],
+    commerce:['trade','communication','insurance','banking','warehousing','transport'],
+    accounts:['bookkeeping','final-accounts','ratio-analysis','cash-flow','partnership','company-accounts'],
+  };
+  Object.entries(TOPIC_SEEDS_LOCAL).forEach(([subj, topics]) => {
+    topics.forEach(t => { topicSubjectMap[t] = subj; });
+  });
+
+  const masteryByTopic = {};
+  (masteryRows || []).forEach(r => { masteryByTopic[r.topic_id] = r; });
+
+  /* Subject-level grades */
+  const gradePredTbody = document.getElementById('grade-predictions-body');
+  gradePredTbody.innerHTML = subjects.map(subjId => {
+    const topics    = TOPIC_SEEDS_LOCAL[subjId] || [];
+    const masteries = topics.map(t => masteryByTopic[t]?.mastery_level).filter(m => m !== null && m !== undefined);
+    const avg       = masteries.length ? masteries.reduce((a,b)=>a+b,0) / masteries.length : null;
+    const grade     = predictWAEC(avg); /* INTERNAL — admin only */
+    const gradeCls  = grade ? grade[0] : 'F';
+    const jambContrib = avg !== null ? Math.round(avg * 100) + '%' : 'NIL';
+    const status    = avg === null ? '<span class="status-nil">NIL</span>' : avg >= 0.60 ? '<span class="status-good">On Track</span>' : '<span class="status-warn">Needs Work</span>';
+    return `
+      <tr>
+        <td style="font-weight:700">${subjectMeta[subjId] || subjId}</td>
+        <td style="font-family:var(--font-mono)">${avg !== null ? Math.round(avg*100)+'%' : 'NIL'}</td>
+        <td><span class="grade-pill grade-${gradeCls}">${grade || 'NIL'}</span></td>
+        <td style="font-family:var(--font-mono)">${jambContrib}</td>
+        <td>${status}</td>
+      </tr>`;
+  }).join('') || '<tr><td colspan="5" style="color:var(--muted)">No subject data</td></tr>';
+
+  /* Per-topic weakness table */
+  const tbody = document.getElementById('weakness-tbody');
+  const rows  = (masteryRows || []).slice(0, 20);
+  tbody.innerHTML = rows.length ? rows.map(r => {
+    const grade   = predictWAEC(r.mastery_level); /* INTERNAL — admin only */
+    const gradeCls = grade ? grade[0] : 'F';
+    const lastStudied = r.last_studied ? new Date(r.last_studied).toLocaleDateString('en-NG') : 'Never';
+    const accDisplay = r.accuracy_avg !== null ? `${Math.round(r.accuracy_avg)}%` : 'NIL';
+    const mastDisplay= r.mastery_level !== null ? `${Math.round(r.mastery_level * 100)}%` : 'NIL';
+    const statusHtml = r.status === 'MASTERED' ? '<span class="status-good">Mastered</span>'
+                     : r.status === 'IN_PROGRESS' ? '<span class="status-warn">In Progress</span>'
+                     : '<span class="status-nil">NIL</span>';
+    return `
+      <tr>
+        <td style="font-weight:600">${r.topic_id.replace(/-/g,' ')}</td>
+        <td style="font-family:var(--font-mono)">${accDisplay}</td>
+        <td style="font-family:var(--font-mono)">${mastDisplay}</td>
+        <td><span class="grade-pill grade-${gradeCls}">${grade || 'NIL'}</span></td>
+        <td>${statusHtml}</td>
+        <td style="color:var(--muted);font-size:.82rem">${lastStudied}</td>
+      </tr>`;
+  }).join('') : '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:20px">No session data yet. Student has not practised.</td></tr>';
+
+  /* Show report */
+  document.getElementById('report-loading').style.display  = 'none';
+  document.getElementById('report-content').style.display  = 'block';
+}
+</script>
+</body>
+</html>
