@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   UltimateEdge School — auth.js  v4.1
+   UE School — auth.js  v4.1
    Foundation script. Runs on every page.
    Sets globals: sb, currentUser, currentProfile, toast(),
    addXP(), trackAction(), openAuthModal(), getStudyMode(),
@@ -347,6 +347,32 @@ async function handleSignup(event) {
   } catch (err) {
     toast(`Error: ${err.message}`);
     if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+  }
+}
+
+
+/* ── HANDLE FORGOT PASSWORD ── */
+async function handleForgotPassword(event) {
+  event?.preventDefault();
+  const emailEl = document.getElementById('login-email');
+  const email = emailEl?.value.trim();
+  if (!email) {
+    toast('Please enter your email address first.');
+    emailEl?.focus();
+    return;
+  }
+  const link = event?.currentTarget;
+  if (link) { link.textContent = 'Sending…'; link.style.pointerEvents = 'none'; }
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/index.html?auth=reset'
+    });
+    if (error) throw error;
+    toast('✅ Password reset link sent! Check your inbox (and spam folder).');
+  } catch (err) {
+    toast('Error: ' + err.message);
+  } finally {
+    if (link) { link.textContent = 'Forgot Password?'; link.style.pointerEvents = ''; }
   }
 }
 
