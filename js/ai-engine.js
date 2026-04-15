@@ -1,286 +1,287 @@
-/* â”€â”€ UltimateEdge School â€” ai-engine.js v4.1 â”€â”€ */
-/* Mastery calc Â· score prediction Â· adaptive pyramid Â· SmartPath */
+/* ═══════════════════════════════════════════════════════════
+   UltimateEdge School — ai-engine.js  v4.1
+   Mastery calculation, JAMB prediction, adaptive pyramid,
+   SmartPath recommendations, video routing.
+   WAEC/NECO grades are INTERNAL ONLY — never rendered
+   in student-facing pages.
+   ═══════════════════════════════════════════════════════════ */
 
-// â”€â”€â”€ MASTERY CALCULATION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/* ── SCORE PREDICTION ── */
+
 /**
- * M = (accuracy_avg Ã— 0.7) + (min(attempts / 50, 1) Ã— 0.3)
- * Returns 0â€“1. NULL accuracy_avg â†’ returns null (NIL).
+ * Predict JAMB score range from accuracy (0–100) and avg time per question.
+ * Returns a string like "265–285".
  */
-function calcMastery(accuracyAvg, attempts) {
-  if (accuracyAvg == null) return null;
-  const acc = Math.min(Math.max(accuracyAvg / 100, 0), 1);
-  const vol = Math.min((attempts || 0) / 50, 1);
-  return parseFloat((acc * 0.7 + vol * 0.3).toFixed(4));
+function predictJAMB(accuracyAvg, avgTimePerQ = 55) {
+  if (accuracyAvg === null || accuracyAvg === undefined) return '— / 400';
+  let base = (accuracyAvg / 100) * 400;
+  let factor = 1.00;
+  if (avgTimePerQ < 45) factor = 1.05;
+  else if (avgTimePerQ > 65) factor = 0.90;
+  const mid   = Math.round(base * factor);
+  const low   = Math.max(0,   Math.round(mid - 15));
+  const high  = Math.min(400, Math.round(mid + 15));
+  return `${low}–${high}`;
 }
-window.calcMastery = calcMastery;
 
-// â”€â”€â”€ SKILL GRADE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 /**
- * Returns 1, 2, or 3 based on accuracy percentage (0â€“100).
- * Grade 3 = exam-ready (â‰¥60%), Grade 2 = intermediate (40â€“59%), Grade 1 = foundational (<40%)
+ * Predict WAEC/NECO grade — INTERNAL USE ONLY.
+ * Never render in student UI.
  */
-function getSkillGrade(accuracyPct) {
-  if (accuracyPct == null) return 3; // Default NIL students to grade 3 (standard) until data
-  if (accuracyPct >= 60) return 3;
-  if (accuracyPct >= 40) return 2;
-  return 1;
-}
-window.getSkillGrade = getSkillGrade;
-
-// â”€â”€â”€ SCORE PREDICTION â€” JAMB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-/**
- * Returns a range string like "265â€“285".
- * @param {number} masteryValue  0â€“1 combined mastery (from calcMastery)
- * @param {number} [avgTimeSecs] Average seconds per question (for speed factor)
- */
-function predictJAMB(masteryValue, avgTimeSecs) {
-  if (masteryValue == null) return 'â€” ';
-  const speedFactor = !avgTimeSecs ? 1
-    : avgTimeSecs < 45 ? 1.05
-    : avgTimeSecs > 65 ? 0.90
-    : 1.00;
-  const raw = Math.round(masteryValue * 400 * speedFactor);
-  const lo  = Math.max(0,   Math.min(400, raw - 15));
-  const hi  = Math.max(0,   Math.min(400, raw + 15));
-  return `${lo}â€“${hi}`;
-}
-window.predictJAMB = predictJAMB;
-
-// â”€â”€â”€ SCORE PREDICTION â€” WAEC / NECO (INTERNAL ONLY â€” NEVER SHOWN TO STUDENTS) â”€
-/**
- * Returns a grade letter. FOR ALGORITHM AND REPORT-VIEW USE ONLY.
- * @param {number} masteryValue  0â€“1
- */
-function predictWAEC(masteryValue) {
-  if (masteryValue == null) return 'N/A';
-  if (masteryValue >= 0.75) return 'A1';
-  if (masteryValue >= 0.70) return 'B2';
-  if (masteryValue >= 0.65) return 'B3';
-  if (masteryValue >= 0.60) return 'B4';
-  if (masteryValue >= 0.50) return 'C5';
-  if (masteryValue >= 0.40) return 'D7';
-  if (masteryValue >= 0.30) return 'E8';
+function predictWAEC(masteryLevel) {
+  if (masteryLevel === null || masteryLevel === undefined) return null;
+  if (masteryLevel >= 0.75) return 'A1';
+  if (masteryLevel >= 0.70) return 'B2';
+  if (masteryLevel >= 0.65) return 'B3';
+  if (masteryLevel >= 0.60) return 'B4';
+  if (masteryLevel >= 0.50) return 'C5';
+  if (masteryLevel >= 0.40) return 'D7';
+  if (masteryLevel >= 0.30) return 'E8';
   return 'F9';
 }
-window.predictWAEC = predictWAEC;
 
-// â”€â”€â”€ DRILL MODE DECISION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/* ── MASTERY CALCULATION ── */
+
 /**
- * Returns true if the student should be in Drill Mode (timer hidden).
- * Only applicable when study_mode = 'drill'. CBT-only students always see the timer.
+ * calcMastery(accuracyAvg, attempts)
+ * M = (accuracy × 0.7) + (min(attempts/50, 1) × 0.3)
+ * Returns 0–1. Returns null if accuracy is null (NIL state).
+ */
+function calcMastery(accuracyAvg, attempts = 0) {
+  if (accuracyAvg === null || accuracyAvg === undefined) return null;
+  const acc  = Math.min(100, Math.max(0, accuracyAvg)) / 100;
+  const vol  = Math.min(attempts / 50, 1);
+  return parseFloat((acc * 0.7 + vol * 0.3).toFixed(3));
+}
+
+/**
+ * Returns true if mastery < 0.50 (drill mode — hide timer).
  */
 function isDrillMode(masteryLevel) {
-  if (typeof getStudyMode === 'function' && getStudyMode() === 'cbt_only') return false;
-  return masteryLevel == null || masteryLevel < 0.50;
+  if (masteryLevel === null || masteryLevel === undefined) return true;
+  return masteryLevel < 0.50;
 }
-window.isDrillMode = isDrillMode;
 
-// â”€â”€â”€ ADAPTIVE PYRAMID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/* ── ADAPTIVE PYRAMID ── */
+
 /**
- * Called after every session ends.
- * Saves grade level to Supabase, shows grade change banner if needed,
- * redirects to elementary site after 3+ failed Grade 1 attempts.
- *
- * @param {string} topicId
- * @param {number} accuracyPct  0â€“100
- * @param {number} attemptsAtGrade1  from topic_mastery row
+ * getSkillGrade(accuracyAvg) → 1, 2, or 3
+ * 3 = Standard (exam-level) ≥60%
+ * 2 = Intermediate 40–59%
+ * 1 = Foundational <40%
  */
-async function applyAdaptivePyramid(topicId, accuracyPct, attemptsAtGrade1) {
-  const newGrade = getSkillGrade(accuracyPct);
+function getSkillGrade(accuracyAvg) {
+  if (accuracyAvg === null || accuracyAvg === undefined) return 3; // Default to standard
+  if (accuracyAvg >= 60) return 3;
+  if (accuracyAvg >= 40) return 2;
+  return 1;
+}
 
-  // Update in DB (silent â€” student never sees grade number)
-  if (typeof sb !== 'undefined' && typeof currentUser !== 'undefined' && currentUser) {
-    await sb.from('topic_mastery')
-      .update({ grade_level: newGrade })
-      .eq('user_id', currentUser.id)
-      .eq('topic_id', topicId);
+/**
+ * applyAdaptivePyramid(topicId, accuracyAvg, attemptsAtGrade1)
+ * Updates topic_mastery and profile, shows banners.
+ * Runs even in CBT-only mode (silently).
+ */
+async function applyAdaptivePyramid(topicId, accuracyAvg, attemptsAtGrade1 = 0) {
+  if (!currentUser || !currentProfile) return;
+
+  const grade   = getSkillGrade(accuracyAvg);
+  const mastery = calcMastery(accuracyAvg);
+
+  /* Save to topic_mastery */
+  await sb.from('topic_mastery')
+    .upsert({
+      user_id: currentUser.id,
+      topic_id: topicId,
+      accuracy_avg: accuracyAvg,
+      mastery_level: mastery,
+      grade_level: grade,
+      status: mastery === null ? 'NIL' : mastery >= 0.75 ? 'MASTERED' : 'IN_PROGRESS',
+      last_studied: new Date().toISOString(),
+    }, { onConflict: 'user_id,topic_id' });
+
+  /* Save grade to profile */
+  await sb.from('profiles')
+    .update({ current_skill_level: grade })
+    .eq('id', currentUser.id);
+  if (currentProfile) currentProfile.current_skill_level = grade;
+
+  /* Show banner — only in drill mode */
+  if (getStudyMode() !== 'cbt_only') {
+    showGradeBanner(grade, topicId);
   }
 
-  // Show motivational banner only in drill mode
-  if (typeof getStudyMode === 'function' && getStudyMode() !== 'cbt_only') {
-    showGradeBanner(newGrade, topicId);
-  }
-
-  // Elementary redirect: stuck at Grade 1 for 3+ sessions
-  if (newGrade === 1 && attemptsAtGrade1 >= 3) {
+  /* Elementary redirect: Grade 1 with 3+ attempts still failing */
+  if (grade === 1 && attemptsAtGrade1 >= 3 && accuracyAvg < 40) {
     showElementaryRedirect(topicId);
   }
-}
-window.applyAdaptivePyramid = applyAdaptivePyramid;
 
-// â”€â”€â”€ GRADE BANNER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  /* Update SmartPath queue */
+  await updateSmartPathQueue();
+}
+
 /**
- * Shows a motivational banner after a session.
- * NEVER mentions Grade 1/2/3 or WAEC letter grades to the student.
+ * Show motivational grade banner — never says "Grade 1/2/3".
  */
 function showGradeBanner(grade, topicId) {
-  const msgs = {
-    3: { emoji: 'ðŸ”¥', text: "You're at exam-ready level on this topic! Keep it up.", color: 'var(--accent2)' },
-    2: { emoji: 'ðŸ“ˆ', text: "You're building strong foundations. A few more sessions and you'll be exam-ready.", color: 'var(--accent)' },
-    1: { emoji: 'ðŸ’ª', text: "You're in focused reinforcement mode â€” every attempt makes you stronger.", color: 'var(--warning)' },
+  const messages = {
+    3: { icon: '💪', text: "You're at exam-ready level — keep it up!", cls: 'fill-green' },
+    2: { icon: '📈', text: "You're building strong foundations. Keep practising!",  cls: 'fill-orange' },
+    1: { icon: '🎯', text: "You're in focused reinforcement mode — keep going!",    cls: 'fill-blue' },
   };
-  const m = msgs[grade] || msgs[3];
-
-  // Remove existing banner if any
-  const existing = document.getElementById('adaptive-banner');
-  if (existing) existing.remove();
-
-  const banner = document.createElement('div');
-  banner.id = 'adaptive-banner';
-  banner.className = 'adaptive-banner';
-  banner.style.borderColor = m.color;
-  banner.innerHTML = `
-    <span style="font-size:1.5rem">${m.emoji}</span>
-    <p style="margin:0;flex:1">${m.text}</p>
-    <button onclick="this.parentElement.remove()"
-      style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted)">Ã—</button>
-  `;
-  document.body.insertAdjacentElement('afterbegin', banner);
-
-  setTimeout(() => banner.remove(), 8000);
+  const m = messages[grade] || messages[3];
+  const container = document.getElementById('adaptive-banner-slot');
+  if (!container) return;
+  container.innerHTML = `
+    <div class="adaptive-banner">
+      <span class="adaptive-banner-icon">${m.icon}</span>
+      <div>
+        <div style="font-weight:700;margin-bottom:4px">${m.text}</div>
+        <div style="font-size:.85rem;color:var(--muted)">Topic: ${topicId.replace(/-/g,' ')}</div>
+      </div>
+    </div>`;
+  container.style.display = 'block';
+  setTimeout(() => { container.style.display = 'none'; }, 6000);
 }
-window.showGradeBanner = showGradeBanner;
 
-// â”€â”€â”€ ELEMENTARY REDIRECT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function showElementaryRedirect(topicId) {
-  const existing = document.getElementById('elementary-card');
-  if (existing) return;
-
-  const card = document.createElement('div');
-  card.id = 'elementary-card';
-  card.className = 'elementary-card card card-body';
-  card.innerHTML = `
-    <div style="font-size:2rem;margin-bottom:10px">ðŸ«</div>
-    <h3 style="font-family:var(--font-head);font-size:1.5rem;margin-bottom:8px">Let's build the foundation first</h3>
-    <p style="color:var(--muted);margin-bottom:16px;line-height:1.7">
-      This topic needs a stronger base before exam-level practice. We've prepared a special version
-      that will get you there faster â€” no pressure, just progress.
-    </p>
-    <a href="https://elementary.ultimateedge.info/${topicId}" target="_blank" class="btn btn-primary btn-lg">
-      Open Foundation Lessons â†’
-    </a>
-    <button class="btn btn-outline" style="margin-left:10px" onclick="this.parentElement.remove()">
-      Keep Practising Here
-    </button>
-  `;
-
-  // Insert after the results screen
-  const results = document.getElementById('results-screen') || document.querySelector('main');
-  if (results) results.insertAdjacentElement('afterend', card);
-  else document.body.appendChild(card);
-}
-window.showElementaryRedirect = showElementaryRedirect;
-
-// â”€â”€â”€ TEACHER MARKETPLACE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function showTeacherMarketplace(topicId, weaknessReport) {
-  const card = document.createElement('div');
-  card.className = 'teacher-card card card-body';
-  card.innerHTML = `
-    <div style="font-size:2rem;margin-bottom:10px">ðŸ‘¨â€ðŸ«</div>
-    <h3 style="font-family:var(--font-head);font-size:1.5rem;margin-bottom:8px">Book a Live Tutor</h3>
-    <p style="color:var(--muted);margin-bottom:16px;line-height:1.7">
-      Sometimes you need a human to explain it. Connect with a verified UltimateEdge tutor
-      for 1-on-1 help on this topic.
-    </p>
-    <a href="tutors.html?topic=${topicId}" class="btn btn-primary">Find a Tutor</a>
-    <button class="btn btn-outline" style="margin-left:10px" onclick="this.parentElement.remove()">
-      Dismiss
-    </button>
-  `;
-  document.body.appendChild(card);
-}
-window.showTeacherMarketplace = showTeacherMarketplace;
-
-// â”€â”€â”€ VIDEO RECOMMENDATION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 /**
- * Returns the lesson URL to serve for a topic based on grade level.
- * Called silently even in CBT-only mode.
+ * Show elementary.ultimateedge.info redirect card.
  */
-function recommendVideoForTopic(topicId, grade) {
-  const base = `lessons/${topicId}`;
+function showElementaryRedirect(topicId) {
+  const container = document.getElementById('adaptive-banner-slot');
+  if (!container) return;
+  container.innerHTML = `
+    <div class="elementary-card">
+      <div style="font-weight:700;font-size:1rem;margin-bottom:8px">🏫 Try Our Elementary Version</div>
+      <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">This topic has some foundational concepts that may help before continuing here.</p>
+      <a href="https://elementary.ultimateedge.info/${topicId}" target="_blank" class="btn btn-warning btn-sm">Visit Elementary Site →</a>
+    </div>`;
+  container.style.display = 'block';
+}
+
+/**
+ * Show Teacher Marketplace card.
+ */
+function showTeacherMarketplace(topicId, weaknessReport) {
+  const container = document.getElementById('adaptive-banner-slot');
+  if (!container) return;
+  container.innerHTML = `
+    <div class="teacher-card">
+      <div style="font-weight:700;font-size:1rem;margin-bottom:8px">👨‍🏫 Hire a Live Tutor</div>
+      <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">Struggling with ${topicId.replace(/-/g,' ')}? Get personalised help from a qualified tutor.</p>
+      <a href="/tutors.html" class="btn btn-success btn-sm">Find a Tutor →</a>
+    </div>`;
+  container.style.display = 'block';
+}
+
+/* ── SMARTPATH ── */
+
+/**
+ * shouldRecommendTopic(row) — returns true if topic needs attention.
+ */
+function shouldRecommendTopic(topicMasteryRow) {
+  if (!topicMasteryRow) return false;
+  if (topicMasteryRow.accuracy_avg === null) return true; // Not started
+  return (topicMasteryRow.mastery_level || 0) < 0.60;
+}
+
+/**
+ * recommendVideoForTopic(topicId, grade) — returns lesson iframe path.
+ */
+function recommendVideoForTopic(topicId, grade = 3) {
+  const base = `/lessons/${topicId}`;
+  // Grade-specific variants exist only when the file is present.
+  // The path is constructed correctly; classroom.html falls back to the
+  // standard index.html if the grade subfolder returns a 404.
+  // TODO §36: create grade1/ and grade2/ sub-folders per topic to activate branching.
   if (grade === 1) return `${base}/grade1/index.html`;
   if (grade === 2) return `${base}/grade2/index.html`;
   return `${base}/index.html`;
 }
-window.recommendVideoForTopic = recommendVideoForTopic;
 
-// â”€â”€â”€ SMARTPATH QUEUE UPDATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 /**
- * After a session, recalculate SmartPath recommendations.
- * Runs silently regardless of study_mode.
- * Updates profiles.smartpath_queue with top-5 weakest topics that have been practised.
+ * updateSmartPathQueue — reads topic_mastery, finds weak topics,
+ * writes to profiles.smartpath_queue.
  */
-async function updateSmartPathQueue(subjectFilter) {
-  if (!currentUser) return;
-
-  const query = sb.from('topic_mastery')
-    .select('topic_id, subject, accuracy_avg, mastery_level, grade_level, status')
-    .eq('user_id', currentUser.id)
-    .not('accuracy_avg', 'is', null)  // Only topics with at least one session
-    .order('mastery_level', { ascending: true });
-
-  // Filter to student's exam subjects if set
+async function updateSmartPathQueue() {
+  if (!currentUser || !currentProfile) return;
   const subjects = getExamSubjects();
-  if (subjects.length > 0) {
-    query.in('subject', subjects);
-  }
+  if (!subjects.length) return;
 
-  const { data: rows } = await query.limit(20);
-  if (!rows || rows.length === 0) return;
+  const { data: rows } = await sb
+    .from('topic_mastery')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('mastery_level', { ascending: true, nullsFirst: true });
+
+  if (!rows) return;
 
   const queue = rows
-    .slice(0, 5)
+    .filter(r => shouldRecommendTopic(r))
+    .slice(0, 6)
     .map(r => ({
-      topic_id: r.topic_id,
-      topic_name: formatTopicName(r.topic_id),
-      subject: r.subject,
-      mastery_level: r.mastery_level,
-      grade_level: r.grade_level,
-      lesson_url: recommendVideoForTopic(r.topic_id, r.grade_level),
+      topicId: r.topic_id,
+      grade: r.grade_level || 3,
+      mastery: r.mastery_level,
+      status: r.status,
+      lessonPath: recommendVideoForTopic(r.topic_id, r.grade_level || 3),
     }));
 
   await sb.from('profiles')
     .update({ smartpath_queue: queue })
     .eq('id', currentUser.id);
-
   if (currentProfile) currentProfile.smartpath_queue = queue;
 }
-window.updateSmartPathQueue = updateSmartPathQueue;
+
+/* ── COMMITMENT SCORE ── */
 
 /**
- * Returns true if a topic_mastery row should appear in SmartPath recommendations.
- */
-function shouldRecommendTopic(row) {
-  if (!row || row.accuracy_avg == null) return false;
-  return row.mastery_level == null || row.mastery_level < 0.60;
-}
-window.shouldRecommendTopic = shouldRecommendTopic;
-
-// â”€â”€â”€ COMMITMENT SCORE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-/**
- * Converts usage_logs array into a 0â€“100 score for report-view.html.
+ * calcCommitmentScore(usageLogs) — returns 0–100 score.
+ * Used in report-view.html only.
  */
 function calcCommitmentScore(usageLogs) {
-  if (!usageLogs || usageLogs.length === 0) return 0;
-
-  const drills    = usageLogs.filter(l => l.action === 'drill_completed').length;
-  const videos    = usageLogs.filter(l => l.action === 'video_watched').length;
-  const logins    = new Set(usageLogs.filter(l => l.action === 'page_load')
-                      .map(l => new Date(l.ts).toDateString())).size;
-
-  // Score out of 100: drills worth 40 pts, videos 30 pts, active days 30 pts
-  const drillScore = Math.min(drills / 30, 1) * 40;
-  const videoScore = Math.min(videos / 20, 1) * 30;
-  const loginScore = Math.min(logins / 30, 1) * 30;
-
-  return Math.round(drillScore + videoScore + loginScore);
+  if (!usageLogs || !usageLogs.length) return 0;
+  let score = 0;
+  const actionWeights = {
+    drill_completed: 10,
+    video_watched:   8,
+    drill_started:   3,
+    page_load:       1,
+    payment_made:    5,
+  };
+  for (const log of usageLogs) {
+    score += actionWeights[log.action] || 0;
+  }
+  /* Bonus for streaks — check last 7 days */
+  const now = Date.now();
+  const recentDays = new Set(
+    usageLogs
+      .filter(l => (now - new Date(l.ts)) < 7 * 24 * 3600 * 1000)
+      .map(l => new Date(l.ts).toDateString())
+  );
+  score += recentDays.size * 5;
+  return Math.min(100, score);
 }
-window.calcCommitmentScore = calcCommitmentScore;
 
-// â”€â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function formatTopicName(topicId) {
-  return (topicId || '')
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase());
+/* ── MASTERY LABEL HELPER ── */
+/**
+ * Returns a student-facing motivational label for a mastery level.
+ * Never returns WAEC/NECO grade letters.
+ */
+function getMasteryLabel(masteryLevel) {
+  if (masteryLevel === null || masteryLevel === undefined) return 'Not Started';
+  if (masteryLevel >= 0.75) return 'On Track';
+  if (masteryLevel >= 0.50) return 'Building Up';
+  if (masteryLevel >= 0.30) return 'Needs Attention';
+  return 'Needs Attention';
 }
-window.formatTopicName = formatTopicName;
+
+/**
+ * Returns CSS fill class for a mastery level.
+ */
+function getMasteryFillClass(masteryLevel) {
+  if (masteryLevel === null || masteryLevel === undefined) return 'fill-grey';
+  if (masteryLevel >= 0.60) return 'fill-green';
+  if (masteryLevel >= 0.40) return 'fill-orange';
+  return 'fill-blue';
+}
