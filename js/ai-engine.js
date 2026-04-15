@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   UltimateEdge School — ai-engine.js  v4.1
+   UE School — ai-engine.js  v4.1
    Mastery calculation, JAMB prediction, adaptive pyramid,
    SmartPath recommendations, video routing.
    WAEC/NECO grades are INTERNAL ONLY — never rendered
@@ -145,7 +145,7 @@ function showGradeBanner(grade, topicId) {
 }
 
 /**
- * Show elementary.ultimateedge.info redirect card.
+ * Show elementary.ueschool.info redirect card.
  */
 function showElementaryRedirect(topicId) {
   const container = document.getElementById('adaptive-banner-slot');
@@ -154,7 +154,7 @@ function showElementaryRedirect(topicId) {
     <div class="elementary-card">
       <div style="font-weight:700;font-size:1rem;margin-bottom:8px">🏫 Try Our Elementary Version</div>
       <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">This topic has some foundational concepts that may help before continuing here.</p>
-      <a href="https://elementary.ultimateedge.info/${topicId}" target="_blank" class="btn btn-warning btn-sm">Visit Elementary Site →</a>
+      <a href="https://elementary.ueschool.info/${topicId}" target="_blank" class="btn btn-warning btn-sm">Visit Elementary Site →</a>
     </div>`;
   container.style.display = 'block';
 }
