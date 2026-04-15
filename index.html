@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UltimateEdge School — Ace Your JAMB, WAEC &amp; NECO Exams</title>
+<title>UE School — Ace Your JAMB, WAEC &amp; NECO Exams</title>
 <meta name="description" content="Master every topic with adaptive CBT prep, expert video lessons, and AI-powered score predictions. From ₦1,500/month.">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/main.css">
@@ -259,10 +259,10 @@
 <!-- ── NAV ── -->
 <nav class="ue-nav">
   <div class="container">
-    <a href="/index.html" class="nav-logo">ULTIMATEEDGE SCHOOL</a>
+    <a href="/index.html" class="nav-logo">UE SCHOOL</a>
     <div class="nav-links">
-      <a href="/classroom.html">Classroom</a>
-      <a href="/cbt.html">Practice (CBT)</a>
+      <a href="/classroom.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Classroom</a>
+      <a href="/cbt.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Practice (CBT)</a>
       <a href="/dashboard.html">Dashboard</a>
     </div>
     <button class="nav-hamburger" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false"
@@ -296,7 +296,7 @@
         <p class="hero-sub">Master every topic with adaptive CBT prep, expert video lessons, and AI-powered score predictions.</p>
         <div class="hero-ctas">
           <button class="btn btn-primary btn-lg" onclick="openAuthModal('signup')">Start Free Today</button>
-          <a href="/cbt.html" class="btn btn-outline btn-lg">Take a Practice Test</a>
+          <a href="/cbt.html" class="btn btn-outline btn-lg" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Take a Practice Test</a>
         </div>
       </div>
       <div class="hero-cbt-card">
@@ -334,7 +334,7 @@
   <div class="container">
     <div class="section-slider-header">
       <div>
-        <h2 class="section-title">Why UltimateEdge?</h2>
+        <h2 class="section-title">Why UE School?</h2>
         <p class="section-sub">Everything you need to succeed, all in one place.</p>
       </div>
       <div>
@@ -373,15 +373,15 @@
     </div>
     <div class="slider-wrap">
       <div class="slider-track" id="subj-track">
-        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card"><div class="subject-icon" style="background:#dbeafe;color:#1d4ed8">📐</div><div class="subject-name">Mathematics</div></a></div>
-        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card"><div class="subject-icon" style="background:#d1fae5;color:#065f46">📖</div><div class="subject-name">English</div></a></div>
-        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card"><div class="subject-icon" style="background:#ede9fe;color:#5b21b6">⚛️</div><div class="subject-name">Physics</div></a></div>
-        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card"><div class="subject-icon" style="background:#ffedd5;color:#c2410c">🧪</div><div class="subject-name">Chemistry</div></a></div>
-        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card"><div class="subject-icon" style="background:#ccfbf1;color:#0f766e">🌿</div><div class="subject-name">Biology</div></a></div>
-        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card"><div class="subject-icon" style="background:#fef3c7;color:#b45309">📈</div><div class="subject-name">Economics</div></a></div>
-        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card"><div class="subject-icon" style="background:#e0e7ff;color:#3730a3">🏛️</div><div class="subject-name">Government</div></a></div>
-        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card"><div class="subject-icon" style="background:#fce7f3;color:#9d174d">📚</div><div class="subject-name">Literature</div></a></div>
-        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card"><div class="subject-icon" style="background:#d1fae5;color:#065f46">🌍</div><div class="subject-name">Geography</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#dbeafe;color:#1d4ed8">📐</div><div class="subject-name">Mathematics</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#d1fae5;color:#065f46">📖</div><div class="subject-name">English</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#ede9fe;color:#5b21b6">⚛️</div><div class="subject-name">Physics</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#ffedd5;color:#c2410c">🧪</div><div class="subject-name">Chemistry</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#ccfbf1;color:#0f766e">🌿</div><div class="subject-name">Biology</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#fef3c7;color:#b45309">📈</div><div class="subject-name">Economics</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#e0e7ff;color:#3730a3">🏛️</div><div class="subject-name">Government</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#fce7f3;color:#9d174d">📚</div><div class="subject-name">Literature</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#d1fae5;color:#065f46">🌍</div><div class="subject-name">Geography</div></a></div>
       </div>
     </div>
     <div class="slider-dots" id="subj-dots"></div>
@@ -428,7 +428,7 @@
         </div>
         <h2 style="font-family:var(--font-head);font-size:clamp(1.6rem,5vw,2.8rem);color:#fff;margin-bottom:16px">Enter the Classroom</h2>
         <p style="color:rgba(255,255,255,.6);margin-bottom:28px;max-width:400px;line-height:1.7">Expert-taught video lessons for every topic on your exam syllabus. Adaptive content that matches your skill level.</p>
-        <a href="/classroom.html" class="btn btn-primary btn-lg">Start Learning</a>
+        <a href="/classroom.html" class="btn btn-primary btn-lg" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Start Learning</a>
       </div>
       <div class="classroom-video-mock">
         <iframe
@@ -531,7 +531,7 @@
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px" class="testimonials-grid">
       <div class="card card-body">
-        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"I scored 312 in JAMB after 6 weeks on UltimateEdge. The score predictions kept me motivated and on track."</div>
+        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"I scored 312 in JAMB after 6 weeks on UE School. The score predictions kept me motivated and on track."</div>
         <div style="font-weight:700">Emeka O.</div>
         <div style="font-size:.82rem;color:var(--muted)">JAMB 2024 — 312/400</div>
       </div>
@@ -553,7 +553,7 @@
 <section style="background:var(--accent);padding:72px 0;text-align:center;">
   <div class="container">
     <h2 style="font-family:var(--font-head);font-size:clamp(1.6rem,5vw,2.8rem);color:#fff;margin-bottom:16px">Ready to Start Your Journey?</h2>
-    <p style="color:rgba(255,255,255,.75);font-size:1.05rem;margin-bottom:32px">Join 12,000+ students already preparing smarter with UltimateEdge.</p>
+    <p style="color:rgba(255,255,255,.75);font-size:1.05rem;margin-bottom:32px">Join 12,000+ students already preparing smarter with UE School.</p>
     <button class="btn btn-lg" style="background:#fff;color:var(--accent);font-weight:700" onclick="openAuthModal('signup')">Start Free Today</button>
   </div>
 </section>
@@ -562,14 +562,14 @@
   <div class="container">
     <div class="footer-grid">
       <div>
-        <div class="footer-logo">ULTIMATEEDGE SCHOOL</div>
+        <div class="footer-logo">UE SCHOOL</div>
         <div class="footer-tagline">The cockpit for your exam preparation. Pass your JAMB, WAEC, and NECO exams with confidence.</div>
       </div>
       <div>
         <div class="footer-heading">Platform</div>
         <ul class="footer-links">
-          <li><a href="/classroom.html">Classroom</a></li>
-          <li><a href="/cbt.html">Practice CBT</a></li>
+          <li><a href="/classroom.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Classroom</a></li>
+          <li><a href="/cbt.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Practice CBT</a></li>
           <li><a href="/dashboard.html">Dashboard</a></li>
         </ul>
       </div>
@@ -582,7 +582,7 @@
         </ul>
       </div>
     </div>
-    <div class="footer-divider">&copy; 2026 UltimateEdge School. All rights reserved.</div>
+    <div class="footer-divider">&copy; 2026 UE School. All rights reserved.</div>
   </div>
 </footer>
 
