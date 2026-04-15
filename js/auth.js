@@ -20,6 +20,16 @@ function waitForSB(cb, attempts = 0) {
 /* ── GLOBALS ── */
 let sb, currentUser = null, currentProfile = null;
 
+/* ── PROTECTED PAGES ── */
+const PROTECTED_PAGES = ['dashboard.html', 'classroom.html', 'cbt.html', 'report-view.html'];
+
+function guardPage() {
+  const page = location.pathname.split('/').pop() || 'index.html';
+  if (PROTECTED_PAGES.some(p => page.includes(p))) {
+    window.location.replace('/index.html?auth=login');
+  }
+}
+
 /* ── SUBJECTS MASTER LIST ── */
 const SUBJECTS_META = {
   mathematics: { name: 'Mathematics',         icon: '📐', color: '#1a56ff' },
@@ -83,6 +93,7 @@ async function initAuth() {
     showStudyPlanWelcome();
   } else {
     updateNavUI();
+    guardPage();
   }
   trackPageLoad();
 }
