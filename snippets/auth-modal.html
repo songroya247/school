@@ -1,211 +1,221 @@
-<!-- ============================================================
-     UltimateEdge School â€” /snippets/auth-modal.html
-     Paste this block into EVERY page before </body>
-     ============================================================ -->
+<!-- ══════════════════════════════════════════════════════════
+     UltimateEdge School — auth-modal.html  v4.1
+     Paste this block before </body> on every page.
+     Contains: Auth modal (login + 4-step signup) + Study Plan modal.
+     ══════════════════════════════════════════════════════════ -->
 
-<!-- AUTH MODAL -->
-<div class="modal-backdrop" id="auth-modal" role="dialog" aria-modal="true" aria-label="Sign in or create account">
-  <div class="modal-card" onclick="event.stopPropagation()">
-
-    <div class="modal-card__header">
-      <h2 class="modal-card__title">UltimateEdge</h2>
-      <button class="modal-close" onclick="closeAuthModal()" aria-label="Close">âœ•</button>
-    </div>
+<!-- ── AUTH MODAL ── -->
+<div class="modal-backdrop" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
 
     <!-- Tabs -->
-    <div class="auth-tabs" role="tablist">
-      <button class="auth-tab-btn active" data-tab="login" role="tab"
-              onclick="switchAuthTab('login')">Sign In</button>
-      <button class="auth-tab-btn" data-tab="signup" role="tab"
-              onclick="switchAuthTab('signup')">Create Account</button>
+    <div class="auth-tabs">
+      <button class="auth-tab" id="auth-tab-login"  onclick="switchAuthTab('login')">Login</button>
+      <button class="auth-tab active" id="auth-tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
     </div>
 
-    <!-- LOGIN PANE -->
-    <div class="auth-tab-pane active" data-pane="login">
-      <form onsubmit="handleLogin(event)" novalidate>
-        <div class="form-group">
-          <label class="form-label" for="login-email">Email Address</label>
-          <input class="form-input" id="login-email" type="email"
-                 placeholder="you@email.com" autocomplete="email" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="login-password">Password</label>
-          <input class="form-input" id="login-password" type="password"
-                 placeholder="Your password" autocomplete="current-password" required>
-        </div>
-        <button class="btn btn-primary btn-block mt" type="submit" id="login-btn">
-          Sign In â†’
-        </button>
-        <p class="text-center text-sm mt" style="color:var(--text-muted)">
-          Don't have an account?
-          <a href="#" onclick="switchAuthTab('signup'); return false;">Create one free</a>
-        </p>
-      </form>
+    <!-- ── LOGIN FORM ── -->
+    <div id="auth-login-form" style="display:none">
+      <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Welcome back</h2>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="login-email" placeholder="chioma@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="login-password" placeholder="••••••••" autocomplete="current-password"
+               onkeydown="if(event.key==='Enter')handleLogin()">
+      </div>
+      <button class="btn btn-primary btn-block btn-lg" id="login-submit-btn" onclick="handleLogin()" style="margin-top:8px">Login</button>
+      <div style="text-align:center;margin-top:16px">
+        <a href="#" style="font-size:.85rem;color:var(--muted)" onclick="toast('Password reset: check your email');sb.auth.resetPasswordForEmail(document.getElementById(\'login-email\').value)">Forgot Password?</a>
+      </div>
     </div>
 
-    <!-- SIGNUP PANE -->
-    <div class="auth-tab-pane" data-pane="signup">
-      <form onsubmit="handleSignup(event)" novalidate>
+    <!-- ── SIGNUP FORM (4 steps) ── -->
+    <div id="auth-signup-form">
 
+      <!-- Step 1: Account details -->
+      <div id="su-step-1">
+        <div class="step-indicator">Step 1 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Create your account</h2>
         <div class="form-group">
-          <label class="form-label" for="signup-name">Full Name</label>
-          <input class="form-input" id="signup-name" type="text"
-                 placeholder="e.g. Amara Okafor" autocomplete="name" required>
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-input" id="su-name" placeholder="Chioma Adebayo" autocomplete="name">
         </div>
-
         <div class="form-group">
-          <label class="form-label" for="signup-email">Email Address</label>
-          <input class="form-input" id="signup-email" type="email"
-                 placeholder="you@email.com" autocomplete="email" required>
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" id="su-email" placeholder="chioma@example.com" autocomplete="email">
         </div>
-
         <div class="form-group">
-          <label class="form-label" for="signup-password">Password</label>
-          <input class="form-input" id="signup-password" type="password"
-                 placeholder="Minimum 8 characters" autocomplete="new-password" required>
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="su-pass" placeholder="Min. 8 characters" autocomplete="new-password">
+          <div class="form-hint">At least 8 characters</div>
         </div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="goSignupStep(2)">Continue →</button>
+      </div>
 
+      <!-- Step 2: Exam goals -->
+      <div id="su-step-2" style="display:none">
+        <div class="step-indicator">Step 2 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Your exam goals</h2>
         <div class="form-group">
-          <label class="form-label">Which exams are you preparing for?</label>
+          <label class="form-label">Which exams are you sitting?</label>
           <div class="exam-checks">
-            <label class="exam-check-label">
-              <input type="checkbox" class="signup-exam-check" value="JAMB"> JAMB
-            </label>
-            <label class="exam-check-label">
-              <input type="checkbox" class="signup-exam-check" value="WAEC"> WAEC
-            </label>
-            <label class="exam-check-label">
-              <input type="checkbox" class="signup-exam-check" value="NECO"> NECO
-            </label>
-            <label class="exam-check-label">
-              <input type="checkbox" class="signup-exam-check" value="POST-UTME"> Post-UTME
-            </label>
+            <label class="exam-check-label"><input type="checkbox" value="JAMB"     onchange="checkJAMBExam()"> JAMB</label>
+            <label class="exam-check-label"><input type="checkbox" value="WAEC"     onchange="checkJAMBExam()"> WAEC</label>
+            <label class="exam-check-label"><input type="checkbox" value="NECO"     onchange="checkJAMBExam()"> NECO</label>
+            <label class="exam-check-label"><input type="checkbox" value="Post-UTME"onchange="checkJAMBExam()"> Post-UTME</label>
           </div>
         </div>
-
         <div class="form-group">
-          <label class="form-label" for="signup-exam-date">When is your exam?</label>
-          <select class="form-select" id="signup-exam-date" required>
-            <option value="">Select exam monthâ€¦</option>
-            <!-- Populated by JS below -->
+          <label class="form-label">When is your exam?</label>
+          <select class="form-select" id="su-date">
+            <option value="">Select month…</option>
+            <option>May 2026</option><option>June 2026</option><option>July 2026</option>
+            <option>August 2026</option><option>September 2026</option><option>October 2026</option>
+            <option>November 2026</option><option>December 2026</option><option>January 2027</option>
+            <option>February 2027</option><option>March 2027</option><option>April 2027</option>
           </select>
         </div>
-
         <div class="form-group">
-          <label class="form-label" for="signup-target">Target JAMB Score</label>
-          <select class="form-select" id="signup-target">
-            <option value="200">200 (Minimum)</option>
-            <option value="220">220</option>
-            <option value="240">240</option>
-            <option value="250">250</option>
-            <option value="260">260</option>
-            <option value="270">270</option>
-            <option value="280" selected>280 (Good)</option>
-            <option value="300">300</option>
-            <option value="320">320+ (Excellent)</option>
+          <label class="form-label">Target JAMB Score</label>
+          <select class="form-select" id="su-target">
+            <option value="210">200–220</option><option value="230">221–240</option>
+            <option value="250">241–260</option><option value="270">261–280</option>
+            <option value="290" selected>281–300</option><option value="310">301–320</option>
+            <option value="330">320+</option>
           </select>
         </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline" onclick="goSignupStep(1)">← Back</button>
+          <button class="btn btn-primary" style="flex:1" onclick="goSignupStep(3)">Continue →</button>
+        </div>
+      </div>
 
-        <button class="btn btn-primary btn-block mt" type="submit" id="signup-btn">
-          Create Free Account â†’
-        </button>
-        <p class="text-center text-sm mt" style="color:var(--text-muted)">
-          Already have an account?
-          <a href="#" onclick="switchAuthTab('login'); return false;">Sign in</a>
-        </p>
-      </form>
-    </div>
+      <!-- Step 3: Subject selection -->
+      <div id="su-step-3" style="display:none">
+        <div class="step-indicator">Step 3 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Your subjects</h2>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">Select all subjects you are sitting for.</p>
+        <div id="su-jamb-hint" class="jamb-hint" style="display:none">
+          JAMB requires exactly 4 subjects. You've selected <span id="su-jamb-count">0</span>.
+        </div>
+        <div class="subject-grid" id="su-subj-grid">
+          <div class="subj-card" onclick="toggleSignupSubj(this,'mathematics')">
+            <div class="subj-check">✓</div><div class="subj-card-icon">📐</div>
+            <div class="subj-card-name" style="color:#1a56ff">Mathematics</div>
+          </div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'english')">
+            <div class="subj-check">✓</div><div class="subj-card-icon">📖</div>
+            <div class="subj-card-name" style="color:#00c97a">English Language</div>
+          </div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'physics')">
+            <div class="subj-check">✓</div><div class="subj-card-icon">⚛️</div>
+            <div class="subj-card-name" style="color:#7c3aed">Physics</div>
+          </div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'chemistry')">
+            <div class="subj-check">✓</div><div class="subj-card-icon">🧪</div>
+            <div class="subj-card-name" style="color:#ff6b35">Chemistry</div>
+          </div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'biology')">
+            <div class="subj-check">✓</div><div class="subj-card-icon">🌿</div>
+            <div class="subj-card-name" style="color:#0891b2">Biology</div>
+          </div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'economics')">
+            <div class="subj-check">✓</div><div class="subj-card-icon">📈</div>
+            <div class="subj-card-name" style="color:#f59e0b">Economics</div>
+          </div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'government')">
+            <div class="subj-check">✓</div><div class="subj-card-icon">🏛️</div>
+            <div class="subj-card-name" style="color:#6366f1">Government</div>
+          </div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'literature')">
+            <div class="subj-check">✓</div><div class="subj-card-icon">📚</div>
+            <div class="subj-card-name" style="color:#ec4899">Literature</div>
+          </div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'geography')">
+            <div class="subj-check">✓</div><div class="subj-card-icon">🌍</div>
+            <div class="subj-card-name" style="color:#10b981">Geography</div>
+          </div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'commerce')">
+            <div class="subj-check">✓</div><div class="subj-card-icon">🏪</div>
+            <div class="subj-card-name" style="color:#8b5cf6">Commerce</div>
+          </div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'accounts')">
+            <div class="subj-check">✓</div><div class="subj-card-icon">💼</div>
+            <div class="subj-card-name" style="color:#14b8a6">Accounts</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="btn btn-outline" onclick="goSignupStep(2)">← Back</button>
+          <button class="btn btn-primary" style="flex:1" onclick="goSignupStep(4)">Continue →</button>
+        </div>
+      </div>
 
-  </div>
-</div>
+      <!-- Step 4: Study preference -->
+      <div id="su-step-4" style="display:none">
+        <div class="step-indicator">Step 4 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Study preference</h2>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:20px">How do you like to study?</p>
+        <label class="study-pref-option">
+          <input type="radio" name="study_mode" value="drill" checked>
+          <div>
+            <div style="font-weight:700">Mix of video + practice drills</div>
+            <div style="font-size:.82rem;color:var(--muted)">Watch lessons, then practise with guided drills. Recommended for most students.</div>
+          </div>
+        </label>
+        <label class="study-pref-option">
+          <input type="radio" name="study_mode" value="cbt_only">
+          <div>
+            <div style="font-weight:700">CBT practice only</div>
+            <div style="font-size:.82rem;color:var(--muted)">Skip drills, go straight to full CBT sessions. The algorithm still tracks your progress.</div>
+          </div>
+        </label>
+        <div style="display:flex;gap:10px;margin-top:24px">
+          <button class="btn btn-outline" onclick="goSignupStep(3)">← Back</button>
+          <button class="btn btn-success btn-lg" style="flex:1" id="su-submit-btn" onclick="handleSignup()">Create Account</button>
+        </div>
+      </div>
 
-<!-- ADD/CHANGE EXAMS MODAL -->
-<div class="modal-backdrop" id="add-exam-modal">
-  <div class="modal-card" onclick="event.stopPropagation()">
-    <div class="modal-card__header">
-      <h2 class="modal-card__title">Update Exams</h2>
-      <button class="modal-close"
-              onclick="document.getElementById('add-exam-modal').classList.remove('active')">âœ•</button>
-    </div>
-    <p class="text-muted mb">Select all exams you're preparing for:</p>
-    <div class="exam-checks mb-lg">
-      <label class="exam-check-label">
-        <input type="checkbox" class="exam-checkbox" value="JAMB"> JAMB
-      </label>
-      <label class="exam-check-label">
-        <input type="checkbox" class="exam-checkbox" value="WAEC"> WAEC
-      </label>
-      <label class="exam-check-label">
-        <input type="checkbox" class="exam-checkbox" value="NECO"> NECO
-      </label>
-      <label class="exam-check-label">
-        <input type="checkbox" class="exam-checkbox" value="POST-UTME"> Post-UTME
-      </label>
-    </div>
-    <button class="btn btn-primary btn-block" onclick="saveExamChanges()">
-      Save Changes
-    </button>
-  </div>
-</div>
+    </div><!-- /signup form -->
+  </div><!-- /modal-card -->
+</div><!-- /auth-modal -->
 
-<!-- STUDY PLAN WELCOME MODAL -->
-<div class="sp-modal" id="study-plan-modal">
-  <div class="sp-card">
-    <div class="flex-between mb">
-      <h2 class="sp-card__title">ðŸ“š Your Study Plan</h2>
-      <button class="modal-close" id="sp-close-btn">âœ•</button>
-    </div>
+<!-- ── STUDY PLAN WELCOME MODAL ── -->
+<div class="modal-backdrop" id="sp-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:4px">
+      Welcome back, <span id="sp-name">Student</span>! 👋
+    </h2>
+    <p style="font-size:.9rem;color:var(--muted);margin-bottom:20px" id="sp-months">Loading your plan…</p>
 
     <div class="sp-stats">
       <div class="sp-stat">
-        <div class="sp-stat__label">Time to Exam</div>
-        <div class="sp-stat__value text-mono" id="sp-months">â€”</div>
+        <div class="sp-stat-val" id="sp-readiness">NIL</div>
+        <div class="sp-stat-lbl">Current Readiness</div>
       </div>
       <div class="sp-stat">
-        <div class="sp-stat__label">Current Readiness</div>
-        <div class="sp-stat__value" id="sp-readiness">NIL</div>
-      </div>
-      <div class="sp-stat">
-        <div class="sp-stat__label">Recommended Pace</div>
-        <div class="sp-stat__value" id="sp-intensity">â€”</div>
-      </div>
-      <div class="sp-stat">
-        <div class="sp-stat__label">Your Level</div>
-        <div class="sp-stat__value" id="sp-grade">â€”</div>
+        <div class="sp-stat-val" id="sp-intensity" style="font-size:1rem">—</div>
+        <div class="sp-stat-lbl">Recommended Study Rate</div>
       </div>
     </div>
 
-    <div class="sp-advice">
-      ðŸ’¡ Start with your weakest subject. Focus on one topic per session.
-      Consistency beats cramming â€” every single time.
+    <div class="sp-card">
+      <div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Your Level</div>
+      <div style="font-weight:700;margin-bottom:4px" id="sp-grade-msg">Loading…</div>
     </div>
 
-    <div class="sp-exams-row">
-      Exams registered: <strong id="sp-exams">â€”</strong>
-      <a href="#" onclick="openAddExamModal(); return false;">+ Add / change exams</a>
+    <div class="sp-card">
+      <div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">SmartPath™ Suggestion</div>
+      <div style="font-size:.9rem" id="sp-smartpath">Complete your first session to unlock recommendations</div>
     </div>
 
-    <a href="cbt.html" class="btn btn-primary btn-block" onclick="document.getElementById('study-plan-modal').classList.remove('active')">
-      Start a Drill â†’
-    </a>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <a href="/classroom.html" class="btn btn-primary" style="flex:1">Go to Classroom</a>
+      <a href="/cbt.html"       class="btn btn-outline" style="flex:1">Start Practice</a>
+    </div>
   </div>
 </div>
-
-<!-- Populate exam date dropdown with next 18 months -->
-<script>
-(function () {
-  const sel = document.getElementById('signup-exam-date');
-  if (!sel) return;
-  const now    = new Date();
-  const months = ['January','February','March','April','May','June',
-                  'July','August','September','October','November','December'];
-  for (let i = 1; i <= 18; i++) {
-    const d   = new Date(now.getFullYear(), now.getMonth() + i, 1);
-    const val = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-    const opt = document.createElement('option');
-    opt.value       = val;
-    opt.textContent = months[d.getMonth()] + ' ' + d.getFullYear();
-    sel.appendChild(opt);
-  }
-})();
-</script>
