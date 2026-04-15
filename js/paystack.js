@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   UltimateEdge School — paystack.js  v4.1
+   UE School — paystack.js  v4.1
    Payment flow — Paystack popup → Supabase profile update.
    Only loaded on index.html.
    ═══════════════════════════════════════════════════════════ */
@@ -104,7 +104,7 @@ async function handlePaymentSuccess(response, plan) {
     const proEl = document.getElementById('nav-pro-badge');
     if (proEl) proEl.style.display = 'flex';
 
-    toast(`Premium activated! Welcome to UltimateEdge PRO 🎉`);
+    toast(`Premium activated! Welcome to UE School PRO 🎉`);
 
     /* Hide defaulter banner */
     const banner = document.getElementById('defaulter-banner');
