@@ -263,7 +263,7 @@
     <div class="nav-links">
       <a href="/classroom.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Classroom</a>
       <a href="/cbt.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Practice (CBT)</a>
-      <a href="/dashboard.html">Dashboard</a>
+      <a href="/dashboard.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Dashboard</a>
     </div>
     <button class="nav-hamburger" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false"
             onclick="const nav=this.closest('.ue-nav');nav.classList.toggle('nav-mobile-open');this.setAttribute('aria-expanded',nav.classList.contains('nav-mobile-open'))">
@@ -570,7 +570,7 @@
         <ul class="footer-links">
           <li><a href="/classroom.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Classroom</a></li>
           <li><a href="/cbt.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Practice CBT</a></li>
-          <li><a href="/dashboard.html">Dashboard</a></li>
+          <li><a href="/dashboard.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Dashboard</a></li>
         </ul>
       </div>
       <div>
