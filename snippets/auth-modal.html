@@ -1,5 +1,5 @@
 <!-- ══════════════════════════════════════════════════════════
-     UltimateEdge School — auth-modal.html  v4.1
+     UE School — auth-modal.html  v4.1
      Paste this block before </body> on every page.
      Contains: Auth modal (login + 4-step signup) + Study Plan modal.
      ══════════════════════════════════════════════════════════ -->
@@ -29,7 +29,7 @@
       </div>
       <button class="btn btn-primary btn-block btn-lg" id="login-submit-btn" onclick="handleLogin()" style="margin-top:8px">Login</button>
       <div style="text-align:center;margin-top:16px">
-        <a href="#" style="font-size:.85rem;color:var(--muted)" onclick="toast('Password reset: check your email');sb.auth.resetPasswordForEmail(document.getElementById(\'login-email\').value)">Forgot Password?</a>
+        <a href="#" style="font-size:.85rem;color:var(--accent);font-weight:600" onclick="handleForgotPassword(event)">Forgot Password?</a>
       </div>
     </div>
 
