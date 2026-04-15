@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   UltimateEdge School — cbt-engine.js  v4.1
+   UE School — cbt-engine.js  v4.1
    Runs ONLY on cbt.html.
    Handles: question rendering, answer recording, timer,
    flag-and-review, offline IndexedDB sync, XP, adaptive pyramid.
