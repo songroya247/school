@@ -12,90 +12,6 @@
 <script src="/js/auth.js"></script>
 <script src="/js/ai-engine.js"></script>
 <script src="/js/paystack.js"></script>
-<style>
-/* â”€â”€ INDEX PAGE MOBILE FIXES â”€â”€ */
-
-/* How It Works: 4-col â†’ 2-col â†’ 1-col */
-.hiw-grid { display: grid !important; }
-@media (max-width: 900px) {
-  .hiw-grid { grid-template-columns: repeat(2, 1fr) !important; }
-}
-@media (max-width: 480px) {
-  .hiw-grid { grid-template-columns: 1fr !important; }
-  .hiw-grid > div { padding: 16px 12px; }
-}
-
-/* Testimonials: 3-col â†’ 1-col */
-.testi-grid { display: grid !important; }
-@media (max-width: 900px) {
-  .testi-grid { grid-template-columns: 1fr !important; }
-}
-
-/* Pricing: enforce single column below 640px */
-@media (max-width: 640px) {
-  .pricing-grid { grid-template-columns: 1fr !important; }
-  .pricing-card { padding: 28px 20px; }
-}
-
-/* Exam coverage cards: 1-col on small screens */
-@media (max-width: 640px) {
-  .exam-cards { grid-template-columns: 1fr !important; }
-}
-
-/* Classroom band: fix video mock height on mobile */
-@media (max-width: 900px) {
-  .classroom-band-inner { gap: 32px; }
-  .classroom-video-mock { height: 240px; min-height: 200px; }
-}
-@media (max-width: 480px) {
-  .classroom-video-mock { height: 200px; }
-  .classroom-band { padding: 48px 0; }
-}
-
-/* Footer: stack to 1-col on small screens */
-@media (max-width: 600px) {
-  .footer-grid { grid-template-columns: 1fr !important; gap: 28px; }
-}
-
-/* Stats strip: 2-col on very small screens, no overflow */
-@media (max-width: 400px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-  .stat-item:last-child { grid-column: 1 / -1; }
-}
-
-/* Auth modal: tighter on mobile */
-@media (max-width: 520px) {
-  .modal-card { padding: 20px 16px; border-radius: 12px; }
-  .modal-backdrop { padding: 12px; align-items: flex-end; }
-  .subject-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important; }
-}
-
-/* Signup step back/continue buttons: stack on very small screens */
-@media (max-width: 380px) {
-  #su-step-2 > div:last-child,
-  #su-step-3 > div:last-child,
-  #su-step-4 > div:last-child { flex-direction: column; }
-  #su-step-2 > div:last-child .btn,
-  #su-step-3 > div:last-child .btn,
-  #su-step-4 > div:last-child .btn { width: 100%; }
-}
-
-/* Study Plan modal stats: single column on mobile */
-@media (max-width: 480px) {
-  .sp-stats { grid-template-columns: 1fr !important; }
-}
-
-/* Section padding: reduce on mobile */
-@media (max-width: 600px) {
-  section[style*="padding:72px"] { padding-top: 48px !important; padding-bottom: 48px !important; }
-  section[style*="padding:80px"] { padding-top: 48px !important; padding-bottom: 48px !important; }
-}
-
-/* Nav user pill: prevent overflow on mobile */
-@media (max-width: 900px) {
-  .nav-user-pill { width: 100%; }
-}
-</style>
 </head>
 <body>
 
@@ -343,7 +259,7 @@
       <h2 class="section-title">How It Works</h2>
       <p class="section-sub">From signup to exam success in 4 simple steps</p>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:40px" class="how-it-works-grid hiw-grid">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:40px" class="how-it-works-grid">
       <div style="text-align:center;padding:24px">
         <div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;font-family:var(--font-head)">1</div>
         <div style="font-weight:700;margin-bottom:8px">Sign Up Free</div>
@@ -374,7 +290,7 @@
     <div class="section-header" style="text-align:center">
       <h2 class="section-title">Student Success Stories</h2>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px" class="testimonials-grid testi-grid">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px" class="testimonials-grid">
       <div class="card card-body">
         <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"I scored 312 in JAMB after 6 weeks on UltimateEdge. The score predictions kept me motivated and on track."</div>
         <div style="font-weight:700">Emeka O.</div>
@@ -609,6 +525,12 @@ function initSlider(trackId, prevId, nextId, dotsId) {
 document.addEventListener('DOMContentLoaded', () => {
   initSlider('feat-track', 'feat-prev', 'feat-next', 'feat-dots');
   initSlider('subj-track', 'subj-prev', 'subj-next', 'subj-dots');
+
+  /* Auto-open login modal when redirected from a protected page */
+  const params = new URLSearchParams(location.search);
+  if (params.get('auth') === 'login') {
+    waitForSB(() => openAuthModal('login'));
+  }
 });
 </script>
 </body>
