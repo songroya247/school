@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   UltimateEdge School — service-worker.js  v4.1
+   UE School — service-worker.js  v4.1
    ⚠️  This file MUST remain at ROOT (/service-worker.js)
    NOT in /js/ — service workers are scoped to their directory.
    ═══════════════════════════════════════════════════════════ */
