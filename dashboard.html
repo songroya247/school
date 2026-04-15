@@ -60,7 +60,7 @@
       <a href="/classroom.html">Classroom</a>
       <a href="/cbt.html">Practice</a>
     </div>
-    <button class="nav-hamburger" aria-label="Toggle menu" onclick="this.closest('.ue-nav').classList.toggle('nav-mobile-open')">
+    <button class="nav-hamburger" aria-label="Toggle menu" onclick="const nav=this.closest('.ue-nav');nav.classList.toggle('nav-mobile-open');this.setAttribute('aria-expanded',nav.classList.contains('nav-mobile-open'))">
       <span></span><span></span><span></span>
     </button>
     <div class="nav-right">
@@ -568,6 +568,15 @@ function renderSmartPath() {
 
 /* â”€â”€ INIT â”€â”€ */
 document.addEventListener('DOMContentLoaded', () => {
+  /* Close mobile nav when a link is tapped */
+  document.querySelectorAll(".nav-links a").forEach(function(link) {
+    link.addEventListener("click", function() {
+      var nav = document.querySelector(".ue-nav");
+      if (nav) nav.classList.remove("nav-mobile-open");
+      var btn = document.querySelector(".nav-hamburger");
+      if (btn) btn.setAttribute("aria-expanded", "false");
+    });
+  });
   /* Poll until auth is ready */
   const poll = setInterval(() => {
     if (typeof sb !== 'undefined') {
