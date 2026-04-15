@@ -10,7 +10,7 @@
 <script src="/js/auth.js"></script>
 <script src="/js/ai-engine.js"></script>
 </head>
-<body style="height:100vh;overflow:hidden;display:flex;flex-direction:column">
+<body class="classroom-page" style="height:100vh;overflow:hidden;display:flex;flex-direction:column">
 
 <div id="defaulter-banner">Your subscription has expired. <a href="/index.html#pricing">Renew Now</a></div>
 
@@ -23,7 +23,7 @@
       <a href="/classroom.html" class="active">Classroom</a>
       <a href="/cbt.html">Practice</a>
     </div>
-    <button class="nav-hamburger" aria-label="Toggle menu" onclick="this.closest('.ue-nav').classList.toggle('nav-mobile-open')">
+    <button class="nav-hamburger" aria-label="Toggle menu" onclick="const nav=this.closest('.ue-nav');nav.classList.toggle('nav-mobile-open');this.setAttribute('aria-expanded',nav.classList.contains('nav-mobile-open'))">
       <span></span><span></span><span></span>
     </button>
     <div class="nav-right">
@@ -60,6 +60,12 @@
   </div>
 
   <div class="classroom-layout">
+
+    <!-- Mobile sidebar toggle -->
+    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn"
+            onclick="const sb=document.querySelector('.classroom-sidebar');sb.classList.toggle('open');this.textContent=sb.classList.contains('open')?'▲ Hide Topics':'📋 Topics'">
+      📋 Topics
+    </button>
 
     <!-- ── SIDEBAR ── -->
     <aside class="classroom-sidebar">
@@ -542,6 +548,15 @@ function resetMainPanel() {
 
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {
+  /* Close mobile nav when a link is tapped */
+  document.querySelectorAll(".nav-links a").forEach(function(link) {
+    link.addEventListener("click", function() {
+      var nav = document.querySelector(".ue-nav");
+      if (nav) nav.classList.remove("nav-mobile-open");
+      var btn = document.querySelector(".nav-hamburger");
+      if (btn) btn.setAttribute("aria-expanded", "false");
+    });
+  });
   /* Init sidebar with defaults */
   renderSidebar('mathematics');
 
