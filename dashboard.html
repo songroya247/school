@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard — UltimateEdge School</title>
+<title>Dashboard â€” UltimateEdge School</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/main.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,7 +11,7 @@
 <script src="/js/auth.js"></script>
 <script src="/js/ai-engine.js"></script>
 <style>
-/* ── DASHBOARD-SPECIFIC LAYOUT ── */
+/* â”€â”€ DASHBOARD-SPECIFIC LAYOUT â”€â”€ */
 .dash-top-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 36px; }
 .dash-welcome-card { background: linear-gradient(135deg, #1a56ff 0%, #2563eb 50%, #1d4ed8 100%); border: none; border-radius: 20px; overflow: hidden; position: relative; box-shadow: 0 8px 40px rgba(26,86,255,.25); }
 .dash-welcome-card::before { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; background:rgba(255,255,255,.06); border-radius:50%; }
@@ -51,7 +51,7 @@
 
 <div id="defaulter-banner">Your subscription has expired. <a href="/index.html#pricing">Renew Now</a></div>
 
-<!-- ── NAV ── -->
+<!-- â”€â”€ NAV â”€â”€ -->
 <nav class="ue-nav">
   <div class="container">
     <a href="/index.html" class="nav-logo">ULTIMATEEDGE SCHOOL</a>
@@ -64,7 +64,7 @@
       <span></span><span></span><span></span>
     </button>
     <div class="nav-right">
-      <div class="streak-badge" id="streak-badge" style="display:none">🔥 <span id="streak-count">0</span>-day streak</div>
+      <div class="streak-badge" id="streak-badge" style="display:none">ðŸ”¥ <span id="streak-count">0</span>-day streak</div>
       <div class="nav-user-pill" id="nav-user-pill" style="display:none">
         <div class="nav-avatar">
           <span id="nav-avatar-initials">??</span>
@@ -87,12 +87,12 @@
     <div class="dash-welcome-card">
       <div class="card-body">
         <h1 id="dash-welcome-title">Welcome back!</h1>
-        <p class="subtitle" id="dash-subtitle">Loading your study plan…</p>
+        <p class="subtitle" id="dash-subtitle">Loading your study planâ€¦</p>
         <div class="dash-welcome-inner">
-          <span class="icon">🎯</span>
+          <span class="icon">ðŸŽ¯</span>
           <div>
             <div style="font-size:.75rem;opacity:.7;margin-bottom:2px">Next Recommended Topic</div>
-            <div style="font-weight:700;font-size:.95rem" id="dash-next-topic">Loading SmartPath…</div>
+            <div style="font-weight:700;font-size:.95rem" id="dash-next-topic">Loading SmartPathâ€¦</div>
           </div>
           <a href="/classroom.html" class="btn btn-sm" style="background:#fff;color:var(--accent);margin-left:auto">Start Lesson</a>
         </div>
@@ -100,7 +100,7 @@
     </div>
     <div class="score-card">
       <div class="score-label">Predicted JAMB Score</div>
-      <div class="score-value" id="dash-jamb-score">—</div>
+      <div class="score-value" id="dash-jamb-score">â€”</div>
       <div class="score-denom">/400</div>
       <div class="score-progress-wrap">
         <div class="progress-track"><div class="progress-fill fill-blue" id="dash-score-bar" style="width:0%"></div></div>
@@ -121,11 +121,11 @@
     <div class="slider-wrap">
       <div class="slider-track" id="dash-track">
         <!-- Rendered by dashboard.js from profiles.exam_subjects -->
-        <div style="flex:0 0 300px;padding:20px;color:var(--muted);font-size:.9rem">Loading your subjects…</div>
+        <div style="flex:0 0 300px;padding:20px;color:var(--muted);font-size:.9rem">Loading your subjectsâ€¦</div>
       </div>
     </div>
     <div style="margin-top:14px">
-      <button class="btn btn-outline btn-sm" onclick="openManageSubjectsModal()">⚙ Manage My Subjects</button>
+      <button class="btn btn-outline btn-sm" onclick="openManageSubjectsModal()">âš™ Manage My Subjects</button>
     </div>
   </section>
 
@@ -135,14 +135,14 @@
       <h2>Detailed <span>Performance</span></h2>
     </div>
     <div class="perf-card" id="perf-chart-container">
-      <div style="padding:24px;color:var(--muted);font-size:.9rem">Loading performance data…</div>
+      <div style="padding:24px;color:var(--muted);font-size:.9rem">Loading performance dataâ€¦</div>
     </div>
   </section>
 
   <!-- SmartPath Recommendations -->
   <section class="dash-section">
     <div class="dash-section-head">
-      <h2>SmartPath™ <span>Recommendations</span></h2>
+      <h2>SmartPathâ„¢ <span>Recommendations</span></h2>
     </div>
     <div class="smartpath-grid" id="smartpath-grid">
       <div class="smartpath-card">
@@ -177,7 +177,7 @@
 <!-- Manage Subjects Modal -->
 <div class="modal-backdrop" id="manage-subj-modal" onclick="if(event.target===this)document.getElementById('manage-subj-modal').classList.remove('open')">
   <div class="modal-card">
-    <button class="modal-close" onclick="document.getElementById('manage-subj-modal').classList.remove('open')">✕</button>
+    <button class="modal-close" onclick="document.getElementById('manage-subj-modal').classList.remove('open')">âœ•</button>
     <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Manage My Subjects</h2>
     <p style="font-size:.88rem;color:var(--muted);margin-bottom:16px">Select all subjects you are sitting for.</p>
     <div class="subject-grid" id="manage-subj-grid"><!-- rendered by JS --></div>
@@ -194,15 +194,15 @@
 <!-- Study Plan Modal -->
 <div class="modal-backdrop" id="sp-modal" onclick="if(event.target===this)closeAuthModal()">
   <div class="modal-card">
-    <button class="modal-close" onclick="closeAuthModal()">✕</button>
-    <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:4px">Welcome back, <span id="sp-name">Student</span>! 👋</h2>
-    <p style="font-size:.9rem;color:var(--muted);margin-bottom:20px" id="sp-months">Loading your plan…</p>
+    <button class="modal-close" onclick="closeAuthModal()">âœ•</button>
+    <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:4px">Welcome back, <span id="sp-name">Student</span>! ðŸ‘‹</h2>
+    <p style="font-size:.9rem;color:var(--muted);margin-bottom:20px" id="sp-months">Loading your planâ€¦</p>
     <div class="sp-stats">
       <div class="sp-stat"><div class="sp-stat-val" id="sp-readiness">NIL</div><div class="sp-stat-lbl">Current Readiness</div></div>
-      <div class="sp-stat"><div class="sp-stat-val" id="sp-intensity" style="font-size:.95rem">—</div><div class="sp-stat-lbl">Recommended Study Rate</div></div>
+      <div class="sp-stat"><div class="sp-stat-val" id="sp-intensity" style="font-size:.95rem">â€”</div><div class="sp-stat-lbl">Recommended Study Rate</div></div>
     </div>
-    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Your Level</div><div style="font-weight:700" id="sp-grade-msg">Loading…</div></div>
-    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">SmartPath™ Suggestion</div><div style="font-size:.9rem" id="sp-smartpath">Complete your first session to unlock recommendations</div></div>
+    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Your Level</div><div style="font-weight:700" id="sp-grade-msg">Loadingâ€¦</div></div>
+    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">SmartPathâ„¢ Suggestion</div><div style="font-size:.9rem" id="sp-smartpath">Complete your first session to unlock recommendations</div></div>
     <div style="display:flex;gap:10px;margin-top:8px">
       <a href="/classroom.html" class="btn btn-primary" style="flex:1">Go to Classroom</a>
       <a href="/cbt.html" class="btn btn-outline" style="flex:1">Start Practice</a>
@@ -213,7 +213,7 @@
 <!-- Auth modal (for redirect to login) -->
 <div class="modal-backdrop" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
   <div class="modal-card">
-    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <button class="modal-close" onclick="closeAuthModal()">âœ•</button>
     <div class="auth-tabs">
       <button class="auth-tab active" id="auth-tab-login" onclick="switchAuthTab('login')">Login</button>
       <button class="auth-tab" id="auth-tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
@@ -221,7 +221,7 @@
     <div id="auth-login-form">
       <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Welcome back</h2>
       <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="login-email" placeholder="chioma@example.com"></div>
-      <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="login-password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" onkeydown="if(event.key==='Enter')handleLogin()"></div>
       <button class="btn btn-primary btn-block btn-lg" id="login-submit-btn" onclick="handleLogin()" style="margin-top:8px">Login</button>
     </div>
     <div id="auth-signup-form" style="display:none">
@@ -231,7 +231,7 @@
 </div>
 
 <script>
-/* ── SLIDER ── */
+/* â”€â”€ SLIDER â”€â”€ */
 function initSlider(trackId, prevId, nextId) {
   const track = document.getElementById(trackId);
   if (!track) return;
@@ -256,7 +256,7 @@ function initSlider(trackId, prevId, nextId) {
   startAuto();
 }
 
-/* ── TOGGLE EXPAND (Performance Chart) ── */
+/* â”€â”€ TOGGLE EXPAND (Performance Chart) â”€â”€ */
 function toggleExpand(id, rowEl) {
   const detail = document.getElementById(id);
   if (!detail) return;
@@ -265,13 +265,13 @@ function toggleExpand(id, rowEl) {
   rowEl.classList.toggle('open', !isOpen);
 }
 
-/* ── STUDY MODE TOGGLE ── */
+/* â”€â”€ STUDY MODE TOGGLE â”€â”€ */
 async function onStudyModeToggle(checked) {
   const mode = checked ? 'cbt_only' : 'drill';
   await setStudyMode(mode);
 }
 
-/* ── MANAGE SUBJECTS MODAL ── */
+/* â”€â”€ MANAGE SUBJECTS MODAL â”€â”€ */
 let _managingSubjects = new Set();
 
 function openManageSubjectsModal() {
@@ -280,22 +280,22 @@ function openManageSubjectsModal() {
   const grid = document.getElementById('manage-subj-grid');
 
   const all = [
-    {id:'mathematics',name:'Mathematics',icon:'📐',color:'#1a56ff'},
-    {id:'english',name:'English Language',icon:'📖',color:'#00c97a'},
-    {id:'physics',name:'Physics',icon:'⚛️',color:'#7c3aed'},
-    {id:'chemistry',name:'Chemistry',icon:'🧪',color:'#ff6b35'},
-    {id:'biology',name:'Biology',icon:'🌿',color:'#0891b2'},
-    {id:'economics',name:'Economics',icon:'📈',color:'#f59e0b'},
-    {id:'government',name:'Government',icon:'🏛️',color:'#6366f1'},
-    {id:'literature',name:'Literature',icon:'📚',color:'#ec4899'},
-    {id:'geography',name:'Geography',icon:'🌍',color:'#10b981'},
-    {id:'commerce',name:'Commerce',icon:'🏪',color:'#8b5cf6'},
-    {id:'accounts',name:'Accounts',icon:'💼',color:'#14b8a6'},
+    {id:'mathematics',name:'Mathematics',icon:'ðŸ“',color:'#1a56ff'},
+    {id:'english',name:'English Language',icon:'ðŸ“–',color:'#00c97a'},
+    {id:'physics',name:'Physics',icon:'âš›ï¸',color:'#7c3aed'},
+    {id:'chemistry',name:'Chemistry',icon:'ðŸ§ª',color:'#ff6b35'},
+    {id:'biology',name:'Biology',icon:'ðŸŒ¿',color:'#0891b2'},
+    {id:'economics',name:'Economics',icon:'ðŸ“ˆ',color:'#f59e0b'},
+    {id:'government',name:'Government',icon:'ðŸ›ï¸',color:'#6366f1'},
+    {id:'literature',name:'Literature',icon:'ðŸ“š',color:'#ec4899'},
+    {id:'geography',name:'Geography',icon:'ðŸŒ',color:'#10b981'},
+    {id:'commerce',name:'Commerce',icon:'ðŸª',color:'#8b5cf6'},
+    {id:'accounts',name:'Accounts',icon:'ðŸ’¼',color:'#14b8a6'},
   ];
 
   grid.innerHTML = all.map(s => `
     <div class="subj-card ${_managingSubjects.has(s.id) ? 'selected' : ''}" onclick="toggleManageSubj(this,'${s.id}')">
-      <div class="subj-check">✓</div>
+      <div class="subj-check">âœ“</div>
       <div class="subj-card-icon">${s.icon}</div>
       <div class="subj-card-name" style="color:${s.color}">${s.name}</div>
     </div>`).join('');
@@ -315,11 +315,11 @@ async function saveSubjectChanges() {
   await sb.from('profiles').update({ exam_subjects: subjects }).eq('id', currentUser.id);
   if (currentProfile) currentProfile.exam_subjects = subjects;
   document.getElementById('manage-subj-modal').classList.remove('open');
-  toast('Subjects updated! Refreshing…');
+  toast('Subjects updated! Refreshingâ€¦');
   setTimeout(() => renderDashboard(), 500);
 }
 
-/* ── RENDER DASHBOARD ── */
+/* â”€â”€ RENDER DASHBOARD â”€â”€ */
 async function renderDashboard() {
   if (!currentProfile) return;
 
@@ -339,12 +339,12 @@ async function renderDashboard() {
   const nextTopic = queue[0];
   document.getElementById('dash-next-topic').textContent = nextTopic
     ? `${nextTopic.topicId?.replace(/-/g,' ')}`
-    : 'Take your first session to unlock SmartPath™';
+    : 'Take your first session to unlock SmartPathâ„¢';
 
   /* JAMB score prediction */
   const accuracy = currentProfile.accuracy_avg;
   const jambRange = predictJAMB(accuracy);
-  document.getElementById('dash-jamb-score').textContent = accuracy !== null ? jambRange : '—';
+  document.getElementById('dash-jamb-score').textContent = accuracy !== null ? jambRange : 'â€”';
   if (accuracy !== null) {
     const barPct = Math.round(accuracy / 100 * 100);
     document.getElementById('dash-score-bar').style.width = `${barPct}%`;
@@ -353,7 +353,7 @@ async function renderDashboard() {
     const diff = target - midRange;
     document.getElementById('dash-score-hint').textContent =
       diff > 0 ? `${diff} points away from your target of ${target}. Keep pushing!`
-               : `You've reached your target score! 🎉`;
+               : `You've reached your target score! ðŸŽ‰`;
   }
 
   /* Study mode toggle */
@@ -396,14 +396,14 @@ function calcStreak(logs) {
   return streak;
 }
 
-/* ── SUBJECT SLIDESHOW ── */
+/* â”€â”€ SUBJECT SLIDESHOW â”€â”€ */
 async function renderSubjectSlideshow() {
   const subjects = getExamSubjects();
   const track = document.getElementById('dash-track');
   if (!track) return;
 
   if (!subjects.length) {
-    track.innerHTML = `<div style="flex:0 0 300px;padding:20px;color:var(--muted)">No subjects selected. <a href="#" onclick="openManageSubjectsModal()" style="color:var(--accent)">Add subjects →</a></div>`;
+    track.innerHTML = `<div style="flex:0 0 300px;padding:20px;color:var(--muted)">No subjects selected. <a href="#" onclick="openManageSubjectsModal()" style="color:var(--accent)">Add subjects â†’</a></div>`;
     return;
   }
 
@@ -423,21 +423,21 @@ async function renderSubjectSlideshow() {
   });
 
   const subjectMeta = {
-    mathematics:{ name:'Mathematics',        icon:'📐', color:'#1a56ff' },
-    english:    { name:'English Language',    icon:'📖', color:'#00c97a' },
-    physics:    { name:'Physics',             icon:'⚛️',  color:'#7c3aed' },
-    chemistry:  { name:'Chemistry',           icon:'🧪', color:'#ff6b35' },
-    biology:    { name:'Biology',             icon:'🌿', color:'#0891b2' },
-    economics:  { name:'Economics',           icon:'📈', color:'#f59e0b' },
-    government: { name:'Government',          icon:'🏛️',  color:'#6366f1' },
-    literature: { name:'Literature',          icon:'📚', color:'#ec4899' },
-    geography:  { name:'Geography',           icon:'🌍', color:'#10b981' },
-    commerce:   { name:'Commerce',            icon:'🏪', color:'#8b5cf6' },
-    accounts:   { name:'Accounts',            icon:'💼', color:'#14b8a6' },
+    mathematics:{ name:'Mathematics',        icon:'ðŸ“', color:'#1a56ff' },
+    english:    { name:'English Language',    icon:'ðŸ“–', color:'#00c97a' },
+    physics:    { name:'Physics',             icon:'âš›ï¸',  color:'#7c3aed' },
+    chemistry:  { name:'Chemistry',           icon:'ðŸ§ª', color:'#ff6b35' },
+    biology:    { name:'Biology',             icon:'ðŸŒ¿', color:'#0891b2' },
+    economics:  { name:'Economics',           icon:'ðŸ“ˆ', color:'#f59e0b' },
+    government: { name:'Government',          icon:'ðŸ›ï¸',  color:'#6366f1' },
+    literature: { name:'Literature',          icon:'ðŸ“š', color:'#ec4899' },
+    geography:  { name:'Geography',           icon:'ðŸŒ', color:'#10b981' },
+    commerce:   { name:'Commerce',            icon:'ðŸª', color:'#8b5cf6' },
+    accounts:   { name:'Accounts',            icon:'ðŸ’¼', color:'#14b8a6' },
   };
 
   track.innerHTML = subjects.map(subjId => {
-    const meta   = subjectMeta[subjId] || { name: subjId, icon: '📘', color: '#1a56ff' };
+    const meta   = subjectMeta[subjId] || { name: subjId, icon: 'ðŸ“˜', color: '#1a56ff' };
     const topics = topicsBySubject[subjId] || [];
     const masteries = topics.map(t => masteryByTopic[t]?.mastery_level).filter(m => m !== null && m !== undefined);
     const avgMastery = masteries.length ? masteries.reduce((a, b) => a + b, 0) / masteries.length : null;
@@ -456,7 +456,7 @@ async function renderSubjectSlideshow() {
           <div class="dash-subj-mastery-row"><span>Mastery</span><span style="font-family:var(--font-mono);color:${pct === null ? 'var(--muted)' : 'var(--text)'}">${masteryLabel}</span></div>
           <div class="subj-progress-track"><div class="subj-progress-fill ${fillClass}" style="width:${fillWidth}"></div></div>
           <div class="dash-subj-btns">
-            <a href="/classroom.html?subject=${subjId}" class="btn btn-primary" style="font-size:.78rem">▶ Lesson</a>
+            <a href="/classroom.html?subject=${subjId}" class="btn btn-primary" style="font-size:.78rem">â–¶ Lesson</a>
             <a href="/cbt.html?subject=${subjId}" class="btn btn-outline" style="font-size:.78rem">Practice</a>
           </div>
         </div>
@@ -466,7 +466,7 @@ async function renderSubjectSlideshow() {
   initSlider('dash-track', 'dash-prev', 'dash-next');
 }
 
-/* ── PERFORMANCE BAR CHART ── */
+/* â”€â”€ PERFORMANCE BAR CHART â”€â”€ */
 async function renderPerformanceChart() {
   const subjects = getExamSubjects();
   const container = document.getElementById('perf-chart-container');
@@ -483,12 +483,12 @@ async function renderPerformanceChart() {
     .eq('user_id', currentUser.id);
 
   const subjectMeta = {
-    mathematics:{ name:'📐 Mathematics' }, english:{ name:'📖 English Language' },
-    physics:{ name:'⚛️ Physics' }, chemistry:{ name:'🧪 Chemistry' },
-    biology:{ name:'🌿 Biology' }, economics:{ name:'📈 Economics' },
-    government:{ name:'🏛️ Government' }, literature:{ name:'📚 Literature' },
-    geography:{ name:'🌍 Geography' }, commerce:{ name:'🏪 Commerce' },
-    accounts:{ name:'💼 Accounts' },
+    mathematics:{ name:'ðŸ“ Mathematics' }, english:{ name:'ðŸ“– English Language' },
+    physics:{ name:'âš›ï¸ Physics' }, chemistry:{ name:'ðŸ§ª Chemistry' },
+    biology:{ name:'ðŸŒ¿ Biology' }, economics:{ name:'ðŸ“ˆ Economics' },
+    government:{ name:'ðŸ›ï¸ Government' }, literature:{ name:'ðŸ“š Literature' },
+    geography:{ name:'ðŸŒ Geography' }, commerce:{ name:'ðŸª Commerce' },
+    accounts:{ name:'ðŸ’¼ Accounts' },
   };
 
   const masteryByTopic = {};
@@ -527,7 +527,7 @@ async function renderPerformanceChart() {
           <span class="perf-subject-name">${meta.name}</span>
           <div class="perf-bar-track"><div class="perf-bar-fill ${fillClass}" style="width:${pct !== null ? pct+'%' : '0%'}"></div></div>
           <span class="perf-pct">${pctLabel}</span>
-          <span class="perf-expand-chevron">▾</span>
+          <span class="perf-expand-chevron">â–¾</span>
         </div>
         <div class="perf-subject-detail" id="${expandId}">
           ${topicRows}
@@ -536,7 +536,7 @@ async function renderPerformanceChart() {
   }).join('');
 }
 
-/* ── SMARTPATH RENDER ── */
+/* â”€â”€ SMARTPATH RENDER â”€â”€ */
 function renderSmartPath() {
   const queue = currentProfile?.smartpath_queue || [];
   const grid  = document.getElementById('smartpath-grid');
@@ -566,7 +566,7 @@ function renderSmartPath() {
   }).join('');
 }
 
-/* ── INIT ── */
+/* â”€â”€ INIT â”€â”€ */
 document.addEventListener('DOMContentLoaded', () => {
   /* Poll until auth is ready */
   const poll = setInterval(() => {
