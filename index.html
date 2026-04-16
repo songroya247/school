@@ -1,1 +1,685 @@
-....
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UE School — Ace Your JAMB, WAEC &amp; NECO Exams</title>
+<meta name="description" content="Master every topic with adaptive CBT prep, expert video lessons, and AI-powered score predictions. From ₦1,500/month.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/ai-engine.js"></script>
+<script src="/js/paystack.js"></script>
+<style>
+/* ── INDEX.HTML — page-specific mobile fixes only.
+   Nav + video card are handled in main.css PATCH v4.1.2
+   ─────────────────────────────────────────────────── */
+
+/* HERO */
+@media (max-width: 768px) {
+  .hero-grid { grid-template-columns: 1fr !important; gap: 32px; }
+  .hero-headline { font-size: clamp(2rem, 9vw, 3.2rem) !important; }
+  .hero-ctas { flex-direction: column; gap: 12px; }
+  .hero-ctas .btn { width: 100%; text-align: center; }
+  .hero-cbt-card { width: 100%; }
+}
+
+/* STATS */
+@media (max-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(3, 1fr) !important; flex-wrap: wrap !important; }
+  .stat-value { font-size: 1.3rem !important; }
+}
+
+/* EXAM CARDS */
+@media (max-width: 768px) {
+  .exam-cards { grid-template-columns: 1fr !important; }
+}
+
+/* HOW IT WORKS */
+@media (max-width: 768px) {
+  .how-it-works-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 16px !important; }
+}
+@media (max-width: 480px) {
+  .how-it-works-grid { grid-template-columns: 1fr !important; }
+}
+
+/* PRICING */
+@media (max-width: 900px) {
+  .pricing-grid { grid-template-columns: 1fr !important; max-width: 420px; margin: 0 auto; }
+}
+
+/* CLASSROOM BAND */
+@media (max-width: 768px) {
+  .classroom-band-inner { grid-template-columns: 1fr !important; flex-direction: column !important; }
+  .classroom-video-mock {
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* TESTIMONIALS */
+@media (max-width: 768px) {
+  .testimonials-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+}
+
+/* FOOTER */
+@media (max-width: 640px) {
+  .footer-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
+}
+
+/* MODALS */
+@media (max-width: 520px) {
+  .modal-backdrop { align-items: flex-end !important; padding: 0 !important; }
+  .modal-card {
+    width: calc(100vw - 24px) !important; margin: 12px; max-height: 92vh;
+    overflow-y: auto; border-radius: 20px 20px 0 0; margin-bottom: 0;
+    padding: 20px 16px !important; box-sizing: border-box;
+  }
+  .subject-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .subj-card { padding: 10px 6px !important; font-size: .78rem; }
+  .sp-stats { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .auth-tabs { gap: 4px; }
+}
+
+/* SLIDER HEADER */
+@media (max-width: 480px) {
+  .section-slider-header { flex-direction: column !important; align-items: flex-start !important; gap: 12px; }
+}
+
+/* CONTAINER + SECTION PADDING */
+@media (max-width: 480px) {
+  .container { padding-left: 16px !important; padding-right: 16px !important; }
+  section { padding-top: 48px !important; padding-bottom: 48px !important; }
+  .btn-lg { font-size: .95rem; padding: 14px 20px; }
+  #defaulter-banner { font-size: .82rem; padding: 8px 12px; text-align: center; }
+}
+
+/* HAMBURGER X ANIMATION */
+@media (max-width: 900px) {
+  .nav-hamburger span { transition: transform .25s ease, opacity .2s ease; display: block; }
+  .nav-mobile-open .nav-hamburger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-mobile-open .nav-hamburger span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .nav-mobile-open .nav-hamburger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+}
+</style>
+</head>
+<body>
+
+<div id="defaulter-banner">Your subscription has expired. <a href="/index.html#pricing">Renew Now</a></div>
+
+<!-- ── NAV ── -->
+<nav class="ue-nav">
+  <div class="container">
+    <a href="/index.html" class="nav-logo">UE SCHOOL</a>
+    <div class="nav-links">
+      <a href="/classroom.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Classroom</a>
+      <a href="/cbt.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Practice (CBT)</a>
+      <a href="/dashboard.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Dashboard</a>
+    </div>
+    <button class="nav-hamburger" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false"
+            onclick="
+              const nav=this.closest('.ue-nav');
+              const opening = !nav.classList.contains('nav-mobile-open');
+              nav.classList.toggle('nav-mobile-open');
+              this.setAttribute('aria-expanded', opening);
+              if(opening){
+                const links = nav.querySelector('.nav-links');
+                if(links) nav.style.setProperty('--nav-links-h', links.offsetHeight+'px');
+              }
+            ">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-right">
+      <!-- Logged-out state -->
+      <button class="btn btn-primary" id="nav-login-btn" onclick="openAuthModal('signup')">Login / Sign Up</button>
+      <!-- Logged-in state (hidden until auth loads) -->
+      <div class="nav-user-pill" id="nav-user-pill" style="display:none">
+        <div class="nav-avatar">
+          <span id="nav-avatar-initials">??</span>
+          <span class="nav-pro-badge" id="nav-pro-badge" style="display:none">PRO</span>
+        </div>
+        <div>
+          <div class="nav-user-name" id="nav-user-name">Student</div>
+          <div class="nav-xp" id="nav-xp">0 XP</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero-section">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <h1 class="hero-headline">ACE YOUR JAMB, WAEC &amp; NECO EXAMS</h1>
+        <p class="hero-sub">Master every topic with adaptive CBT prep, expert video lessons, and AI-powered score predictions.</p>
+        <div class="hero-ctas">
+          <button class="btn btn-primary btn-lg" onclick="openAuthModal('signup')">Start Free Today</button>
+          <a href="/cbt.html" class="btn btn-outline btn-lg" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Take a Practice Test</a>
+        </div>
+      </div>
+      <div class="hero-cbt-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+          <span class="hero-timer">Time Left: 01:45:20</span>
+          <span class="hero-jamb-badge">Predicted JAMB: 285</span>
+        </div>
+        <div class="hero-question">If <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--font-mono)">x² − 5x + 6 = 0</code>, what are the values of x?</div>
+        <div class="hero-opts">
+          <div class="hero-opt selected">A. x = 2 or x = 3</div>
+          <div class="hero-opt">B. x = −2 or x = −3</div>
+          <div class="hero-opt">C. x = 1 or x = 6</div>
+          <div class="hero-opt">D. x = −1 or x = −6</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS STRIP ── -->
+<section class="stats-strip">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-value">12,000+</div><div class="stat-label">Students</div></div>
+      <div class="stat-item"><div class="stat-value">50,000+</div><div class="stat-label">Questions</div></div>
+      <div class="stat-item"><div class="stat-value">95%</div><div class="stat-label">Pass Rate</div></div>
+      <div class="stat-item"><div class="stat-value">200+</div><div class="stat-label">Video Lessons</div></div>
+      <div class="stat-item"><div class="stat-value">₦1,500</div><div class="stat-label">/month</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES & ADVERTISING SLIDESHOW (NEW §27) ── -->
+<section style="padding:72px 0;background:rgba(240,244,255,.5);">
+  <div class="container">
+    <div class="section-slider-header">
+      <div>
+        <h2 class="section-title">Why UE School?</h2>
+        <p class="section-sub">Everything you need to succeed, all in one place.</p>
+      </div>
+      <div>
+        <button class="btn-icon" id="feat-prev">&#8249;</button>
+        <button class="btn-icon" id="feat-next">&#8250;</button>
+      </div>
+    </div>
+    <div class="slider-wrap">
+      <div class="slider-track" id="feat-track">
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Smart Score Prediction</div><div class="feature-desc">Know your JAMB range before exam day — updated after every session.</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">📹</div><div class="feature-title">200+ Video Masterclasses</div><div class="feature-desc">Full curriculum covered topic by topic, taught by expert educators.</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">🧠</div><div class="feature-title">Adaptive Practice</div><div class="feature-desc">Questions automatically adjust to your skill level. You always practice at the right difficulty.</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">⚑</div><div class="feature-title">Real CBT Experience</div><div class="feature-desc">Timer, question map, flag &amp; review — just like the real JAMB CBT centre.</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Weakness Tracker</div><div class="feature-desc">Instantly see which topics need the most attention with our visual performance chart.</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">🚀</div><div class="feature-title">SmartPath™ Engine</div><div class="feature-desc">AI-powered topic recommendations after every session. Always know what to study next.</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">📴</div><div class="feature-title">Works Offline</div><div class="feature-desc">Practise anywhere — even without internet. Your answers sync automatically when you're back online.</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">💰</div><div class="feature-title">From ₦1,500/month</div><div class="feature-desc">Less than a data bundle. No ₦50,000 coaching fees. Cancel anytime.</div></div></div>
+      </div>
+    </div>
+    <div class="slider-dots" id="feat-dots"></div>
+  </div>
+</section>
+
+<!-- ── SUBJECT CARDS SLIDER (kept exactly as-is per §29) ── -->
+<section style="padding:72px 0;">
+  <div class="container">
+    <div class="section-slider-header">
+      <div>
+        <h2 class="section-title">Master Every Subject</h2>
+        <p class="section-sub">Comprehensive coverage for science, arts, and commercial students.</p>
+      </div>
+      <div>
+        <button class="btn-icon" id="subj-prev">&#8249;</button>
+        <button class="btn-icon" id="subj-next">&#8250;</button>
+      </div>
+    </div>
+    <div class="slider-wrap">
+      <div class="slider-track" id="subj-track">
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#dbeafe;color:#1d4ed8">📐</div><div class="subject-name">Mathematics</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#d1fae5;color:#065f46">📖</div><div class="subject-name">English</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#ede9fe;color:#5b21b6">⚛️</div><div class="subject-name">Physics</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#ffedd5;color:#c2410c">🧪</div><div class="subject-name">Chemistry</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#ccfbf1;color:#0f766e">🌿</div><div class="subject-name">Biology</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#fef3c7;color:#b45309">📈</div><div class="subject-name">Economics</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#e0e7ff;color:#3730a3">🏛️</div><div class="subject-name">Government</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#fce7f3;color:#9d174d">📚</div><div class="subject-name">Literature</div></a></div>
+        <div style="flex:0 0 180px"><a href="/classroom.html" class="subject-card" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}"><div class="subject-icon" style="background:#d1fae5;color:#065f46">🌍</div><div class="subject-name">Geography</div></a></div>
+      </div>
+    </div>
+    <div class="slider-dots" id="subj-dots"></div>
+  </div>
+</section>
+
+<!-- ── EXAM COVERAGE ── -->
+<section style="padding:72px 0;background:rgba(240,244,255,.5);">
+  <div class="container">
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">Full Exam Coverage</h2>
+      <p class="section-sub">We prepare you for every major exam in Nigeria</p>
+    </div>
+    <div class="exam-cards">
+      <div class="exam-card">
+        <div class="exam-card-icon">🎓</div>
+        <div class="exam-card-title">JAMB / UTME</div>
+        <div class="exam-card-desc">Complete preparation for the Joint Admissions and Matriculation Board exam. 40 subject questions, 1h40m — we cover all of it.</div>
+      </div>
+      <div class="exam-card">
+        <div class="exam-card-icon">📝</div>
+        <div class="exam-card-title">WAEC / GCE</div>
+        <div class="exam-card-desc">West Africa Senior School Certificate Examination preparation across all science, arts, and commercial subjects.</div>
+      </div>
+      <div class="exam-card">
+        <div class="exam-card-icon">🏫</div>
+        <div class="exam-card-title">NECO / Post-UTME</div>
+        <div class="exam-card-desc">National Examinations Council and university screening preparation. Subject-specific, past question powered practice.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CLASSROOM BAND ── -->
+<section class="classroom-band">
+  <div class="container">
+    <div class="classroom-band-inner">
+      <div>
+        <div class="topic-pills">
+          <span class="topic-pill">Quadratics</span>
+          <span class="topic-pill">Indices</span>
+          <span class="topic-pill">Logarithms</span>
+          <span class="topic-pill">Calculus</span>
+        </div>
+        <h2 style="font-family:var(--font-head);font-size:clamp(1.6rem,5vw,2.8rem);color:#fff;margin-bottom:16px">Enter the Classroom</h2>
+        <p style="color:rgba(255,255,255,.6);margin-bottom:28px;max-width:400px;line-height:1.7">Expert-taught video lessons for every topic on your exam syllabus. Adaptive content that matches your skill level.</p>
+        <a href="/classroom.html" class="btn btn-primary btn-lg" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Start Learning</a>
+      </div>
+      <div class="classroom-video-mock" style="cursor:pointer;position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#0f1117 0%,#1a1d2e 100%);min-height:280px;display:flex;flex-direction:column;isolation:isolate;" onclick="if(!currentUser){openAuthModal('signup');}else{window.location='/classroom.html';}">
+        <!-- Decorative glow -->
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 40%,rgba(26,86,255,.18),transparent);pointer-events:none;z-index:0;"></div>
+        <!-- Grid pattern overlay -->
+        <div style="position:absolute;inset:0;opacity:.07;background-image:linear-gradient(rgba(255,255,255,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.3) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0;"></div>
+        <!-- Top bar: subject badge + HD label -->
+        <div style="position:relative;z-index:3;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:16px 20px;">
+          <div style="background:rgba(26,86,255,.85);backdrop-filter:blur(6px);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:4px 12px;border-radius:999px;text-transform:uppercase;">
+            Mathematics &middot; Quadratics
+          </div>
+          <div style="color:rgba(255,255,255,.45);font-size:.72rem;font-weight:600;letter-spacing:.04em;">HD</div>
+        </div>
+        <!-- Centre: play button + text -->
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px 24px 20px;text-align:center;position:relative;z-index:2;">
+          <div style="width:68px;height:68px;border-radius:50%;background:rgba(26,86,255,.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 14px rgba(26,86,255,.12),0 8px 32px rgba(26,86,255,.45);transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 0 0 18px rgba(26,86,255,.18),0 8px 40px rgba(26,86,255,.6)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 0 0 14px rgba(26,86,255,.12),0 8px 32px rgba(26,86,255,.45)'">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M8 5.14v14l11-7-11-7z"/></svg>
+          </div>
+          <div>
+            <div style="color:#fff;font-family:var(--font-head);font-size:1.1rem;margin-bottom:6px;letter-spacing:.02em;">Video Lessons Coming Soon</div>
+            <div style="color:rgba(255,255,255,.45);font-size:.8rem;max-width:240px;line-height:1.55;margin:0 auto;">Expert-taught lessons are uploading. Sign up to get notified the moment they go live.</div>
+          </div>
+          <!-- Progress bar -->
+          <div style="width:100%;max-width:220px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="color:rgba(255,255,255,.35);font-size:.7rem;">Upload progress</span>
+              <span style="color:rgba(255,255,255,.5);font-size:.7rem;font-weight:600;">65%</span>
+            </div>
+            <div style="background:rgba(255,255,255,.1);border-radius:999px;height:4px;overflow:hidden;">
+              <div style="width:65%;height:100%;background:linear-gradient(90deg,#1a56ff,#6fa3ff);border-radius:999px;animation:ue-progress 2.5s ease-in-out infinite alternate;"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Bottom meta bar -->
+        <div style="position:relative;z-index:3;flex-shrink:0;padding:12px 20px;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;border-top:1px solid rgba(255,255,255,.06);">
+          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1a56ff,#6fa3ff);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#fff;font-weight:700;flex-shrink:0;">UE</div>
+          <div style="flex:1;min-width:0;">
+            <div style="color:#fff;font-size:.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">UE School &middot; Expert Tutor</div>
+            <div style="color:rgba(255,255,255,.4);font-size:.7rem;">JAMB &middot; WAEC &middot; NECO</div>
+          </div>
+          <div style="color:rgba(255,255,255,.35);font-size:.72rem;flex-shrink:0;">200+ Lessons</div>
+        </div>
+      </div>
+      <style>@keyframes ue-progress{from{width:45%}to{width:78%}}</style>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ── -->
+<section id="pricing" style="padding:80px 0;">
+  <div class="container">
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">Invest in Your Future</h2>
+      <p class="section-sub">Less than the cost of a data bundle. No expensive coaching fees.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <h3 style="font-weight:700;font-size:1.15rem;margin-bottom:8px">Monthly</h3>
+        <div class="pricing-price">₦1,500<span style="font-family:var(--font-body);font-size:1rem;color:var(--muted)">/mo</span></div>
+        <ul class="pricing-features" style="margin-top:20px">
+          <li><span class="pricing-check">✓</span> Full CBT access</li>
+          <li><span class="pricing-check">✓</span> All video lessons</li>
+          <li><span class="pricing-check">✓</span> Score prediction</li>
+          <li><span class="pricing-check">✓</span> Basic analytics</li>
+        </ul>
+        <button class="btn btn-outline btn-block" onclick="openPaystack('monthly')">Subscribe</button>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Most Popular</div>
+        <h3 style="font-weight:700;font-size:1.15rem;margin-bottom:8px">3-Month</h3>
+        <div class="pricing-price">₦3,500</div>
+        <div class="pricing-save">Save 22%</div>
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> Everything in Monthly</li>
+          <li><span class="pricing-check">✓</span> SmartPath™ Engine</li>
+          <li><span class="pricing-check">✓</span> Weakness tracker</li>
+          <li><span class="pricing-check">✓</span> Priority support</li>
+        </ul>
+        <button class="btn btn-primary btn-block" onclick="openPaystack('3month')">Subscribe</button>
+      </div>
+      <div class="pricing-card">
+        <h3 style="font-weight:700;font-size:1.15rem;margin-bottom:8px">Annual</h3>
+        <div class="pricing-price">₦12,000</div>
+        <div class="pricing-save">Save 33%</div>
+        <ul class="pricing-features">
+          <li><span class="pricing-check">✓</span> Everything in 3-Month</li>
+          <li><span class="pricing-check">✓</span> Post-UTME prep</li>
+          <li><span class="pricing-check">✓</span> Downloadable reports</li>
+          <li><span class="pricing-check">✓</span> 1-on-1 tutoring discount</li>
+        </ul>
+        <button class="btn btn-outline btn-block" onclick="openPaystack('annual')">Subscribe</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section style="padding:72px 0;background:rgba(240,244,255,.5);">
+  <div class="container">
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-sub">From signup to exam success in 4 simple steps</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:40px" class="how-it-works-grid">
+      <div style="text-align:center;padding:24px">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;font-family:var(--font-head)">1</div>
+        <div style="font-weight:700;margin-bottom:8px">Sign Up Free</div>
+        <div style="font-size:.88rem;color:var(--muted)">Create your account and select your subjects and exam type</div>
+      </div>
+      <div style="text-align:center;padding:24px">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;font-family:var(--font-head)">2</div>
+        <div style="font-weight:700;margin-bottom:8px">Watch Lessons</div>
+        <div style="font-size:.88rem;color:var(--muted)">Study topic-by-topic video masterclasses at your own pace</div>
+      </div>
+      <div style="text-align:center;padding:24px">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;font-family:var(--font-head)">3</div>
+        <div style="font-weight:700;margin-bottom:8px">Practise CBT</div>
+        <div style="font-size:.88rem;color:var(--muted)">Take adaptive mock exams with real timers and question maps</div>
+      </div>
+      <div style="text-align:center;padding:24px">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;font-family:var(--font-head)">4</div>
+        <div style="font-weight:700;margin-bottom:8px">Track &amp; Improve</div>
+        <div style="font-size:.88rem;color:var(--muted)">Monitor your JAMB score prediction and follow SmartPath guidance</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ── -->
+<section style="padding:72px 0;">
+  <div class="container">
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">Student Success Stories</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px" class="testimonials-grid">
+      <div class="card card-body">
+        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"I scored 312 in JAMB after 6 weeks on UE School. The score predictions kept me motivated and on track."</div>
+        <div style="font-weight:700">Emeka O.</div>
+        <div style="font-size:.82rem;color:var(--muted)">JAMB 2024 — 312/400</div>
+      </div>
+      <div class="card card-body">
+        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"The flag-and-review feature is exactly like the real CBT centre. I walked in knowing exactly what to expect."</div>
+        <div style="font-weight:700">Aisha B.</div>
+        <div style="font-size:.82rem;color:var(--muted)">WAEC 2024 — 5 A1s</div>
+      </div>
+      <div class="card card-body">
+        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"As a student in a remote area with poor internet, the offline mode was a lifesaver. Practised everywhere!"</div>
+        <div style="font-weight:700">Fatima D.</div>
+        <div style="font-size:.82rem;color:var(--muted)">NECO 2024 — 6 distinctions</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA BAND ── -->
+<section style="background:var(--accent);padding:72px 0;text-align:center;">
+  <div class="container">
+    <h2 style="font-family:var(--font-head);font-size:clamp(1.6rem,5vw,2.8rem);color:#fff;margin-bottom:16px">Ready to Start Your Journey?</h2>
+    <p style="color:rgba(255,255,255,.75);font-size:1.05rem;margin-bottom:32px">Join 12,000+ students already preparing smarter with UE School.</p>
+    <button class="btn btn-lg" style="background:#fff;color:var(--accent);font-weight:700" onclick="openAuthModal('signup')">Start Free Today</button>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">UE SCHOOL</div>
+        <div class="footer-tagline">The cockpit for your exam preparation. Pass your JAMB, WAEC, and NECO exams with confidence.</div>
+      </div>
+      <div>
+        <div class="footer-heading">Platform</div>
+        <ul class="footer-links">
+          <li><a href="/classroom.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Classroom</a></li>
+          <li><a href="/cbt.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Practice CBT</a></li>
+          <li><a href="/dashboard.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Dashboard</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">Company</div>
+        <ul class="footer-links">
+          <li><a href="/about.html">About Us</a></li>
+          <li><a href="/contact.html">Contact Us</a></li>
+          <li><a href="/terms.html">Terms of Service</a></li>
+          <li><a href="/privacy.html">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-divider">&copy; 2026 UE School. All rights reserved.</div>
+  </div>
+</footer>
+
+<div id="toast"></div>
+<div id="adaptive-banner-slot" style="display:none"></div>
+
+<!-- Auth Modal & Study Plan Modal (canonical copy) -->
+<!-- ── AUTH MODAL ── -->
+<div class="modal-backdrop" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <div class="auth-tabs">
+      <button class="auth-tab" id="auth-tab-login"  onclick="switchAuthTab('login')">Login</button>
+      <button class="auth-tab active" id="auth-tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+    <div id="auth-login-form" style="display:none">
+      <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Welcome back</h2>
+      <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" id="login-email" placeholder="chioma@example.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()"></div>
+      <button class="btn btn-primary btn-block btn-lg" id="login-submit-btn" onclick="handleLogin()" style="margin-top:8px">Login</button>
+      <div style="text-align:center;margin-top:16px"><a href="#" style="font-size:.85rem;color:var(--accent);font-weight:600" onclick="handleForgotPassword(event)">Forgot Password?</a></div>
+    </div>
+    <div id="auth-signup-form">
+      <div id="su-step-1">
+        <div class="step-indicator">Step 1 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Create your account</h2>
+        <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="su-name" placeholder="Chioma Adebayo"></div>
+        <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" id="su-email" placeholder="chioma@example.com"></div>
+        <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="su-pass" placeholder="Min. 8 characters"><div class="form-hint">At least 8 characters</div></div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="goSignupStep(2)">Continue →</button>
+      </div>
+      <div id="su-step-2" style="display:none">
+        <div class="step-indicator">Step 2 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Your exam goals</h2>
+        <div class="form-group"><label class="form-label">Which exams are you sitting?</label>
+          <div class="exam-checks">
+            <label class="exam-check-label"><input type="checkbox" value="JAMB"      onchange="checkJAMBExam()"> JAMB</label>
+            <label class="exam-check-label"><input type="checkbox" value="WAEC"      onchange="checkJAMBExam()"> WAEC</label>
+            <label class="exam-check-label"><input type="checkbox" value="NECO"      onchange="checkJAMBExam()"> NECO</label>
+            <label class="exam-check-label"><input type="checkbox" value="Post-UTME" onchange="checkJAMBExam()"> Post-UTME</label>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">When is your exam?</label>
+          <select class="form-select" id="su-date">
+            <option value="">Select month…</option>
+            <option>May 2026</option><option>June 2026</option><option>July 2026</option>
+            <option>August 2026</option><option>September 2026</option><option>October 2026</option>
+            <option>November 2026</option><option>December 2026</option><option>January 2027</option>
+            <option>February 2027</option><option>March 2027</option><option>April 2027</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Target JAMB Score</label>
+          <select class="form-select" id="su-target">
+            <option value="210">200–220</option><option value="230">221–240</option>
+            <option value="250">241–260</option><option value="270">261–280</option>
+            <option value="290" selected>281–300</option><option value="310">301–320</option><option value="330">320+</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline" onclick="goSignupStep(1)">← Back</button>
+          <button class="btn btn-primary" style="flex:1" onclick="goSignupStep(3)">Continue →</button>
+        </div>
+      </div>
+      <div id="su-step-3" style="display:none">
+        <div class="step-indicator">Step 3 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Your subjects</h2>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">Select all the subjects you are sitting for.</p>
+        <div id="su-jamb-hint" class="jamb-hint" style="display:none">JAMB requires exactly 4 subjects. You've selected <span id="su-jamb-count">0</span>.</div>
+        <div class="subject-grid">
+          <div class="subj-card" onclick="toggleSignupSubj(this,'mathematics')"><div class="subj-check">✓</div><div class="subj-card-icon">📐</div><div class="subj-card-name" style="color:#1a56ff">Mathematics</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'english')"><div class="subj-check">✓</div><div class="subj-card-icon">📖</div><div class="subj-card-name" style="color:#00c97a">English Language</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'physics')"><div class="subj-check">✓</div><div class="subj-card-icon">⚛️</div><div class="subj-card-name" style="color:#7c3aed">Physics</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'chemistry')"><div class="subj-check">✓</div><div class="subj-card-icon">🧪</div><div class="subj-card-name" style="color:#ff6b35">Chemistry</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'biology')"><div class="subj-check">✓</div><div class="subj-card-icon">🌿</div><div class="subj-card-name" style="color:#0891b2">Biology</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'economics')"><div class="subj-check">✓</div><div class="subj-card-icon">📈</div><div class="subj-card-name" style="color:#f59e0b">Economics</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'government')"><div class="subj-check">✓</div><div class="subj-card-icon">🏛️</div><div class="subj-card-name" style="color:#6366f1">Government</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'literature')"><div class="subj-check">✓</div><div class="subj-card-icon">📚</div><div class="subj-card-name" style="color:#ec4899">Literature</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'geography')"><div class="subj-check">✓</div><div class="subj-card-icon">🌍</div><div class="subj-card-name" style="color:#10b981">Geography</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'commerce')"><div class="subj-check">✓</div><div class="subj-card-icon">🏪</div><div class="subj-card-name" style="color:#8b5cf6">Commerce</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'accounts')"><div class="subj-check">✓</div><div class="subj-card-icon">💼</div><div class="subj-card-name" style="color:#14b8a6">Accounts</div></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="btn btn-outline" onclick="goSignupStep(2)">← Back</button>
+          <button class="btn btn-primary" style="flex:1" onclick="goSignupStep(4)">Continue →</button>
+        </div>
+      </div>
+      <div id="su-step-4" style="display:none">
+        <div class="step-indicator">Step 4 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Study preference</h2>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:20px">How do you like to study?</p>
+        <label class="study-pref-option"><input type="radio" name="study_mode" value="drill" checked><div><div style="font-weight:700">Mix of video + practice drills</div><div style="font-size:.82rem;color:var(--muted)">Watch lessons, then practise. Recommended for most students.</div></div></label>
+        <label class="study-pref-option"><input type="radio" name="study_mode" value="cbt_only"><div><div style="font-weight:700">CBT practice only</div><div style="font-size:.82rem;color:var(--muted)">Skip drills, go straight to CBT sessions. Algorithm still tracks your progress.</div></div></label>
+        <div style="display:flex;gap:10px;margin-top:24px">
+          <button class="btn btn-outline" onclick="goSignupStep(3)">← Back</button>
+          <button class="btn btn-success btn-lg" style="flex:1" id="su-submit-btn" onclick="handleSignup()">Create Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ── STUDY PLAN MODAL ── -->
+<div class="modal-backdrop" id="sp-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:4px">Welcome back, <span id="sp-name">Student</span>! 👋</h2>
+    <p style="font-size:.9rem;color:var(--muted);margin-bottom:20px" id="sp-months">Loading your plan…</p>
+    <div class="sp-stats">
+      <div class="sp-stat"><div class="sp-stat-val" id="sp-readiness">NIL</div><div class="sp-stat-lbl">Current Readiness</div></div>
+      <div class="sp-stat"><div class="sp-stat-val" id="sp-intensity" style="font-size:.95rem">—</div><div class="sp-stat-lbl">Recommended Study Rate</div></div>
+    </div>
+    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Your Level</div><div style="font-weight:700" id="sp-grade-msg">Loading…</div></div>
+    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">SmartPath™ Suggestion</div><div style="font-size:.9rem" id="sp-smartpath">Complete your first session to unlock recommendations</div></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <a href="/classroom.html" class="btn btn-primary" style="flex:1">Go to Classroom</a>
+      <a href="/cbt.html" class="btn btn-outline" style="flex:1">Start Practice</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── REUSABLE SLIDER FACTORY ── */
+function initSlider(trackId, prevId, nextId, dotsId) {
+  const track = document.getElementById(trackId);
+  if (!track) return;
+  const prevBtn = document.getElementById(prevId);
+  const nextBtn = document.getElementById(nextId);
+  const dotsEl  = dotsId ? document.getElementById(dotsId) : null;
+
+  let pos = 0, isDragging = false, startX = 0, startPos = 0, autoTimer;
+
+  function getSlideWidth() {
+    const s = track.querySelector('[style*="flex:0 0"], .feature-slide, .dash-subj-slide');
+    return s ? s.offsetWidth + 16 : 296;
+  }
+  function maxPos() { return Math.max(0, track.scrollWidth - track.parentElement.offsetWidth); }
+  function currentDotIndex() {
+    const sw = getSlideWidth();
+    return sw > 0 ? Math.round(pos / sw) : 0;
+  }
+  function updateDots() {
+    if (!dotsEl) return;
+    Array.from(dotsEl.children).forEach((d, i) => d.classList.toggle('active', i === currentDotIndex()));
+  }
+  function buildDots() {
+    if (!dotsEl) return;
+    const count = track.children.length;
+    dotsEl.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+      const d = document.createElement('button');
+      d.className = 'slider-dot' + (i === 0 ? ' active' : '');
+      d.setAttribute('aria-label', `Slide ${i + 1}`);
+      d.addEventListener('click', () => { moveTo(i * getSlideWidth()); resetAuto(); });
+      dotsEl.appendChild(d);
+    }
+  }
+  function moveTo(p) { pos = Math.max(0, Math.min(p, maxPos())); track.style.transform = `translateX(-${pos}px)`; updateDots(); }
+  function next() { moveTo(pos + getSlideWidth()); }
+  function prev() { moveTo(pos - getSlideWidth()); }
+
+  if (nextBtn) nextBtn.addEventListener('click', () => { next(); resetAuto(); });
+  if (prevBtn) prevBtn.addEventListener('click', () => { prev(); resetAuto(); });
+
+  track.addEventListener('mousedown', e => { isDragging = true; startX = e.pageX; startPos = pos; track.style.transition = 'none'; });
+  window.addEventListener('mousemove', e => { if (!isDragging) return; moveTo(startPos - (e.pageX - startX)); });
+  window.addEventListener('mouseup', () => { if (!isDragging) return; isDragging = false; track.style.transition = ''; });
+  track.addEventListener('touchstart', e => { startX = e.touches[0].pageX; startPos = pos; track.style.transition = 'none'; }, {passive:true});
+  track.addEventListener('touchmove',  e => { moveTo(startPos - (e.touches[0].pageX - startX)); }, {passive:true});
+  track.addEventListener('touchend',   () => { track.style.transition = ''; });
+
+  function startAuto() { autoTimer = setInterval(() => { if (pos >= maxPos()) moveTo(0); else next(); }, 3500); }
+  function resetAuto() { clearInterval(autoTimer); startAuto(); }
+  track.parentElement.addEventListener('mouseenter', () => clearInterval(autoTimer));
+  track.parentElement.addEventListener('mouseleave', startAuto);
+  buildDots();
+  startAuto();
+  return { next, prev, moveTo };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSlider('feat-track', 'feat-prev', 'feat-next', 'feat-dots');
+  initSlider('subj-track', 'subj-prev', 'subj-next', 'subj-dots');
+
+  /* Close mobile nav when a nav link is tapped */
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      const nav = document.querySelector('.ue-nav');
+      nav && nav.classList.remove('nav-mobile-open');
+      const btn = document.getElementById('nav-toggle');
+      btn && btn.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  /* Auto-open login modal when redirected from a protected page */
+  const params = new URLSearchParams(location.search);
+  if (params.get('auth') === 'login') {
+    waitForSB(() => openAuthModal('login'));
+  }
+});
+</script>
+</body>
+</html>
