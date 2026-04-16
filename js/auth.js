@@ -68,12 +68,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* Listen for auth state changes */
     sb.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
+      if (event === 'PASSWORD_RECOVERY') {
+        /* User clicked the reset link — show new-password dialog */
+        showResetPasswordDialog();
+      } else if (event === 'SIGNED_IN' && session) {
         currentUser = session.user;
         await loadProfile();
         updateNavUI();
         await checkAccess();
-        showStudyPlanWelcome();
+        /* Don't show study-plan welcome if we just came from a password reset */
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('auth') !== 'reset') showStudyPlanWelcome();
       } else if (event === 'SIGNED_OUT') {
         currentUser = null;
         currentProfile = null;
@@ -373,6 +378,106 @@ async function handleForgotPassword(event) {
     toast('Error: ' + err.message);
   } finally {
     if (link) { link.textContent = 'Forgot Password?'; link.style.pointerEvents = ''; }
+  }
+}
+
+/* ── RESET PASSWORD DIALOG ── */
+function showResetPasswordDialog() {
+  /* Remove any existing dialog */
+  const existing = document.getElementById('reset-pw-modal');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'reset-pw-modal';
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:9999;
+    background:rgba(0,0,0,.55);display:flex;
+    align-items:center;justify-content:center;padding:16px;
+  `;
+  overlay.innerHTML = `
+    <div style="
+      background:#fff;border-radius:18px;padding:36px 32px;
+      width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.2);
+      font-family:var(--font-body,sans-serif);
+    ">
+      <h2 style="font-family:var(--font-head,sans-serif);font-size:1.7rem;margin:0 0 6px">
+        Set new password
+      </h2>
+      <p style="font-size:.88rem;color:#666;margin:0 0 24px">
+        Choose a strong password of at least 8 characters.
+      </p>
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:.85rem;font-weight:600;margin-bottom:6px">
+          New Password
+        </label>
+        <input
+          type="password" id="reset-pw-new"
+          placeholder="Min. 8 characters"
+          autocomplete="new-password"
+          style="
+            width:100%;padding:12px 14px;border:1.5px solid #d1d5db;
+            border-radius:10px;font-size:.95rem;box-sizing:border-box;
+          "
+        >
+      </div>
+      <div style="margin-bottom:24px">
+        <label style="display:block;font-size:.85rem;font-weight:600;margin-bottom:6px">
+          Confirm Password
+        </label>
+        <input
+          type="password" id="reset-pw-confirm"
+          placeholder="Repeat password"
+          autocomplete="new-password"
+          style="
+            width:100%;padding:12px 14px;border:1.5px solid #d1d5db;
+            border-radius:10px;font-size:.95rem;box-sizing:border-box;
+          "
+          onkeydown="if(event.key==='Enter')handleResetPasswordSubmit()"
+        >
+      </div>
+      <button
+        id="reset-pw-btn"
+        onclick="handleResetPasswordSubmit()"
+        style="
+          width:100%;padding:14px;background:var(--accent,#1a56ff);
+          color:#fff;border:none;border-radius:10px;
+          font-size:1rem;font-weight:700;cursor:pointer;
+        "
+      >
+        Update Password
+      </button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.getElementById('reset-pw-new').focus();
+}
+
+async function handleResetPasswordSubmit() {
+  const newPw   = document.getElementById('reset-pw-new')?.value;
+  const confirm = document.getElementById('reset-pw-confirm')?.value;
+  const btn     = document.getElementById('reset-pw-btn');
+
+  if (!newPw || newPw.length < 8) {
+    toast('Password must be at least 8 characters.');
+    return;
+  }
+  if (newPw !== confirm) {
+    toast('Passwords do not match.');
+    return;
+  }
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Updating…'; }
+  try {
+    const { error } = await sb.auth.updateUser({ password: newPw });
+    if (error) throw error;
+    toast('✅ Password updated! You are now logged in.');
+    document.getElementById('reset-pw-modal')?.remove();
+    /* Clean the URL so a refresh doesn't re-trigger */
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => window.location.href = '/dashboard.html', 1200);
+  } catch (err) {
+    toast('Error: ' + err.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Update Password'; }
   }
 }
 
