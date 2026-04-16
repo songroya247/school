@@ -1,1 +1,363 @@
-...
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — UE School</title>
+<meta name="description" content="UE School Privacy Policy — how we collect, use, and protect your personal data.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="/js/ai-engine.js"></script>
+<script src="/js/paystack.js"></script>
+<script src="/js/auth.js"></script>
+<style>
+  .legal-hero {
+    background: linear-gradient(135deg, #0a0f1e 0%, #111827 100%);
+    padding: 80px 0 60px;
+    text-align: center;
+  }
+  .legal-hero h1 {
+    font-family: var(--font-head);
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    color: #fff;
+    margin-bottom: 16px;
+  }
+  .legal-hero .meta {
+    color: rgba(255,255,255,.45);
+    font-size: .88rem;
+  }
+  .legal-body { padding: 72px 0; }
+  .legal-body .container { max-width: 760px; }
+  .legal-body h2 {
+    font-family: var(--font-head);
+    font-size: 1.7rem;
+    margin: 48px 0 14px;
+    color: var(--text);
+  }
+  .legal-body h2:first-child { margin-top: 0; }
+  .legal-body h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 24px 0 10px;
+  }
+  .legal-body p, .legal-body li {
+    color: var(--muted);
+    line-height: 1.85;
+    font-size: .96rem;
+  }
+  .legal-body ul { padding-left: 20px; margin: 12px 0 20px; }
+  .legal-body li { margin-bottom: 8px; }
+  .legal-toc {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 48px;
+  }
+  .legal-toc h3 { margin: 0 0 14px; font-size: .85rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .legal-toc ol { padding-left: 18px; margin: 0; }
+  .legal-toc li { margin-bottom: 6px; }
+  .legal-toc a { color: var(--accent); text-decoration: none; font-size: .9rem; font-weight: 600; }
+  .legal-toc a:hover { text-decoration: underline; }
+  .legal-highlight {
+    background: var(--surface);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: .92rem;
+    color: var(--text);
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="ue-nav">
+  <div class="container">
+    <a href="/index.html" class="nav-logo">UE SCHOOL</a>
+    <div class="nav-links">
+      <a href="/classroom.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Classroom</a>
+      <a href="/cbt.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Practice (CBT)</a>
+      <a href="/dashboard.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Dashboard</a>
+    </div>
+    <button class="nav-hamburger" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false"
+            onclick="const nav=this.closest('.ue-nav');nav.classList.toggle('nav-mobile-open');this.setAttribute('aria-expanded',nav.classList.contains('nav-mobile-open'))">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-right">
+      <button class="btn btn-primary" id="nav-login-btn" onclick="openAuthModal('signup')">Login / Sign Up</button>
+      <div class="nav-user-pill" id="nav-user-pill" style="display:none">
+        <div class="nav-avatar"><span id="nav-avatar-initials">??</span></div>
+        <div>
+          <div class="nav-user-name" id="nav-user-name">Student</div>
+          <div class="nav-xp" id="nav-xp">0 XP</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="legal-hero">
+  <div class="container">
+    <h1>Privacy Policy</h1>
+    <div class="meta">Last updated: April 2026</div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="legal-body">
+  <div class="container">
+
+    <div class="legal-toc">
+      <h3>Contents</h3>
+      <ol>
+        <li><a href="#who-we-are">Who We Are</a></li>
+        <li><a href="#data-we-collect">Data We Collect</a></li>
+        <li><a href="#how-we-use">How We Use Your Data</a></li>
+        <li><a href="#data-sharing">Data Sharing</a></li>
+        <li><a href="#data-security">Data Security</a></li>
+        <li><a href="#your-rights">Your Rights</a></li>
+        <li><a href="#cookies">Cookies</a></li>
+        <li><a href="#minors">Children &amp; Minors</a></li>
+        <li><a href="#changes">Changes to This Policy</a></li>
+        <li><a href="#contact-privacy">Contact Us</a></li>
+      </ol>
+    </div>
+
+    <div class="legal-highlight">
+      We respect your privacy. We do not sell your personal data to third parties. Ever.
+    </div>
+
+    <h2 id="who-we-are">1. Who We Are</h2>
+    <p>UE School ("we", "us", "our") is an online exam preparation platform serving Nigerian secondary and post-secondary students. This Privacy Policy explains how we collect, use, and protect the personal information you provide when you use our website and platform at <strong>ueschool.ng</strong>.</p>
+
+    <h2 id="data-we-collect">2. Data We Collect</h2>
+    <h3>Information you provide</h3>
+    <ul>
+      <li><strong>Account data</strong> — your full name, email address, and password (stored as a secure hash via Supabase Auth).</li>
+      <li><strong>Academic profile</strong> — the exams you are sitting, your target score, preferred subjects, and exam date. You provide this during sign-up and may update it at any time.</li>
+      <li><strong>Payment data</strong> — when you subscribe, payment is processed by Paystack. We receive only a transaction reference and your plan status. We never store card details.</li>
+      <li><strong>Support communications</strong> — messages you send us via email or the contact form.</li>
+    </ul>
+    <h3>Data we collect automatically</h3>
+    <ul>
+      <li><strong>Usage data</strong> — which topics you practise, CBT session scores, time spent, streak data, and XP accumulated. This data is central to how our adaptive engine works.</li>
+      <li><strong>Device &amp; browser data</strong> — browser type, operating system, screen size, and approximate location (country/region level only) collected via server logs.</li>
+      <li><strong>Cookies &amp; local storage</strong> — for authentication sessions and user preferences. See the <a href="#cookies">Cookies</a> section below.</li>
+    </ul>
+
+    <h2 id="how-we-use">3. How We Use Your Data</h2>
+    <ul>
+      <li>To create and manage your account and verify your identity.</li>
+      <li>To personalise your study experience — tracking gaps, surfacing weak topics, and adjusting difficulty via SmartPath™.</li>
+      <li>To process subscription payments and send receipts.</li>
+      <li>To send you important service emails (password resets, billing confirmations). We do not send unsolicited marketing emails without your consent.</li>
+      <li>To improve the platform — aggregated, anonymised usage data helps us identify the questions most students struggle with.</li>
+      <li>To comply with applicable Nigerian data protection regulations (NDPR).</li>
+    </ul>
+
+    <h2 id="data-sharing">4. Data Sharing</h2>
+    <p>We share personal data only in these limited circumstances:</p>
+    <ul>
+      <li><strong>Supabase</strong> — our database and authentication provider. Data is stored on servers located within GDPR-compliant regions.</li>
+      <li><strong>Paystack</strong> — payment processing. Governed by Paystack's own Privacy Policy.</li>
+      <li><strong>Legal obligation</strong> — if required by Nigerian law or a valid court order.</li>
+    </ul>
+    <p>We do <strong>not</strong> sell, rent, or trade your personal data to advertisers, data brokers, or any other third parties.</p>
+
+    <h2 id="data-security">5. Data Security</h2>
+    <p>We take reasonable technical and organisational steps to protect your data:</p>
+    <ul>
+      <li>All data is transmitted over HTTPS (TLS 1.2+).</li>
+      <li>Passwords are hashed and salted by Supabase Auth — we cannot read your password.</li>
+      <li>Access to the production database is restricted to authorised staff only.</li>
+    </ul>
+    <p>No system is 100% secure. If you believe your account has been compromised, please contact us immediately at <a href="mailto:support@ueschool.ng" style="color:var(--accent);font-weight:600;">support@ueschool.ng</a>.</p>
+
+    <h2 id="your-rights">6. Your Rights</h2>
+    <p>Under the Nigeria Data Protection Regulation (NDPR) and applicable law, you have the right to:</p>
+    <ul>
+      <li>Access the personal data we hold about you.</li>
+      <li>Correct inaccurate data.</li>
+      <li>Request deletion of your account and associated data.</li>
+      <li>Withdraw consent where processing is based on consent.</li>
+      <li>Lodge a complaint with the Nigeria Data Protection Bureau (NDPB).</li>
+    </ul>
+    <p>To exercise any of these rights, email <a href="mailto:hello@ueschool.ng" style="color:var(--accent);font-weight:600;">hello@ueschool.ng</a> with "Data Request" in the subject line. We will respond within 30 days.</p>
+
+    <h2 id="cookies">7. Cookies</h2>
+    <p>We use strictly necessary cookies and browser local storage to keep you logged in and remember your preferences. We do not use advertising or third-party tracking cookies. You can clear cookies via your browser settings at any time; doing so will log you out.</p>
+
+    <h2 id="minors">8. Children &amp; Minors</h2>
+    <p>Our platform is primarily used by students aged 14–20. We do not knowingly collect data from children under 13. If a parent or guardian believes their child under 13 has registered, please contact us and we will promptly delete the account.</p>
+
+    <h2 id="changes">9. Changes to This Policy</h2>
+    <p>We may update this Privacy Policy from time to time. When we do, we will revise the "Last updated" date at the top of this page. Significant changes will be communicated via email to registered users.</p>
+
+    <h2 id="contact-privacy">10. Contact Us</h2>
+    <p>For any privacy-related questions, please contact us at <a href="mailto:hello@ueschool.ng" style="color:var(--accent);font-weight:600;">hello@ueschool.ng</a> or visit our <a href="/contact.html" style="color:var(--accent);font-weight:600;">Contact page</a>.</p>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">UE SCHOOL</div>
+        <div class="footer-tagline">The cockpit for your exam preparation. Pass your JAMB, WAEC, and NECO exams with confidence.</div>
+      </div>
+      <div>
+        <div class="footer-heading">Platform</div>
+        <ul class="footer-links">
+          <li><a href="/classroom.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Classroom</a></li>
+          <li><a href="/cbt.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Practice CBT</a></li>
+          <li><a href="/dashboard.html" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Dashboard</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">Company</div>
+        <ul class="footer-links">
+          <li><a href="/about.html">About Us</a></li>
+          <li><a href="/contact.html">Contact Us</a></li>
+          <li><a href="/terms.html">Terms of Service</a></li>
+          <li><a href="/privacy.html">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-divider">&copy; 2026 UE School. All rights reserved.</div>
+  </div>
+</footer>
+
+<div id="toast"></div>
+<!-- ── AUTH MODAL ── -->
+<div class="modal-backdrop" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <div class="auth-tabs">
+      <button class="auth-tab" id="auth-tab-login"  onclick="switchAuthTab('login')">Login</button>
+      <button class="auth-tab active" id="auth-tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+    <div id="auth-login-form" style="display:none">
+      <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Welcome back</h2>
+      <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" id="login-email" placeholder="chioma@example.com" autocomplete="email"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleLogin()"></div>
+      <button class="btn btn-primary btn-block btn-lg" id="login-submit-btn" onclick="handleLogin()" style="margin-top:8px">Login</button>
+      <div style="text-align:center;margin-top:16px"><a href="#" style="font-size:.85rem;color:var(--accent);font-weight:600" onclick="handleForgotPassword(event)">Forgot Password?</a></div>
+    </div>
+    <div id="auth-signup-form">
+      <div id="su-step-1">
+        <div class="step-indicator">Step 1 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Create your account</h2>
+        <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="su-name" placeholder="Chioma Adebayo" autocomplete="name"></div>
+        <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" id="su-email" placeholder="chioma@example.com" autocomplete="email"></div>
+        <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="su-pass" placeholder="Min. 8 characters" autocomplete="new-password"><div class="form-hint">At least 8 characters</div></div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="goSignupStep(2)">Continue →</button>
+      </div>
+      <div id="su-step-2" style="display:none">
+        <div class="step-indicator">Step 2 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Your exam goals</h2>
+        <div class="form-group"><label class="form-label">Which exams are you sitting?</label>
+          <div class="exam-checks">
+            <label class="exam-check-label"><input type="checkbox" value="JAMB" onchange="checkJAMBExam()"> JAMB</label>
+            <label class="exam-check-label"><input type="checkbox" value="WAEC" onchange="checkJAMBExam()"> WAEC</label>
+            <label class="exam-check-label"><input type="checkbox" value="NECO" onchange="checkJAMBExam()"> NECO</label>
+            <label class="exam-check-label"><input type="checkbox" value="Post-UTME" onchange="checkJAMBExam()"> Post-UTME</label>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">When is your exam?</label>
+          <select class="form-select" id="su-date">
+            <option value="">Select month…</option>
+            <option>May 2026</option><option>June 2026</option><option>July 2026</option>
+            <option>August 2026</option><option>September 2026</option><option>October 2026</option>
+            <option>November 2026</option><option>December 2026</option><option>January 2027</option>
+            <option>February 2027</option><option>March 2027</option><option>April 2027</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Target JAMB Score</label>
+          <select class="form-select" id="su-target">
+            <option value="210">200–220</option><option value="230">221–240</option>
+            <option value="250">241–260</option><option value="270">261–280</option>
+            <option value="290" selected>281–300</option><option value="310">301–320</option><option value="330">320+</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline" onclick="goSignupStep(1)">← Back</button>
+          <button class="btn btn-primary" style="flex:1" onclick="goSignupStep(3)">Continue →</button>
+        </div>
+      </div>
+      <div id="su-step-3" style="display:none">
+        <div class="step-indicator">Step 3 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Your subjects</h2>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">Select all subjects you are sitting for.</p>
+        <div id="su-jamb-hint" class="jamb-hint" style="display:none">JAMB requires exactly 4 subjects. You've selected <span id="su-jamb-count">0</span>.</div>
+        <div class="subject-grid">
+          <div class="subj-card" onclick="toggleSignupSubj(this,'mathematics')"><div class="subj-check">✓</div><div class="subj-card-icon">📐</div><div class="subj-card-name" style="color:#1a56ff">Mathematics</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'english')"><div class="subj-check">✓</div><div class="subj-card-icon">📖</div><div class="subj-card-name" style="color:#00c97a">English Language</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'physics')"><div class="subj-check">✓</div><div class="subj-card-icon">⚛️</div><div class="subj-card-name" style="color:#7c3aed">Physics</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'chemistry')"><div class="subj-check">✓</div><div class="subj-card-icon">🧪</div><div class="subj-card-name" style="color:#ff6b35">Chemistry</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'biology')"><div class="subj-check">✓</div><div class="subj-card-icon">🌿</div><div class="subj-card-name" style="color:#0891b2">Biology</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'economics')"><div class="subj-check">✓</div><div class="subj-card-icon">📈</div><div class="subj-card-name" style="color:#f59e0b">Economics</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'government')"><div class="subj-check">✓</div><div class="subj-card-icon">🏛️</div><div class="subj-card-name" style="color:#6366f1">Government</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'literature')"><div class="subj-check">✓</div><div class="subj-card-icon">📚</div><div class="subj-card-name" style="color:#ec4899">Literature</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'geography')"><div class="subj-check">✓</div><div class="subj-card-icon">🌍</div><div class="subj-card-name" style="color:#10b981">Geography</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'commerce')"><div class="subj-check">✓</div><div class="subj-card-icon">🏪</div><div class="subj-card-name" style="color:#8b5cf6">Commerce</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'accounts')"><div class="subj-check">✓</div><div class="subj-card-icon">💼</div><div class="subj-card-name" style="color:#14b8a6">Accounts</div></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="btn btn-outline" onclick="goSignupStep(2)">← Back</button>
+          <button class="btn btn-primary" style="flex:1" onclick="goSignupStep(4)">Continue →</button>
+        </div>
+      </div>
+      <div id="su-step-4" style="display:none">
+        <div class="step-indicator">Step 4 of 4</div>
+        <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Study preference</h2>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:20px">How do you like to study?</p>
+        <label class="study-pref-option"><input type="radio" name="study_mode" value="drill" checked><div><div style="font-weight:700">Mix of video + practice drills</div><div style="font-size:.82rem;color:var(--muted)">Watch lessons, then practise. Recommended for most students.</div></div></label>
+        <label class="study-pref-option"><input type="radio" name="study_mode" value="cbt_only"><div><div style="font-weight:700">CBT practice only</div><div style="font-size:.82rem;color:var(--muted)">Skip drills, go straight to full CBT sessions.</div></div></label>
+        <div style="display:flex;gap:10px;margin-top:24px">
+          <button class="btn btn-outline" onclick="goSignupStep(3)">← Back</button>
+          <button class="btn btn-success btn-lg" style="flex:1" id="su-submit-btn" onclick="handleSignup()">Create Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ── STUDY PLAN MODAL ── -->
+<div class="modal-backdrop" id="sp-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:4px">Welcome back, <span id="sp-name">Student</span>! 👋</h2>
+    <p style="font-size:.9rem;color:var(--muted);margin-bottom:20px" id="sp-months">Loading your plan…</p>
+    <div class="sp-stats">
+      <div class="sp-stat"><div class="sp-stat-val" id="sp-readiness">NIL</div><div class="sp-stat-lbl">Current Readiness</div></div>
+      <div class="sp-stat"><div class="sp-stat-val" id="sp-intensity" style="font-size:.95rem">—</div><div class="sp-stat-lbl">Recommended Study Rate</div></div>
+    </div>
+    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Your Level</div><div style="font-weight:700" id="sp-grade-msg">Loading…</div></div>
+    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">SmartPath™ Suggestion</div><div style="font-size:.9rem" id="sp-smartpath">Complete your first session to unlock recommendations</div></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <a href="/classroom.html" class="btn btn-primary" style="flex:1">Go to Classroom</a>
+      <a href="/cbt.html" class="btn btn-outline" style="flex:1">Start Practice</a>
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      const nav = document.querySelector('.ue-nav');
+      nav && nav.classList.remove('nav-mobile-open');
+      const btn = document.getElementById('nav-toggle');
+      btn && btn.setAttribute('aria-expanded', 'false');
+    });
+  });
+});
+</script>
+</body>
+</html>
