@@ -249,6 +249,15 @@
     transition: transform .25s ease, opacity .2s ease;
     display: block;
   }
+  /* ── HAMBURGER MENU BACKGROUND FIX ── */
+  .nav-mobile-open {
+    background: #ffffff !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,.16) !important;
+  }
+  .nav-mobile-open .nav-links,
+  .nav-mobile-open .nav-right {
+    display: flex !important;
+  }
 }
 </style>
 </head>
@@ -430,7 +439,7 @@
         <p style="color:rgba(255,255,255,.6);margin-bottom:28px;max-width:400px;line-height:1.7">Expert-taught video lessons for every topic on your exam syllabus. Adaptive content that matches your skill level.</p>
         <a href="/classroom.html" class="btn btn-primary btn-lg" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Start Learning</a>
       </div>
-      <div class="classroom-video-mock" style="cursor:pointer;position:relative;overflow:hidden;border-radius:14px;background:linear-gradient(135deg,#0f1117 0%,#1a1d2e 100%);">
+      <div class="classroom-video-mock" style="cursor:pointer;position:relative;overflow:hidden;border-radius:14px;background:linear-gradient(135deg,#0f1117 0%,#1a1d2e 100%);min-height:320px;aspect-ratio:16/9;display:flex;flex-direction:column;justify-content:center;">
         <!-- Decorative glow -->
         <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 40%,rgba(26,86,255,.18),transparent);pointer-events:none;"></div>
         <!-- Grid pattern overlay -->
