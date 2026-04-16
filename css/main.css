@@ -740,6 +740,12 @@ select,input,textarea { font-family: var(--font-body); }
     display: flex !important;
     flex-direction: column !important;
   }
+}
+/* On mobile the aspect-ratio rule in index.html overrides min-height; restore flex column */
+@media (max-width: 768px) {
+  .classroom-video-mock {
+    min-height: 0 !important;
+  }
   /* Top bar: always on top of glow layer */
   .classroom-video-mock > div:first-child {
     flex-shrink: 0;
