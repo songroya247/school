@@ -29,9 +29,9 @@
   --shadow-lg:    0 4px 24px rgba(0,0,0,.10), 0 8px 40px rgba(0,0,0,.06);
 
   /* Typography */
-  --font-head: 'Bebas Neue', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-  --font-mono: 'DM Mono', monospace;
+  --font-head: 'Bebas Neue', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  --font-body: 'DM Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  --font-mono: 'DM Mono', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', monospace;
 
   --radius: 10px;
 }
@@ -239,7 +239,7 @@ select,input,textarea { font-family: var(--font-body); }
 .dash-subj-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 24px; transition: all .2s; }
 .dash-subj-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
 .dash-subj-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-.dash-subj-icon { width: 44px; height: 44px; background: var(--surface2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; border: 1px solid var(--border); }
+.dash-subj-icon { width: 44px; height: 44px; background: var(--surface2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; border: 1px solid var(--border); font-family: 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif; }
 .dash-subj-name { font-family: var(--font-head); font-size: 1.6rem; }
 .dash-subj-mastery-row { display: flex; justify-content: space-between; font-size: .8rem; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
 .dash-subj-mastery-row span:last-child { font-family: var(--font-mono); font-weight: 700; color: var(--text); }
@@ -482,84 +482,14 @@ select,input,textarea { font-family: var(--font-body); }
 
 /* ── MOBILE NAV ── */
 @media (max-width: 900px) {
-  /* Show hamburger */
-  .nav-hamburger { display: flex; margin-left: 12px; }
-
-  /* Nav bar: fixed height, NEVER expands */
-  .ue-nav {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    height: 64px;
-  }
-  .ue-nav .container {
-    position: relative;
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: space-between;
-    height: 64px;
-    padding: 0 20px;
-  }
-
-  /* Dropdown links panel — floats BELOW the bar */
-  .nav-links {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    flex-direction: column;
-    gap: 0;
-    background: #ffffff;
-    border-top: 1px solid var(--border);
-    border-bottom: 2px solid var(--border);
-    box-shadow: 0 8px 24px rgba(0,0,0,.13);
-    z-index: 999;
-    padding: 4px 20px 12px;
-    margin-top: 0;
-  }
-  .nav-links a {
-    display: block;
-    padding: 13px 0;
-    font-size: .95rem;
-    font-weight: 600;
-    color: var(--text);
-    border-bottom: 1px solid var(--border);
-  }
-  .nav-links a:last-child { border-bottom: none; }
-
-  /* Login/user pill row — appended inside the links dropdown via HTML */
-  .nav-right {
-    display: none;
-  }
-
-  /* Open state: reveal dropdown and the button inside it */
-  .nav-mobile-open .nav-links { display: flex; }
-
-  /* On mobile-open, nav-right sits directly below nav-links panel */
-  .nav-mobile-open .nav-right {
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: #ffffff;
-    padding: 8px 20px 16px;
-    transform: translateY(var(--nav-links-h, 157px));
-    box-shadow: 0 12px 24px rgba(0,0,0,.10);
-    border-top: 1px solid var(--border);
-    z-index: 997;
-  }
+  .nav-hamburger { display: flex; margin-left: auto; }
+  .nav-links { display: none; flex-direction: column; width: 100%; gap: 0; padding: 8px 0 12px; border-top: 1px solid var(--border); margin-top: 8px; }
+  .nav-links a { padding: 10px 4px; font-size: .95rem; color: var(--text); }
+  .nav-right { display: none; width: 100%; padding-bottom: 12px; }
+  .ue-nav .container { flex-wrap: wrap; position: relative; height: auto; padding: 12px 24px; }
+  .nav-mobile-open { background: #ffffff !important; box-shadow: 0 8px 32px rgba(0,0,0,.16); }
+  .nav-mobile-open .nav-links, .nav-mobile-open .nav-right { display: flex; }
   .nav-right .btn { width: 100%; text-align: center; }
-  .nav-right .nav-user-pill { width: 100%; justify-content: flex-start; }
-
-  /* Nav bar itself stays unchanged */
-  .nav-mobile-open {
-    background: rgba(255,255,255,.95) !important;
-    box-shadow: none !important;
-  }
 }
 
 /* ── RESPONSIVE ── */
@@ -725,43 +655,4 @@ select,input,textarea { font-family: var(--font-body); }
 /* ── NAV: close on link tap (all pages) ── */
 @media (max-width: 900px) {
   .ue-nav .container { height: auto; padding-top: 10px; padding-bottom: 10px; }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PATCH v4.1.2 — Video mock card stacking fix
-   ═══════════════════════════════════════════════════════════ */
-@media (max-width: 900px) {
-  /* Classroom video mock: contain all layered children, enforce height */
-  .classroom-video-mock {
-    isolation: isolate;       /* new stacking context — glow/grid overlays stay inside */
-    overflow: hidden;         /* clip any bleed */
-    min-height: 260px !important;
-    height: auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-}
-/* On mobile the aspect-ratio rule in index.html overrides min-height; restore flex column */
-@media (max-width: 768px) {
-  .classroom-video-mock {
-    min-height: 0 !important;
-  }
-  /* Top bar: always on top of glow layer */
-  .classroom-video-mock > div:first-child {
-    flex-shrink: 0;
-    z-index: 3;
-    position: relative;
-  }
-  /* Centre content */
-  .classroom-video-mock > div:nth-child(3) {
-    flex: 1;
-    z-index: 2;
-    position: relative;
-  }
-  /* Bottom meta bar: pin to bottom */
-  .classroom-video-mock > div:last-child {
-    flex-shrink: 0;
-    z-index: 3;
-    position: relative;
-  }
 }
