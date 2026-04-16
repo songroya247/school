@@ -249,10 +249,12 @@
     transition: transform .25s ease, opacity .2s ease;
     display: block;
   }
-  /* ── HAMBURGER MENU BACKGROUND FIX ── */
+  /* ── HAMBURGER BG FIX: kill the backdrop-filter so blur stops bleeding through ── */
   .nav-mobile-open {
     background: #ffffff !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,.16) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,.15) !important;
   }
   .nav-mobile-open .nav-links,
   .nav-mobile-open .nav-right {
@@ -439,17 +441,17 @@
         <p style="color:rgba(255,255,255,.6);margin-bottom:28px;max-width:400px;line-height:1.7">Expert-taught video lessons for every topic on your exam syllabus. Adaptive content that matches your skill level.</p>
         <a href="/classroom.html" class="btn btn-primary btn-lg" onclick="if(!currentUser){event.preventDefault();openAuthModal('signup');}">Start Learning</a>
       </div>
-      <div class="classroom-video-mock" style="cursor:pointer;position:relative;overflow:hidden;border-radius:14px;background:linear-gradient(135deg,#0f1117 0%,#1a1d2e 100%);min-height:320px;aspect-ratio:16/9;display:flex;flex-direction:column;justify-content:center;">
+      <div class="classroom-video-mock" style="cursor:pointer;position:relative;overflow:hidden;border-radius:14px;background:linear-gradient(135deg,#0f1117 0%,#1a1d2e 100%);min-height:300px;">
         <!-- Decorative glow -->
         <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 40%,rgba(26,86,255,.18),transparent);pointer-events:none;"></div>
         <!-- Grid pattern overlay -->
         <div style="position:absolute;inset:0;opacity:.07;background-image:linear-gradient(rgba(255,255,255,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.3) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;"></div>
         <!-- Subject badge -->
-        <div style="position:absolute;top:20px;left:20px;background:rgba(26,86,255,.85);backdrop-filter:blur(6px);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:4px 12px;border-radius:999px;text-transform:uppercase;">
+        <div style="position:absolute;top:20px;left:20px;background:rgba(26,86,255,.85);backdrop-filter:blur(6px);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:4px 12px;border-radius:999px;text-transform:uppercase;z-index:2;">
           Mathematics &middot; Quadratics
         </div>
-        <!-- Centre play card -->
-        <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 24px;text-align:center;position:relative;z-index:1;">
+        <!-- Centre play card — drives container height (not absolute) -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:72px 24px 64px;text-align:center;position:relative;z-index:1;">
           <div style="width:72px;height:72px;border-radius:50%;background:rgba(26,86,255,.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 12px rgba(26,86,255,.15),0 8px 32px rgba(26,86,255,.5);transition:transform .2s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M8 5.14v14l11-7-11-7z"/></svg>
           </div>
