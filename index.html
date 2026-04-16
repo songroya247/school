@@ -22,6 +22,11 @@
     position: relative;
     align-items: center;
   }
+  /* Also ensure the nav itself is the stacking context */
+  .ue-nav {
+    position: relative;
+    z-index: 1000;
+  }
   /* Logo on left (order 1), right-side controls in middle (order 2), links drop to full row (order 3) */
   .nav-logo {
     order: 1;
@@ -43,12 +48,22 @@
     gap: 0;
     padding: 8px 0 16px;
     border-top: 1px solid var(--border, #e5e7eb);
+    /* ── FIX: float above page body ── */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    z-index: 999;
+    padding: 8px 20px 16px;
   }
   .nav-links a {
     display: block;
     padding: 12px 0;
     font-size: 1rem;
     border-bottom: 1px solid var(--border, #f3f4f6);
+    color: var(--text, #111);
   }
   .nav-mobile-open .nav-links {
     display: flex;
@@ -140,8 +155,9 @@
   }
   .classroom-video-mock {
     width: 100% !important;
-    height: 220px !important;
-    min-height: 180px !important;
+    height: 260px !important;
+    min-height: 220px !important;
+    isolation: isolate;
   }
 }
 
@@ -443,14 +459,14 @@
         <!-- Grid pattern overlay -->
         <div style="position:absolute;inset:0;opacity:.07;background-image:linear-gradient(rgba(255,255,255,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.3) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;"></div>
         <!-- Top bar: subject badge + duration -->
-        <div style="position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:16px 20px;">
+        <div style="position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;padding:16px 20px;flex-shrink:0;">
           <div style="background:rgba(26,86,255,.85);backdrop-filter:blur(6px);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:4px 12px;border-radius:999px;text-transform:uppercase;">
             Mathematics &middot; Quadratics
           </div>
           <div style="color:rgba(255,255,255,.45);font-size:.72rem;font-weight:600;letter-spacing:.04em;">HD</div>
         </div>
         <!-- Centre: play button + text -->
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px 24px 20px;text-align:center;position:relative;z-index:1;">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px 24px 20px;text-align:center;position:relative;z-index:2;">
           <div style="width:68px;height:68px;border-radius:50%;background:rgba(26,86,255,.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 14px rgba(26,86,255,.12),0 8px 32px rgba(26,86,255,.45);transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 0 0 18px rgba(26,86,255,.18),0 8px 40px rgba(26,86,255,.6)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 0 0 14px rgba(26,86,255,.12),0 8px 32px rgba(26,86,255,.45)'">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M8 5.14v14l11-7-11-7z"/></svg>
           </div>
@@ -470,7 +486,7 @@
           </div>
         </div>
         <!-- Bottom meta bar -->
-        <div style="position:relative;z-index:2;padding:12px 20px;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;border-top:1px solid rgba(255,255,255,.06);">
+        <div style="position:relative;z-index:3;flex-shrink:0;padding:12px 20px;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;border-top:1px solid rgba(255,255,255,.06);">
           <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1a56ff,#6fa3ff);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#fff;font-weight:700;flex-shrink:0;">UE</div>
           <div style="flex:1;min-width:0;">
             <div style="color:#fff;font-size:.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">UE School &middot; Expert Tutor</div>
