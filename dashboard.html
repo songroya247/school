@@ -45,6 +45,60 @@
   .dash-welcome-card h1 { font-size:1.5rem; }
   .dash-welcome-inner { display:grid; grid-template-columns:auto 1fr; gap:8px 12px; }
 }
+
+/* â”€â”€ ONBOARDING WELCOME POPUP â”€â”€ */
+.onboard-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 800;
+  display: none; align-items: center; justify-content: center; padding: 24px;
+  animation: fadeInBg .25s ease;
+}
+.onboard-backdrop.open { display: flex; }
+@keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
+.onboard-card {
+  background: var(--surface); border-radius: 24px; max-width: 500px; width: 100%;
+  overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,.3);
+  animation: slideUp .3s cubic-bezier(.16,1,.3,1);
+}
+@keyframes slideUp { from { opacity:0; transform:translateY(32px) scale(.97); } to { opacity:1; transform:none; } }
+.onboard-hero {
+  background: linear-gradient(135deg, #1a56ff 0%, #6366f1 100%);
+  padding: 36px 32px 28px; text-align: center; position: relative; overflow: hidden;
+}
+.onboard-hero::before {
+  content:''; position:absolute; top:-80px; right:-80px; width:260px; height:260px;
+  background:rgba(255,255,255,.07); border-radius:50%;
+}
+.onboard-hero::after {
+  content:''; position:absolute; bottom:-60px; left:-60px; width:200px; height:200px;
+  background:rgba(255,255,255,.05); border-radius:50%;
+}
+.onboard-rocket { font-size: 3.5rem; display:block; margin-bottom:12px; line-height:1;
+  font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif; }
+.onboard-hero h2 { font-family:var(--font-head); font-size:2rem; color:#fff; margin-bottom:6px; position:relative; z-index:1; }
+.onboard-hero p { color:rgba(255,255,255,.8); font-size:.95rem; position:relative; z-index:1; }
+.onboard-body { padding: 28px 32px 32px; }
+.onboard-steps { display:flex; flex-direction:column; gap:14px; margin-bottom:24px; }
+.onboard-step {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: var(--surface2); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px;
+  transition: border-color .2s;
+}
+.onboard-step:hover { border-color: var(--accent); }
+.onboard-step-emoji {
+  font-size: 1.6rem; flex-shrink: 0; width: 40px; height: 40px;
+  background: var(--bg); border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;
+}
+.onboard-step-text strong { display:block; font-size:.92rem; font-weight:700; margin-bottom:2px; }
+.onboard-step-text span { font-size:.82rem; color:var(--muted); }
+.onboard-cta { display:flex; flex-direction:column; gap:10px; }
+.onboard-skip { background:none; border:none; color:var(--muted); font-size:.82rem; cursor:pointer; text-decoration:underline; text-align:center; padding:4px; }
+.onboard-skip:hover { color:var(--text); }
+@media(max-width:600px) {
+  .onboard-hero { padding:28px 20px 22px; }
+  .onboard-body { padding:20px 20px 24px; }
+  .onboard-hero h2 { font-size:1.6rem; }
+}
 </style>
 </head>
 <body>
@@ -190,6 +244,51 @@
 
 <div id="toast"></div>
 <div id="adaptive-banner-slot" style="display:none"></div>
+
+<!-- â”€â”€ BEGINNER ONBOARDING POPUP â”€â”€ -->
+<div class="onboard-backdrop" id="onboard-modal" onclick="if(event.target===this)closeOnboardModal()">
+  <div class="onboard-card">
+    <div class="onboard-hero">
+      <span class="onboard-rocket">ðŸš€</span>
+      <h2>Welcome to UE School!</h2>
+      <p>Your dashboard is empty â€” let's fix that.<br>We'll help you find your strengths and weak spots first.</p>
+    </div>
+    <div class="onboard-body">
+      <div class="onboard-steps">
+        <div class="onboard-step">
+          <div class="onboard-step-emoji">ðŸŽ¯</div>
+          <div class="onboard-step-text">
+            <strong>Take your first diagnostic drill</strong>
+            <span>Answer a few questions per subject so our SmartPathâ„¢ engine knows where you stand.</span>
+          </div>
+        </div>
+        <div class="onboard-step">
+          <div class="onboard-step-emoji">ðŸ“Š</div>
+          <div class="onboard-step-text">
+            <strong>See your weak topics instantly</strong>
+            <span>After just one session, your performance chart and predicted JAMB score unlock.</span>
+          </div>
+        </div>
+        <div class="onboard-step">
+          <div class="onboard-step-emoji">ðŸ§ </div>
+          <div class="onboard-step-text">
+            <strong>Get a personalised study plan</strong>
+            <span>SmartPathâ„¢ will recommend exactly what to study next â€” no guessing needed.</span>
+          </div>
+        </div>
+      </div>
+      <div class="onboard-cta">
+        <a href="/cbt.html" class="btn btn-primary btn-lg btn-block" onclick="closeOnboardModal()">
+          ðŸŽ¯ &nbsp;Take My First Drill
+        </a>
+        <a href="/classroom.html" class="btn btn-outline btn-block" onclick="closeOnboardModal()">
+          ðŸ“š &nbsp;Start with a Lesson Instead
+        </a>
+        <button class="onboard-skip" onclick="closeOnboardModal()">I'll explore on my own</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Study Plan Modal -->
 <div class="modal-backdrop" id="sp-modal" onclick="if(event.target===this)closeAuthModal()">
@@ -377,6 +476,9 @@ async function renderDashboard() {
 
   /* Render SmartPath */
   renderSmartPath();
+
+  /* Show beginner onboarding if this is a fresh/empty dashboard */
+  maybeShowOnboarding();
 }
 
 function calcStreak(logs) {
@@ -564,6 +666,35 @@ function renderSmartPath() {
         </div>
       </div>`;
   }).join('');
+}
+
+/* â”€â”€ ONBOARDING POPUP â”€â”€ */
+function closeOnboardModal() {
+  const modal = document.getElementById('onboard-modal');
+  if (modal) {
+    modal.style.animation = 'fadeInBg .2s ease reverse';
+    setTimeout(() => modal.classList.remove('open'), 180);
+  }
+  /* Remember dismissal so we don't show it on every reload */
+  try { localStorage.setItem('ue_onboard_dismissed', '1'); } catch(e) {}
+}
+
+function maybeShowOnboarding() {
+  /* Skip if user already dismissed it */
+  try { if (localStorage.getItem('ue_onboard_dismissed')) return; } catch(e) {}
+
+  /* Show if user has no smartpath data AND no usage logs (brand new / empty dashboard) */
+  const queue = currentProfile?.smartpath_queue || [];
+  const logs  = currentProfile?.usage_logs || [];
+  const hasSessions = logs.some(l => l.action === 'drill_completed' || l.action === 'lesson_watched');
+
+  if (!queue.length && !hasSessions) {
+    /* Small delay so the dashboard renders behind the popup first */
+    setTimeout(() => {
+      const modal = document.getElementById('onboard-modal');
+      if (modal) modal.classList.add('open');
+    }, 700);
+  }
 }
 
 /* â”€â”€ INIT â”€â”€ */
