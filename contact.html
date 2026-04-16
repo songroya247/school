@@ -3,11 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact Us â€” UE School</title>
+<title>Contact Us — UE School</title>
 <meta name="description" content="Get in touch with the UE School team for support, partnerships, or general enquiries.">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/main.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  /* ── Supabase client bootstrap ──────────────────────────────────────────
+     Priority 1: reuse window._supabase already created by auth.js
+     Priority 2: reuse window.supabase if auth.js used that name
+     Priority 3: create our own client right here (safe fallback)
+     ─────────────────────────────────────────────────────────────────── */
+  (function () {
+    const SUPA_URL = 'https://hazwqyvnolgdkokehjhr.supabase.co';
+    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhendxeXZub2xnZGtva2VoamhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDUwNzYsImV4cCI6MjA5MTY4MTA3Nn0.V7TsNcfpib2HtJRjTASyJPavQ8qUR2R4KXYuWdZB4gE';
+
+    function ensureClient() {
+      if (window._supabase)  return;                                   // auth.js already set it
+      if (window.supabase && typeof window.supabase.from === 'function') {
+        window._supabase = window.supabase; return;                    // auth.js used different name
+      }
+      // createClient is exposed by the CDN as supabase.createClient
+      if (window.supabase && window.supabase.createClient) {
+        window._supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+      }
+    }
+
+    // Try immediately (scripts above may have already run)
+    ensureClient();
+    // Also try after DOM + all scripts are ready
+    document.addEventListener('DOMContentLoaded', ensureClient);
+  })();
+</script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script src="/js/ai-engine.js"></script>
 <script src="/js/paystack.js"></script>
@@ -76,7 +103,9 @@
     background: var(--bg);
     border: 1.5px solid var(--border);
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
+    line-height: 1;
     flex-shrink: 0;
   }
   .contact-channel-label {
@@ -141,7 +170,7 @@
 <div class="legal-hero">
   <div class="container">
     <h1>Contact Us</h1>
-    <p>We typically respond within one business day. Students always come first â€” reach out any time.</p>
+    <p>We typically respond within one business day. Students always come first — reach out any time.</p>
   </div>
 </div>
 
@@ -166,7 +195,7 @@
           <div class="form-group">
             <label class="form-label">Subject</label>
             <select class="form-select" id="cf-subject">
-              <option value="">Select a topicâ€¦</option>
+              <option value="">Select a topic…</option>
               <option>Account &amp; Billing</option>
               <option>Technical Issue</option>
               <option>Exam Content / Question Error</option>
@@ -176,7 +205,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Message</label>
-            <textarea class="form-input" id="cf-message" rows="5" placeholder="Tell us how we can helpâ€¦" style="resize:vertical;min-height:120px;"></textarea>
+            <textarea class="form-input" id="cf-message" rows="5" placeholder="Tell us how we can help…" style="resize:vertical;min-height:120px;"></textarea>
           </div>
           <button class="btn btn-primary btn-block btn-lg" id="cf-submit" onclick="submitContactForm()" style="margin-top:8px">
             Send Message
@@ -184,7 +213,7 @@
         </div>
 
         <div id="contact-success">
-          <div class="check">âœ…</div>
+          <div class="check">✅</div>
           <h3>Message Received!</h3>
           <p>We'll get back to you at the email you provided within one business day.</p>
         </div>
@@ -193,31 +222,31 @@
       <!-- Contact info -->
       <div class="contact-info">
         <h2>Other Ways to Reach Us</h2>
-        <p>Whether you have a billing question, spotted a wrong answer in a past question, or want to bring UE School to your school â€” we want to hear from you.</p>
+        <p>Whether you have a billing question, spotted a wrong answer in a past question, or want to bring UE School to your school — we want to hear from you.</p>
 
         <div class="contact-channel">
-          <div class="contact-channel-icon">ðŸ“§</div>
+          <div class="contact-channel-icon">📧</div>
           <div>
             <div class="contact-channel-label">General Enquiries</div>
             <div class="contact-channel-val"><a href="mailto:hello@ueschool.ng">hello@ueschool.ng</a></div>
           </div>
         </div>
         <div class="contact-channel">
-          <div class="contact-channel-icon">ðŸ› ï¸</div>
+          <div class="contact-channel-icon">🛠️</div>
           <div>
             <div class="contact-channel-label">Technical Support</div>
             <div class="contact-channel-val"><a href="mailto:support@ueschool.ng">support@ueschool.ng</a></div>
           </div>
         </div>
         <div class="contact-channel">
-          <div class="contact-channel-icon">ðŸ«</div>
+          <div class="contact-channel-icon">🏫</div>
           <div>
             <div class="contact-channel-label">Schools &amp; Partnerships</div>
             <div class="contact-channel-val"><a href="mailto:schools@ueschool.ng">schools@ueschool.ng</a></div>
           </div>
         </div>
         <div class="contact-channel">
-          <div class="contact-channel-icon">â±ï¸</div>
+          <div class="contact-channel-icon">⏱️</div>
           <div>
             <div class="contact-channel-label">Response Time</div>
             <div class="contact-channel-val">Within 1 business day</div>
@@ -262,7 +291,7 @@
 <div id="toast"></div>
 
 <script>
-function submitContactForm() {
+async function submitContactForm() {
   const name    = document.getElementById('cf-name').value.trim();
   const email   = document.getElementById('cf-email').value.trim();
   const subject = document.getElementById('cf-subject').value;
@@ -275,20 +304,33 @@ function submitContactForm() {
   if (!message) { toast('Please enter a message.');    return; }
 
   btn.disabled = true;
-  btn.textContent = 'Sendingâ€¦';
+  btn.textContent = 'Sending…';
 
-  /* In production wire this to your backend / Supabase edge function.
-     For now we simulate a short delay and show the success state. */
-  setTimeout(() => {
+  try {
+    /* Save submission to Supabase table: contact_submissions
+       Make sure this table exists in your Supabase project with columns:
+       id (uuid, default gen_random_uuid()), name (text), email (text),
+       subject (text), message (text), created_at (timestamptz, default now()) */
+    const { error } = await window._supabase
+      .from('contact_submissions')
+      .insert([{ name, email, subject, message }]);
+
+    if (error) throw error;
+
     document.getElementById('contact-form-inner').style.display = 'none';
     document.getElementById('contact-success').style.display    = 'block';
-  }, 900);
+  } catch (err) {
+    console.error('Contact form error:', err);
+    toast('Something went wrong. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Send Message';
+  }
 }
 </script>
-<!-- â”€â”€ AUTH MODAL â”€â”€ -->
+<!-- ── AUTH MODAL ── -->
 <div class="modal-backdrop" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
   <div class="modal-card">
-    <button class="modal-close" onclick="closeAuthModal()">âœ•</button>
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
     <div class="auth-tabs">
       <button class="auth-tab" id="auth-tab-login"  onclick="switchAuthTab('login')">Login</button>
       <button class="auth-tab active" id="auth-tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
@@ -296,7 +338,7 @@ function submitContactForm() {
     <div id="auth-login-form" style="display:none">
       <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:24px">Welcome back</h2>
       <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" id="login-email" placeholder="chioma@example.com" autocomplete="email"></div>
-      <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="login-password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleLogin()"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleLogin()"></div>
       <button class="btn btn-primary btn-block btn-lg" id="login-submit-btn" onclick="handleLogin()" style="margin-top:8px">Login</button>
       <div style="text-align:center;margin-top:16px"><a href="#" style="font-size:.85rem;color:var(--accent);font-weight:600" onclick="handleForgotPassword(event)">Forgot Password?</a></div>
     </div>
@@ -307,7 +349,7 @@ function submitContactForm() {
         <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="su-name" placeholder="Chioma Adebayo" autocomplete="name"></div>
         <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" id="su-email" placeholder="chioma@example.com" autocomplete="email"></div>
         <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="su-pass" placeholder="Min. 8 characters" autocomplete="new-password"><div class="form-hint">At least 8 characters</div></div>
-        <button class="btn btn-primary btn-block btn-lg" onclick="goSignupStep(2)">Continue â†’</button>
+        <button class="btn btn-primary btn-block btn-lg" onclick="goSignupStep(2)">Continue →</button>
       </div>
       <div id="su-step-2" style="display:none">
         <div class="step-indicator">Step 2 of 4</div>
@@ -322,7 +364,7 @@ function submitContactForm() {
         </div>
         <div class="form-group"><label class="form-label">When is your exam?</label>
           <select class="form-select" id="su-date">
-            <option value="">Select monthâ€¦</option>
+            <option value="">Select month…</option>
             <option>May 2026</option><option>June 2026</option><option>July 2026</option>
             <option>August 2026</option><option>September 2026</option><option>October 2026</option>
             <option>November 2026</option><option>December 2026</option><option>January 2027</option>
@@ -331,14 +373,14 @@ function submitContactForm() {
         </div>
         <div class="form-group"><label class="form-label">Target JAMB Score</label>
           <select class="form-select" id="su-target">
-            <option value="210">200â€“220</option><option value="230">221â€“240</option>
-            <option value="250">241â€“260</option><option value="270">261â€“280</option>
-            <option value="290" selected>281â€“300</option><option value="310">301â€“320</option><option value="330">320+</option>
+            <option value="210">200–220</option><option value="230">221–240</option>
+            <option value="250">241–260</option><option value="270">261–280</option>
+            <option value="290" selected>281–300</option><option value="310">301–320</option><option value="330">320+</option>
           </select>
         </div>
         <div style="display:flex;gap:10px">
-          <button class="btn btn-outline" onclick="goSignupStep(1)">â† Back</button>
-          <button class="btn btn-primary" style="flex:1" onclick="goSignupStep(3)">Continue â†’</button>
+          <button class="btn btn-outline" onclick="goSignupStep(1)">← Back</button>
+          <button class="btn btn-primary" style="flex:1" onclick="goSignupStep(3)">Continue →</button>
         </div>
       </div>
       <div id="su-step-3" style="display:none">
@@ -347,21 +389,21 @@ function submitContactForm() {
         <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">Select all subjects you are sitting for.</p>
         <div id="su-jamb-hint" class="jamb-hint" style="display:none">JAMB requires exactly 4 subjects. You've selected <span id="su-jamb-count">0</span>.</div>
         <div class="subject-grid">
-          <div class="subj-card" onclick="toggleSignupSubj(this,'mathematics')"><div class="subj-check">âœ“</div><div class="subj-card-icon">ðŸ“</div><div class="subj-card-name" style="color:#1a56ff">Mathematics</div></div>
-          <div class="subj-card" onclick="toggleSignupSubj(this,'english')"><div class="subj-check">âœ“</div><div class="subj-card-icon">ðŸ“–</div><div class="subj-card-name" style="color:#00c97a">English Language</div></div>
-          <div class="subj-card" onclick="toggleSignupSubj(this,'physics')"><div class="subj-check">âœ“</div><div class="subj-card-icon">âš›ï¸</div><div class="subj-card-name" style="color:#7c3aed">Physics</div></div>
-          <div class="subj-card" onclick="toggleSignupSubj(this,'chemistry')"><div class="subj-check">âœ“</div><div class="subj-card-icon">ðŸ§ª</div><div class="subj-card-name" style="color:#ff6b35">Chemistry</div></div>
-          <div class="subj-card" onclick="toggleSignupSubj(this,'biology')"><div class="subj-check">âœ“</div><div class="subj-card-icon">ðŸŒ¿</div><div class="subj-card-name" style="color:#0891b2">Biology</div></div>
-          <div class="subj-card" onclick="toggleSignupSubj(this,'economics')"><div class="subj-check">âœ“</div><div class="subj-card-icon">ðŸ“ˆ</div><div class="subj-card-name" style="color:#f59e0b">Economics</div></div>
-          <div class="subj-card" onclick="toggleSignupSubj(this,'government')"><div class="subj-check">âœ“</div><div class="subj-card-icon">ðŸ›ï¸</div><div class="subj-card-name" style="color:#6366f1">Government</div></div>
-          <div class="subj-card" onclick="toggleSignupSubj(this,'literature')"><div class="subj-check">âœ“</div><div class="subj-card-icon">ðŸ“š</div><div class="subj-card-name" style="color:#ec4899">Literature</div></div>
-          <div class="subj-card" onclick="toggleSignupSubj(this,'geography')"><div class="subj-check">âœ“</div><div class="subj-card-icon">ðŸŒ</div><div class="subj-card-name" style="color:#10b981">Geography</div></div>
-          <div class="subj-card" onclick="toggleSignupSubj(this,'commerce')"><div class="subj-check">âœ“</div><div class="subj-card-icon">ðŸª</div><div class="subj-card-name" style="color:#8b5cf6">Commerce</div></div>
-          <div class="subj-card" onclick="toggleSignupSubj(this,'accounts')"><div class="subj-check">âœ“</div><div class="subj-card-icon">ðŸ’¼</div><div class="subj-card-name" style="color:#14b8a6">Accounts</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'mathematics')"><div class="subj-check">✓</div><div class="subj-card-icon">📐</div><div class="subj-card-name" style="color:#1a56ff">Mathematics</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'english')"><div class="subj-check">✓</div><div class="subj-card-icon">📖</div><div class="subj-card-name" style="color:#00c97a">English Language</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'physics')"><div class="subj-check">✓</div><div class="subj-card-icon">⚛️</div><div class="subj-card-name" style="color:#7c3aed">Physics</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'chemistry')"><div class="subj-check">✓</div><div class="subj-card-icon">🧪</div><div class="subj-card-name" style="color:#ff6b35">Chemistry</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'biology')"><div class="subj-check">✓</div><div class="subj-card-icon">🌿</div><div class="subj-card-name" style="color:#0891b2">Biology</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'economics')"><div class="subj-check">✓</div><div class="subj-card-icon">📈</div><div class="subj-card-name" style="color:#f59e0b">Economics</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'government')"><div class="subj-check">✓</div><div class="subj-card-icon">🏛️</div><div class="subj-card-name" style="color:#6366f1">Government</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'literature')"><div class="subj-check">✓</div><div class="subj-card-icon">📚</div><div class="subj-card-name" style="color:#ec4899">Literature</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'geography')"><div class="subj-check">✓</div><div class="subj-card-icon">🌍</div><div class="subj-card-name" style="color:#10b981">Geography</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'commerce')"><div class="subj-check">✓</div><div class="subj-card-icon">🏪</div><div class="subj-card-name" style="color:#8b5cf6">Commerce</div></div>
+          <div class="subj-card" onclick="toggleSignupSubj(this,'accounts')"><div class="subj-check">✓</div><div class="subj-card-icon">💼</div><div class="subj-card-name" style="color:#14b8a6">Accounts</div></div>
         </div>
         <div style="display:flex;gap:10px;margin-top:20px">
-          <button class="btn btn-outline" onclick="goSignupStep(2)">â† Back</button>
-          <button class="btn btn-primary" style="flex:1" onclick="goSignupStep(4)">Continue â†’</button>
+          <button class="btn btn-outline" onclick="goSignupStep(2)">← Back</button>
+          <button class="btn btn-primary" style="flex:1" onclick="goSignupStep(4)">Continue →</button>
         </div>
       </div>
       <div id="su-step-4" style="display:none">
@@ -371,25 +413,25 @@ function submitContactForm() {
         <label class="study-pref-option"><input type="radio" name="study_mode" value="drill" checked><div><div style="font-weight:700">Mix of video + practice drills</div><div style="font-size:.82rem;color:var(--muted)">Watch lessons, then practise. Recommended for most students.</div></div></label>
         <label class="study-pref-option"><input type="radio" name="study_mode" value="cbt_only"><div><div style="font-weight:700">CBT practice only</div><div style="font-size:.82rem;color:var(--muted)">Skip drills, go straight to full CBT sessions.</div></div></label>
         <div style="display:flex;gap:10px;margin-top:24px">
-          <button class="btn btn-outline" onclick="goSignupStep(3)">â† Back</button>
+          <button class="btn btn-outline" onclick="goSignupStep(3)">← Back</button>
           <button class="btn btn-success btn-lg" style="flex:1" id="su-submit-btn" onclick="handleSignup()">Create Account</button>
         </div>
       </div>
     </div>
   </div>
 </div>
-<!-- â”€â”€ STUDY PLAN MODAL â”€â”€ -->
+<!-- ── STUDY PLAN MODAL ── -->
 <div class="modal-backdrop" id="sp-modal" onclick="if(event.target===this)closeAuthModal()">
   <div class="modal-card">
-    <button class="modal-close" onclick="closeAuthModal()">âœ•</button>
-    <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:4px">Welcome back, <span id="sp-name">Student</span>! ðŸ‘‹</h2>
-    <p style="font-size:.9rem;color:var(--muted);margin-bottom:20px" id="sp-months">Loading your planâ€¦</p>
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:4px">Welcome back, <span id="sp-name">Student</span>! 👋</h2>
+    <p style="font-size:.9rem;color:var(--muted);margin-bottom:20px" id="sp-months">Loading your plan…</p>
     <div class="sp-stats">
       <div class="sp-stat"><div class="sp-stat-val" id="sp-readiness">NIL</div><div class="sp-stat-lbl">Current Readiness</div></div>
-      <div class="sp-stat"><div class="sp-stat-val" id="sp-intensity" style="font-size:.95rem">â€”</div><div class="sp-stat-lbl">Recommended Study Rate</div></div>
+      <div class="sp-stat"><div class="sp-stat-val" id="sp-intensity" style="font-size:.95rem">—</div><div class="sp-stat-lbl">Recommended Study Rate</div></div>
     </div>
-    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Your Level</div><div style="font-weight:700" id="sp-grade-msg">Loadingâ€¦</div></div>
-    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">SmartPathâ„¢ Suggestion</div><div style="font-size:.9rem" id="sp-smartpath">Complete your first session to unlock recommendations</div></div>
+    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Your Level</div><div style="font-weight:700" id="sp-grade-msg">Loading…</div></div>
+    <div class="sp-card"><div style="font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">SmartPath™ Suggestion</div><div style="font-size:.9rem" id="sp-smartpath">Complete your first session to unlock recommendations</div></div>
     <div style="display:flex;gap:10px;margin-top:8px">
       <a href="/classroom.html" class="btn btn-primary" style="flex:1">Go to Classroom</a>
       <a href="/cbt.html" class="btn btn-outline" style="flex:1">Start Practice</a>
