@@ -1,1 +1,479 @@
-.....
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UE School â€” Ace Your JAMB, WAEC & NECO Exams</title>
+<link rel="stylesheet" href="css/main.css">
+<style>
+/* â”€â”€ MOBILE NAV â”€â”€ */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+.nav-hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: all .25s;
+}
+.nav-mobile-open .nav-hamburger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-mobile-open .nav-hamburger span:nth-child(2) { opacity: 0; }
+.nav-mobile-open .nav-hamburger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+@media (max-width: 768px) {
+  /* Nav */
+  .ue-nav .container { flex-wrap: wrap; position: relative; }
+  .nav-hamburger { display: flex; margin-left: auto; }
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    gap: 0;
+    padding: 8px 0 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .nav-links a { padding: 10px 4px; font-size: .95rem; }
+  .nav-right { display: none; width: 100%; padding-bottom: 12px; }
+  .nav-mobile-open .nav-links,
+  .nav-mobile-open .nav-right { display: flex; }
+  .nav-right .btn { width: 100%; text-align: center; }
+
+  /* Hero */
+  .hero-grid { grid-template-columns: 1fr !important; }
+  .hero-cbt-card { display: none; }
+  .hero-headline { font-size: 2rem !important; }
+  .hero-ctas { flex-direction: column; gap: 12px; }
+  .hero-ctas .btn { width: 100%; text-align: center; }
+
+  /* Stats */
+  .stats-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 12px !important; }
+  .stats-grid .stat-item:nth-child(4),
+  .stats-grid .stat-item:nth-child(5) { grid-column: span 1; }
+
+  /* Features / Subjects section header */
+  .section-slider-header { flex-direction: column !important; align-items: flex-start !important; gap: 12px; }
+  .section-slider-header > div:last-child { align-self: flex-end; }
+
+  /* Exam cards */
+  .exam-cards { grid-template-columns: 1fr !important; }
+
+  /* Classroom band */
+  .classroom-band-inner { flex-direction: column !important; gap: 24px; }
+  .classroom-band-inner h2 { font-size: 1.8rem !important; }
+  .classroom-video-mock { width: 100% !important; min-height: 160px; }
+  .topic-pills { flex-wrap: wrap; }
+
+  /* Pricing */
+  .pricing-grid { grid-template-columns: 1fr !important; max-width: 400px; margin: 0 auto; }
+
+  /* How it works â€“ 4-col inline grid â†’ 2-col â†’ 1-col */
+  .how-it-works-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Testimonials */
+  .testimonials-grid { grid-template-columns: 1fr !important; }
+
+  /* CTA band headline */
+  .cta-band h2 { font-size: 1.8rem !important; }
+
+  /* Footer */
+  .footer-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+
+  /* General section padding */
+  .section-mobile-pad { padding: 48px 0 !important; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .how-it-works-grid { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="defaulter-banner">Your subscription has expired. <a href="#pricing">Renew Now</a></div>
+
+<nav class="ue-nav">
+  <div class="container">
+    <a href="index.html" class="nav-logo">UE School</a>
+    <div class="nav-links">
+      <a href="classroom.html">Classroom</a>
+      <a href="cbt.html">Practice (CBT)</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="pricing.html">Pricing</a>
+    </div>
+    <button class="nav-hamburger" id="nav-toggle" aria-label="Toggle menu" onclick="this.closest('.ue-nav').classList.toggle('nav-mobile-open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-right" id="nav-right">
+      <a href="login.html" class="btn btn-primary" id="nav-cta-btn">Login / Sign Up</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-section">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <h1 class="hero-headline">ACE YOUR JAMB, WAEC &amp; NECO EXAMS</h1>
+        <p class="hero-sub">Master every topic with adaptive CBT prep, expert video lessons, and AI-powered score predictions.</p>
+        <div class="hero-ctas">
+          <a href="login.html" class="btn btn-primary btn-lg">Start Free Today</a>
+          <a href="cbt.html" class="btn btn-outline btn-lg">Take a Practice Test</a>
+        </div>
+      </div>
+      <div class="hero-cbt-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+          <span class="hero-timer">Time Left: 01:45:20</span>
+          <span class="hero-jamb-badge">Predicted JAMB: 285</span>
+        </div>
+        <div class="hero-question">If <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--font-mono)">xÂ² - 5x + 6 = 0</code>, what are the values of x?</div>
+        <div class="hero-opts">
+          <div class="hero-opt selected">A. x = 2 or x = 3</div>
+          <div class="hero-opt">B. x = -2 or x = -3</div>
+          <div class="hero-opt">C. x = 1 or x = 6</div>
+          <div class="hero-opt">D. x = -1 or x = -6</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS STRIP -->
+<section class="stats-strip">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-value">12,000+</div><div class="stat-label">Students</div></div>
+      <div class="stat-item"><div class="stat-value">50,000+</div><div class="stat-label">Questions</div></div>
+      <div class="stat-item"><div class="stat-value">95%</div><div class="stat-label">Pass Rate</div></div>
+      <div class="stat-item"><div class="stat-value">200+</div><div class="stat-label">Video Lessons</div></div>
+      <div class="stat-item"><div class="stat-value">â‚¦1,500</div><div class="stat-label">/month</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES SLIDER -->
+<section style="padding:72px 0;background:rgba(240,244,255,.5);">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;" class="section-slider-header">
+      <div>
+        <h2 class="section-title">Why UE School?</h2>
+        <p class="section-sub">Everything you need to succeed, all in one place.</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-icon" id="feat-prev">&#8249;</button>
+        <button class="btn-icon" id="feat-next">&#8250;</button>
+      </div>
+    </div>
+    <div class="slider-wrap">
+      <div class="slider-track" id="feat-track">
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">ðŸŽ¯</div><div class="feature-title">Smart Score Prediction</div><div class="feature-desc">Know your JAMB range before exam day</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">ðŸ“¹</div><div class="feature-title">200+ Video Masterclasses</div><div class="feature-desc">Full curriculum covered topic by topic</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">ðŸ§ </div><div class="feature-title">Adaptive Practice</div><div class="feature-desc">Questions adjust to your level automatically</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">âš‘</div><div class="feature-title">Real CBT Experience</div><div class="feature-desc">Timer, question map, flag &amp; review â€” just like the real exam</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">ðŸ“Š</div><div class="feature-title">Weakness Tracker</div><div class="feature-desc">Instantly see which topics need the most attention</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">ðŸš€</div><div class="feature-title">SmartPathâ„¢ Engine</div><div class="feature-desc">AI-powered recommendations after every session</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">ðŸ“´</div><div class="feature-title">Works Offline</div><div class="feature-desc">Practise anywhere â€” syncs when you're back online</div></div></div>
+        <div class="feature-slide"><div class="feature-card"><div class="feature-icon">ðŸ’°</div><div class="feature-title">From â‚¦1,500/month</div><div class="feature-desc">Less than a data bundle. No â‚¦50,000 coaching fees.</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUBJECTS SLIDER -->
+<section style="padding:72px 0;">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;" class="section-slider-header">
+      <div>
+        <h2 class="section-title">Master Every Subject</h2>
+        <p class="section-sub">Comprehensive coverage for science, arts, and commercial students.</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-icon" id="subj-prev">&#8249;</button>
+        <button class="btn-icon" id="subj-next">&#8250;</button>
+      </div>
+    </div>
+    <div class="slider-wrap">
+      <div class="slider-track" id="subj-track">
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#dbeafe;color:#1d4ed8">ðŸ“</div><div class="subject-name">Mathematics</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#d1fae5;color:#065f46">ðŸ“–</div><div class="subject-name">English</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#ede9fe;color:#5b21b6">âš›ï¸</div><div class="subject-name">Physics</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#ffedd5;color:#c2410c">ðŸ§ª</div><div class="subject-name">Chemistry</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#ccfbf1;color:#0f766e">ðŸŒ¿</div><div class="subject-name">Biology</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#fef3c7;color:#b45309">ðŸ“ˆ</div><div class="subject-name">Economics</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#e0e7ff;color:#3730a3">ðŸ›ï¸</div><div class="subject-name">Government</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#fce7f3;color:#9d174d">ðŸ“š</div><div class="subject-name">Literature</div></a></div>
+        <div class="subj-slide" style="flex:0 0 180px"><a href="classroom.html" class="subject-card"><div class="subject-icon" style="background:#d1fae5;color:#065f46">ðŸŒ</div><div class="subject-name">Geography</div></a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXAM COVERAGE -->
+<section style="padding:72px 0;background:rgba(240,244,255,.5);">
+  <div class="container">
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">Full Exam Coverage</h2>
+      <p class="section-sub">We prepare you for every major exam in Nigeria</p>
+    </div>
+    <div class="exam-cards">
+      <div class="exam-card">
+        <div class="exam-card-icon">ðŸŽ“</div>
+        <div class="exam-card-title">JAMB / UTME</div>
+        <div class="exam-card-desc">Complete preparation for the Joint Admissions and Matriculation Board exam. 40 subject questions, 1h40m â€” we cover all of it.</div>
+      </div>
+      <div class="exam-card">
+        <div class="exam-card-icon">ðŸ“</div>
+        <div class="exam-card-title">WAEC / GCE</div>
+        <div class="exam-card-desc">West Africa Senior School Certificate Examination preparation across all science, arts, and commercial subjects.</div>
+      </div>
+      <div class="exam-card">
+        <div class="exam-card-icon">ðŸ«</div>
+        <div class="exam-card-title">NECO / Post-UTME</div>
+        <div class="exam-card-desc">National Examinations Council and university screening preparation. Subject-specific, past question powered practice.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLASSROOM BAND -->
+<section class="classroom-band">
+  <div class="container">
+    <div class="classroom-band-inner">
+      <div>
+        <div class="topic-pills">
+          <span class="topic-pill">Quadratics</span>
+          <span class="topic-pill">Indices</span>
+          <span class="topic-pill">Logarithms</span>
+          <span class="topic-pill">Calculus</span>
+        </div>
+        <h2 style="font-family:var(--font-head);font-size:clamp(1.6rem,5vw,2.8rem);color:#fff;margin-bottom:16px">Enter the Classroom</h2>
+        <p style="color:rgba(255,255,255,.6);margin-bottom:28px;max-width:400px;line-height:1.7">Expert-taught video lessons for every topic on your exam syllabus. Adaptive content that matches your skill level.</p>
+        <a href="classroom.html" class="btn btn-primary btn-lg">Start Learning</a>
+      </div>
+      <div class="classroom-video-mock">
+        <div style="text-align:center;color:rgba(255,255,255,.25)">
+          <div style="font-size:3.5rem;margin-bottom:8px">â–¶</div>
+          <div style="font-size:.85rem;font-weight:600">Sample Lesson Preview</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" style="padding:80px 0;">
+  <div class="container">
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">Invest in Your Future</h2>
+      <p class="section-sub">Less than the cost of a data bundle. No expensive coaching fees.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <h3 style="font-weight:700;font-size:1.15rem;margin-bottom:8px">Monthly</h3>
+        <div class="pricing-price">â‚¦1,500<span style="font-family:var(--font-body);font-size:1rem;color:var(--muted)">/mo</span></div>
+        <ul class="pricing-features" style="margin-top:20px">
+          <li><span class="pricing-check">âœ“</span> Full CBT access</li>
+          <li><span class="pricing-check">âœ“</span> All video lessons</li>
+          <li><span class="pricing-check">âœ“</span> Score prediction</li>
+          <li><span class="pricing-check">âœ“</span> Basic analytics</li>
+        </ul>
+        <button class="btn btn-outline btn-block" onclick="goPricing('monthly')">Subscribe</button>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Most Popular</div>
+        <h3 style="font-weight:700;font-size:1.15rem;margin-bottom:8px">3-Month</h3>
+        <div class="pricing-price">â‚¦3,500</div>
+        <div class="pricing-save">Save 22%</div>
+        <ul class="pricing-features">
+          <li><span class="pricing-check">âœ“</span> Everything in Monthly</li>
+          <li><span class="pricing-check">âœ“</span> SmartPathâ„¢ Engine</li>
+          <li><span class="pricing-check">âœ“</span> Weakness tracker</li>
+          <li><span class="pricing-check">âœ“</span> Priority support</li>
+        </ul>
+        <button class="btn btn-primary btn-block" onclick="goPricing('quarterly')">Subscribe</button>
+      </div>
+      <div class="pricing-card">
+        <h3 style="font-weight:700;font-size:1.15rem;margin-bottom:8px">Annual</h3>
+        <div class="pricing-price">â‚¦10,000</div>
+        <div class="pricing-save">Save 44%</div>
+        <ul class="pricing-features">
+          <li><span class="pricing-check">âœ“</span> Everything in 3-Month</li>
+          <li><span class="pricing-check">âœ“</span> Post-UTME prep</li>
+          <li><span class="pricing-check">âœ“</span> Downloadable reports</li>
+          <li><span class="pricing-check">âœ“</span> 1-on-1 tutoring discount</li>
+        </ul>
+        <button class="btn btn-outline btn-block" onclick="goPricing('annual')">Subscribe</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section style="padding:72px 0;background:rgba(240,244,255,.5);">
+  <div class="container">
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-sub">From signup to exam success in 4 simple steps</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:40px;" class="how-it-works-grid">
+      <div style="text-align:center;padding:24px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;font-family:var(--font-head)">1</div>
+        <div style="font-weight:700;margin-bottom:8px">Sign Up Free</div>
+        <div style="font-size:.88rem;color:var(--muted)">Create your account and select your subjects and exam type</div>
+      </div>
+      <div style="text-align:center;padding:24px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;font-family:var(--font-head)">2</div>
+        <div style="font-weight:700;margin-bottom:8px">Watch Lessons</div>
+        <div style="font-size:.88rem;color:var(--muted)">Study topic-by-topic video masterclasses at your own pace</div>
+      </div>
+      <div style="text-align:center;padding:24px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;font-family:var(--font-head)">3</div>
+        <div style="font-weight:700;margin-bottom:8px">Practise CBT</div>
+        <div style="font-size:.88rem;color:var(--muted)">Take adaptive mock exams with real timers and question maps</div>
+      </div>
+      <div style="text-align:center;padding:24px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 16px;font-family:var(--font-head)">4</div>
+        <div style="font-weight:700;margin-bottom:8px">Track & Improve</div>
+        <div style="font-size:.88rem;color:var(--muted)">Monitor your JAMB score prediction and follow SmartPath guidance</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section style="padding:72px 0;">
+  <div class="container">
+    <div class="section-header" style="text-align:center">
+      <h2 class="section-title">Student Success Stories</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;" class="testimonials-grid">
+      <div class="card card-body">
+        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"I scored 312 in JAMB after 6 weeks on UE School. The score predictions kept me motivated and on track."</div>
+        <div style="font-weight:700">Emeka O.</div>
+        <div style="font-size:.82rem;color:var(--muted)">JAMB 2024 â€” 312/400</div>
+      </div>
+      <div class="card card-body">
+        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"The flag-and-review feature is exactly like the real CBT centre. I walked in knowing exactly what to expect."</div>
+        <div style="font-weight:700">Aisha B.</div>
+        <div style="font-size:.82rem;color:var(--muted)">WAEC 2024 â€” 5 A1s</div>
+      </div>
+      <div class="card card-body">
+        <div style="font-size:.95rem;color:var(--muted);margin-bottom:16px;line-height:1.7">"As a student in a remote area with poor internet, the offline mode was a lifesaver. Practised everywhere!"</div>
+        <div style="font-weight:700">Fatima D.</div>
+        <div style="font-size:.82rem;color:var(--muted)">NECO 2024 â€” 6 distinctions</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<section style="background:var(--accent);padding:72px 0;text-align:center;" class="cta-band">
+  <div class="container">
+    <h2 style="font-family:var(--font-head);font-size:clamp(1.6rem,5vw,2.8rem);color:#fff;margin-bottom:16px" class="cta-band-h2">Ready to Start Your Journey?</h2>
+    <p style="color:rgba(255,255,255,.75);font-size:1.05rem;margin-bottom:32px;">Join 12,000+ students already preparing smarter with UE School.</p>
+    <a href="login.html" class="btn btn-lg" style="background:#fff;color:var(--accent);font-weight:700">Start Free Today</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">UE School</div>
+        <div class="footer-tagline">The cockpit for your exam preparation. Pass your JAMB, WAEC, and NECO exams with confidence.</div>
+      </div>
+      <div>
+        <div class="footer-heading">Platform</div>
+        <ul class="footer-links">
+          <li><a href="classroom.html">Classroom</a></li>
+          <li><a href="cbt.html">Practice CBT</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">Company</div>
+        <ul class="footer-links">
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-divider">&copy; 2026 UE School. All rights reserved.</div>
+  </div>
+</footer>
+
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="js/app.js"></script>
+<script src="js/auth-guard.js"></script>
+<script src="js/payment.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    initSlider('feat-track', 'feat-prev', 'feat-next');
+    initSlider('subj-track', 'subj-prev', 'subj-next');
+
+    // Init Supabase
+    window.sb = window.supabase.createClient(
+      'https://hazwqyvnolgdkokehjhr.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhendxeXZub2xnZGtva2VoamhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDUwNzYsImV4cCI6MjA5MTY4MTA3Nn0.V7TsNcfpib2HtJRjTASyJPavQ8qUR2R4KXYuWdZB4gE'
+    );
+
+    // Auth-aware nav
+    const { data: { session } } = await window.sb.auth.getSession();
+    if (session) {
+      const navRight = document.getElementById('nav-right');
+      if (navRight) {
+        const { data: profile } = await window.sb.from('profiles')
+          .select('full_name,is_premium,subscription_expiry').eq('id', session.user.id).single();
+        const initials = (profile?.full_name||'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        navRight.innerHTML = `
+          <div class="nav-user-pill" style="display:flex;align-items:center;gap:10px;background:var(--bg);border:1.5px solid var(--border2);border-radius:999px;padding:4px 14px 4px 4px">
+            <div class="nav-avatar" style="width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem">${initials}</div>
+            <span style="font-weight:700;font-size:.9rem">${(profile?.full_name||'').split(' ')[0]}</span>
+          </div>
+          <a href="dashboard.html" class="btn btn-primary" style="margin-left:8px">My Dashboard</a>
+          <button class="btn btn-outline btn-sm" onclick="window.sb.auth.signOut().then(()=>location.reload())" style="margin-left:4px">Logout</button>
+        `;
+      }
+      // Banner
+      const banner = document.getElementById('defaulter-banner');
+      if (banner) {
+        const { data: p } = await window.sb.from('profiles')
+          .select('is_premium,subscription_expiry').eq('id', session.user.id).single();
+        const expired = p?.is_premium && p?.subscription_expiry && new Date(p.subscription_expiry) < new Date();
+        banner.style.display = expired ? 'block' : 'none';
+      }
+    } else {
+      const banner = document.getElementById('defaulter-banner');
+      if (banner) banner.style.display = 'none';
+    }
+  });
+
+  // Pricing buttons call PAYMENT.openCheckout directly
+  // (PAYMENT handles the login redirect if not signed in)
+  function goPricing(plan) {
+    if (typeof PAYMENT !== 'undefined') {
+      PAYMENT.openCheckout(plan);
+    } else {
+      sessionStorage.setItem('ue_selected_plan', plan);
+      window.location.href = 'pricing.html';
+    }
+  }
+</script>
+</body>
+</html>
