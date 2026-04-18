@@ -1,23 +1,28 @@
-/* ═══════════════════════════════════════════════════
-   UltimateEdge School — Supabase Client
-   Single source of truth. Import on every page.
-═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   UE School — js/supabase.js  (UPDATED v2)
+   This file is now a thin shim.
+   All credentials live in js/config.js.
+   All pages use window.sb which is set by auth-guard.js on init.
 
-const SUPABASE_URL  = 'https://hazwqyvnolgdkokehjhr.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhendxeXZub2xnZGtva2VoamhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDUwNzYsImV4cCI6MjA5MTY4MTA3Nn0.V7TsNcfpib2HtJRjTASyJPavQ8qUR2R4KXYuWdZB4gE';
+   For PUBLIC pages (index, pricing, contact) that don't load
+   auth-guard.js, include this file to get window.sb:
+═══════════════════════════════════════════════════════════════════ */
 
-// Load Supabase from CDN (injected once via script tag in HTML)
-// This module just exposes the initialised client
-let _supabase = null;
+(function () {
+  'use strict';
 
-function getSupabase() {
-  if (_supabase) return _supabase;
-  if (typeof window !== 'undefined' && window.supabase) {
-    _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-    return _supabase;
+  if (window.sb) return; // auth-guard.js already set it
+
+  if (!window.supabase) {
+    console.error('[supabase.js] Supabase SDK not loaded.');
+    return;
   }
-  throw new Error('Supabase SDK not loaded. Add the CDN script tag before this file.');
-}
 
-// Convenience shorthand used across all pages
-window.sb = null; // set after DOMContentLoaded in each page
+  const cfg = window.UE_CONFIG;
+  if (!cfg) {
+    console.error('[supabase.js] UE_CONFIG not defined. Load js/config.js first.');
+    return;
+  }
+
+  window.sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON);
+})();
