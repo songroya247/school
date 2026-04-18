@@ -4,6 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mastery Report — UE School</title>
+
+<!-- ╔══════════════════════════════════════════════════════╗
+     ║  SECURITY BLOCK — must be first in <head>           ║
+     ║  NOTE: report.html allows public token-based access ║
+     ║  The gatekeeper skips redirect when ?token= present ║
+     ╚══════════════════════════════════════════════════════╝ -->
+<script>
+// Inline micro-gatekeeper for report.html:
+// If no ?token= param AND no localStorage session → redirect to login.
+// This runs synchronously before any CSS or body renders.
+(function(){
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('token')) return; // public share link — allow through
+  // Load config.js values inline (config.js may not be loaded yet)
+  var sessionFound = false;
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1) {
+        var raw = JSON.parse(localStorage.getItem(k) || '{}');
+        if (raw && raw.access_token && (raw.expires_at || 0) > Math.floor(Date.now()/1000)) {
+          sessionFound = true;
+        }
+        break;
+      }
+    }
+  } catch(e) {}
+  if (!sessionFound) {
+    window.location.replace('login.html?next=report.html');
+    throw new Error('[UE] No session');
+  }
+})();
+</script>
 <link rel="stylesheet" href="css/main.css">
 <style>
 body{background:var(--bg);padding:32px 0}
@@ -133,10 +166,14 @@ thead tr{background:var(--bg)}
 
 <div id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
 <script src="js/app.js"></script>
 <script src="js/smartpath.js"></script>
 <script>
-const SB=window.supabase.createClient('https://hazwqyvnolgdkokehjhr.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhendxeXZub2xnZGtva2VoamhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDUwNzYsImV4cCI6MjA5MTY4MTA3Nn0.V7TsNcfpib2HtJRjTASyJPavQ8qUR2R4KXYuWdZB4gE');
+// All credentials come from UE_CONFIG (loaded by config.js above).
+// window.sb is set by supabase.js shim below.
+const SB = window.sb;
 const SUBJ_LABELS={mathematics:'Mathematics',english:'English Language',physics:'Physics',chemistry:'Chemistry',biology:'Biology',economics:'Economics',government:'Government',literature:'Literature',geography:'Geography',commerce:'Commerce',accounts:'Accounts',crk:'CRK'};
 function setEl(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
 function fmtDate(ts){if(!ts)return'—';return new Date(ts).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'});}
