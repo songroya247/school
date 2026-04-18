@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CBT Practice — UE School</title>
+
+<!-- ╔══════════════════════════════════════════════════════╗
+     ║  SECURITY BLOCK — must be first in <head>           ║
+     ╚══════════════════════════════════════════════════════╝ -->
+<script src="js/config.js"></script>
+<script src="js/head-gatekeeper.js"></script>
+<!-- END SECURITY BLOCK -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -338,8 +345,8 @@ body{font-family:'Inter',sans-serif;background:#f0f4ff;color:#0f1c3f;font-size:1
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/auth-guard.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/auth-guard.js"></script>
 <script src="js/questions.js"></script>
 <script src="js/grading.js"></script>
 <script>
@@ -352,22 +359,13 @@ let isReviewMode=false;
 const URL_PARAMS=new URLSearchParams(window.location.search);
 
 // ════════════ INIT ════════════
-window.sb=window.supabase.createClient(
-  'https://hazwqyvnolgdkokehjhr.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhendxeXZub2xnZGtva2VoamhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDUwNzYsImV4cCI6MjA5MTY4MTA3Nn0.V7TsNcfpib2HtJRjTASyJPavQ8qUR2R4KXYuWdZB4gE'
-);
+// window.sb is initialised by auth-guard.js using UE_CONFIG — no credentials here.
 
 document.addEventListener('DOMContentLoaded', async ()=>{
+  // AUTH_GUARD.init() boots window.sb from UE_CONFIG, validates session,
+  // checks premium gate (cbt.html is in PREMIUM_PAGES), renders nav + defaulter banner.
   const result=await AUTH_GUARD.init();
-  if(!result) return;
-
-  // Defaulter banner
-  const profile=result.profile;
-  if(profile){
-    const status=AUTH_GUARD.subscriptionStatus(profile);
-    const banner=document.getElementById('defaulter-banner');
-    if(banner) banner.style.display=status==='EXPIRED'?'block':'none';
-  }
+  if(!result) return; // redirect in progress
 
   // Pre-fill from URL
   const urlSubj=URL_PARAMS.get('subject');
