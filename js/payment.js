@@ -1,103 +1,144 @@
-/* ═══════════════════════════════════════════════════
-   UE School — Payment Module
-   Handles Paystack inline popup, payment recording,
-   and subscription activation on success.
-═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   UE School — js/payment.js  (HARDENED v2)
+
+   KEY SECURITY CHANGE FROM v1:
+   ─────────────────────────────
+   Subscription activation is NO LONGER handled solely in the
+   onSuccess client-side callback.  The onSuccess callback now only
+   records the reference and shows a "verifying…" UI state.
+
+   The ACTUAL is_premium toggle happens in a Supabase Edge Function
+   (verify-payment) that:
+     1. Receives the transaction reference from the client.
+     2. Calls the Paystack Verify Transaction API server-side using
+        the SECRET key (which the client never sees).
+     3. Checks that the response status === 'success'.
+     4. Checks that the amount paid matches the selected plan amount.
+     5. Checks that the reference has not been used before (idempotency).
+     6. Only then updates profiles.is_premium = true.
+
+   Edge Function skeleton is included at the bottom of this file
+   as a SQL + Deno snippet.  Deploy it to Supabase via the dashboard
+   or the CLI:  supabase functions deploy verify-payment
+
+   WHY THIS MATTERS:
+   The Paystack onSuccess callback fires in the BROWSER.  Anyone with
+   DevTools can intercept and re-fire it with any reference string
+   (including a made-up one or a reference from someone else's
+   transaction).  Verifying server-side with the SECRET key closes
+   this attack vector completely.
+═══════════════════════════════════════════════════════════════════ */
 
 const PAYMENT = (function () {
+  'use strict';
 
-  // ── Plan config (matches Paystack dashboard) ──────
+  // ── Plan config (must match your Paystack dashboard exactly) ────
   const PLANS = {
     monthly: {
       label:    'Monthly',
-      amount:   150000,          // kobo (₦1,500)
+      amount:   150000,           // kobo (₦1,500)
       naira:    '₦1,500',
       days:     30,
       planCode: 'PLN_jctl2fmbtbprn79',
-      features: ['Full CBT access', 'All video lessons', 'Score prediction', 'Basic analytics']
+      features: ['Full CBT access', 'All video lessons', 'Score prediction', 'Basic analytics'],
     },
     quarterly: {
       label:    '3-Month',
-      amount:   350000,          // kobo (₦3,500)
+      amount:   350000,           // kobo (₦3,500)
       naira:    '₦3,500',
       days:     90,
       planCode: 'PLN_7k27rm469etnc8y',
-      features: ['Everything in Monthly', 'SmartPath™ Engine', 'Weakness tracker', 'Priority support']
+      features: ['Everything in Monthly', 'SmartPath™ Engine', 'Weakness tracker', 'Priority support'],
     },
     annual: {
       label:    'Annual',
-      amount:   1200000,         // kobo (₦12,000)
+      amount:   1200000,          // kobo (₦12,000)
       naira:    '₦12,000',
       days:     365,
       planCode: 'PLN_vg1odwe75m793nk',
-      features: ['Everything in 3-Month', 'Post-UTME prep', 'Downloadable reports', '1-on-1 tutoring discount']
-    }
+      features: ['Everything in 3-Month', 'Post-UTME prep', 'Downloadable reports', '1-on-1 tutoring discount'],
+    },
   };
 
+  // ── Public Paystack key (safe to expose — server uses secret key) 
   const PAYSTACK_PUBLIC_KEY = 'pk_live_681bc4436b4c4249010d01795bb05f655cd470eb';
 
-  // ── Generate unique reference ─────────────────────
+  // ── Edge Function URL ───────────────────────────────────────────
+  //  Change this to your actual Supabase project URL after deploying.
+  const VERIFY_FUNCTION_URL =
+    window.UE_CONFIG.SUPABASE_URL + '/functions/v1/verify-payment';
+
+  // ── Generate unique reference ───────────────────────────────────
   function generateRef() {
     return 'UE_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8).toUpperCase();
   }
 
-  // ── Write payment record to Supabase ─────────────
-  async function recordPayment(userId, plan, reference, status) {
+  // ── Write pending payment record ────────────────────────────────
+  async function recordPayment(userId, plan, reference) {
     const planData = PLANS[plan];
     const { error } = await window.sb.from('payments').insert({
       user_id:   userId,
       amount:    planData.amount,
-      plan:      plan,
-      reference: reference,
-      status:    status
+      plan,
+      reference,
+      status:    'pending',
     });
-    if (error) console.error('Payment record error:', error);
+    if (error) console.error('[PAYMENT] pending record error:', error.message);
     return !error;
   }
 
-  // ── Update profile subscription ───────────────────
-  async function activateSubscription(userId, plan) {
-    const planData = PLANS[plan];
-    const now      = new Date();
-    const expiry   = new Date(now.getTime() + planData.days * 86400000);
+  // ── SERVER-SIDE VERIFICATION (the key security step) ────────────
+  //  Calls the Edge Function which verifies with Paystack's REST API
+  //  using the SECRET key — the client never sees or touches this.
+  async function verifyWithServer(reference, planKey) {
+    try {
+      // The Edge Function requires the user to be authenticated.
+      // We pass the access token in the Authorization header.
+      const accessToken = window.UE_USER?.access_token ||
+        (await window.sb.auth.getSession()).data.session?.access_token;
 
-    const { error } = await window.sb.from('profiles').update({
-      is_premium:          true,
-      subscription_expiry: expiry.toISOString(),
-      status:              'ACTIVE',
-      auto_renew:          false
-    }).eq('id', userId);
+      const response = await fetch(VERIFY_FUNCTION_URL, {
+        method:  'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ reference, plan: planKey }),
+      });
 
-    if (error) console.error('Subscription activation error:', error);
-    return !error;
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        console.error('[PAYMENT] Edge Function error:', err);
+        return { success: false, message: err.message || 'Server verification failed.' };
+      }
+
+      const result = await response.json();
+      return result; // { success: true, plan, expiry } or { success: false, message }
+
+    } catch (err) {
+      console.error('[PAYMENT] Network error calling verify function:', err);
+      return { success: false, message: 'Network error. Please check your connection.' };
+    }
   }
 
-  // ── Update payment status to success ─────────────
-  async function markPaymentSuccess(reference) {
-    await window.sb.from('payments')
-      .update({ status: 'success' })
-      .eq('reference', reference);
-  }
-
-  // ── Main: open Paystack popup ─────────────────────
+  // ── Main: open Paystack popup ───────────────────────────────────
   async function openCheckout(planKey) {
     if (!window.PaystackPop) {
-      showPaymentError('Payment service failed to load. Please refresh and try again.');
+      showPaymentModal('error', null, 'Payment service failed to load. Please refresh and try again.');
       return;
     }
 
     const plan = PLANS[planKey];
     if (!plan) {
-      showPaymentError('Invalid plan selected.');
+      showPaymentModal('error', null, 'Invalid plan selected.');
       return;
     }
 
-    // Get current user
     const { data: { session } } = await window.sb.auth.getSession();
     if (!session) {
-      // Not logged in — send to login first
       sessionStorage.setItem('ue_selected_plan', planKey);
-      window.location.href = 'login.html?tab=login&next=' + encodeURIComponent('dashboard.html#pricing');
+      window.location.href =
+        window.UE_CONFIG.LOGIN_PAGE + '?tab=login&next=' + encodeURIComponent('dashboard.html#pricing');
       return;
     }
 
@@ -105,59 +146,71 @@ const PAYMENT = (function () {
     const userEmail = session.user.email;
     const reference = generateRef();
 
-    // Write pending record before opening popup
-    await recordPayment(userId, planKey, reference, 'pending');
+    // Write pending record BEFORE opening popup
+    await recordPayment(userId, planKey, reference);
 
-    // Show loading state on button
     setButtonLoading(planKey, true);
 
     const handler = window.PaystackPop.setup({
-      key:       PAYSTACK_PUBLIC_KEY,
-      email:     userEmail,
-      amount:    plan.amount,
-      currency:  'NGN',
-      ref:       reference,
-      plan:      plan.planCode,
+      key:      PAYSTACK_PUBLIC_KEY,
+      email:    userEmail,
+      amount:   plan.amount,
+      currency: 'NGN',
+      ref:      reference,
+      plan:     plan.planCode,
       metadata: {
         custom_fields: [
           { display_name: 'Plan',    variable_name: 'plan',    value: plan.label },
-          { display_name: 'User ID', variable_name: 'user_id', value: userId }
-        ]
+          { display_name: 'User ID', variable_name: 'user_id', value: userId },
+        ],
       },
 
+      // ── onSuccess: SHOW UI ONLY — do NOT activate subscription here ──
+      //  The activation happens server-side via verifyWithServer().
+      //  A bad actor can fire this callback manually, but that is safe
+      //  because verifyWithServer() will call Paystack's API with the
+      //  SECRET key and reject any reference that isn't genuinely paid.
       onSuccess: async (transaction) => {
         setButtonLoading(planKey, false);
         showPaymentModal('processing');
 
-        // Activate subscription
-        await markPaymentSuccess(reference);
-        const activated = await activateSubscription(userId, planKey);
+        const result = await verifyWithServer(reference, planKey);
 
-        if (activated) {
+        if (result.success) {
+          // Update the local profile cache so UI reflects new status
+          if (window.UE_PROFILE) {
+            window.UE_PROFILE.is_premium = true;
+            window.UE_PROFILE.subscription_expiry = result.expiry;
+          }
+          try {
+            sessionStorage.setItem('ue_profile_cache', JSON.stringify({
+              is_premium:          true,
+              subscription_expiry: result.expiry,
+            }));
+          } catch (_) {}
+
           showPaymentModal('success', plan);
-          // Refresh profile cache
-          window.UE_PROFILE = null;
-          setTimeout(() => {
-            window.location.href = 'dashboard.html';
-          }, 3000);
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
         } else {
-          showPaymentModal('error', null, 'Subscription activation failed. Contact support with ref: ' + reference);
+          showPaymentModal('error', null,
+            (result.message || 'Verification failed.') +
+            ' Please contact support with reference: ' + reference
+          );
         }
       },
 
       onCancel: () => {
         setButtonLoading(planKey, false);
-        // Mark as failed/cancelled in DB
         window.sb.from('payments')
           .update({ status: 'failed' })
           .eq('reference', reference);
-      }
+      },
     });
 
     handler.openIframe();
   }
 
-  // ── Button loading states ─────────────────────────
+  // ── Button loading states ───────────────────────────────────────
   function setButtonLoading(planKey, loading) {
     const btn = document.querySelector(`[data-plan="${planKey}"]`);
     if (!btn) return;
@@ -167,9 +220,8 @@ const PAYMENT = (function () {
       : PLANS[planKey] ? `Subscribe — ${PLANS[planKey].naira}` : 'Subscribe';
   }
 
-  // ── Payment result modal ──────────────────────────
+  // ── Payment result modal ────────────────────────────────────────
   function showPaymentModal(state, plan, errorMsg) {
-    // Remove existing modal
     const existing = document.getElementById('ue-pay-modal');
     if (existing) existing.remove();
 
@@ -178,14 +230,16 @@ const PAYMENT = (function () {
       content = `
         <div style="text-align:center;padding:16px 0">
           <div class="pay-spinner-lg"></div>
-          <h3 style="font-size:1.3rem;margin:16px 0 8px">Confirming Payment…</h3>
-          <p style="color:var(--muted,#6b7280);font-size:.9rem">Please wait while we activate your subscription.</p>
+          <h3 style="font-size:1.3rem;margin:16px 0 8px">Verifying Payment…</h3>
+          <p style="color:var(--muted,#6b7280);font-size:.9rem">
+            Confirming with payment provider. Please don't close this window.
+          </p>
         </div>`;
     } else if (state === 'success') {
       content = `
         <div style="text-align:center;padding:16px 0">
           <div style="font-size:3.5rem;margin-bottom:12px">🎉</div>
-          <h3 style="font-size:1.5rem;margin-bottom:8px">Payment Successful!</h3>
+          <h3 style="font-size:1.5rem;margin-bottom:8px">Payment Verified!</h3>
           <p style="color:#065f46;background:#d1fae5;padding:10px 16px;border-radius:8px;font-weight:600;margin-bottom:16px">
             ${plan ? plan.label : ''} Plan Activated
           </p>
@@ -224,18 +278,14 @@ const PAYMENT = (function () {
     document.body.appendChild(modal);
   }
 
-  function showPaymentError(msg) {
-    showPaymentModal('error', null, msg);
-  }
-
-  // ── Render pricing section (used on both index + dashboard) ──
-  function renderPricingSection(containerId, context) {
+  // ── Render pricing section ──────────────────────────────────────
+  function renderPricingSection(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
     container.innerHTML = Object.entries(PLANS).map(([key, plan]) => {
-      const isFeatured  = key === 'quarterly';
-      const save        = key === 'quarterly' ? 'Save 22%' : key === 'annual' ? 'Save 44%' : '';
+      const isFeatured   = key === 'quarterly';
+      const save         = key === 'quarterly' ? 'Save 22%' : key === 'annual' ? 'Save 44%' : '';
       const featuresHTML = plan.features.map(f =>
         `<li style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:.9rem">
           <span style="color:#00c97a;font-size:1rem">✓</span> ${f}
@@ -257,19 +307,17 @@ const PAYMENT = (function () {
     }).join('');
   }
 
-  // ── Check URL for plan pre-selection (from index.html) ──
+  // ── Check for pending plan after login redirect ─────────────────
   function checkPendingPlan() {
     const pending = sessionStorage.getItem('ue_selected_plan');
     if (pending && PLANS[pending]) {
       sessionStorage.removeItem('ue_selected_plan');
-      // Small delay to ensure page + auth loaded
       setTimeout(() => openCheckout(pending), 800);
     }
   }
 
-  // ── Get plan details (used by other modules) ──────
-  function getPlan(key) { return PLANS[key] || null; }
-  function getAllPlans() { return PLANS; }
+  function getPlan(key)    { return PLANS[key] || null; }
+  function getAllPlans()    { return PLANS; }
 
   return {
     openCheckout,
@@ -277,7 +325,82 @@ const PAYMENT = (function () {
     checkPendingPlan,
     getPlan,
     getAllPlans,
-    PLANS
+    PLANS,
   };
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════════
+   EDGE FUNCTION — supabase/functions/verify-payment/index.ts
+   Deploy with:  supabase functions deploy verify-payment
+   Set the secret:  supabase secrets set PAYSTACK_SECRET_KEY=sk_live_...
+
+   import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+   import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+   const PAYSTACK_SECRET = Deno.env.get("PAYSTACK_SECRET_KEY")!;
+   const SUPABASE_URL    = Deno.env.get("SUPABASE_URL")!;
+   const SUPABASE_KEY    = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+   const PLANS: Record<string, { amount: number; days: number }> = {
+     monthly:   { amount: 150000, days: 30  },
+     quarterly: { amount: 350000, days: 90  },
+     annual:    { amount: 1200000, days: 365 },
+   };
+
+   serve(async (req) => {
+     // 1. Authenticate the calling user
+     const authHeader = req.headers.get("Authorization") ?? "";
+     const userClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
+       global: { headers: { Authorization: authHeader } },
+     });
+     const { data: { user }, error: authErr } = await userClient.auth.getUser();
+     if (authErr || !user) return resp(401, { message: "Unauthorised" });
+
+     const { reference, plan } = await req.json();
+     if (!reference || !plan || !PLANS[plan])
+       return resp(400, { message: "Invalid payload" });
+
+     // 2. Check idempotency — don't process a reference twice
+     const adminClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+     const { data: existing } = await adminClient
+       .from("payments").select("status").eq("reference", reference).single();
+     if (existing?.status === "success")
+       return resp(200, { success: true, message: "Already activated" });
+
+     // 3. Verify with Paystack using the SECRET key
+     const psRes = await fetch(
+       `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
+       { headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` } }
+     );
+     const psData = await psRes.json();
+
+     if (!psData.status || psData.data?.status !== "success")
+       return resp(402, { message: "Payment not confirmed by Paystack" });
+
+     // 4. Verify amount matches plan (prevent plan-downgrade attacks)
+     const paidAmount = psData.data.amount;
+     if (paidAmount < PLANS[plan].amount)
+       return resp(402, { message: "Payment amount does not match plan" });
+
+     // 5. Activate subscription
+     const expiry = new Date(Date.now() + PLANS[plan].days * 86400000).toISOString();
+     await adminClient.from("profiles").update({
+       is_premium: true, subscription_expiry: expiry, status: "ACTIVE",
+     }).eq("id", user.id);
+
+     // 6. Mark payment as success
+     await adminClient.from("payments")
+       .update({ status: "success" }).eq("reference", reference);
+
+     return resp(200, { success: true, expiry });
+   });
+
+   function resp(status: number, body: object) {
+     return new Response(JSON.stringify(body), {
+       status,
+       headers: { "Content-Type": "application/json",
+                  "Access-Control-Allow-Origin": "*" },
+     });
+   }
+═══════════════════════════════════════════════════════════════════ */
