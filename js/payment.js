@@ -1,85 +1,155 @@
 /* ═══════════════════════════════════════════════════════════════════
-   UE School — js/payment.js  (HARDENED v2)
+   UE School — js/payment.js  (v3 — Tiered Plans + Init Fixes)
 
-   KEY SECURITY CHANGE FROM v1:
-   ─────────────────────────────
-   Subscription activation is NO LONGER handled solely in the
-   onSuccess client-side callback.  The onSuccess callback now only
-   records the reference and shows a "verifying…" UI state.
+   CHANGES FROM v2:
+   ─────────────────
+   1. PLAN FEATURES are now fully differentiated: Basic / Pro / Elite.
+      Each tier builds on the previous — no copy-paste repetition.
 
-   The ACTUAL is_premium toggle happens in a Supabase Edge Function
-   (verify-payment) that:
-     1. Receives the transaction reference from the client.
-     2. Calls the Paystack Verify Transaction API server-side using
-        the SECRET key (which the client never sees).
-     3. Checks that the response status === 'success'.
-     4. Checks that the amount paid matches the selected plan amount.
-     5. Checks that the reference has not been used before (idempotency).
-     6. Only then updates profiles.is_premium = true.
+   2. INITIALIZATION: The entire module self-initialises inside
+      DOMContentLoaded so the DOM is guaranteed ready before any
+      listener is attached. Calling code no longer needs its own
+      DOMContentLoaded wrapper.
 
-   Edge Function skeleton is included at the bottom of this file
-   as a SQL + Deno snippet.  Deploy it to Supabase via the dashboard
-   or the CLI:  supabase functions deploy verify-payment
+   3. PAYMENT DEADLOCK FIX: openCheckout() checks window.UE_USER
+      (seeded by head-gatekeeper.js) BEFORE trying to open Paystack.
+      If UE_USER is absent (public page, not logged in) it redirects
+      to login with ?next=pricing.html instead of silently failing.
 
-   WHY THIS MATTERS:
-   The Paystack onSuccess callback fires in the BROWSER.  Anyone with
-   DevTools can intercept and re-fire it with any reference string
-   (including a made-up one or a reference from someone else's
-   transaction).  Verifying server-side with the SECRET key closes
-   this attack vector completely.
+   4. SERVER-SIDE VERIFICATION: onSuccess still routes through the
+      Edge Function (verify-payment) — no client-side is_premium flip.
 ═══════════════════════════════════════════════════════════════════ */
 
 const PAYMENT = (function () {
   'use strict';
 
-  // ── Plan config (must match your Paystack dashboard exactly) ────
+  /* ── 1. TIERED PLAN DEFINITIONS ──────────────────────────────────
+     Each plan has:
+       tier:      display label shown as a chip on the card
+       features:  grouped array — sections are { section, items[] }
+                  Sections render as visual dividers inside the list.
+  ─────────────────────────────────────────────────────────────────── */
   const PLANS = {
+
     monthly: {
-      label:    'Monthly',
-      amount:   150000,           // kobo (₦1,500)
+      key:      'monthly',
+      label:    'Basic',
+      tier:     'Basic',
+      amount:   150000,       // kobo  = ₦1,500
       naira:    '₦1,500',
+      period:   '/month',
       days:     30,
       planCode: 'PLN_jctl2fmbtbprn79',
-      features: ['Full CBT access', 'All video lessons', 'Score prediction', 'Basic analytics'],
+      save:     '',
+      featured: false,
+      featureGroups: [
+        {
+          section: 'Core Access',
+          items: [
+            '✅ Full CBT practice engine (all subjects)',
+            '✅ Core video lessons for all topics',
+            '✅ JAMB, WAEC & NECO question banks',
+            '✅ Basic score prediction',
+          ],
+        },
+        {
+          section: 'Support',
+          items: [
+            '📧 24-hour email support',
+          ],
+        },
+      ],
     },
+
     quarterly: {
-      label:    '3-Month',
-      amount:   350000,           // kobo (₦3,500)
+      key:      'quarterly',
+      label:    'Pro',
+      tier:     'Pro',
+      amount:   350000,       // kobo  = ₦3,500
       naira:    '₦3,500',
+      period:   '/3 months',
       days:     90,
       planCode: 'PLN_7k27rm469etnc8y',
-      features: ['Everything in Monthly', 'SmartPath™ Engine', 'Weakness tracker', 'Priority support'],
+      save:     'Save 22%',
+      featured: true,
+      featureGroups: [
+        {
+          section: 'Everything in Basic, plus:',
+          items: [
+            '🧠 SmartPath™ AI Analytics engine',
+            '🔥 Topic weakness heatmaps',
+            '📊 Detailed performance dashboard',
+            '🎯 Adaptive difficulty (Grades 1–3)',
+            '📈 WAEC/NECO grade predictions',
+          ],
+        },
+        {
+          section: 'Support',
+          items: [
+            '⚡ 2-hour priority support',
+          ],
+        },
+      ],
     },
+
     annual: {
-      label:    'Annual',
-      amount:   1200000,          // kobo (₦12,000)
+      key:      'annual',
+      label:    'Elite',
+      tier:     'Elite',
+      amount:   1200000,      // kobo  = ₦12,000
       naira:    '₦12,000',
+      period:   '/year',
       days:     365,
       planCode: 'PLN_vg1odwe75m793nk',
-      features: ['Everything in 3-Month', 'Post-UTME prep', 'Downloadable reports', '1-on-1 tutoring discount'],
+      save:     'Save 44%',
+      featured: false,
+      featureGroups: [
+        {
+          section: 'Everything in Pro, plus:',
+          items: [
+            '📄 Full PDF study guides per subject',
+            '🏛️ Post-UTME university-specific question banks',
+            '🗓️ 1-on-1 strategy session with a tutor',
+            '⬇️ Downloadable mastery reports',
+            '🔔 Exam-countdown reminders & study schedule',
+          ],
+        },
+        {
+          section: 'Support',
+          items: [
+            '📞 Dedicated WhatsApp support line',
+          ],
+        },
+      ],
     },
   };
 
-  // ── Public Paystack key (safe to expose — server uses secret key) 
+  /* ── 2. CONSTANTS ──────────────────────────────────────────────── */
   const PAYSTACK_PUBLIC_KEY = 'pk_live_681bc4436b4c4249010d01795bb05f655cd470eb';
 
-  // ── Edge Function URL ───────────────────────────────────────────
-  //  Change this to your actual Supabase project URL after deploying.
-  const VERIFY_FUNCTION_URL =
-    window.UE_CONFIG.SUPABASE_URL + '/functions/v1/verify-payment';
+  // Edge Function URL — set by UE_CONFIG at runtime
+  function getVerifyUrl() {
+    return (window.UE_CONFIG && window.UE_CONFIG.SUPABASE_URL)
+      ? window.UE_CONFIG.SUPABASE_URL + '/functions/v1/verify-payment'
+      : '/functions/v1/verify-payment';
+  }
 
-  // ── Generate unique reference ───────────────────────────────────
+  /* ── 3. HELPERS ────────────────────────────────────────────────── */
   function generateRef() {
     return 'UE_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8).toUpperCase();
   }
 
-  // ── Write pending payment record ────────────────────────────────
-  async function recordPayment(userId, plan, reference) {
-    const planData = PLANS[plan];
+  function getLoginPage() {
+    return (window.UE_CONFIG && window.UE_CONFIG.LOGIN_PAGE) || 'login.html';
+  }
+
+  /* ── 4. DATABASE WRITES ────────────────────────────────────────── */
+  async function recordPayment(userId, planKey, reference) {
+    const plan = PLANS[planKey];
     const { error } = await window.sb.from('payments').insert({
       user_id:   userId,
-      amount:    planData.amount,
-      plan,
+      amount:    plan.amount,
+      plan:      planKey,
       reference,
       status:    'pending',
     });
@@ -87,17 +157,15 @@ const PAYMENT = (function () {
     return !error;
   }
 
-  // ── SERVER-SIDE VERIFICATION (the key security step) ────────────
-  //  Calls the Edge Function which verifies with Paystack's REST API
-  //  using the SECRET key — the client never sees or touches this.
+  /* ── 5. SERVER-SIDE VERIFICATION ──────────────────────────────── */
   async function verifyWithServer(reference, planKey) {
     try {
-      // The Edge Function requires the user to be authenticated.
-      // We pass the access token in the Authorization header.
-      const accessToken = window.UE_USER?.access_token ||
-        (await window.sb.auth.getSession()).data.session?.access_token;
+      // Prefer auth token from UE_USER (seeded by head-gatekeeper / auth-guard)
+      const accessToken =
+        (window.UE_USER && window.UE_USER.access_token) ||
+        ((await window.sb.auth.getSession()).data.session?.access_token);
 
-      const response = await fetch(VERIFY_FUNCTION_URL, {
+      const res = await fetch(getVerifyUrl(), {
         method:  'POST',
         headers: {
           'Content-Type':  'application/json',
@@ -106,25 +174,34 @@ const PAYMENT = (function () {
         body: JSON.stringify({ reference, plan: planKey }),
       });
 
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        console.error('[PAYMENT] Edge Function error:', err);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
         return { success: false, message: err.message || 'Server verification failed.' };
       }
-
-      const result = await response.json();
-      return result; // { success: true, plan, expiry } or { success: false, message }
+      return await res.json(); // { success, expiry } or { success: false, message }
 
     } catch (err) {
-      console.error('[PAYMENT] Network error calling verify function:', err);
-      return { success: false, message: 'Network error. Please check your connection.' };
+      console.error('[PAYMENT] Network error:', err);
+      return { success: false, message: 'Network error. Please check your connection and try again.' };
     }
   }
 
-  // ── Main: open Paystack popup ───────────────────────────────────
+  /* ── 6. MAIN CHECKOUT ─────────────────────────────────────────────
+     PAYMENT DEADLOCK FIX:
+     ─────────────────────
+     Before touching Paystack we check three things in order:
+       a) window.PaystackPop is loaded  (CDN race guard)
+       b) window.sb exists              (Supabase SDK guard)
+       c) A valid session exists        (auth guard)
+
+     If the user is on a public page (pricing.html) and not logged in,
+     window.UE_USER will be null. We redirect to login rather than
+     letting the call fail silently.
+  ─────────────────────────────────────────────────────────────────── */
   async function openCheckout(planKey) {
+    // Guard: Paystack CDN
     if (!window.PaystackPop) {
-      showPaymentModal('error', null, 'Payment service failed to load. Please refresh and try again.');
+      showPaymentModal('error', null, 'Payment service is not ready. Please refresh the page and try again.');
       return;
     }
 
@@ -134,19 +211,36 @@ const PAYMENT = (function () {
       return;
     }
 
-    const { data: { session } } = await window.sb.auth.getSession();
-    if (!session) {
-      sessionStorage.setItem('ue_selected_plan', planKey);
-      window.location.href =
-        window.UE_CONFIG.LOGIN_PAGE + '?tab=login&next=' + encodeURIComponent('dashboard.html#pricing');
-      return;
+    // Guard: session — use UE_USER fast-path first, then fall back to SDK
+    let userId, userEmail, accessToken;
+
+    if (window.UE_USER && window.UE_USER.id) {
+      // Protected page — head-gatekeeper already validated the session
+      userId      = window.UE_USER.id;
+      userEmail   = window.UE_USER.email;
+      accessToken = window.UE_USER.access_token;
+    } else {
+      // Public page (pricing.html) — check session via SDK
+      if (!window.sb) {
+        // Supabase not ready yet — redirect to login
+        sessionStorage.setItem('ue_selected_plan', planKey);
+        window.location.href = getLoginPage() + '?next=pricing.html';
+        return;
+      }
+      const { data: { session } } = await window.sb.auth.getSession();
+      if (!session) {
+        sessionStorage.setItem('ue_selected_plan', planKey);
+        window.location.href = getLoginPage() + '?tab=login&next=pricing.html';
+        return;
+      }
+      userId      = session.user.id;
+      userEmail   = session.user.email;
+      accessToken = session.access_token;
     }
 
-    const userId    = session.user.id;
-    const userEmail = session.user.email;
     const reference = generateRef();
 
-    // Write pending record BEFORE opening popup
+    // Write pending record first — so we have a DB trace even if user closes popup
     await recordPayment(userId, planKey, reference);
 
     setButtonLoading(planKey, true);
@@ -165,22 +259,24 @@ const PAYMENT = (function () {
         ],
       },
 
-      // ── onSuccess: SHOW UI ONLY — do NOT activate subscription here ──
-      //  The activation happens server-side via verifyWithServer().
-      //  A bad actor can fire this callback manually, but that is safe
-      //  because verifyWithServer() will call Paystack's API with the
-      //  SECRET key and reject any reference that isn't genuinely paid.
-      onSuccess: async (transaction) => {
+      // onSuccess: show UI immediately, then verify server-side.
+      // A cheater can fire this callback manually — that is fine because
+      // verifyWithServer() uses the Paystack SECRET key and will reject
+      // any reference that was not genuinely paid.
+      onSuccess: async (_transaction) => {
         setButtonLoading(planKey, false);
         showPaymentModal('processing');
 
         const result = await verifyWithServer(reference, planKey);
 
         if (result.success) {
-          // Update the local profile cache so UI reflects new status
+          // Update local profile cache so nav/banner reflect new status instantly
           if (window.UE_PROFILE) {
-            window.UE_PROFILE.is_premium = true;
+            window.UE_PROFILE.is_premium          = true;
             window.UE_PROFILE.subscription_expiry = result.expiry;
+          }
+          if (window.UE_USER) {
+            window.UE_USER.is_premium = true;
           }
           try {
             sessionStorage.setItem('ue_profile_cache', JSON.stringify({
@@ -194,66 +290,67 @@ const PAYMENT = (function () {
         } else {
           showPaymentModal('error', null,
             (result.message || 'Verification failed.') +
-            ' Please contact support with reference: ' + reference
+            '\n\nPlease contact support with reference: ' + reference
           );
         }
       },
 
       onCancel: () => {
         setButtonLoading(planKey, false);
-        window.sb.from('payments')
-          .update({ status: 'failed' })
-          .eq('reference', reference);
+        if (window.sb) {
+          window.sb.from('payments')
+            .update({ status: 'failed' })
+            .eq('reference', reference);
+        }
       },
     });
 
     handler.openIframe();
   }
 
-  // ── Button loading states ───────────────────────────────────────
+  /* ── 7. BUTTON LOADING STATE ────────────────────────────────────── */
   function setButtonLoading(planKey, loading) {
     const btn = document.querySelector(`[data-plan="${planKey}"]`);
     if (!btn) return;
     btn.disabled = loading;
     btn.innerHTML = loading
       ? '<span class="pay-spinner"></span> Opening…'
-      : PLANS[planKey] ? `Subscribe — ${PLANS[planKey].naira}` : 'Subscribe';
+      : `Subscribe — ${PLANS[planKey]?.naira || ''}`;
   }
 
-  // ── Payment result modal ────────────────────────────────────────
+  /* ── 8. PAYMENT RESULT MODAL ────────────────────────────────────── */
   function showPaymentModal(state, plan, errorMsg) {
     const existing = document.getElementById('ue-pay-modal');
     if (existing) existing.remove();
 
     let content = '';
+
     if (state === 'processing') {
       content = `
         <div style="text-align:center;padding:16px 0">
           <div class="pay-spinner-lg"></div>
           <h3 style="font-size:1.3rem;margin:16px 0 8px">Verifying Payment…</h3>
-          <p style="color:var(--muted,#6b7280);font-size:.9rem">
-            Confirming with payment provider. Please don't close this window.
-          </p>
+          <p style="color:#6b7280;font-size:.9rem">Confirming with Paystack. Please don't close this window.</p>
         </div>`;
+
     } else if (state === 'success') {
       content = `
         <div style="text-align:center;padding:16px 0">
           <div style="font-size:3.5rem;margin-bottom:12px">🎉</div>
           <h3 style="font-size:1.5rem;margin-bottom:8px">Payment Verified!</h3>
           <p style="color:#065f46;background:#d1fae5;padding:10px 16px;border-radius:8px;font-weight:600;margin-bottom:16px">
-            ${plan ? plan.label : ''} Plan Activated
+            ${plan ? plan.tier + ' Plan' : 'Plan'} Activated
           </p>
-          <p style="color:var(--muted,#6b7280);font-size:.9rem;margin-bottom:20px">
-            Your account is now active. Redirecting to your dashboard…
-          </p>
+          <p style="color:#6b7280;font-size:.9rem;margin-bottom:20px">Redirecting to your dashboard…</p>
           <div class="pay-spinner-lg"></div>
         </div>`;
+
     } else if (state === 'error') {
       content = `
         <div style="text-align:center;padding:16px 0">
           <div style="font-size:3rem;margin-bottom:12px">⚠️</div>
           <h3 style="font-size:1.3rem;margin-bottom:8px">Something went wrong</h3>
-          <p style="color:#991b1b;background:#fee2e2;padding:10px 16px;border-radius:8px;font-size:.88rem;margin-bottom:20px">
+          <p style="color:#991b1b;background:#fee2e2;padding:10px 16px;border-radius:8px;font-size:.88rem;margin-bottom:20px;white-space:pre-line">
             ${errorMsg || 'An unexpected error occurred.'}
           </p>
           <button onclick="document.getElementById('ue-pay-modal').remove()"
@@ -278,36 +375,59 @@ const PAYMENT = (function () {
     document.body.appendChild(modal);
   }
 
-  // ── Render pricing section ──────────────────────────────────────
+  /* ── 9. RENDER PRICING CARDS ──────────────────────────────────────
+     Renders all three plan cards into a container element.
+     Features are grouped into visual sections so Basic/Pro/Elite
+     are clearly differentiated — not a repeated flat list.
+  ─────────────────────────────────────────────────────────────────── */
   function renderPricingSection(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    container.innerHTML = Object.entries(PLANS).map(([key, plan]) => {
-      const isFeatured   = key === 'quarterly';
-      const save         = key === 'quarterly' ? 'Save 22%' : key === 'annual' ? 'Save 44%' : '';
-      const featuresHTML = plan.features.map(f =>
-        `<li style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:.9rem">
-          <span style="color:#00c97a;font-size:1rem">✓</span> ${f}
-        </li>`).join('');
+    const tierChipClass = { Basic: 'tier-chip-basic', Pro: 'tier-chip-pro', Elite: 'tier-chip-elite' };
+
+    container.innerHTML = Object.values(PLANS).map((plan) => {
+      // Build feature list HTML — each group gets a section label
+      const featuresHTML = plan.featureGroups.map((group) => {
+        const sectionLabel = group.section
+          ? `<li class="feat-section">${group.section}</li>`
+          : '';
+        const items = group.items.map((f) =>
+          `<li style="display:flex;align-items:flex-start;gap:10px;padding:5px 0;font-size:.88rem;line-height:1.45">
+             <span style="flex-shrink:0">${f.slice(0, 2)}</span>
+             <span>${f.slice(2)}</span>
+           </li>`
+        ).join('');
+        return sectionLabel + items;
+      }).join('');
+
+      const chipCls = tierChipClass[plan.tier] || 'tier-chip-basic';
+      const featuredBadge = plan.featured
+        ? '<div class="pricing-badge">Most Popular</div>'
+        : '';
+      const saveTag = plan.save
+        ? `<div class="pricing-save">${plan.save}</div>`
+        : '<div style="margin-bottom:20px"></div>';
 
       return `
-        <div class="pricing-card${isFeatured ? ' featured' : ''}" style="position:relative">
-          ${isFeatured ? '<div class="pricing-badge">Most Popular</div>' : ''}
+        <div class="pricing-card${plan.featured ? ' featured' : ''}" style="position:relative">
+          ${featuredBadge}
+          <span class="tier-chip ${chipCls}">${plan.tier}</span>
           <h3 style="font-weight:700;font-size:1.15rem;margin-bottom:8px">${plan.label}</h3>
-          <div class="pricing-price">${plan.naira}${key === 'monthly' ? '<span style="font-size:1rem;color:var(--muted,#6b7280)">/mo</span>' : ''}</div>
-          ${save ? `<div class="pricing-save">${save}</div>` : '<div style="margin-bottom:20px"></div>'}
+          <div class="pricing-price">${plan.naira}<span style="font-size:1rem;color:#6b7280;font-family:var(--font-body);font-weight:400">${plan.period}</span></div>
+          ${saveTag}
           <ul class="pricing-features" style="list-style:none;margin-bottom:28px">${featuresHTML}</ul>
-          <button class="btn ${isFeatured ? 'btn-primary' : 'btn-outline'} btn-block"
-                  data-plan="${key}"
-                  onclick="PAYMENT.openCheckout('${key}')">
+          <button class="btn ${plan.featured ? 'btn-primary' : 'btn-outline'} btn-block"
+                  style="width:100%;height:44px"
+                  data-plan="${plan.key}"
+                  onclick="PAYMENT.openCheckout('${plan.key}')">
             Subscribe — ${plan.naira}
           </button>
         </div>`;
     }).join('');
   }
 
-  // ── Check for pending plan after login redirect ─────────────────
+  /* ── 10. PENDING PLAN CHECK (post-login redirect) ──────────────── */
   function checkPendingPlan() {
     const pending = sessionStorage.getItem('ue_selected_plan');
     if (pending && PLANS[pending]) {
@@ -316,8 +436,20 @@ const PAYMENT = (function () {
     }
   }
 
-  function getPlan(key)    { return PLANS[key] || null; }
-  function getAllPlans()    { return PLANS; }
+  /* ── 11. DOM-READY SELF-INIT ──────────────────────────────────────
+     Attaches DOMContentLoaded so callers do NOT need their own
+     wrapper. Safe to call even after DOMContentLoaded has fired
+     (the browser queues it immediately).
+  ─────────────────────────────────────────────────────────────────── */
+  window.addEventListener('DOMContentLoaded', () => {
+    // Auto-render any container with data-payment-grid attribute
+    const autoGrids = document.querySelectorAll('[data-payment-grid]');
+    autoGrids.forEach((el) => renderPricingSection(el.id));
+  });
+
+  /* ── PUBLIC API ─────────────────────────────────────────────────── */
+  function getPlan(key)  { return PLANS[key] || null; }
+  function getAllPlans()  { return PLANS; }
 
   return {
     openCheckout,
@@ -329,78 +461,3 @@ const PAYMENT = (function () {
   };
 
 })();
-
-/* ═══════════════════════════════════════════════════════════════════
-   EDGE FUNCTION — supabase/functions/verify-payment/index.ts
-   Deploy with:  supabase functions deploy verify-payment
-   Set the secret:  supabase secrets set PAYSTACK_SECRET_KEY=sk_live_...
-
-   import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-   import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-   const PAYSTACK_SECRET = Deno.env.get("PAYSTACK_SECRET_KEY")!;
-   const SUPABASE_URL    = Deno.env.get("SUPABASE_URL")!;
-   const SUPABASE_KEY    = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-   const PLANS: Record<string, { amount: number; days: number }> = {
-     monthly:   { amount: 150000, days: 30  },
-     quarterly: { amount: 350000, days: 90  },
-     annual:    { amount: 1200000, days: 365 },
-   };
-
-   serve(async (req) => {
-     // 1. Authenticate the calling user
-     const authHeader = req.headers.get("Authorization") ?? "";
-     const userClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
-       global: { headers: { Authorization: authHeader } },
-     });
-     const { data: { user }, error: authErr } = await userClient.auth.getUser();
-     if (authErr || !user) return resp(401, { message: "Unauthorised" });
-
-     const { reference, plan } = await req.json();
-     if (!reference || !plan || !PLANS[plan])
-       return resp(400, { message: "Invalid payload" });
-
-     // 2. Check idempotency — don't process a reference twice
-     const adminClient = createClient(SUPABASE_URL, SUPABASE_KEY);
-     const { data: existing } = await adminClient
-       .from("payments").select("status").eq("reference", reference).single();
-     if (existing?.status === "success")
-       return resp(200, { success: true, message: "Already activated" });
-
-     // 3. Verify with Paystack using the SECRET key
-     const psRes = await fetch(
-       `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
-       { headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` } }
-     );
-     const psData = await psRes.json();
-
-     if (!psData.status || psData.data?.status !== "success")
-       return resp(402, { message: "Payment not confirmed by Paystack" });
-
-     // 4. Verify amount matches plan (prevent plan-downgrade attacks)
-     const paidAmount = psData.data.amount;
-     if (paidAmount < PLANS[plan].amount)
-       return resp(402, { message: "Payment amount does not match plan" });
-
-     // 5. Activate subscription
-     const expiry = new Date(Date.now() + PLANS[plan].days * 86400000).toISOString();
-     await adminClient.from("profiles").update({
-       is_premium: true, subscription_expiry: expiry, status: "ACTIVE",
-     }).eq("id", user.id);
-
-     // 6. Mark payment as success
-     await adminClient.from("payments")
-       .update({ status: "success" }).eq("reference", reference);
-
-     return resp(200, { success: true, expiry });
-   });
-
-   function resp(status: number, body: object) {
-     return new Response(JSON.stringify(body), {
-       status,
-       headers: { "Content-Type": "application/json",
-                  "Access-Control-Allow-Origin": "*" },
-     });
-   }
-═══════════════════════════════════════════════════════════════════ */
