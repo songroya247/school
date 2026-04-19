@@ -242,10 +242,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // Auth-aware nav for public pages
 (async function() {
   try {
-    const sb = window.supabase.createClient(
-      'https://hazwqyvnolgdkokehjhr.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhendxeXZub2xnZGtva2VoamhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDUwNzYsImV4cCI6MjA5MTY4MTA3Nn0.V7TsNcfpib2HtJRjTASyJPavQ8qUR2R4KXYuWdZB4gE'
-    );
+    // sb/SB is set by js/supabase.js shim — credentials live only in js/config.js
+const SB = window.sb;
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
       const navRight = document.getElementById('nav-right-public');
@@ -259,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span style="font-size:.78rem;color:var(--muted)">${p?.total_xp||0} XP</span>
           </div>
           <a href="dashboard.html" class="btn btn-primary" style="margin-left:8px">Dashboard</a>
-          <button class="btn btn-outline btn-sm" onclick="supabase.createClient('https://hazwqyvnolgdkokehjhr.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhendxeXZub2xnZGtva2VoamhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDUwNzYsImV4cCI6MjA5MTY4MTA3Nn0.V7TsNcfpib2HtJRjTASyJPavQ8qUR2R4KXYuWdZB4gE').auth.signOut().then(()=>location.reload())" style="margin-left:4px">Logout</button>
+          <button class="btn btn-outline btn-sm" onclick="(window.sb||window.supabase.createClient(window.UE_CONFIG.SUPABASE_URL,window.UE_CONFIG.SUPABASE_ANON)).auth.signOut().then(()=>location.reload())" style="margin-left:4px">Logout</button>
         `;
       }
     }
