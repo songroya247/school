@@ -6,46 +6,84 @@
 <title>UE School — Ace Your JAMB, WAEC & NECO Exams</title>
 <link rel="stylesheet" href="css/main.css">
 <style>
-/* ── MOBILE NAV ── */
+/* ══════════════════════════════════════════════════════
+   MOBILE NAV — Professional slide-down panel
+   Extends main.css. Does NOT redefine span animation.
+══════════════════════════════════════════════════════ */
 .nav-hamburger {
   display: none;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   gap: 5px;
-  background: none;
-  border: none;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  background: rgba(26,86,255,.06);
+  border: 1.5px solid var(--border2);
+  border-radius: 9px;
   cursor: pointer;
-  padding: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 210;
+  transition: background .2s, border-color .2s;
 }
+.nav-hamburger:hover { background: rgba(26,86,255,.12); border-color: var(--accent); }
 .nav-hamburger span {
   display: block;
-  width: 24px;
+  width: 18px;
   height: 2px;
   background: var(--text);
   border-radius: 2px;
-  transition: all .25s;
+  transition: transform .3s ease, opacity .3s ease;
+  transform-origin: center center;
 }
+.nav-mobile-open .nav-hamburger { background: rgba(26,86,255,.1); border-color: var(--accent); }
 .nav-mobile-open .nav-hamburger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.nav-mobile-open .nav-hamburger span:nth-child(2) { opacity: 0; }
+.nav-mobile-open .nav-hamburger span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .nav-mobile-open .nav-hamburger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 @media (max-width: 768px) {
-  /* Nav */
-  .ue-nav .container { flex-wrap: wrap; position: relative; }
-  .nav-hamburger { display: flex; margin-left: auto; }
-  .nav-links {
-    display: none;
+  .ue-nav { height: auto; }
+  .ue-nav .container { flex-wrap: wrap; height: auto; padding: 0 16px; position: relative; }
+  .nav-logo { padding: 14px 0; flex: 1; }
+  .nav-hamburger { display: flex; }
+
+  /* Smooth slide-down panel */
+  .nav-links,
+  .nav-right {
+    display: flex !important;
     flex-direction: column;
     width: 100%;
-    gap: 0;
-    padding: 8px 0 12px;
-    border-top: 1px solid var(--border);
-    margin-top: 8px;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s ease, padding .3s ease;
   }
-  .nav-links a { padding: 10px 4px; font-size: .95rem; }
-  .nav-right { display: none; width: 100%; padding-bottom: 12px; }
-  .nav-mobile-open .nav-links,
-  .nav-mobile-open .nav-right { display: flex; }
-  .nav-right .btn { width: 100%; text-align: center; }
+  .nav-links { gap: 2px; padding: 0; order: 3; border-top: none; }
+  .nav-right  { gap: 8px; padding: 0; order: 4; border-top: 1px solid var(--border); }
+
+  /* Open state */
+  .nav-mobile-open .nav-links {
+    max-height: 300px; opacity: 1; pointer-events: auto;
+    padding: 8px 0 4px; border-top: 1px solid var(--border); margin-top: 4px;
+  }
+  .nav-mobile-open .nav-right {
+    max-height: 160px; opacity: 1; pointer-events: auto; padding: 12px 0 16px;
+  }
+
+  /* Nav link pills */
+  .nav-links a {
+    display: flex; align-items: center;
+    padding: 11px 14px; font-size: .92rem; font-weight: 600;
+    color: var(--text); border-radius: 9px;
+    transition: background .15s, color .15s;
+  }
+  .nav-links a:hover, .nav-links a.active { background: rgba(26,86,255,.07); color: var(--accent); }
+  .nav-links a.active { font-weight: 700; }
+  .nav-right .btn { width: 100%; justify-content: center; height: 44px; }
 
   /* Hero */
   .hero-grid { grid-template-columns: 1fr !important; }
