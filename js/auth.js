@@ -70,16 +70,31 @@ const AUTH = (function () {
 
   // ── SIGNUP ────────────────────────────────────────
 
+  // ── Build the redirect URL robustly ──────────────────────────────
+  // window.location.origin alone is enough for most hosts.
+  // For GitHub Pages subdirectory deploys the pathname prefix is needed.
+  // We also strip any trailing /index.html so the URL is clean.
+  function buildRedirectUrl(page) {
+    const origin  = window.location.origin; // e.g. https://school.ultimateedge.info
+    const path    = window.location.pathname
+      .replace(/\/[^/]*\.html$/, '') // remove filename
+      .replace(/\/$/, '');           // remove trailing slash
+    // path will be '' for root domains, '/subfolder' for subdirectory deploys
+    return origin + path + '/' + page;
+  }
+
   async function handleSignup(formData) {
     clearError();
     setLoading('btn-create-account', true, 'Creating account…');
 
     try {
+      const redirectUrl = buildRedirectUrl('confirm.html');
+
       const { data, error } = await window.sb.auth.signUp({
         email:    formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: window.location.origin + '/confirm.html',
+          emailRedirectTo: redirectUrl,
           data: {
             // Store form data in user metadata for use after confirmation
             full_name:    formData.fullName,
