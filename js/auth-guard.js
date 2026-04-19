@@ -1,68 +1,181 @@
-/* ═══════════════════════════════════════════════════
-   UE School — Auth Guard v2
-   Three-tier access model:
-     PUBLIC   — no login needed (index, about, pricing, contact, legal)
-     FREE     — logged in, any user (dashboard, cbt limited, classroom preview)
-     PREMIUM  — active subscription required (full CBT, all lessons)
-═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   UE School — js/auth-guard.js  (HARDENED v2)
+   ▸ Runs AFTER the Supabase SDK and config.js are loaded.
+   ▸ Performs the full async session + premium validation.
+   ▸ head-gatekeeper.js already stopped unauth'd page renders;
+     this module handles the nuanced cases:
+       • Expired tokens that Supabase can silently refresh
+       • Premium-gating for classroom.html and cbt.html
+       • Auth-state-change listener (tab re-focus, token rotation)
+       • Profile hydration, nav rendering, XP/streak display
+═══════════════════════════════════════════════════════════════════ */
 
 const AUTH_GUARD = (function () {
+  'use strict';
 
-  const SUPABASE_URL = 'https://hazwqyvnolgdkokehjhr.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhendxeXZub2xnZGtva2VoamhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDUwNzYsImV4cCI6MjA5MTY4MTA3Nn0.V7TsNcfpib2HtJRjTASyJPavQ8qUR2R4KXYuWdZB4gE';
+  // ── Config from centralised source ─────────────────────────────
+  const cfg          = window.UE_CONFIG;
+  const SUPABASE_URL  = cfg.SUPABASE_URL;
+  const SUPABASE_ANON = cfg.SUPABASE_ANON;
+  const LOGIN_PAGE    = cfg.LOGIN_PAGE   || 'login.html';
+  const PRICING_PAGE  = cfg.PRICING_PAGE || 'pricing.html';
+  const PREMIUM_PAGES = cfg.PREMIUM_PAGES || ['classroom.html', 'cbt.html'];
 
-  // Pages that require at minimum a free account
-  const REQUIRES_LOGIN = ['dashboard.html', 'classroom.html', 'cbt.html', 'report.html'];
+  // ── Toast helper (used for premium-redirect messages) ──────────
+  function showToast(message, type = 'info', duration = 5000) {
+    // Remove existing toast
+    const existing = document.getElementById('ue-auth-toast');
+    if (existing) existing.remove();
 
-  // ── Step 1: Hide body immediately to prevent flash ──
-  // Called synchronously the moment this script is parsed
-  (function hideUntilReady() {
-    const page = location.pathname.split('/').pop() || 'index.html';
-    if (REQUIRES_LOGIN.includes(page)) {
-      document.documentElement.style.visibility = 'hidden';
-    }
-  })();
+    const colours = {
+      info:    { bg: '#1a56ff', icon: 'ℹ️' },
+      warning: { bg: '#d97706', icon: '⚠️' },
+      error:   { bg: '#dc2626', icon: '🚫' },
+      success: { bg: '#059669', icon: '✅' },
+    };
+    const c = colours[type] || colours.info;
 
-  // ── Helpers ──────────────────────────────────────
+    const toast = document.createElement('div');
+    toast.id = 'ue-auth-toast';
+    toast.style.cssText = `
+      position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+      background:${c.bg};color:#fff;padding:14px 22px;border-radius:12px;
+      font-family:inherit;font-size:.9rem;font-weight:600;z-index:99999;
+      box-shadow:0 8px 32px rgba(0,0,0,.25);max-width:90vw;text-align:center;
+      transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+      display:flex;align-items:center;gap:10px;
+    `;
+    toast.innerHTML = `<span>${c.icon}</span><span>${message}</span>`;
+    document.body.appendChild(toast);
 
+    // Animate in
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+      });
+    });
+
+    // Auto-dismiss
+    setTimeout(() => {
+      toast.style.transform = 'translateX(-50%) translateY(80px)';
+      setTimeout(() => toast.remove(), 400);
+    }, duration);
+  }
+
+  // ── Remove the veil injected by head-gatekeeper (expired tokens) 
+  function liftVeil() {
+    const veil = document.getElementById('ue-gatekeeper-veil');
+    if (veil) veil.remove();
+    // Also un-hide body visibility in case head-gatekeeper set it inline
+    document.body.style.visibility = '';
+  }
+
+  // ── Current page helper ─────────────────────────────────────────
   function currentPage() {
-    return location.pathname.split('/').pop() || 'index.html';
+    return window.location.pathname.split('/').pop() || 'index.html';
   }
 
-  function showPage() {
-    document.documentElement.style.visibility = '';
+  // ── Redirect helpers ───────────────────────────────────────────
+  function redirectToLogin(reason) {
+    window.location.replace(
+      LOGIN_PAGE + '?next=' + encodeURIComponent(currentPage()) +
+      (reason ? '&reason=' + encodeURIComponent(reason) : '')
+    );
   }
 
+  function redirectToPricing(reason) {
+    window.location.replace(
+      PRICING_PAGE + '?reason=' + encodeURIComponent(reason || 'premium_required') +
+      '&next=' + encodeURIComponent(currentPage())
+    );
+  }
+
+  // ── Session fetch (uses SDK for auto-refresh) ───────────────────
   async function getSession() {
-    const { data: { session } } = await window.sb.auth.getSession();
+    const { data: { session }, error } = await window.sb.auth.getSession();
+    if (error) return null;
     return session;
   }
 
+  // ── Profile fetch ───────────────────────────────────────────────
   async function getProfile(userId) {
     const { data, error } = await window.sb
-      .from('profiles').select('*').eq('id', userId).single();
-    return error ? null : data;
+      .from('profiles')
+      .select(
+        'id, full_name, email, is_premium, subscription_expiry, ' +
+        'total_xp, accuracy_avg, mastery_level, status, ' +
+        'exam_types, exam_date, target_score, current_skill_level, ' +
+        'report_share_token, usage_logs, exam_subjects, study_mode, ' +
+        'smartpath_queue, created_at'
+      )
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error('[AUTH_GUARD] Profile fetch error:', error.message);
+      return null;
+    }
+
+    // Cache a lightweight version for the head-gatekeeper's optimistic check
+    try {
+      sessionStorage.setItem('ue_profile_cache', JSON.stringify({
+        is_premium:          data.is_premium,
+        subscription_expiry: data.subscription_expiry,
+      }));
+    } catch (_) { /* storage full / blocked — non-fatal */ }
+
+    return data;
   }
 
-  // ── Subscription helpers ──────────────────────────
-
+  // ── Subscription status ─────────────────────────────────────────
   function subscriptionStatus(profile) {
-    if (!profile || !profile.is_premium) return 'NIL';
-    if (!profile.subscription_expiry) return 'NIL';
-    return new Date(profile.subscription_expiry) > new Date() ? 'ACTIVE' : 'EXPIRED';
+    if (!profile)                       return 'NIL';
+    if (!profile.is_premium)            return 'NIL';
+    if (!profile.subscription_expiry)   return 'NIL';
+    const expiry = new Date(profile.subscription_expiry);
+    if (expiry < new Date())            return 'EXPIRED';
+    return 'ACTIVE';
   }
 
   function isPremium(profile) {
     return subscriptionStatus(profile) === 'ACTIVE';
   }
 
-  // ── Nav rendering ─────────────────────────────────
+  // ── Premium gate ────────────────────────────────────────────────
+  //  Called AFTER the real profile has been fetched from the DB.
+  //  This is the authoritative check — not the optimistic cache one.
+  function enforcePremiumGate(profile) {
+    const page = currentPage();
+    if (PREMIUM_PAGES.indexOf(page) === -1) return; // page doesn't need premium
 
+    const status = subscriptionStatus(profile);
+
+    if (status === 'NIL') {
+      showToast(
+        'This feature requires a UE School subscription. Choose a plan to continue.',
+        'warning', 6000
+      );
+      setTimeout(() => redirectToPricing('not_subscribed'), 1800);
+      return false;
+    }
+
+    if (status === 'EXPIRED') {
+      showToast(
+        'Your subscription has expired. Renew your plan to access this content.',
+        'warning', 6000
+      );
+      setTimeout(() => redirectToPricing('subscription_expired'), 1800);
+      return false;
+    }
+
+    return true; // ACTIVE — all good
+  }
+
+  // ── Nav rendering ───────────────────────────────────────────────
   function renderNavUser(profile) {
     const avatarEl = document.getElementById('nav-avatar');
     const nameEl   = document.getElementById('nav-user-name');
     const xpEl     = document.getElementById('nav-xp');
-    const streakEl = document.getElementById('nav-streak');
 
     const initials = (profile.full_name || 'U')
       .split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -75,14 +188,16 @@ const AUTH_GUARD = (function () {
     if (nameEl)   nameEl.textContent = (profile.full_name || '').split(' ').slice(0, 2).join(' ');
     if (xpEl)     xpEl.textContent   = `${profile.total_xp ?? 0} XP`;
 
-    // Fallback: replace nav-right wholesale on pages without named elements
+    // Fallback: replace nav-right on pages that don't have avatar/name elements
     if (!avatarEl && !nameEl) {
       const rightEl = document.getElementById('nav-right');
       if (!rightEl) return;
       rightEl.innerHTML = `
         <div class="nav-user-pill">
           <div class="nav-avatar" style="position:relative">${initials}${proBadge}</div>
-          <span style="font-weight:700;font-size:.9rem">${(profile.full_name || '').split(' ')[0]}</span>
+          <span style="font-weight:700;font-size:.9rem">
+            ${(profile.full_name || '').split(' ')[0]}
+          </span>
         </div>
         <button class="btn btn-outline btn-sm" onclick="AUTH_GUARD.logout()">Logout</button>
       `;
@@ -95,95 +210,97 @@ const AUTH_GUARD = (function () {
     banner.style.display = subscriptionStatus(profile) === 'EXPIRED' ? 'block' : 'none';
   }
 
-  // ── Logout ────────────────────────────────────────
-
+  // ── Logout ──────────────────────────────────────────────────────
   async function logout() {
     await window.sb.auth.signOut();
-    window.location.href = 'index.html';
+    // Clear the profile cache on logout
+    try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
+    window.location.replace(LOGIN_PAGE);
   }
 
-  // ── Premium gate (for pages that need subscription) ──
-  // Call showPremiumGate(profile) after init() if the page requires premium
-  function showPremiumGate(profile, redirectUrl) {
-    const status = subscriptionStatus(profile);
-    if (status === 'ACTIVE') return true; // all good
-
-    // Show a full-page upgrade prompt instead of the page content
-    document.body.innerHTML = `
-      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;
-                  background:#f0f4ff;padding:24px;font-family:'DM Sans',sans-serif">
-        <div style="background:#fff;border:1.5px solid rgba(59,130,246,.15);border-radius:18px;
-                    padding:48px 40px;max-width:460px;width:100%;text-align:center;
-                    box-shadow:0 8px 40px rgba(26,86,255,.08)">
-          <div style="font-size:3rem;margin-bottom:16px">${status === 'EXPIRED' ? '⏰' : '🔒'}</div>
-          <h2 style="font-family:'Bebas Neue',sans-serif;font-size:2rem;margin-bottom:10px;color:#0f1c3f">
-            ${status === 'EXPIRED' ? 'Subscription Expired' : 'Premium Required'}
-          </h2>
-          <p style="color:#6b7280;line-height:1.7;margin-bottom:28px;font-size:.95rem">
-            ${status === 'EXPIRED'
-              ? 'Your subscription has expired. Renew now to continue accessing all lessons and CBT sessions.'
-              : 'This feature requires a UE School subscription — from just ₦1,500/month.'}
-          </p>
-          <a href="pricing.html" style="display:block;background:#1a56ff;color:#fff;padding:14px 28px;
-             border-radius:10px;font-weight:700;font-size:1rem;text-decoration:none;margin-bottom:12px">
-            ${status === 'EXPIRED' ? 'Renew Subscription' : 'View Plans from ₦1,500/month'}
-          </a>
-          <a href="dashboard.html" style="display:block;color:#6b7280;font-size:.88rem;text-decoration:none">
-            ← Back to Dashboard
-          </a>
-        </div>
-      </div>`;
-    document.documentElement.style.visibility = '';
-    return false;
-  }
-
-  // ── Main init ─────────────────────────────────────
-
+  // ── Main init ────────────────────────────────────────────────────
   async function init() {
-    // Initialise Supabase
-    window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // ── 1. Boot the Supabase client (idempotent) ──────────────────
+    if (!window.sb) {
+      if (!window.supabase) {
+        console.error('[AUTH_GUARD] Supabase SDK not loaded.');
+        redirectToLogin('sdk_missing');
+        return null;
+      }
+      window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    }
 
+    // ── 2. Get the session (SDK handles silent refresh for us) ────
     const session = await getSession();
-    const page    = currentPage();
 
-    // Not logged in on a protected page → redirect to login
-    if (REQUIRES_LOGIN.includes(page) && !session) {
-      window.location.href = 'login.html?next=' + encodeURIComponent(page);
+    if (!session) {
+      // No valid session (refresh failed or never existed)
+      try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
+      redirectToLogin('no_session');
       return null;
     }
 
-    if (session) {
-      // Watch for sign-out events
-      window.sb.auth.onAuthStateChange((event) => {
-        if (event === 'SIGNED_OUT') window.location.href = 'login.html';
-      });
+    // ── 3. Lift the veil (for expired-token path from gatekeeper) ─
+    liftVeil();
 
-      const profile = await getProfile(session.user.id);
-      if (profile) {
-        renderNavUser(profile);
-        renderDefaulterBanner(profile);
-      }
+    // ── 4. Fetch the real profile from Supabase ──────────────────
+    const profile = await getProfile(session.user.id);
 
-      window.UE_SESSION = session;
-      window.UE_PROFILE = profile;
-      window.UE_USER_ID  = session.user.id;
-
-      showPage();
-      return { session, profile };
+    if (!profile) {
+      // Profile missing — could be a brand-new user whose trigger hasn't
+      // fired yet, or a DB error. Redirect to login as safety measure.
+      redirectToLogin('no_profile');
+      return null;
     }
 
-    showPage();
-    return null;
+    // ── 5. Enforce premium gate (authoritative DB-backed check) ───
+    const premiumOk = enforcePremiumGate(profile);
+    if (premiumOk === false) return null; // redirect in progress
+
+    // ── 6. Set up auth-state-change listener ────────────────────
+    window.sb.auth.onAuthStateChange((event, newSession) => {
+      if (event === 'SIGNED_OUT' || (!newSession && event !== 'INITIAL_SESSION')) {
+        try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
+        redirectToLogin('signed_out');
+      }
+      // TOKEN_REFRESHED — update the cached token in UE_USER
+      if (event === 'TOKEN_REFRESHED' && newSession) {
+        if (window.UE_USER) window.UE_USER.access_token = newSession.access_token;
+        window.UE_SESSION = newSession;
+      }
+    });
+
+    // ── 7. Enrich global UE_USER with real profile data ──────────
+    window.UE_USER = {
+      id:           session.user.id,
+      email:        session.user.email,
+      full_name:    profile.full_name,
+      access_token: session.access_token,
+      is_premium:   isPremium(profile),
+      _expired:     false,
+    };
+
+    // Also expose the full objects for other scripts
+    window.UE_SESSION = session;
+    window.UE_PROFILE = profile;
+    window.UE_USER_ID = session.user.id;  // convenience shorthand
+
+    // ── 8. Render UI ─────────────────────────────────────────────
+    renderNavUser(profile);
+    renderDefaulterBanner(profile);
+
+    return { session, profile };
   }
 
+  // ── Public API ──────────────────────────────────────────────────
   return {
     init,
     getSession,
     getProfile,
     logout,
+    showToast,
     subscriptionStatus,
     isPremium,
-    showPremiumGate
   };
 
 })();
