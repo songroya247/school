@@ -76,7 +76,9 @@ body { min-height:100vh; display:flex; align-items:center; justify-content:cente
 
 <div id="toast"></div>
 
+<script src="js/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase.js"></script>
 <script src="js/app.js"></script>
 <script src="js/auth.js"></script>
 
@@ -90,39 +92,61 @@ if (emailParam) {
   document.getElementById('email-display').textContent = decodeURIComponent(emailParam);
 }
 
-// ── Listen for auth state — fires when user clicks email link ──
-window.sb.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' && session) {
-    document.getElementById('state-waiting').style.display   = 'none';
-    document.getElementById('state-confirmed').style.display = 'block';
+// ── CRITICAL: Handle the Supabase email confirmation token ───────────
+// When a user clicks the confirmation link in their email, Supabase
+// redirects them back to confirm.html with one of two formats:
+//
+//   Format A (PKCE):  confirm.html?code=XXXX
+//   Format B (Hash):  confirm.html#access_token=XXX&type=signup
+//
+// The Supabase JS SDK v2 automatically detects and exchanges both.
+// We just need to call getSession() after a short delay to let the
+// SDK parse the URL, OR listen to onAuthStateChange.
+//
+// We also handle the case where the user lands here already signed in
+// (page refresh after confirmation).
 
-    // Create profile (handles the case where profile doesn't exist yet)
+(async () => {
+  // Give the SDK time to detect and exchange the token from the URL
+  await new Promise(r => setTimeout(r, 400));
+
+  const { data: { session } } = await window.sb.auth.getSession();
+  if (session) {
+    showConfirmed();
+    await AUTH.handlePostConfirm();
+  }
+})();
+
+// ── Auth state change listener ──────────────────────────────────────
+// Fires when SDK exchanges the email confirmation token from URL hash
+window.sb.auth.onAuthStateChange(async (event, session) => {
+  if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+    showConfirmed();
     await AUTH.handlePostConfirm();
   }
 });
 
-// ── Also check if already confirmed on page load ──
-(async () => {
-  const { data: { session } } = await window.sb.auth.getSession();
-  if (session) {
-    document.getElementById('state-waiting').style.display   = 'none';
-    document.getElementById('state-confirmed').style.display = 'block';
-    await AUTH.handlePostConfirm();
-  }
-})();
+function showConfirmed() {
+  const waiting   = document.getElementById('state-waiting');
+  const confirmed = document.getElementById('state-confirmed');
+  if (waiting)   waiting.style.display   = 'none';
+  if (confirmed) confirmed.style.display = 'block';
+}
 
 // ── Resend confirmation ──
 let resendCooldown = 0;
 
 async function resendConfirmation() {
   if (resendCooldown > 0) return;
-  const email = emailParam ? decodeURIComponent(emailParam) : prompt('Enter your email address:');
+  const email = emailParam
+    ? decodeURIComponent(emailParam)
+    : prompt('Enter your email address:');
   if (!email) return;
 
   const { error } = await window.sb.auth.resend({ type: 'signup', email });
   if (error) { toast('Error: ' + error.message); return; }
 
-  toast('Confirmation email resent! Check your inbox.');
+  toast('Confirmation email resent! Check your inbox and spam folder.');
   startCooldown(60);
 }
 
