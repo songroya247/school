@@ -265,24 +265,34 @@
 
 <div id="toast"></div>
 
+<!--
+  SCRIPT LOAD ORDER â€” do not reorder:
+  1. config.js    â€” window.UE_CONFIG (URL + anon key, no hardcoding)
+  2. supabase CDN â€” SDK must load before shim
+  3. supabase.js  â€” sets window.sb using UE_CONFIG
+  4. Paystack CDN â€” payment popup library
+  5. app.js       â€” utilities
+  6. auth-guard.js
+  7. payment.js   â€” PAYMENT module
+-->
+<script src="js/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<!-- Paystack inline JS -->
+<script src="js/supabase.js"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script src="js/app.js"></script>
 <script src="js/auth-guard.js"></script>
 <script src="js/payment.js"></script>
 
 <script>
-window.sb = window.supabase.createClient(
-  'https://hazwqyvnolgdkokehjhr.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhendxeXZub2xnZGtva2VoamhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDUwNzYsImV4cCI6MjA5MTY4MTA3Nn0.V7TsNcfpib2HtJRjTASyJPavQ8qUR2R4KXYuWdZB4gE'
-);
+// window.sb is set by supabase.js shim â€” no credentials here
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Render pricing cards
+  // â”€â”€ Render tiered pricing cards (Basic / Pro / Elite) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // PAYMENT.renderPricingSection reads plan definitions from payment.js
+  // so features are always in sync â€” no separate HTML to maintain.
   PAYMENT.renderPricingSection('pricing-grid');
 
-  // Check auth state
+  // â”€â”€ Auth-aware UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const { data: { session } } = await window.sb.auth.getSession();
 
   const banner   = document.getElementById('auth-state-banner');
@@ -290,26 +300,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   const navRight = document.getElementById('nav-right');
 
   if (session) {
-    // Logged in â€” update nav + banner
     const { data: profile } = await window.sb
       .from('profiles')
-      .select('full_name, is_premium, subscription_expiry, total_xp')
+      .select('full_name, is_premium, subscription_expiry')
       .eq('id', session.user.id)
       .single();
 
+    // â”€â”€ Nav: show user pill + dashboard link â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (navRight) {
-      const initials = (profile?.full_name || 'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      const initials  = (profile?.full_name || 'U')
+        .split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const firstName = (profile?.full_name || '').split(' ')[0];
       navRight.innerHTML = `
         <div class="nav-user-pill">
           <div class="nav-avatar">${initials}</div>
-          <span style="font-weight:700;font-size:.9rem">${(profile?.full_name||'').split(' ')[0]}</span>
+          <span style="font-weight:700;font-size:.9rem">${firstName}</span>
         </div>
         <a href="dashboard.html" class="btn btn-outline btn-sm">Dashboard</a>
-        <button class="btn btn-outline btn-sm" onclick="window.sb.auth.signOut().then(()=>location.reload())">Logout</button>
+        <button class="btn btn-outline btn-sm"
+          onclick="window.sb.auth.signOut().then(()=>location.reload())">Logout</button>
       `;
     }
 
-    // Show subscription status in banner
+    // â”€â”€ Auth-state banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const isPremium = profile?.is_premium;
     const expiry    = profile?.subscription_expiry ? new Date(profile.subscription_expiry) : null;
     const isActive  = isPremium && expiry && expiry > new Date();
@@ -317,42 +330,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (isActive) {
       const daysLeft = Math.ceil((expiry - new Date()) / 86400000);
-      banner.style.background = '#d1fae5';
-      banner.style.borderColor = '#6ee7b7';
-      bannerTx.innerHTML = `
-        âœ… <strong>Your subscription is active</strong> â€” ${daysLeft} day${daysLeft!==1?'s':''} remaining.
-        <a href="dashboard.html">Go to Dashboard â†’</a>
-      `;
-      bannerTx.style.color = '#065f46';
-      // Mark current plan button
-      markCurrentPlan(expiry, daysLeft);
+      banner.style.background   = '#d1fae5';
+      banner.style.borderColor  = '#6ee7b7';
+      bannerTx.style.color      = '#065f46';
+      bannerTx.innerHTML = `âœ… <strong>Your subscription is active</strong> â€” ${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining. <a href="dashboard.html">Go to Dashboard â†’</a>`;
+      markCurrentPlan(daysLeft);
     } else if (isExpired) {
-      banner.style.background = '#fee2e2';
-      banner.style.borderColor = '#fca5a5';
-      bannerTx.innerHTML = `âš ï¸ Your subscription expired. Renew below to restore full access.`;
-      bannerTx.style.color = '#991b1b';
+      banner.style.background   = '#fee2e2';
+      banner.style.borderColor  = '#fca5a5';
+      bannerTx.style.color      = '#991b1b';
+      bannerTx.innerHTML = `âš ï¸ Your subscription expired. Renew a plan below to restore full access.`;
     } else {
-      bannerTx.innerHTML = `ðŸ‘‹ Welcome, ${(profile?.full_name||'').split(' ')[0]}! Subscribe below to unlock full access.`;
-      bannerTx.style.color = '#1e40af';
+      const firstName = (profile?.full_name || '').split(' ')[0];
+      bannerTx.innerHTML = `ðŸ‘‹ Welcome back, ${firstName}! Subscribe below to unlock full access.`;
     }
 
-    // Auto-open checkout if redirected from index with a plan selected
     PAYMENT.checkPendingPlan();
 
   } else {
-    // Not logged in
     bannerTx.innerHTML = `ðŸ”’ <a href="login.html">Sign in</a> or <a href="login.html">create a free account</a> to subscribe.`;
   }
+  // Defaulter banner is intentionally absent on pricing.html
 });
 
-function markCurrentPlan(expiry, daysLeft) {
-  // Try to infer which plan they're on from days remaining
-  const plan = daysLeft > 180 ? 'annual' : daysLeft > 60 ? 'quarterly' : 'monthly';
-  const btn  = document.querySelector(`[data-plan="${plan}"]`);
+function markCurrentPlan(daysLeft) {
+  const planKey = daysLeft > 180 ? 'annual' : daysLeft > 60 ? 'quarterly' : 'monthly';
+  const btn = document.querySelector(`[data-plan="${planKey}"]`);
   if (btn) {
     btn.textContent = 'âœ“ Current Plan';
-    btn.disabled = true;
-    btn.style.opacity = '.7';
+    btn.disabled    = true;
+    btn.style.opacity = '.65';
   }
 }
 </script>
