@@ -41,9 +41,9 @@
   --warning:      #f59e0b;
   --danger:       #ef4444;
 
-  --font-head:    'Syne', sans-serif;
-  --font-body:    'DM Sans', sans-serif;
-  --font-mono:    'JetBrains Mono', monospace;
+  --font-head:    'Syne', "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  --font-body:    'DM Sans', "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  --font-mono:    'JetBrains Mono', "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", monospace;
 
   --radius-sm:    8px;
   --radius:       14px;
@@ -133,7 +133,7 @@ a { text-decoration: none; color: inherit; }
   gap: 0;
 }
 .nav-logo {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: .06em;
@@ -278,7 +278,7 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
 .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px 24px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 2px 12px rgba(26,86,255,.06); }
 .score-card::before { content: ''; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); width: 180px; height: 180px; background: radial-gradient(circle, rgba(26,86,255,.08) 0%, transparent 70%); pointer-events: none; }
 .score-label { font-size: .7rem; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px; }
-.score-value { font-family: 'Inter', sans-serif; font-size: 3rem; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 4px; letter-spacing: -.03em; }
+.score-value { font-family: 'Inter', "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 3rem; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 4px; letter-spacing: -.03em; }
 .score-denom { font-size: 1.2rem; color: var(--text-3); font-weight: 400; font-family: var(--font-mono); }
 .score-progress-wrap { width: 100%; max-width: 180px; margin: 16px auto 12px; }
 .progress-track { height: 6px; background: rgba(255,255,255,.08); border-radius: 100px; overflow: hidden; }
