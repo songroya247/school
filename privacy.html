@@ -3,274 +3,148 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Policy — UE School</title>
-<meta name="description" content="UE School Privacy Policy — how we collect, use, and protect your personal data.">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<title>Set New Password — UE School</title>
 <link rel="stylesheet" href="css/main.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
-
-
-
 <style>
-  .legal-hero {
-    background: linear-gradient(135deg, #0a0f1e 0%, #111827 100%);
-    padding: 80px 0 60px;
-    text-align: center;
-  }
-  .legal-hero h1 {
-    font-family: var(--font-head);
-    font-size: clamp(2.4rem, 6vw, 4rem);
-    color: #fff;
-    margin-bottom: 16px;
-  }
-  .legal-hero .meta {
-    color: rgba(255,255,255,.45);
-    font-size: .88rem;
-  }
-  .legal-body { padding: 72px 0; }
-  .legal-body .container { max-width: 760px; }
-  .legal-body h2 {
-    font-family: var(--font-head);
-    font-size: 1.7rem;
-    margin: 48px 0 14px;
-    color: var(--text);
-  }
-  .legal-body h2:first-child { margin-top: 0; }
-  .legal-body h3 {
-    font-size: 1.05rem;
-    font-weight: 700;
-    margin: 24px 0 10px;
-  }
-  .legal-body p, .legal-body li {
-    color: var(--muted);
-    line-height: 1.85;
-    font-size: .96rem;
-  }
-  .legal-body ul { padding-left: 20px; margin: 12px 0 20px; }
-  .legal-body li { margin-bottom: 8px; }
-  .legal-toc {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    padding: 24px 28px;
-    margin-bottom: 48px;
-  }
-  .legal-toc h3 { margin: 0 0 14px; font-size: .85rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-  .legal-toc ol { padding-left: 18px; margin: 0; }
-  .legal-toc li { margin-bottom: 6px; }
-  .legal-toc a { color: var(--accent); text-decoration: none; font-size: .9rem; font-weight: 600; }
-  .legal-toc a:hover { text-decoration: underline; }
-  .legal-highlight {
-    background: var(--surface);
-    border-left: 4px solid var(--accent);
-    border-radius: 0 10px 10px 0;
-    padding: 16px 20px;
-    margin: 20px 0;
-    font-size: .92rem;
-    color: var(--text);
-    line-height: 1.7;
-  }
+body { min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--bg); padding:24px; }
+.auth-card {
+  background:var(--surface); border:1.5px solid var(--border); border-radius:18px;
+  box-shadow:var(--shadow-lg); max-width:460px; width:100%; padding:40px;
+}
+.auth-logo { font-family:var(--font-head); font-size:1.6rem; color:var(--accent); letter-spacing:.07em; display:block; text-align:center; margin-bottom:28px; }
+#auth-error { display:none; background:#fee2e2; color:#991b1b; padding:12px 16px; border-radius:8px; font-size:.88rem; font-weight:600; margin-bottom:16px; border:1px solid #fca5a5; }
+.spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; margin-right:6px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.password-wrap { position:relative; }
+.password-wrap .form-input { padding-right:44px; }
+.pw-toggle { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:1.1rem; color:var(--muted); padding:0; line-height:1; }
+.strength-bar { height:3px; border-radius:999px; margin-top:6px; transition:all .3s; }
+.strength-weak   { background:#ef4444; width:30%; }
+.strength-fair   { background:#f59e0b; width:60%; }
+.strength-strong { background:#22c55e; width:100%; }
+
+#state-invalid { display:none; text-align:center; }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="ue-nav">
-  <div class="container">
-    <a href="index.html" class="nav-logo">UE School</a>
-    <div class="nav-links">
-      <a href="classroom.html">Classroom</a>
-      <a href="cbt.html">Practice (CBT)</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="pricing.html">Pricing</a>
-    </div>
-    <button class="nav-hamburger" id="nav-toggle" aria-label="Toggle menu"
-            onclick="this.closest('.ue-nav').classList.toggle('nav-mobile-open')">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="nav-right" id="nav-right-public">
-      <a href="login.html" class="btn btn-primary" id="nav-login-btn">Login / Sign Up</a>
-    </div>
-  </div>
-</nav>
+<div style="display:flex;flex-direction:column;align-items:center;width:100%">
+  <a href="index.html" class="auth-logo">UE School</a>
 
-<!-- HERO -->
-<div class="legal-hero">
-  <div class="container">
-    <h1>Privacy Policy</h1>
-    <div class="meta">Last updated: April 2026</div>
+  <div class="auth-card">
+    <div id="auth-error"></div>
+
+    <!-- Checking token state -->
+    <div id="state-checking" style="text-align:center;padding:24px 0">
+      <div style="font-size:2rem;margin-bottom:12px">🔐</div>
+      <p style="color:var(--muted)">Verifying your reset link…</p>
+    </div>
+
+    <!-- Reset form -->
+    <div id="reset-form" style="display:none">
+      <h2 style="font-family:var(--font-head);font-size:1.9rem;margin-bottom:6px">Set New Password</h2>
+      <p style="font-size:.88rem;color:var(--muted);margin-bottom:24px">
+        Choose a strong password for your account.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <div class="password-wrap">
+          <input type="password" class="form-input" placeholder="Min. 8 characters"
+                 id="new-pass" autocomplete="new-password" oninput="checkStrength(this.value)">
+          <button type="button" class="pw-toggle" onclick="togglePw('new-pass',this)">👁</button>
+        </div>
+        <div class="strength-bar" id="strength-bar" style="display:none"></div>
+        <div class="form-hint" id="strength-label"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirm New Password</label>
+        <div class="password-wrap">
+          <input type="password" class="form-input" placeholder="Repeat password"
+                 id="new-pass2" autocomplete="new-password">
+          <button type="button" class="pw-toggle" onclick="togglePw('new-pass2',this)">👁</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-block btn-lg" id="btn-reset" onclick="doReset()">
+        Set New Password
+      </button>
+    </div>
+
+    <!-- Invalid/expired link -->
+    <div id="state-invalid">
+      <div style="font-size:3rem;margin-bottom:16px">⚠️</div>
+      <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:12px">Link Expired</h2>
+      <p style="font-size:.92rem;color:var(--muted);line-height:1.7;margin-bottom:24px">
+        This password reset link has expired or is invalid.<br>
+        Please request a new one.
+      </p>
+      <a href="forgot-password.html" class="btn btn-primary btn-block">Request New Link</a>
+    </div>
   </div>
 </div>
-
-<!-- BODY -->
-<div class="legal-body">
-  <div class="container">
-
-    <div class="legal-toc">
-      <h3>Contents</h3>
-      <ol>
-        <li><a href="#who-we-are">Who We Are</a></li>
-        <li><a href="#data-we-collect">Data We Collect</a></li>
-        <li><a href="#how-we-use">How We Use Your Data</a></li>
-        <li><a href="#data-sharing">Data Sharing</a></li>
-        <li><a href="#data-security">Data Security</a></li>
-        <li><a href="#your-rights">Your Rights</a></li>
-        <li><a href="#cookies">Cookies</a></li>
-        <li><a href="#minors">Children &amp; Minors</a></li>
-        <li><a href="#changes">Changes to This Policy</a></li>
-        <li><a href="#contact-privacy">Contact Us</a></li>
-      </ol>
-    </div>
-
-    <div class="legal-highlight">
-      We respect your privacy. We do not sell your personal data to third parties. Ever.
-    </div>
-
-    <h2 id="who-we-are">1. Who We Are</h2>
-    <p>UE School ("we", "us", "our") is an online exam preparation platform serving Nigerian secondary and post-secondary students. This Privacy Policy explains how we collect, use, and protect the personal information you provide when you use our website and platform at <strong>ueschool.ng</strong>.</p>
-
-    <h2 id="data-we-collect">2. Data We Collect</h2>
-    <h3>Information you provide</h3>
-    <ul>
-      <li><strong>Account data</strong> — your full name, email address, and password (stored as a secure hash via Supabase Auth).</li>
-      <li><strong>Academic profile</strong> — the exams you are sitting, your target score, preferred subjects, and exam date. You provide this during sign-up and may update it at any time.</li>
-      <li><strong>Payment data</strong> — when you subscribe, payment is processed by Paystack. We receive only a transaction reference and your plan status. We never store card details.</li>
-      <li><strong>Support communications</strong> — messages you send us via email or the contact form.</li>
-    </ul>
-    <h3>Data we collect automatically</h3>
-    <ul>
-      <li><strong>Usage data</strong> — which topics you practise, CBT session scores, time spent, streak data, and XP accumulated. This data is central to how our adaptive engine works.</li>
-      <li><strong>Device &amp; browser data</strong> — browser type, operating system, screen size, and approximate location (country/region level only) collected via server logs.</li>
-      <li><strong>Cookies &amp; local storage</strong> — for authentication sessions and user preferences. See the <a href="#cookies">Cookies</a> section below.</li>
-    </ul>
-
-    <h2 id="how-we-use">3. How We Use Your Data</h2>
-    <ul>
-      <li>To create and manage your account and verify your identity.</li>
-      <li>To personalise your study experience — tracking gaps, surfacing weak topics, and adjusting difficulty via SmartPath™.</li>
-      <li>To process subscription payments and send receipts.</li>
-      <li>To send you important service emails (password resets, billing confirmations). We do not send unsolicited marketing emails without your consent.</li>
-      <li>To improve the platform — aggregated, anonymised usage data helps us identify the questions most students struggle with.</li>
-      <li>To comply with applicable Nigerian data protection regulations (NDPR).</li>
-    </ul>
-
-    <h2 id="data-sharing">4. Data Sharing</h2>
-    <p>We share personal data only in these limited circumstances:</p>
-    <ul>
-      <li><strong>Supabase</strong> — our database and authentication provider. Data is stored on servers located within GDPR-compliant regions.</li>
-      <li><strong>Paystack</strong> — payment processing. Governed by Paystack's own Privacy Policy.</li>
-      <li><strong>Legal obligation</strong> — if required by Nigerian law or a valid court order.</li>
-    </ul>
-    <p>We do <strong>not</strong> sell, rent, or trade your personal data to advertisers, data brokers, or any other third parties.</p>
-
-    <h2 id="data-security">5. Data Security</h2>
-    <p>We take reasonable technical and organisational steps to protect your data:</p>
-    <ul>
-      <li>All data is transmitted over HTTPS (TLS 1.2+).</li>
-      <li>Passwords are hashed and salted by Supabase Auth — we cannot read your password.</li>
-      <li>Access to the production database is restricted to authorised staff only.</li>
-    </ul>
-    <p>No system is 100% secure. If you believe your account has been compromised, please <a href="contact.html" style="color:var(--accent);font-weight:600;">contact us</a> immediately.</p>
-
-    <h2 id="your-rights">6. Your Rights</h2>
-    <p>Under the Nigeria Data Protection Regulation (NDPR) and applicable law, you have the right to:</p>
-    <ul>
-      <li>Access the personal data we hold about you.</li>
-      <li>Correct inaccurate data.</li>
-      <li>Request deletion of your account and associated data.</li>
-      <li>Withdraw consent where processing is based on consent.</li>
-      <li>Lodge a complaint with the Nigeria Data Protection Bureau (NDPB).</li>
-    </ul>
-    <p>To exercise any of these rights, visit our <a href="contact.html" style="color:var(--accent);font-weight:600;">Contact page</a> with "Data Request" in the subject line. We will respond within 30 days.</p>
-
-    <h2 id="cookies">7. Cookies</h2>
-    <p>We use strictly necessary cookies and browser local storage to keep you logged in and remember your preferences. We do not use advertising or third-party tracking cookies. You can clear cookies via your browser settings at any time; doing so will log you out.</p>
-
-    <h2 id="minors">8. Children &amp; Minors</h2>
-    <p>Our platform is primarily used by students aged 14–20. We do not knowingly collect data from children under 13. If a parent or guardian believes their child under 13 has registered, please <a href="contact.html" style="color:var(--accent);font-weight:600;">contact us</a> and we will promptly delete the account.</p>
-
-    <h2 id="changes">9. Changes to This Policy</h2>
-    <p>We may update this Privacy Policy from time to time. When we do, we will revise the "Last updated" date at the top of this page. Significant changes will be communicated via email to registered users.</p>
-
-    <h2 id="contact-privacy">10. Contact Us</h2>
-    <p>For any privacy-related questions, please visit our <a href="contact.html" style="color:var(--accent);font-weight:600;">Contact page</a>.</p>
-
-  </div>
-</div>
-
-<!-- FOOTER -->
-<footer class="site-footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div>
-        <div class="footer-logo">UE School</div>
-        <div class="footer-tagline">The cockpit for your exam preparation. Pass your JAMB, WAEC, and NECO exams with confidence.</div>
-      </div>
-      <div>
-        <div class="footer-heading">Platform</div>
-        <ul class="footer-links">
-          <li><a href="classroom.html">Classroom</a></li>
-          <li><a href="cbt.html">Practice CBT</a></li>
-          <li><a href="dashboard.html">Dashboard</a></li>
-          <li><a href="pricing.html">Pricing</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="footer-heading">Company</div>
-        <ul class="footer-links">
-          <li><a href="about.html">About Us</a></li>
-          <li><a href="contact.html">Contact Us</a></li>
-          <li><a href="terms.html">Terms of Service</a></li>
-          <li><a href="privacy.html">Privacy Policy</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-divider">&copy; 2026 UE School. All rights reserved.</div>
-  </div>
-</footer>
 
 <div id="toast"></div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-      const nav = document.querySelector('.ue-nav');
-      nav && nav.classList.remove('nav-mobile-open');
-      const btn = document.getElementById('nav-toggle');
-      btn && btn.setAttribute('aria-expanded', 'false');
-    });
-  });
-});
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/app.js"></script>
+<script src="js/auth.js"></script>
 
 <script>
-// Auth-aware nav for public pages
-(async function() {
-  try {
-    // sb/SB is set by js/supabase.js shim — credentials live only in js/config.js
-const SB = window.sb;
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      const navRight = document.getElementById('nav-right-public');
-      if (navRight) {
-        const { data: p } = await sb.from('profiles').select('full_name,total_xp').eq('id', session.user.id).single();
-        const initials = (p?.full_name || 'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-        navRight.innerHTML = `
-          <div class="nav-user-pill" style="display:flex;align-items:center;gap:10px;background:var(--bg);border:1.5px solid var(--border2);border-radius:999px;padding:4px 14px 4px 4px">
-            <div class="nav-avatar" style="width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem">${initials}</div>
-            <span style="font-weight:700;font-size:.9rem">${(p?.full_name||'').split(' ')[0]}</span>
-            <span style="font-size:.78rem;color:var(--muted)">${p?.total_xp||0} XP</span>
-          </div>
-          <a href="dashboard.html" class="btn btn-primary" style="margin-left:8px">Dashboard</a>
-          <button class="btn btn-outline btn-sm" onclick="(window.sb||window.supabase.createClient(window.UE_CONFIG.SUPABASE_URL,window.UE_CONFIG.SUPABASE_ANON)).auth.signOut().then(()=>location.reload())" style="margin-left:4px">Logout</button>
-        `;
-      }
-    }
-  } catch(e) {}
-})();
+// window.sb is set by js/supabase.js — credentials live only in js/config.js
+
+// Supabase puts the recovery token in the URL hash when redirecting here.
+// The SDK handles it via onAuthStateChange with 'PASSWORD_RECOVERY'.
+window.sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    // Token valid — show the form
+    document.getElementById('state-checking').style.display = 'none';
+    document.getElementById('reset-form').style.display     = 'block';
+  }
+});
+
+// If no recovery event fires within 3 seconds, show invalid state
+setTimeout(() => {
+  if (document.getElementById('state-checking').style.display !== 'none') {
+    document.getElementById('state-checking').style.display = 'none';
+    document.getElementById('state-invalid').style.display  = 'block';
+  }
+}, 3000);
+
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type  = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+function checkStrength(pw) {
+  const bar   = document.getElementById('strength-bar');
+  const label = document.getElementById('strength-label');
+  bar.style.display = pw.length ? 'block' : 'none';
+  if (pw.length < 6)        { bar.className = 'strength-bar strength-weak';   label.textContent = 'Weak'; label.style.color = '#ef4444'; }
+  else if (pw.length < 10)  { bar.className = 'strength-bar strength-fair';   label.textContent = 'Fair'; label.style.color = '#f59e0b'; }
+  else                      { bar.className = 'strength-bar strength-strong'; label.textContent = 'Strong ✓'; label.style.color = '#22c55e'; }
+}
+
+async function doReset() {
+  const pass  = document.getElementById('new-pass').value;
+  const pass2 = document.getElementById('new-pass2').value;
+  const err   = document.getElementById('auth-error');
+
+  if (pass.length < 8) {
+    err.textContent = 'Password must be at least 8 characters.';
+    err.style.display = 'block'; return;
+  }
+  if (pass !== pass2) {
+    err.textContent = 'Passwords do not match.';
+    err.style.display = 'block'; return;
+  }
+  err.style.display = 'none';
+  await AUTH.handleResetPassword(pass);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doReset(); });
 </script>
 </body>
 </html>
