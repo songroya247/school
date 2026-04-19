@@ -3,260 +3,227 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Plans & Pricing â€” UE School</title>
+<title>Privacy Policy — UE School</title>
+<meta name="description" content="UE School Privacy Policy — how we collect, use, and protect your personal data.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+
+
+
 <style>
-.pricing-wrap {
-  min-height: 100vh;
-  background: var(--bg);
-}
-.pricing-hero {
-  background: linear-gradient(135deg, #0f1c3f 0%, #1a3a8f 100%);
-  padding: 72px 0 56px;
-  text-align: center;
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-}
-.pricing-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-}
-.pricing-hero h1 {
-  font-family: var(--font-head);
-  font-size: clamp(2rem, 6vw, 3.2rem);
-  margin-bottom: 14px;
-  position: relative;
-}
-.pricing-hero p {
-  font-size: 1.05rem;
-  color: rgba(255,255,255,.7);
-  max-width: 480px;
-  margin: 0 auto;
-  line-height: 1.6;
-  position: relative;
-}
-
-.pricing-section {
-  padding: 60px 0 80px;
-}
-
-.pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  max-width: 920px;
-  margin: 0 auto;
-}
-.pricing-card {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 16px;
-  padding: 36px;
-  position: relative;
-}
-.pricing-card.featured {
-  border-color: var(--accent);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-6px);
-}
-.pricing-badge {
-  position: absolute;
-  top: -14px; left: 50%;
-  transform: translateX(-50%);
-  background: var(--accent);
-  color: #fff;
-  font-size: .72rem;
-  font-weight: 700;
-  padding: 4px 16px;
-  border-radius: 999px;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  white-space: nowrap;
-}
-.pricing-price {
-  font-family: var(--font-head);
-  font-size: 2.6rem;
-  margin: 8px 0 4px;
-}
-.pricing-save { color: var(--accent2); font-size: .85rem; font-weight: 700; margin-bottom: 20px; }
-.pricing-features { list-style: none; margin-bottom: 28px; }
-.pricing-features li { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: .9rem; }
-.pricing-check { color: var(--accent2); }
-
-/* Current plan badge */
-.current-plan-badge {
-  display: none;
-  background: #d1fae5;
-  color: #065f46;
-  font-size: .75rem;
-  font-weight: 700;
-  padding: 4px 14px;
-  border-radius: 999px;
-  text-align: center;
-  margin-bottom: 12px;
-}
-
-/* Auth state banner */
-#auth-state-banner {
-  text-align: center;
-  padding: 16px 24px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 12px;
-  margin-bottom: 40px;
-  font-size: .92rem;
-  color: #1e40af;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-#auth-state-banner a { color: var(--accent); font-weight: 700; }
-
-/* FAQ */
-.faq-section { background: rgba(240,244,255,.5); padding: 60px 0; }
-.faq-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; max-width: 860px; margin: 0 auto; }
-.faq-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 24px; }
-.faq-q { font-weight: 700; margin-bottom: 8px; font-size: .95rem; }
-.faq-a { font-size: .88rem; color: var(--muted); line-height: 1.6; }
-
-/* Guarantee */
-.guarantee-strip {
-  background: linear-gradient(135deg, #1a56ff, #6366f1);
-  color: #fff;
-  text-align: center;
-  padding: 48px 24px;
-}
-
-@media (max-width: 768px) {
-  .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
-  .pricing-card.featured { transform: none; }
-  .faq-grid { grid-template-columns: 1fr; }
-}
+  .legal-hero {
+    background: linear-gradient(135deg, #0a0f1e 0%, #111827 100%);
+    padding: 80px 0 60px;
+    text-align: center;
+  }
+  .legal-hero h1 {
+    font-family: var(--font-head);
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    color: #fff;
+    margin-bottom: 16px;
+  }
+  .legal-hero .meta {
+    color: rgba(255,255,255,.45);
+    font-size: .88rem;
+  }
+  .legal-body { padding: 72px 0; }
+  .legal-body .container { max-width: 760px; }
+  .legal-body h2 {
+    font-family: var(--font-head);
+    font-size: 1.7rem;
+    margin: 48px 0 14px;
+    color: var(--text);
+  }
+  .legal-body h2:first-child { margin-top: 0; }
+  .legal-body h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 24px 0 10px;
+  }
+  .legal-body p, .legal-body li {
+    color: var(--muted);
+    line-height: 1.85;
+    font-size: .96rem;
+  }
+  .legal-body ul { padding-left: 20px; margin: 12px 0 20px; }
+  .legal-body li { margin-bottom: 8px; }
+  .legal-toc {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 48px;
+  }
+  .legal-toc h3 { margin: 0 0 14px; font-size: .85rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .legal-toc ol { padding-left: 18px; margin: 0; }
+  .legal-toc li { margin-bottom: 6px; }
+  .legal-toc a { color: var(--accent); text-decoration: none; font-size: .9rem; font-weight: 600; }
+  .legal-toc a:hover { text-decoration: underline; }
+  .legal-highlight {
+    background: var(--surface);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: .92rem;
+    color: var(--text);
+    line-height: 1.7;
+  }
 </style>
 </head>
-<body class="pricing-wrap">
+<body>
 
+<!-- NAV -->
 <nav class="ue-nav">
   <div class="container">
     <a href="index.html" class="nav-logo">UE School</a>
     <div class="nav-links">
-      <a href="dashboard.html">Dashboard</a>
       <a href="classroom.html">Classroom</a>
-      <a href="cbt.html">Practice</a>
+      <a href="cbt.html">Practice (CBT)</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="pricing.html">Pricing</a>
     </div>
-    <div class="nav-right" id="nav-right">
+    <button class="nav-hamburger" id="nav-toggle" aria-label="Toggle menu"
+            onclick="this.closest('.ue-nav').classList.toggle('nav-mobile-open')">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-right" id="nav-right-public">
       <a href="login.html" class="btn btn-primary" id="nav-login-btn">Login / Sign Up</a>
     </div>
   </div>
 </nav>
 
-<!-- Hero -->
-<div class="pricing-hero">
+<!-- HERO -->
+<div class="legal-hero">
   <div class="container">
-    <h1>Invest in Your Future</h1>
-    <p>Less than the cost of a data bundle. Cancel anytime. No hidden fees.</p>
+    <h1>Privacy Policy</h1>
+    <div class="meta">Last updated: April 2026</div>
   </div>
 </div>
 
-<!-- Pricing cards -->
-<section class="pricing-section">
+<!-- BODY -->
+<div class="legal-body">
   <div class="container">
 
-    <div id="auth-state-banner">
-      <span id="auth-banner-text">
-        ðŸ”’ <a href="login.html">Sign in</a> to subscribe, or <a href="login.html">create a free account</a> to get started.
-      </span>
+    <div class="legal-toc">
+      <h3>Contents</h3>
+      <ol>
+        <li><a href="#who-we-are">Who We Are</a></li>
+        <li><a href="#data-we-collect">Data We Collect</a></li>
+        <li><a href="#how-we-use">How We Use Your Data</a></li>
+        <li><a href="#data-sharing">Data Sharing</a></li>
+        <li><a href="#data-security">Data Security</a></li>
+        <li><a href="#your-rights">Your Rights</a></li>
+        <li><a href="#cookies">Cookies</a></li>
+        <li><a href="#minors">Children &amp; Minors</a></li>
+        <li><a href="#changes">Changes to This Policy</a></li>
+        <li><a href="#contact-privacy">Contact Us</a></li>
+      </ol>
     </div>
 
-    <div class="pricing-grid" id="pricing-grid">
-      <!-- Populated by PAYMENT.renderPricingSection() -->
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">
-        Loading plansâ€¦
-      </div>
+    <div class="legal-highlight">
+      We respect your privacy. We do not sell your personal data to third parties. Ever.
     </div>
 
-    <p style="text-align:center;margin-top:28px;font-size:.82rem;color:var(--muted)">
-      ðŸ”’ Secured by Paystack &nbsp;Â·&nbsp; â‚¦ NGN &nbsp;Â·&nbsp; Instant activation after payment
-    </p>
+    <h2 id="who-we-are">1. Who We Are</h2>
+    <p>UE School ("we", "us", "our") is an online exam preparation platform serving Nigerian secondary and post-secondary students. This Privacy Policy explains how we collect, use, and protect the personal information you provide when you use our website and platform at <strong>ueschool.ng</strong>.</p>
+
+    <h2 id="data-we-collect">2. Data We Collect</h2>
+    <h3>Information you provide</h3>
+    <ul>
+      <li><strong>Account data</strong> — your full name, email address, and password (stored as a secure hash via Supabase Auth).</li>
+      <li><strong>Academic profile</strong> — the exams you are sitting, your target score, preferred subjects, and exam date. You provide this during sign-up and may update it at any time.</li>
+      <li><strong>Payment data</strong> — when you subscribe, payment is processed by Paystack. We receive only a transaction reference and your plan status. We never store card details.</li>
+      <li><strong>Support communications</strong> — messages you send us via email or the contact form.</li>
+    </ul>
+    <h3>Data we collect automatically</h3>
+    <ul>
+      <li><strong>Usage data</strong> — which topics you practise, CBT session scores, time spent, streak data, and XP accumulated. This data is central to how our adaptive engine works.</li>
+      <li><strong>Device &amp; browser data</strong> — browser type, operating system, screen size, and approximate location (country/region level only) collected via server logs.</li>
+      <li><strong>Cookies &amp; local storage</strong> — for authentication sessions and user preferences. See the <a href="#cookies">Cookies</a> section below.</li>
+    </ul>
+
+    <h2 id="how-we-use">3. How We Use Your Data</h2>
+    <ul>
+      <li>To create and manage your account and verify your identity.</li>
+      <li>To personalise your study experience — tracking gaps, surfacing weak topics, and adjusting difficulty via SmartPath™.</li>
+      <li>To process subscription payments and send receipts.</li>
+      <li>To send you important service emails (password resets, billing confirmations). We do not send unsolicited marketing emails without your consent.</li>
+      <li>To improve the platform — aggregated, anonymised usage data helps us identify the questions most students struggle with.</li>
+      <li>To comply with applicable Nigerian data protection regulations (NDPR).</li>
+    </ul>
+
+    <h2 id="data-sharing">4. Data Sharing</h2>
+    <p>We share personal data only in these limited circumstances:</p>
+    <ul>
+      <li><strong>Supabase</strong> — our database and authentication provider. Data is stored on servers located within GDPR-compliant regions.</li>
+      <li><strong>Paystack</strong> — payment processing. Governed by Paystack's own Privacy Policy.</li>
+      <li><strong>Legal obligation</strong> — if required by Nigerian law or a valid court order.</li>
+    </ul>
+    <p>We do <strong>not</strong> sell, rent, or trade your personal data to advertisers, data brokers, or any other third parties.</p>
+
+    <h2 id="data-security">5. Data Security</h2>
+    <p>We take reasonable technical and organisational steps to protect your data:</p>
+    <ul>
+      <li>All data is transmitted over HTTPS (TLS 1.2+).</li>
+      <li>Passwords are hashed and salted by Supabase Auth — we cannot read your password.</li>
+      <li>Access to the production database is restricted to authorised staff only.</li>
+    </ul>
+    <p>No system is 100% secure. If you believe your account has been compromised, please <a href="contact.html" style="color:var(--accent);font-weight:600;">contact us</a> immediately.</p>
+
+    <h2 id="your-rights">6. Your Rights</h2>
+    <p>Under the Nigeria Data Protection Regulation (NDPR) and applicable law, you have the right to:</p>
+    <ul>
+      <li>Access the personal data we hold about you.</li>
+      <li>Correct inaccurate data.</li>
+      <li>Request deletion of your account and associated data.</li>
+      <li>Withdraw consent where processing is based on consent.</li>
+      <li>Lodge a complaint with the Nigeria Data Protection Bureau (NDPB).</li>
+    </ul>
+    <p>To exercise any of these rights, visit our <a href="contact.html" style="color:var(--accent);font-weight:600;">Contact page</a> with "Data Request" in the subject line. We will respond within 30 days.</p>
+
+    <h2 id="cookies">7. Cookies</h2>
+    <p>We use strictly necessary cookies and browser local storage to keep you logged in and remember your preferences. We do not use advertising or third-party tracking cookies. You can clear cookies via your browser settings at any time; doing so will log you out.</p>
+
+    <h2 id="minors">8. Children &amp; Minors</h2>
+    <p>Our platform is primarily used by students aged 14–20. We do not knowingly collect data from children under 13. If a parent or guardian believes their child under 13 has registered, please <a href="contact.html" style="color:var(--accent);font-weight:600;">contact us</a> and we will promptly delete the account.</p>
+
+    <h2 id="changes">9. Changes to This Policy</h2>
+    <p>We may update this Privacy Policy from time to time. When we do, we will revise the "Last updated" date at the top of this page. Significant changes will be communicated via email to registered users.</p>
+
+    <h2 id="contact-privacy">10. Contact Us</h2>
+    <p>For any privacy-related questions, please visit our <a href="contact.html" style="color:var(--accent);font-weight:600;">Contact page</a>.</p>
 
   </div>
-</section>
-
-<!-- FAQ -->
-<section class="faq-section">
-  <div class="container">
-    <h2 class="section-title" style="text-align:center;margin-bottom:32px">Frequently Asked Questions</h2>
-    <div class="faq-grid">
-      <div class="faq-item">
-        <div class="faq-q">Can I cancel anytime?</div>
-        <div class="faq-a">Yes. Your subscription is active until the end of the billing period. No automatic renewal unless you opt in.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">What payment methods are accepted?</div>
-        <div class="faq-a">We accept all Nigerian bank cards (Visa, Mastercard), bank transfers, and USSD via Paystack â€” Nigeria's most trusted payment gateway.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Is there a free trial?</div>
-        <div class="faq-a">Yes! You can create a free account and take practice sessions. Premium unlocks all video lessons and full SmartPathâ„¢ analysis.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">What if I have payment issues?</div>
-        <div class="faq-a">Contact us immediately with your payment reference number. We resolve all payment disputes within 24 hours.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Can I upgrade my plan?</div>
-        <div class="faq-a">Yes. Subscribing to a higher plan simply extends your access. The new expiry is calculated from the current date.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Is my data secure?</div>
-        <div class="faq-a">All data is stored securely in Supabase with row-level security. Payments are handled entirely by Paystack â€” we never see your card details.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Guarantee -->
-<div class="guarantee-strip">
-  <div style="font-size:2.5rem;margin-bottom:12px">ðŸŽ¯</div>
-  <h2 style="font-family:var(--font-head);font-size:1.9rem;margin-bottom:10px;color:#fff">Pass or We Help You Retry</h2>
-  <p style="color:rgba(255,255,255,.75);max-width:480px;margin:0 auto 24px;font-size:.95rem;line-height:1.6">
-    If you complete 80% of your SmartPathâ„¢ plan and don't improve your mock score, contact us and we'll extend your subscription for free.
-  </p>
-  <a href="login.html" class="btn btn-white btn-lg">Get Started Free</a>
 </div>
 
+<!-- FOOTER -->
 <footer class="site-footer">
   <div class="container">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:32px">
+    <div class="footer-grid">
       <div>
         <div class="footer-logo">UE School</div>
-        <div class="footer-tagline" style="margin-top:8px">The cockpit for your exam preparation.</div>
+        <div class="footer-tagline">The cockpit for your exam preparation. Pass your JAMB, WAEC, and NECO exams with confidence.</div>
       </div>
-      <div style="display:flex;gap:48px;flex-wrap:wrap">
-        <div>
-          <div class="footer-heading">Platform</div>
-          <ul class="footer-links">
-            <li><a href="classroom.html">Classroom</a></li>
-            <li><a href="cbt.html">Practice CBT</a></li>
-            <li><a href="dashboard.html">Dashboard</a></li>
-          </ul>
-        </div>
-        <div>
-          <div class="footer-heading">Company</div>
-          <ul class="footer-links">
-            <li><a href="about.html">About Us</a></li>
-            <li><a href="contact.html">Contact Us</a></li>
-            <li><a href="terms.html">Terms of Service</a></li>
-            <li><a href="privacy.html">Privacy Policy</a></li>
-          </ul>
-        </div>
+      <div>
+        <div class="footer-heading">Platform</div>
+        <ul class="footer-links">
+          <li><a href="classroom.html">Classroom</a></li>
+          <li><a href="cbt.html">Practice CBT</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="pricing.html">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">Company</div>
+        <ul class="footer-links">
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+        </ul>
       </div>
     </div>
     <div class="footer-divider">&copy; 2026 UE School. All rights reserved.</div>
@@ -265,96 +232,45 @@
 
 <div id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<!-- Paystack inline JS -->
-<script src="https://js.paystack.co/v1/inline.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      const nav = document.querySelector('.ue-nav');
+      nav && nav.classList.remove('nav-mobile-open');
+      const btn = document.getElementById('nav-toggle');
+      btn && btn.setAttribute('aria-expanded', 'false');
+    });
+  });
+});
+</script>
 <script src="js/app.js"></script>
-<script src="js/auth-guard.js"></script>
-<script src="js/payment.js"></script>
 
 <script>
-window.sb = window.supabase.createClient(
-  'https://hazwqyvnolgdkokehjhr.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhendxeXZub2xnZGtva2VoamhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDUwNzYsImV4cCI6MjA5MTY4MTA3Nn0.V7TsNcfpib2HtJRjTASyJPavQ8qUR2R4KXYuWdZB4gE'
-);
-
-document.addEventListener('DOMContentLoaded', async () => {
-  // Render pricing cards
-  PAYMENT.renderPricingSection('pricing-grid');
-
-  // Check auth state
-  const { data: { session } } = await window.sb.auth.getSession();
-
-  const banner   = document.getElementById('auth-state-banner');
-  const bannerTx = document.getElementById('auth-banner-text');
-  const navRight = document.getElementById('nav-right');
-
-  if (session) {
-    // Logged in â€” update nav + banner
-    const { data: profile } = await window.sb
-      .from('profiles')
-      .select('full_name, is_premium, subscription_expiry, total_xp')
-      .eq('id', session.user.id)
-      .single();
-
-    if (navRight) {
-      const initials = (profile?.full_name || 'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-      navRight.innerHTML = `
-        <div class="nav-user-pill">
-          <div class="nav-avatar">${initials}</div>
-          <span style="font-weight:700;font-size:.9rem">${(profile?.full_name||'').split(' ')[0]}</span>
-        </div>
-        <a href="dashboard.html" class="btn btn-outline btn-sm">Dashboard</a>
-        <button class="btn btn-outline btn-sm" onclick="window.sb.auth.signOut().then(()=>location.reload())">Logout</button>
-      `;
+// Auth-aware nav for public pages
+(async function() {
+  try {
+    // sb/SB is set by js/supabase.js shim — credentials live only in js/config.js
+const SB = window.sb;
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      const navRight = document.getElementById('nav-right-public');
+      if (navRight) {
+        const { data: p } = await sb.from('profiles').select('full_name,total_xp').eq('id', session.user.id).single();
+        const initials = (p?.full_name || 'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        navRight.innerHTML = `
+          <div class="nav-user-pill" style="display:flex;align-items:center;gap:10px;background:var(--bg);border:1.5px solid var(--border2);border-radius:999px;padding:4px 14px 4px 4px">
+            <div class="nav-avatar" style="width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem">${initials}</div>
+            <span style="font-weight:700;font-size:.9rem">${(p?.full_name||'').split(' ')[0]}</span>
+            <span style="font-size:.78rem;color:var(--muted)">${p?.total_xp||0} XP</span>
+          </div>
+          <a href="dashboard.html" class="btn btn-primary" style="margin-left:8px">Dashboard</a>
+          <button class="btn btn-outline btn-sm" onclick="(window.sb||window.supabase.createClient(window.UE_CONFIG.SUPABASE_URL,window.UE_CONFIG.SUPABASE_ANON)).auth.signOut().then(()=>location.reload())" style="margin-left:4px">Logout</button>
+        `;
+      }
     }
-
-    // Show subscription status in banner
-    const isPremium = profile?.is_premium;
-    const expiry    = profile?.subscription_expiry ? new Date(profile.subscription_expiry) : null;
-    const isActive  = isPremium && expiry && expiry > new Date();
-    const isExpired = isPremium && expiry && expiry <= new Date();
-
-    if (isActive) {
-      const daysLeft = Math.ceil((expiry - new Date()) / 86400000);
-      banner.style.background = '#d1fae5';
-      banner.style.borderColor = '#6ee7b7';
-      bannerTx.innerHTML = `
-        âœ… <strong>Your subscription is active</strong> â€” ${daysLeft} day${daysLeft!==1?'s':''} remaining.
-        <a href="dashboard.html">Go to Dashboard â†’</a>
-      `;
-      bannerTx.style.color = '#065f46';
-      // Mark current plan button
-      markCurrentPlan(expiry, daysLeft);
-    } else if (isExpired) {
-      banner.style.background = '#fee2e2';
-      banner.style.borderColor = '#fca5a5';
-      bannerTx.innerHTML = `âš ï¸ Your subscription expired. Renew below to restore full access.`;
-      bannerTx.style.color = '#991b1b';
-    } else {
-      bannerTx.innerHTML = `ðŸ‘‹ Welcome, ${(profile?.full_name||'').split(' ')[0]}! Subscribe below to unlock full access.`;
-      bannerTx.style.color = '#1e40af';
-    }
-
-    // Auto-open checkout if redirected from index with a plan selected
-    PAYMENT.checkPendingPlan();
-
-  } else {
-    // Not logged in
-    bannerTx.innerHTML = `ðŸ”’ <a href="login.html">Sign in</a> or <a href="login.html">create a free account</a> to subscribe.`;
-  }
-});
-
-function markCurrentPlan(expiry, daysLeft) {
-  // Try to infer which plan they're on from days remaining
-  const plan = daysLeft > 180 ? 'annual' : daysLeft > 60 ? 'quarterly' : 'monthly';
-  const btn  = document.querySelector(`[data-plan="${plan}"]`);
-  if (btn) {
-    btn.textContent = 'âœ“ Current Plan';
-    btn.disabled = true;
-    btn.style.opacity = '.7';
-  }
-}
+  } catch(e) {}
+})();
 </script>
 </body>
 </html>
