@@ -114,7 +114,7 @@ const DASHBOARD = (function () {
       text += streak > 0
         ? `You're on a ${streak}-day streak — keep it up! &#x1F525;`
         : 'Start a session today to build your streak.';
-      subEl.textContent = text;
+      subEl.innerHTML = text; // innerHTML needed for HTML entities (emoji)
     }
 
     // Next recommended topic
@@ -135,7 +135,7 @@ const DASHBOARD = (function () {
     // Nav streak badge
     const streakEl = document.getElementById('nav-streak');
     if (streakEl) {
-      streakEl.textContent = streak > 0 ? `&#x1F525; ${streak}-day streak` : '&#x1F525; Start streak';
+      streakEl.innerHTML = streak > 0 ? `&#x1F525; ${streak}-day streak` : '&#x1F525; Start streak';
     }
 
     // Nav XP
@@ -167,7 +167,7 @@ const DASHBOARD = (function () {
         if (gap > 0) {
           hintEl.textContent = `${gap} points away from your target of ${target}. Keep pushing!`;
         } else {
-          hintEl.textContent = `You've hit your target of ${target}! Aim higher? &#x1F389;`;
+          hintEl.innerHTML = `You've hit your target of ${target}! Aim higher? &#x1F389;`;
         }
       }
       if (fillEl) fillEl.style.width = prediction.pct + '%';
