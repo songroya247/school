@@ -106,25 +106,33 @@ if (emailParam) {
 // We also handle the case where the user lands here already signed in
 // (page refresh after confirmation).
 
-(async () => {
-  // Give the SDK time to detect and exchange the token from the URL
-  await new Promise(r => setTimeout(r, 400));
+// Guard: ensure we only process confirmation once even if both
+// the IIFE and onAuthStateChange fire at the same time
+let _confirmHandled = false;
 
-  const { data: { session } } = await window.sb.auth.getSession();
-  if (session) {
-    showConfirmed();
-    await AUTH.handlePostConfirm();
-  }
-})();
+async function handleConfirmation() {
+  if (_confirmHandled) return;
+  _confirmHandled = true;
+  showConfirmed();
+  await AUTH.handlePostConfirm();
+}
 
-// ── Auth state change listener ──────────────────────────────────────
-// Fires when SDK exchanges the email confirmation token from URL hash
+// Listen for auth state change (fires when Supabase exchanges the token)
 window.sb.auth.onAuthStateChange(async (event, session) => {
   if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
-    showConfirmed();
-    await AUTH.handlePostConfirm();
+    await handleConfirmation();
   }
 });
+
+// Also check on page load — handles the case where the token was
+// already exchanged before the listener was registered
+(async () => {
+  await new Promise(r => setTimeout(r, 500));
+  const { data: { session } } = await window.sb.auth.getSession();
+  if (session) {
+    await handleConfirmation();
+  }
+})();
 
 function showConfirmed() {
   const waiting   = document.getElementById('state-waiting');
