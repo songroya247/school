@@ -46,16 +46,16 @@ const PAYMENT = (function () {
         {
           section: 'Core Access',
           items: [
-            '✅ Full CBT practice engine (all subjects)',
-            '✅ Core video lessons for all topics',
-            '✅ JAMB, WAEC & NECO question banks',
-            '✅ Basic score prediction',
+            '&#x2705; Full CBT practice engine (all subjects)',
+            '&#x2705; Core video lessons for all topics',
+            '&#x2705; JAMB, WAEC & NECO question banks',
+            '&#x2705; Basic score prediction',
           ],
         },
         {
           section: 'Support',
           items: [
-            '📧 24-hour email support',
+            '&#x1F4E7; 24-hour email support',
           ],
         },
       ],
@@ -76,17 +76,17 @@ const PAYMENT = (function () {
         {
           section: 'Everything in Basic, plus:',
           items: [
-            '🧠 SmartPath™ AI Analytics engine',
-            '🔥 Topic weakness heatmaps',
-            '📊 Detailed performance dashboard',
-            '🎯 Adaptive difficulty (Grades 1–3)',
-            '📈 WAEC/NECO grade predictions',
+            '&#x1F9E0; SmartPath™ AI Analytics engine',
+            '&#x1F525; Topic weakness heatmaps',
+            '&#x1F4CA; Detailed performance dashboard',
+            '&#x1F3AF; Adaptive difficulty (Grades 1–3)',
+            '&#x1F4C8; WAEC/NECO grade predictions',
           ],
         },
         {
           section: 'Support',
           items: [
-            '⚡ 2-hour priority support',
+            '&#x26A1; 2-hour priority support',
           ],
         },
       ],
@@ -107,17 +107,17 @@ const PAYMENT = (function () {
         {
           section: 'Everything in Pro, plus:',
           items: [
-            '📄 Full PDF study guides per subject',
-            '🏛️ Post-UTME university-specific question banks',
-            '🗓️ 1-on-1 strategy session with a tutor',
-            '⬇️ Downloadable mastery reports',
-            '🔔 Exam-countdown reminders & study schedule',
+            '&#x1F4C4; Full PDF study guides per subject',
+            '&#x1F3DB;&#xFE0F; Post-UTME university-specific question banks',
+            '&#x1F5D3;&#xFE0F; 1-on-1 strategy session with a tutor',
+            '&#x2B07;&#xFE0F; Downloadable mastery reports',
+            '&#x1F514; Exam-countdown reminders & study schedule',
           ],
         },
         {
           section: 'Support',
           items: [
-            '📞 Dedicated WhatsApp support line',
+            '&#x1F4DE; Dedicated WhatsApp support line',
           ],
         },
       ],
@@ -336,7 +336,7 @@ const PAYMENT = (function () {
     } else if (state === 'success') {
       content = `
         <div style="text-align:center;padding:16px 0">
-          <div style="font-size:3.5rem;margin-bottom:12px">🎉</div>
+          <div style="font-size:3.5rem;margin-bottom:12px">&#x1F389;</div>
           <h3 style="font-size:1.5rem;margin-bottom:8px">Payment Verified!</h3>
           <p style="color:#065f46;background:#d1fae5;padding:10px 16px;border-radius:8px;font-weight:600;margin-bottom:16px">
             ${plan ? plan.tier + ' Plan' : 'Plan'} Activated
@@ -348,7 +348,7 @@ const PAYMENT = (function () {
     } else if (state === 'error') {
       content = `
         <div style="text-align:center;padding:16px 0">
-          <div style="font-size:3rem;margin-bottom:12px">⚠️</div>
+          <div style="font-size:3rem;margin-bottom:12px">&#x26A0;&#xFE0F;</div>
           <h3 style="font-size:1.3rem;margin-bottom:8px">Something went wrong</h3>
           <p style="color:#991b1b;background:#fee2e2;padding:10px 16px;border-radius:8px;font-size:.88rem;margin-bottom:20px;white-space:pre-line">
             ${errorMsg || 'An unexpected error occurred.'}
