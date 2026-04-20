@@ -124,9 +124,10 @@
         <div class="form-group">
           <label class="form-label">Confirm Password</label>
           <div class="password-wrap">
-            <input type="password" class="form-input" placeholder="Repeat password" id="su-pass2" autocomplete="new-password">
+            <input type="password" class="form-input" placeholder="Repeat password" id="su-pass2" autocomplete="new-password" oninput="checkPasswordMatch()">
             <button type="button" class="pw-toggle" onclick="togglePw('su-pass2',this)">👁</button>
           </div>
+          <div id="pw-match-msg" style="font-size:.82rem;margin-top:5px;font-weight:600;display:none"></div>
         </div>
         <button class="btn btn-primary btn-block btn-lg" onclick="goStep(2)">Continue &rarr;</button>
       </div>
@@ -358,6 +359,22 @@ function showStepError(msg) {
 }
 
 // ── Password helpers ──
+function checkPasswordMatch() {
+  const pass  = document.getElementById('su-pass').value;
+  const pass2 = document.getElementById('su-pass2').value;
+  const msg   = document.getElementById('pw-match-msg');
+  if (!msg || !pass2) return;
+  if (pass2.length === 0) { msg.style.display = 'none'; return; }
+  msg.style.display = 'block';
+  if (pass === pass2) {
+    msg.textContent = '&#x2713; Passwords match';
+    msg.style.color = '#16a34a';
+  } else {
+    msg.textContent = '&#x2717; Passwords do not match';
+    msg.style.color = '#dc2626';
+  }
+}
+
 function togglePw(id, btn) {
   const inp = document.getElementById(id);
   if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
