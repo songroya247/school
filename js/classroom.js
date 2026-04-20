@@ -11,7 +11,7 @@ const CLASSROOM = (function () {
   // content (key points), formulas (optional), quiz questions
   const CURRICULUM = {
     mathematics: {
-      label: 'Mathematics', icon: '📐', color: '#3b82f6',
+      label: 'Mathematics', icon: '&#x1F4D0;', color: '#3b82f6',
       topics: [
         {
           id: 'mathematics.Number Bases', title: 'Number Bases', duration: '12:30', premium: false,
@@ -153,7 +153,7 @@ const CLASSROOM = (function () {
     },
 
     english: {
-      label: 'English Language', icon: '📖', color: '#10b981',
+      label: 'English Language', icon: '&#x1F4D6;', color: '#10b981',
       topics: [
         {
           id: 'english.Comprehension', title: 'Reading Comprehension', duration: '14:00', premium: false,
@@ -213,7 +213,7 @@ const CLASSROOM = (function () {
     },
 
     physics: {
-      label: 'Physics', icon: '⚛️', color: '#7c3aed',
+      label: 'Physics', icon: '&#x269B;', color: '#7c3aed',
       topics: [
         {
           id: 'physics.Mechanics', title: 'Mechanics & Motion', duration: '19:20', premium: false,
@@ -288,7 +288,7 @@ const CLASSROOM = (function () {
     },
 
     chemistry: {
-      label: 'Chemistry', icon: '🧪', color: '#ff6b35',
+      label: 'Chemistry', icon: '&#x1F9EA;', color: '#ff6b35',
       topics: [
         {
           id: 'chemistry.Periodic Table', title: 'The Periodic Table', duration: '16:00', premium: false,
@@ -363,7 +363,7 @@ const CLASSROOM = (function () {
     },
 
     biology: {
-      label: 'Biology', icon: '🌿', color: '#0891b2',
+      label: 'Biology', icon: '&#x1F33F;', color: '#0891b2',
       topics: [
         {
           id: 'biology.Cell Biology', title: 'Cell Biology', duration: '18:00', premium: false,
@@ -392,7 +392,7 @@ const CLASSROOM = (function () {
     },
 
     economics: {
-      label: 'Economics', icon: '📈', color: '#f59e0b',
+      label: 'Economics', icon: '&#x1F4C8;', color: '#f59e0b',
       topics: [
         {
           id: 'economics.Supply & Demand', title: 'Supply & Demand', duration: '16:20', premium: false,
@@ -421,7 +421,7 @@ const CLASSROOM = (function () {
     },
 
     government: {
-      label: 'Government', icon: '🏛️', color: '#6366f1',
+      label: 'Government', icon: '&#x1F3DB;', color: '#6366f1',
       topics: [
         {
           id: 'government.Constitution', title: 'The Nigerian Constitution', duration: '14:45', premium: false,
@@ -537,9 +537,9 @@ const CLASSROOM = (function () {
       const isLocked   = topic.premium && !isPremiumUser;
       const isActive   = topic.id === currentTopicId;
 
-      const icon = isLocked ? '🔒'
+      const icon = isLocked ? '&#x1F512;'
                  : isActive  ? '<span style="color:var(--accent)">▶</span>'
-                 :             '<span style="color:var(--muted2)">📖</span>';
+                 :             '<span style="color:var(--muted2)">&#x1F4D6;</span>';
 
       return `<button class="topic-item ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}"
                 data-topic-id="${topic.id}"
@@ -682,7 +682,7 @@ const CLASSROOM = (function () {
         <div class="video-bg"></div>
         <div class="video-grid"></div>
         <div class="video-locked">
-          <div style="font-size:2.5rem;margin-bottom:14px">🔒</div>
+          <div style="font-size:2.5rem;margin-bottom:14px">&#x1F512;</div>
           <h3 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Premium Content</h3>
           <p style="color:rgba(15,28,63,.55);margin-bottom:22px">Upgrade your plan to unlock this lesson and all premium topics.</p>
           <a href="pricing.html" class="btn btn-primary btn-lg">Unlock Premium →</a>
@@ -693,7 +693,7 @@ const CLASSROOM = (function () {
     if (contentEl) {
       contentEl.innerHTML = `
         <div style="text-align:center;padding:40px 20px;background:var(--surface2);border-radius:var(--radius-lg);border:1px solid var(--border2)">
-          <div style="font-size:2rem;margin-bottom:12px">🔒</div>
+          <div style="font-size:2rem;margin-bottom:12px">&#x1F512;</div>
           <div style="font-weight:700;margin-bottom:8px">This lesson requires a premium subscription</div>
           <div style="font-size:.88rem;color:var(--muted);margin-bottom:20px">From ₦1,500/month — less than a data bundle</div>
           <a href="pricing.html" class="btn btn-primary">View Plans</a>
@@ -711,7 +711,7 @@ const CLASSROOM = (function () {
     const idx    = subj.topics.findIndex(t => t.id === currentTopicId);
     const next   = subj.topics.slice(idx + 1).find(t => !t.premium || isPremiumUser);
     if (next) selectTopic(next.id);
-    else toast('You\'ve completed all available lessons in this subject! 🎉');
+    else toast('You\'ve completed all available lessons in this subject! &#x1F389;');
   }
 
   function prevLesson() {
@@ -780,10 +780,10 @@ const CLASSROOM = (function () {
       fb.style.display = 'block';
       if (isCorrect) {
         fb.style.cssText = 'display:block;background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.25);padding:12px 16px;border-radius:10px;font-weight:600;margin-top:12px';
-        fb.textContent = '✓ Correct! Well done.';
+        fb.textContent = '&#x2713; Correct! Well done.';
       } else {
         fb.style.cssText = 'display:block;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.25);padding:12px 16px;border-radius:10px;font-weight:600;margin-top:12px';
-        fb.textContent = `✗ Not quite. Correct answer: ${q.opts[q.ans]}.`;
+        fb.textContent = `&#x2717; Not quite. Correct answer: ${q.opts[q.ans]}.`;
         const allBtns = document.querySelectorAll('#quiz-options .drill-option');
         if (allBtns[q.ans]) allBtns[q.ans].style.borderColor = '#22c55e';
       }
@@ -798,7 +798,7 @@ const CLASSROOM = (function () {
         const pct = Math.round((quizState.correct / quizState.questions.length) * 100);
         if (fb) {
           fb.style.cssText = 'display:block;background:rgba(79,142,255,.1);color:#3b82f6;border:1px solid rgba(79,142,255,.25);padding:12px 16px;border-radius:10px;font-weight:600;margin-top:12px';
-          fb.innerHTML = `🎉 Quiz complete! You scored <strong>${pct}%</strong>. <a href="${document.getElementById('practice-btn')?.href || 'cbt.html'}" style="color:var(--accent);text-decoration:underline">Take full practice →</a>`;
+          fb.innerHTML = `&#x1F389; Quiz complete! You scored <strong>${pct}%</strong>. <a href="${document.getElementById('practice-btn')?.href || 'cbt.html'}" style="color:var(--accent);text-decoration:underline">Take full practice →</a>`;
         }
         if (document.getElementById('quiz-options')) document.getElementById('quiz-options').innerHTML = '';
       }
