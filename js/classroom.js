@@ -601,17 +601,34 @@ const CLASSROOM = (function () {
     setEl('topic-title',  topic.title);
     setEl('lesson-duration-badge', topic.duration + ' mins');
 
-    // Video area — show YouTube embed or placeholder
+    // Video area — supports YouTube, Google Drive, or placeholder
     const videoArea = document.getElementById('video-area');
     if (videoArea) {
-      videoArea.innerHTML = topic.youtubeId
-        ? `<iframe src="https://www.youtube.com/embed/${topic.youtubeId}?rel=0&modestbranding=1"
-                   style="width:100%;height:100%;border:none;border-radius:var(--radius-lg)"
-                   allowfullscreen></iframe>`
-        : `<div class="video-bg"></div>
-           <div class="video-grid"></div>
-           <div class="video-play-btn" onclick="CLASSROOM.playVideo('${topic.id}')">▶</div>
-           <div class="video-duration">${topic.duration}</div>`;
+      if (topic.youtubeId) {
+        // YouTube embed
+        videoArea.innerHTML = `<iframe
+          src="https://www.youtube.com/embed/${topic.youtubeId}?rel=0&modestbranding=1"
+          style="width:100%;height:100%;border:none;border-radius:var(--radius-lg)"
+          allowfullscreen></iframe>`;
+      } else if (topic.driveId) {
+        // Google Drive embed
+        // driveId is the file ID from the Google Drive share URL:
+        //   https://drive.google.com/file/d/FILE_ID_HERE/view
+        // The embedded player URL uses /preview format.
+        // IMPORTANT: The file must be shared as "Anyone with the link can view".
+        videoArea.innerHTML = `<iframe
+          src="https://drive.google.com/file/d/${topic.driveId}/preview"
+          style="width:100%;height:100%;border:none;border-radius:var(--radius-lg)"
+          allow="autoplay"
+          allowfullscreen></iframe>`;
+      } else {
+        // No video yet — show animated placeholder
+        videoArea.innerHTML = `
+          <div class="video-bg"></div>
+          <div class="video-grid"></div>
+          <div class="video-play-btn" onclick="CLASSROOM.playVideo('${topic.id}')">&#x25B6;</div>
+          <div class="video-duration">${topic.duration}</div>`;
+      }
     }
 
     // Lesson content
