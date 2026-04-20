@@ -392,12 +392,19 @@ const PAYMENT = (function () {
         const sectionLabel = group.section
           ? `<li class="feat-section">${group.section}</li>`
           : '';
-        const items = group.items.map((f) =>
-          `<li style="display:flex;align-items:flex-start;gap:10px;padding:5px 0;font-size:.88rem;line-height:1.45">
-             <span style="flex-shrink:0">${f.slice(0, 2)}</span>
-             <span>${f.slice(2)}</span>
-           </li>`
-        ).join('');
+        const items = group.items.map((f) => {
+          // Split "&#x2705; Full CBT..." into icon part and text part
+          // Entity ends at first semicolon+space. Fall back to first space.
+          const semiIdx = f.indexOf('; ');
+          const spaceIdx = f.indexOf(' ');
+          const splitAt = semiIdx !== -1 ? semiIdx + 1 : spaceIdx;
+          const icon = splitAt > 0 ? f.slice(0, splitAt).trim() : f.slice(0, 2);
+          const text = splitAt > 0 ? f.slice(splitAt).trim() : f.slice(2);
+          return `<li style="display:flex;align-items:flex-start;gap:10px;padding:5px 0;font-size:.88rem;line-height:1.45">
+             <span style="flex-shrink:0;min-width:20px" aria-hidden="true">${icon}</span>
+             <span>${text}</span>
+           </li>`;
+        }).join('');
         return sectionLabel + items;
       }).join('');
 
