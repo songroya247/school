@@ -8,18 +8,18 @@ const DASHBOARD = (function () {
 
   // ── Subject registry ──────────────────────────────
   const SUBJECT_META = {
-    mathematics: { icon: '📐', label: 'Mathematics',     color: '#3b82f6' },
-    english:     { icon: '📖', label: 'English Language', color: '#10b981' },
-    physics:     { icon: '⚛️', label: 'Physics',          color: '#7c3aed' },
-    chemistry:   { icon: '🧪', label: 'Chemistry',        color: '#ff6b35' },
-    biology:     { icon: '🌿', label: 'Biology',           color: '#0891b2' },
-    economics:   { icon: '📈', label: 'Economics',        color: '#f59e0b' },
-    government:  { icon: '🏛️', label: 'Government',       color: '#6366f1' },
-    literature:  { icon: '📚', label: 'Literature',        color: '#ec4899' },
-    geography:   { icon: '🌍', label: 'Geography',         color: '#10b981' },
-    commerce:    { icon: '🏪', label: 'Commerce',          color: '#8b5cf6' },
-    accounts:    { icon: '💼', label: 'Accounts',          color: '#14b8a6' },
-    crk:         { icon: '✝️', label: 'CRK',               color: '#6d28d9' },
+    mathematics: { icon: '&#x1F4D0;', label: 'Mathematics',     color: '#3b82f6' },
+    english:     { icon: '&#x1F4D6;', label: 'English Language', color: '#10b981' },
+    physics:     { icon: '&#x269B;', label: 'Physics',          color: '#7c3aed' },
+    chemistry:   { icon: '&#x1F9EA;', label: 'Chemistry',        color: '#ff6b35' },
+    biology:     { icon: '&#x1F33F;', label: 'Biology',           color: '#0891b2' },
+    economics:   { icon: '&#x1F4C8;', label: 'Economics',        color: '#f59e0b' },
+    government:  { icon: '&#x1F3DB;', label: 'Government',       color: '#6366f1' },
+    literature:  { icon: '&#x1F4DA;', label: 'Literature',        color: '#ec4899' },
+    geography:   { icon: '&#x1F30D;', label: 'Geography',         color: '#10b981' },
+    commerce:    { icon: '&#x1F3EA;', label: 'Commerce',          color: '#8b5cf6' },
+    accounts:    { icon: '&#x1F4BC;', label: 'Accounts',          color: '#14b8a6' },
+    crk:         { icon: '&#x271D;', label: 'CRK',               color: '#6d28d9' },
   };
 
   // Topic lists per subject
@@ -112,7 +112,7 @@ const DASHBOARD = (function () {
         text = 'Exam time is here! ';
       }
       text += streak > 0
-        ? `You're on a ${streak}-day streak — keep it up! 🔥`
+        ? `You're on a ${streak}-day streak — keep it up! &#x1F525;`
         : 'Start a session today to build your streak.';
       subEl.textContent = text;
     }
@@ -125,7 +125,7 @@ const DASHBOARD = (function () {
         const rec   = queue[0];
         const parts = rec.topic_id.split('.');
         const subj  = parts[0], topic = parts[1] || SMARTPATH.formatTopicLabel(rec.topic_id);
-        const meta  = SUBJECT_META[subj] || { label: subj, icon: '📚' };
+        const meta  = SUBJECT_META[subj] || { label: subj, icon: '&#x1F4DA;' };
         nextTopicEl.textContent = `${meta.label}: ${topic}`;
       } else {
         nextTopicEl.textContent = 'Choose a subject below to get started';
@@ -135,7 +135,7 @@ const DASHBOARD = (function () {
     // Nav streak badge
     const streakEl = document.getElementById('nav-streak');
     if (streakEl) {
-      streakEl.textContent = streak > 0 ? `🔥 ${streak}-day streak` : '🔥 Start streak';
+      streakEl.textContent = streak > 0 ? `&#x1F525; ${streak}-day streak` : '&#x1F525; Start streak';
     }
 
     // Nav XP
@@ -167,7 +167,7 @@ const DASHBOARD = (function () {
         if (gap > 0) {
           hintEl.textContent = `${gap} points away from your target of ${target}. Keep pushing!`;
         } else {
-          hintEl.textContent = `You've hit your target of ${target}! Aim higher? 🎉`;
+          hintEl.textContent = `You've hit your target of ${target}! Aim higher? &#x1F389;`;
         }
       }
       if (fillEl) fillEl.style.width = prediction.pct + '%';
@@ -191,7 +191,7 @@ const DASHBOARD = (function () {
     }
 
     track.innerHTML = subjects.map(subj => {
-      const meta   = SUBJECT_META[subj] || { icon: '📚', label: subj, color: '#6b7280' };
+      const meta   = SUBJECT_META[subj] || { icon: '&#x1F4DA;', label: subj, color: '#6b7280' };
       const rows   = masteryBySubject[subj] || [];
       const pct    = subjectMasteryPct(rows);
       const pctStr = pct !== null ? `${pct}%` : 'NIL';
@@ -232,7 +232,7 @@ const DASHBOARD = (function () {
     if (subjects.length === 0 || masteryRows.length === 0) {
       container.innerHTML = `
         <div style="padding:48px 24px;text-align:center;color:var(--muted)">
-          <div style="font-size:2rem;margin-bottom:12px">📊</div>
+          <div style="font-size:2rem;margin-bottom:12px">&#x1F4CA;</div>
           <div style="font-weight:700;margin-bottom:6px">No performance data yet</div>
           <div style="font-size:.88rem">Complete your first CBT session to see your results here.</div>
           <a href="cbt.html" class="btn btn-primary" style="margin-top:20px;display:inline-flex">Start Practice</a>
@@ -246,7 +246,7 @@ const DASHBOARD = (function () {
     const masteryBySubject = groupMasteryBySubject(masteryRows);
 
     container.innerHTML = subjects.map((subj, idx) => {
-      const meta      = SUBJECT_META[subj] || { icon: '📚', label: subj };
+      const meta      = SUBJECT_META[subj] || { icon: '&#x1F4DA;', label: subj };
       const rows      = masteryBySubject[subj] || [];
       const subjPct   = subjectMasteryPct(rows);
       const pctStr    = subjPct !== null ? `${subjPct}%` : 'NIL';
@@ -309,7 +309,7 @@ const DASHBOARD = (function () {
       container.innerHTML = `
         <div style="grid-column:1/-1;padding:40px 24px;text-align:center;
              background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)">
-          <div style="font-size:2rem;margin-bottom:12px">🚀</div>
+          <div style="font-size:2rem;margin-bottom:12px">&#x1F680;</div>
           <div style="font-weight:700;margin-bottom:6px;font-size:1rem">SmartPath is getting ready</div>
           <div style="font-size:.88rem;color:var(--muted)">
             Complete a few practice sessions and SmartPath™ will start recommending what to study next.
@@ -323,7 +323,7 @@ const DASHBOARD = (function () {
       const parts    = rec.topic_id.split('.');
       const subj     = parts[0];
       const topicName = parts.slice(1).join(' ') || SMARTPATH.formatTopicLabel(rec.topic_id);
-      const meta     = SUBJECT_META[subj] || { icon: '📚' };
+      const meta     = SUBJECT_META[subj] || { icon: '&#x1F4DA;' };
       const desc     = SMARTPATH.buildDescription(rec.classification, rec.topic_id);
       const type     = rec.classification;
 
