@@ -169,10 +169,8 @@
 <section class="pricing-section">
   <div class="container">
 
-    <div id="auth-state-banner">
-      <span id="auth-banner-text">
-        🔒 <a href="login.html">Sign in</a> to subscribe, or <a href="login.html">create a free account</a> to get started.
-      </span>
+    <div id="auth-state-banner" style="display:none">
+      <span id="auth-banner-text"></span>
     </div>
 
     <div class="pricing-grid" id="pricing-grid">
@@ -287,6 +285,7 @@
 // window.sb is set by supabase.js shim — no credentials here
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Keep banner hidden until auth state is resolved to prevent flash
   // ── Render tiered pricing cards (Basic / Pro / Elite) ──────────
   // PAYMENT.renderPricingSection reads plan definitions from payment.js
   // so features are always in sync — no separate HTML to maintain.
@@ -298,6 +297,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const banner   = document.getElementById('auth-state-banner');
   const bannerTx = document.getElementById('auth-banner-text');
   const navRight = document.getElementById('nav-right');
+
+  // Reveal banner now that we know the auth state — prevents flash
+  banner.style.display = 'block';
 
   if (session) {
     const { data: profile } = await window.sb
@@ -348,7 +350,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     PAYMENT.checkPendingPlan();
 
   } else {
-    bannerTx.innerHTML = `&#x1F512; <a href="login.html">Sign in</a> or <a href="login.html">create a free account</a> to subscribe.`;
+    bannerTx.innerHTML = `&#x1F512; <a href="login.html">Sign in</a> or <a href="login.html#signup">create a free account</a> to get started.`;
   }
   // Defaulter banner is intentionally absent on pricing.html
 });
