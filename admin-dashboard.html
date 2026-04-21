@@ -410,15 +410,135 @@
   }
   @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-  /* ── Responsive ── */
+  /* ── Mobile sidebar overlay ── */
+  .sidebar-overlay {
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.6);
+    z-index:99;
+  }
+  .sidebar-overlay.open { display:block; }
+
+  /* ── Hamburger button ── */
+  .hamburger {
+    display:none;
+    background:transparent;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:6px 10px;
+    color:var(--text);
+    font-size:1.1rem;
+    cursor:pointer;
+    line-height:1;
+  }
+
+  /* ── Mobile bottom nav ── */
+  .mobile-nav {
+    display:none;
+    position:fixed; bottom:0; left:0; right:0;
+    background:var(--surface);
+    border-top:1px solid var(--border);
+    z-index:90;
+    padding:8px 0 max(8px, env(safe-area-inset-bottom));
+  }
+  .mobile-nav-items {
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+  }
+  .mobile-nav-item {
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    padding:4px 12px;
+    cursor:pointer;
+    color:var(--muted);
+    font-size:.62rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:.4px;
+    border:none; background:transparent;
+    transition:color .15s;
+    font-family:var(--font-body);
+  }
+  .mobile-nav-item.active { color:var(--accent); }
+  .mobile-nav-item .mnav-icon { font-size:1.25rem; }
+
+  /* ── Mobile user card (replaces table rows on small screens) ── */
+  .user-card {
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px;
+    margin-bottom:10px;
+    cursor:pointer;
+    transition:border-color .15s;
+  }
+  .user-card:hover { border-color:var(--accent); }
+  .user-card:active { opacity:.85; }
+  .user-card-top { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .user-card-info { flex:1; min-width:0; }
+  .user-card-name { font-weight:700; font-size:.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .user-card-email { font-size:.74rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .user-card-meta { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .user-card-actions { display:flex; gap:8px; margin-top:10px; }
+  .user-card-actions .action-btn { flex:1; text-align:center; padding:7px 0; font-size:.78rem; }
+
+  /* ── Responsive breakpoints ── */
   @media(max-width:900px) {
     .kpi-grid { grid-template-columns:1fr 1fr; }
     .two-col { grid-template-columns:1fr; }
   }
+
   @media(max-width:640px) {
-    .sidebar { display:none; }
-    .main { margin-left:0; }
-    .kpi-grid { grid-template-columns:1fr; }
+    /* Sidebar becomes a slide-in drawer */
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform .28s cubic-bezier(.4,0,.2,1);
+      z-index:100;
+    }
+    .sidebar.mobile-open { transform: translateX(0); }
+
+    /* Main takes full width */
+    .main { margin-left:0; padding-bottom:70px; }
+
+    /* Topbar */
+    .topbar { padding:12px 16px; }
+    .hamburger { display:block; }
+    .topbar-actions .btn-ghost { display:none; } /* hide Refresh on mobile, use pull-to-refresh */
+    .topbar-actions .btn-primary { padding:7px 12px; font-size:.78rem; }
+
+    /* Content padding */
+    .content { padding:14px 14px; }
+
+    /* KPIs — 2×2 grid on mobile */
+    .kpi-grid { grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+    .kpi-value { font-size:1.5rem; }
+    .kpi-card { padding:14px; }
+
+    /* Hide impersonate note on mobile (too much text) */
+    .impersonate-note { display:none; }
+
+    /* Table toolbar stacks */
+    .table-toolbar { flex-direction:column; align-items:stretch; gap:8px; }
+    .search-input { min-width:unset; width:100%; }
+    .filter-select { width:100%; }
+
+    /* Hide desktop table, show cards */
+    #users-table { display:none; }
+    #user-cards { display:block; padding:14px; }
+
+    /* Drawer full width on mobile */
+    .drawer { width:100%; border-left:none; border-top:1px solid var(--border); top:auto; height:88vh; border-radius:16px 16px 0 0; }
+
+    /* Show mobile nav */
+    .mobile-nav { display:block; }
+
+    /* Section header */
+    .section-header { flex-direction:column; align-items:flex-start; gap:4px; }
+  }
+
+  @media(max-width:380px) {
+    .kpi-grid { grid-template-columns:1fr 1fr; gap:8px; }
+    .kpi-value { font-size:1.3rem; }
+    .pin-box { padding:24px 18px; }
+    .pin-key { padding:12px 0; font-size:1rem; }
   }
 
   .toast {
@@ -621,10 +741,13 @@
   <!-- Main -->
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title" id="page-title">Command Centre</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="hamburger" onclick="toggleMobileSidebar()" aria-label="Menu">☰</button>
+        <div class="topbar-title" id="page-title">Command Centre</div>
+      </div>
       <div class="topbar-actions">
         <button class="btn btn-ghost" onclick="refreshData()">↻ Refresh</button>
-        <button class="btn btn-primary" onclick="exportCSV()">⬇ Export CSV</button>
+        <button class="btn btn-primary" onclick="exportCSV()">⬇ Export</button>
       </div>
     </div>
 
