@@ -57,7 +57,6 @@ const AUTH = (function () {
       exam_types:          formData.examTypes,
       exam_date:           formData.examDate || null,
       target_score:        formData.targetScore,
-      target_grade:        formData.targetGrade || null,
       current_skill_level: 3,
       accuracy_avg:        null,
       mastery_level:       null,
@@ -165,8 +164,7 @@ const AUTH = (function () {
         email:       session.user.email,
         examTypes:   pendingData.examTypes   || tryParse(meta.exam_types, []),
         examDate:    pendingData.examDate    || meta.exam_date    || null,
-        targetScore: pendingData.targetScore || parseInt(meta.target_score) || null,
-        targetGrade: pendingData.targetGrade || meta.target_grade || null,
+        targetScore: pendingData.targetScore || parseInt(meta.target_score) || 250,
         subjects:    pendingData.subjects    || tryParse(meta.subjects, []),
         studyMode:   pendingData.studyMode   || meta.study_mode   || 'drill'
       };
