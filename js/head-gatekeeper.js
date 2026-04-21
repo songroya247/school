@@ -48,96 +48,49 @@
 
   if (!needsAuth) return; // public page — nothing to do
 
-  // ── Step 3: Read session from localStorage (SYNCHRONOUS) ────────
-  //  Supabase v2 persists the session under a key that follows the
-  //  pattern:  sb-<project-ref>-auth-token
-  //  We scan for it rather than hardcode the project ref so this
-  //  script survives a project migration.
-  var session = null;
+  // ── Step 3: One-shot fresh-login bypass ─────────────────────────
+  //  When auth.js / handlePostConfirm / signup just navigated here,
+  //  the SDK may not have replayed the session into the format we
+  //  expect yet. Trust the SDK — let auth-guard.js handle validation.
+  try {
+    if (sessionStorage.getItem('ue_just_signed_in') === '1') {
+      sessionStorage.removeItem('ue_just_signed_in');
+      return; // skip gatekeeper this once; auth-guard does the real check
+    }
+  } catch (_) { /* sessionStorage blocked — fall through */ }
 
+  // ── Step 3b: Best-effort presence check (NOT validation) ────────
+  //  We only want to know IF a session likely exists, not parse it.
+  //  Any sb-*-auth-token key (including chunked .0/.1 variants)
+  //  counts. Validation happens in auth-guard.js with the real SDK.
+  var sessionPresent = false;
   try {
     for (var i = 0; i < localStorage.length; i++) {
       var key = localStorage.key(i);
       if (key && key.indexOf('sb-') === 0 && key.indexOf('-auth-token') !== -1) {
-        var raw = localStorage.getItem(key);
-        if (raw) {
-          var parsed = JSON.parse(raw);
-          // Supabase stores { access_token, expires_at, user, … }
-          // expires_at is a UNIX timestamp (seconds)
-          if (parsed && parsed.access_token) {
-            var expiresAt = parsed.expires_at || 0;
-            var nowSecs   = Math.floor(Date.now() / 1000);
-            if (expiresAt > nowSecs) {
-              session = parsed;
-            }
-            // Even an expired token is found — we'll let auth-guard
-            // handle the refresh below via UE_USER.expired flag.
-            if (!session && parsed.access_token) {
-              session = parsed;
-              session._expired = true;
-            }
-          }
-        }
+        sessionPresent = true;
         break;
       }
     }
   } catch (e) {
-    // localStorage blocked (private mode with strict settings) — treat as no session
-    session = null;
+    sessionPresent = false;
   }
 
   // ── Step 4: Hard-redirect if no session at all ─────────────────
-  if (!session) {
-    // Guard: don't redirect if we just came FROM login (avoids
-    // a race on very slow connections where localStorage hasn't
-    // been written yet by the time gatekeeper runs on next page).
-    var referrer = document.referrer || '';
-    var comingFromLogin = referrer.indexOf('login.html') !== -1 ||
-                          referrer.indexOf('confirm.html') !== -1;
-    if (comingFromLogin) {
-      // Let auth-guard.js handle it — it will redirect properly
-      // once the SDK has a chance to refresh the session.
-      return;
-    }
+  if (!sessionPresent) {
     window.location.replace(
       LOGIN_PAGE + '?next=' + encodeURIComponent(currentPage)
     );
     throw new Error('[UE Gatekeeper] No session — redirecting to login.');
   }
 
-  // ── Step 5: Seed window.UE_USER for downstream scripts ─────────
-  //  This is a LIGHTWEIGHT seed only — no DB call yet.
-  //  auth-guard.js will fully validate and enrich this object.
-  var user = (session.user) ? session.user : {};
-
-  // Build the global UE_USER object (non-enumerable to reduce console noise)
+  // ── Step 5: Minimal optimistic seed ────────────────────────────
+  //  Real values come from auth-guard.js.
   Object.defineProperty(window, 'UE_USER', {
-    value: {
-      id:           user.id           || null,
-      email:        user.email        || null,
-      full_name:    (user.user_metadata && user.user_metadata.full_name) || null,
-      access_token: session.access_token,
-      _expired:     !!session._expired,
-      // Premium status is UNKNOWN at this stage — auth-guard.js sets it
-      is_premium:   null,
-    },
-    writable:     true,   // auth-guard.js will overwrite with real profile data
-    configurable: true,
-    enumerable:   true,
+    value: { id: null, email: null, full_name: null,
+             access_token: null, _expired: false, is_premium: null },
+    writable: true, configurable: true, enumerable: true,
   });
-
-  // ── Step 6: Expired token fast-path ────────────────────────────
-  //  The token exists but has expired.  Hide the body until
-  //  auth-guard.js either refreshes the session or redirects.
-  if (session._expired) {
-    // Inject a temporary style to keep the page invisible
-    var s = document.createElement('style');
-    s.id = 'ue-gatekeeper-veil';
-    s.textContent = 'body{visibility:hidden!important}';
-    // document.head may not exist yet (we're at top of <head>)
-    // but createElement+appendChild works fine in partial parse state
-    (document.head || document.documentElement).appendChild(s);
-  }
 
   // ── Step 7: Premium page — optimistic client-side check ────────
   //  A definitive check is done in auth-guard.js with a DB read.
