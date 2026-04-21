@@ -88,11 +88,19 @@
 
   // ── Step 4: Hard-redirect if no session at all ─────────────────
   if (!session) {
-    // Guard: don't redirect if we just came FROM login (avoids
-    // a race on very slow connections where localStorage hasn't
-    // been written yet by the time gatekeeper runs on next page).
+    // Guard: don't redirect if we just came FROM login.
+    // We check both document.referrer (may be wiped by replace()) AND
+    // a sessionStorage flag set by auth.js right before navigating here.
+    // The flag is consumed immediately so it never fires twice.
+    var justLoggedIn = false;
+    try {
+      justLoggedIn = !!sessionStorage.getItem('ue_just_logged_in');
+      if (justLoggedIn) sessionStorage.removeItem('ue_just_logged_in');
+    } catch (_) {}
+
     var referrer = document.referrer || '';
-    var comingFromLogin = referrer.indexOf('login.html') !== -1 ||
+    var comingFromLogin = justLoggedIn ||
+                          referrer.indexOf('login.html') !== -1 ||
                           referrer.indexOf('confirm.html') !== -1;
     if (comingFromLogin) {
       // Let auth-guard.js handle it — it will redirect properly
