@@ -143,35 +143,135 @@ const DASHBOARD = (function () {
     if (xpEl) xpEl.textContent = `${profile.total_xp ?? 0} XP`;
   }
 
-  // ── Score Prediction Card ─────────────────────────
+  // ── Score / Grade Card ────────────────────────────
+  // Adapts to the user's exam type:
+  //   JAMB only  → predicted score out of 400
+  //   WAEC/NECO  → estimated grade (A1–F9)
+  //   Both       → accuracy % (applies to both)
+  //   Neither    → card hidden
   function renderScoreCard(profile, masteryRows) {
-    const prediction = SMARTPATH.predictJAMBScore(profile, masteryRows);
-    const target     = profile.target_score || 250;
-
+    const cardEl  = document.querySelector('.score-card');
+    const labelEl = document.getElementById('score-label');
     const valueEl = document.getElementById('score-value');
     const hintEl  = document.getElementById('score-hint');
     const fillEl  = document.getElementById('score-progress-fill');
+    const wrapEl  = document.querySelector('.score-progress-wrap');
 
     if (!valueEl) return;
 
-    if (!prediction) {
-      // New user — no data yet
-      valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
-      if (hintEl) hintEl.textContent = 'Complete your first practice session to see your predicted score.';
-      if (fillEl) fillEl.style.width = '0%';
-    } else {
-      valueEl.innerHTML = `${prediction.low}–${prediction.high}<span class="score-denom">/400</span>`;
-      const midpoint = Math.round((prediction.low + prediction.high) / 2);
-      const gap = target - midpoint;
+    const exams    = profile.exam_types || [];
+    const hasJAMB  = exams.includes('JAMB');
+    const hasWAEC  = exams.includes('WAEC') || exams.includes('NECO');
+
+    // ── Neither exam selected — hide card entirely ──
+    if (!hasJAMB && !hasWAEC) {
+      if (cardEl) cardEl.style.display = 'none';
+      return;
+    }
+
+    if (cardEl) cardEl.style.display = '';
+
+    // ── JAMB only — show predicted /400 score ───────
+    if (hasJAMB && !hasWAEC) {
+      if (labelEl) labelEl.textContent = 'Predicted JAMB Score';
+      if (wrapEl)  wrapEl.style.display = '';
+
+      const prediction = SMARTPATH.predictJAMBScore(profile, masteryRows);
+      const target     = profile.target_score || 250;
+
+      if (!prediction) {
+        valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
+        if (hintEl) hintEl.textContent = 'Complete your first practice session to see your predicted score.';
+        if (fillEl) fillEl.style.width = '0%';
+      } else {
+        valueEl.innerHTML = `${prediction.low}–${prediction.high}<span class="score-denom">/400</span>`;
+        const midpoint = Math.round((prediction.low + prediction.high) / 2);
+        const gap = target - midpoint;
+        if (hintEl) {
+          hintEl.textContent = gap > 0
+            ? `${gap} points away from your target of ${target}. Keep pushing!`
+            : `You've hit your target of ${target}! Aim higher? 🎉`;
+        }
+        if (fillEl) fillEl.style.width = prediction.pct + '%';
+      }
+      return;
+    }
+
+    // ── WAEC / NECO only — show estimated grade ─────
+    if (!hasJAMB && hasWAEC) {
+      if (labelEl) labelEl.textContent = 'Estimated Grade';
+      if (wrapEl)  wrapEl.style.display = 'none'; // no progress bar for grades
+
+      const examLabel = exams.includes('WAEC') ? 'WAEC' : 'NECO';
+
+      // Derive accuracy from mastery rows
+      const active = masteryRows.filter(r => r.accuracy_avg !== null && r.accuracy_avg !== undefined);
+      if (active.length === 0) {
+        valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
+        if (hintEl) hintEl.textContent = `Complete a practice session to see your estimated ${examLabel} grade.`;
+        return;
+      }
+
+      const avgAcc  = active.reduce((s, r) => s + r.accuracy_avg, 0) / active.length;
+      const grade   = accToGrade(avgAcc);
+      const target  = profile.target_grade || 'B3';
+      const color   = grade.startsWith('A') ? 'var(--accent2)'
+                    : grade.startsWith('B') ? '#f59e0b'
+                    : grade.startsWith('C') ? 'var(--accent)'
+                    : 'var(--danger)';
+
+      valueEl.innerHTML = `<span style="color:${color}">${grade}</span>`;
+
+      const gradeOrder = ['A1','B2','B3','C4','C5','C6','D7','E8','F9'];
+      const currentIdx = gradeOrder.indexOf(grade);
+      const targetIdx  = gradeOrder.indexOf(target);
+
       if (hintEl) {
-        if (gap > 0) {
-          hintEl.textContent = `${gap} points away from your target of ${target}. Keep pushing!`;
+        if (currentIdx === -1 || currentIdx <= targetIdx) {
+          hintEl.textContent = `You're on track for your target of ${target} in ${examLabel}. Keep it up! 🎉`;
         } else {
-          hintEl.innerHTML = `You've hit your target of ${target}! Aim higher? &#x1F389;`;
+          hintEl.textContent = `Target: ${target} in ${examLabel}. ${gradeOrder[currentIdx - 1] || target} is one step away — keep practising.`;
         }
       }
-      if (fillEl) fillEl.style.width = prediction.pct + '%';
+      return;
     }
+
+    // ── Both JAMB + WAEC — show accuracy % ──────────
+    if (hasJAMB && hasWAEC) {
+      if (labelEl) labelEl.textContent = 'Overall Accuracy';
+      if (wrapEl)  wrapEl.style.display = '';
+
+      const active = masteryRows.filter(r => r.accuracy_avg !== null && r.accuracy_avg !== undefined);
+      if (active.length === 0) {
+        valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
+        if (hintEl) hintEl.textContent = 'Complete a practice session to see your accuracy.';
+        if (fillEl) fillEl.style.width = '0%';
+        return;
+      }
+
+      const avgAcc = active.reduce((s, r) => s + r.accuracy_avg, 0) / active.length;
+      const pct    = Math.round(avgAcc * 100);
+      const estJAMB = Math.round(pct * 4);
+
+      valueEl.innerHTML = `${pct}<span class="score-denom">%</span>`;
+      if (hintEl) hintEl.textContent = `Est. JAMB ~${estJAMB}/400 · Grade ~${accToGrade(avgAcc)} for WAEC/NECO`;
+      if (fillEl) fillEl.style.width = pct + '%';
+    }
+  }
+
+  // ── Grade helper ──────────────────────────────────
+  function accToGrade(acc) {
+    // acc is 0–1 from mastery rows
+    const pct = acc <= 1 ? acc * 100 : acc;
+    if (pct >= 90) return 'A1';
+    if (pct >= 80) return 'B2';
+    if (pct >= 75) return 'B3';
+    if (pct >= 65) return 'C4';
+    if (pct >= 55) return 'C5';
+    if (pct >= 50) return 'C6';
+    if (pct >= 40) return 'D7';
+    if (pct >= 30) return 'E8';
+    return 'F9';
   }
 
   // ── Subjects Slider ───────────────────────────────
