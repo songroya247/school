@@ -125,7 +125,6 @@ const AUTH = (function () {
       // ── AUTO-CONFIRMED (email confirmations disabled in Supabase) ────
       if (data.session) {
         await createProfile(data.user, formData);
-        try { sessionStorage.setItem('ue_just_logged_in', '1'); } catch (_) {}
         window.location.replace('dashboard.html');
         return;
       }
@@ -222,9 +221,6 @@ const AUTH = (function () {
       const safeNext = (next.includes('login') || next.includes('confirm') || next.startsWith('http'))
         ? 'dashboard.html'
         : next;
-      // Signal to head-gatekeeper that we just authenticated so it
-      // doesn't hard-redirect before the SDK writes the token to localStorage.
-      try { sessionStorage.setItem('ue_just_logged_in', '1'); } catch (_) {}
       window.location.replace(safeNext);
 
     } catch (err) {
