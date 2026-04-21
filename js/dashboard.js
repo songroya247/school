@@ -49,9 +49,13 @@ const DASHBOARD = (function () {
   // ── Days until exam ───────────────────────────────
   function daysUntil(dateStr) {
     if (!dateStr) return null;
-    // examDate stored as "May 2026" — parse to 1st of that month
-    const d = new Date(dateStr);
-    if (isNaN(d)) return null;
+    const m = String(dateStr).match(/^([A-Za-z]+)\s+(\d{4})$/);
+    if (!m) return null;
+    const months = ['january','february','march','april','may','june',
+                    'july','august','september','october','november','december'];
+    const monthIdx = months.indexOf(m[1].toLowerCase());
+    if (monthIdx < 0) return null;
+    const d = new Date(parseInt(m[2], 10), monthIdx, 1);
     return Math.ceil((d - Date.now()) / 86400000);
   }
 
@@ -178,9 +182,12 @@ const DASHBOARD = (function () {
       if (labelEl) labelEl.textContent = 'Estimated Grade';
       if (fillEl) fillEl.closest('.score-progress-wrap') && (fillEl.closest('.score-progress-wrap').style.display = 'none');
 
-      const totalQ   = masteryRows.reduce((s, r) => s + (r.attempts || 0), 0);
-      const totalC   = masteryRows.reduce((s, r) => s + (r.correct  || 0), 0);
-      const acc      = totalQ > 0 ? (totalC / totalQ) * 100 : null;
+      const accRows = masteryRows.filter(
+        r => r.accuracy_avg !== null && r.accuracy_avg !== undefined
+      );
+      const acc = accRows.length
+        ? (accRows.reduce((s, r) => s + r.accuracy_avg, 0) / accRows.length) * 100
+        : null;
       const target   = profile.target_grade || 'B3';
 
       if (acc === null) {
@@ -190,7 +197,8 @@ const DASHBOARD = (function () {
         const grade = accToGrade(acc);
         valueEl.innerHTML = `${grade}<span class="score-denom" style="font-size:1.2rem;margin-left:6px">/ A1</span>`;
         if (hintEl) {
-          if (grade <= target) {
+          const RANK = { A1:1, B2:2, B3:3, C4:4, C5:5, C6:6, D7:7, E8:8, F9:9 };
+          if ((RANK[grade] || 9) <= (RANK[target] || 9)) {
             hintEl.innerHTML = `You're on track for ${target} or better. Keep it up! &#x1F31F;`;
           } else {
             hintEl.textContent = `Target: ${target}. Focus on weak topics to push your grade up.`;
@@ -208,9 +216,12 @@ const DASHBOARD = (function () {
     // ── Mixed (JAMB + WAEC) — show accuracy % ──
     if (ctx.hasBoth) {
       if (labelEl) labelEl.textContent = 'Overall Accuracy';
-      const totalQ = masteryRows.reduce((s, r) => s + (r.attempts || 0), 0);
-      const totalC = masteryRows.reduce((s, r) => s + (r.correct  || 0), 0);
-      const acc    = totalQ > 0 ? Math.round((totalC / totalQ) * 100) : null;
+      const accRows = masteryRows.filter(
+        r => r.accuracy_avg !== null && r.accuracy_avg !== undefined
+      );
+      const acc = accRows.length
+        ? (accRows.reduce((s, r) => s + r.accuracy_avg, 0) / accRows.length) * 100
+        : null;
 
       if (acc === null) {
         valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
