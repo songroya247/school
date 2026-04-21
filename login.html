@@ -336,7 +336,10 @@
 // Redirect already-logged-in users
 (async () => {
   const { data: { session } } = await window.sb.auth.getSession();
-  if (session) { window.location.href = 'dashboard.html'; }
+  if (session && !window._loginRedirectInProgress) {
+    window._loginRedirectInProgress = true;
+    window.location.replace('dashboard.html');
+  }
 })();
 
 // â”€â”€ State â”€â”€
