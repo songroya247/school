@@ -199,6 +199,7 @@ const PAYMENT = (function () {
      letting the call fail silently.
   ─────────────────────────────────────────────────────────────────── */
   async function openCheckout(planKey) {
+    const sb = window.sb; // captured for later closures
     // Guard: Paystack CDN
     if (!window.PaystackPop) {
       showPaymentModal('error', null, 'Payment service is not ready. Please refresh the page and try again.');
@@ -297,8 +298,8 @@ const PAYMENT = (function () {
 
       onCancel: () => {
         setButtonLoading(planKey, false);
-        if (window.sb) {
-          window.sb.from('payments')
+        if (sb) {
+          sb.from('payments')
             .update({ status: 'failed' })
             .eq('reference', reference);
         }
