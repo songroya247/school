@@ -38,11 +38,12 @@ const AUTH = (function () {
   // ── TARGET SCORE MAPPING ──────────────────────────
   // Maps the select string to an integer midpoint
   function parseTargetScore(str) {
+    const norm = String(str || '').replace(/[–—-]/g, '-');  // unify dashes
     const map = {
-      '200–220': 210, '221–240': 230, '241–260': 250,
-      '261–280': 270, '281–300': 290, '301–320': 310, '320+': 330
+      '200-220': 210, '221-240': 230, '241-260': 250,
+      '261-280': 270, '281-300': 290, '301-320': 310, '320+': 330
     };
-    return map[str] || 250;
+    return map[norm] || 250;
   }
 
   // ── CREATE PROFILE (called after email confirm, or at signup) ──
@@ -125,6 +126,7 @@ const AUTH = (function () {
       // ── AUTO-CONFIRMED (email confirmations disabled in Supabase) ────
       if (data.session) {
         await createProfile(data.user, formData);
+        sessionStorage.setItem('ue_just_signed_in', '1');
         window.location.replace('dashboard.html');
         return;
       }
@@ -179,10 +181,12 @@ const AUTH = (function () {
 
       // Small delay so the DB write completes before dashboard reads it
       await new Promise(r => setTimeout(r, 600));
+      sessionStorage.setItem('ue_just_signed_in', '1');
       window.location.replace('dashboard.html');
 
     } catch (err) {
       console.error('[AUTH] handlePostConfirm error:', err);
+      sessionStorage.setItem('ue_just_signed_in', '1');
       window.location.replace('dashboard.html');
     }
   }
@@ -214,13 +218,16 @@ const AUTH = (function () {
       }
 
       // Check for intended destination — sanitise to prevent redirect loops
-      const params = new URLSearchParams(window.location.search);
+      const params  = new URLSearchParams(window.location.search);
       const rawNext = params.get('next') || 'dashboard.html';
-      const next = decodeURIComponent(rawNext);
+      const next    = decodeURIComponent(rawNext);
       // Never redirect back to login or auth pages
       const safeNext = (next.includes('login') || next.includes('confirm') || next.startsWith('http'))
         ? 'dashboard.html'
         : next;
+
+      // One-shot flag honoured by head-gatekeeper.js for the next page load.
+      sessionStorage.setItem('ue_just_signed_in', '1');
       window.location.replace(safeNext);
 
     } catch (err) {
