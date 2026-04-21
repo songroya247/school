@@ -143,135 +143,109 @@ const DASHBOARD = (function () {
     if (xpEl) xpEl.textContent = `${profile.total_xp ?? 0} XP`;
   }
 
-  // ── Score / Grade Card ────────────────────────────
-  // Adapts to the user's exam type:
-  //   JAMB only  → predicted score out of 400
-  //   WAEC/NECO  → estimated grade (A1–F9)
-  //   Both       → accuracy % (applies to both)
-  //   Neither    → card hidden
+  // ── Exam context helpers ──────────────────────────
+  function getExamContext(profile) {
+    const exams = profile.exam_types || [];
+    return {
+      isJAMBOnly:  exams.includes('JAMB') && !exams.includes('WAEC') && !exams.includes('NECO'),
+      isGradeOnly: !exams.includes('JAMB') && (exams.includes('WAEC') || exams.includes('NECO')),
+      hasBoth:     exams.includes('JAMB') && (exams.includes('WAEC') || exams.includes('NECO')),
+      exams
+    };
+  }
+
+  function accToGrade(acc) {
+    if (acc >= 90) return 'A1'; if (acc >= 80) return 'B2';
+    if (acc >= 75) return 'B3'; if (acc >= 65) return 'C4';
+    if (acc >= 55) return 'C5'; if (acc >= 50) return 'C6';
+    if (acc >= 40) return 'D7'; if (acc >= 30) return 'E8';
+    return 'F9';
+  }
+
+  // ── Score Prediction Card ─────────────────────────
   function renderScoreCard(profile, masteryRows) {
+    const ctx     = getExamContext(profile);
     const cardEl  = document.querySelector('.score-card');
-    const labelEl = document.getElementById('score-label');
+    const labelEl = cardEl?.querySelector('.score-label');
     const valueEl = document.getElementById('score-value');
     const hintEl  = document.getElementById('score-hint');
     const fillEl  = document.getElementById('score-progress-fill');
-    const wrapEl  = document.querySelector('.score-progress-wrap');
 
     if (!valueEl) return;
 
-    const exams    = profile.exam_types || [];
-    const hasJAMB  = exams.includes('JAMB');
-    const hasWAEC  = exams.includes('WAEC') || exams.includes('NECO');
+    // ── WAEC/NECO only — show grade tracker instead ──
+    if (ctx.isGradeOnly) {
+      if (labelEl) labelEl.textContent = 'Estimated Grade';
+      if (fillEl) fillEl.closest('.score-progress-wrap') && (fillEl.closest('.score-progress-wrap').style.display = 'none');
 
-    // ── Neither exam selected — hide card entirely ──
-    if (!hasJAMB && !hasWAEC) {
-      if (cardEl) cardEl.style.display = 'none';
+      const totalQ   = masteryRows.reduce((s, r) => s + (r.attempts || 0), 0);
+      const totalC   = masteryRows.reduce((s, r) => s + (r.correct  || 0), 0);
+      const acc      = totalQ > 0 ? (totalC / totalQ) * 100 : null;
+      const target   = profile.target_grade || 'B3';
+
+      if (acc === null) {
+        valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
+        if (hintEl) hintEl.textContent = 'Complete your first practice session to see your estimated grade.';
+      } else {
+        const grade = accToGrade(acc);
+        valueEl.innerHTML = `${grade}<span class="score-denom" style="font-size:1.2rem;margin-left:6px">/ A1</span>`;
+        if (hintEl) {
+          if (grade <= target) {
+            hintEl.innerHTML = `You're on track for ${target} or better. Keep it up! &#x1F31F;`;
+          } else {
+            hintEl.textContent = `Target: ${target}. Focus on weak topics to push your grade up.`;
+          }
+        }
+        if (fillEl) {
+          const gradeMap = { A1:100, B2:87, B3:77, C4:70, C5:60, C6:52, D7:45, E8:35, F9:20 };
+          fillEl.style.width = (gradeMap[grade] || 0) + '%';
+          if (fillEl.closest('.score-progress-wrap')) fillEl.closest('.score-progress-wrap').style.display = '';
+        }
+      }
       return;
     }
 
-    if (cardEl) cardEl.style.display = '';
+    // ── Mixed (JAMB + WAEC) — show accuracy % ──
+    if (ctx.hasBoth) {
+      if (labelEl) labelEl.textContent = 'Overall Accuracy';
+      const totalQ = masteryRows.reduce((s, r) => s + (r.attempts || 0), 0);
+      const totalC = masteryRows.reduce((s, r) => s + (r.correct  || 0), 0);
+      const acc    = totalQ > 0 ? Math.round((totalC / totalQ) * 100) : null;
 
-    // ── JAMB only — show predicted /400 score ───────
-    if (hasJAMB && !hasWAEC) {
-      if (labelEl) labelEl.textContent = 'Predicted JAMB Score';
-      if (wrapEl)  wrapEl.style.display = '';
-
-      const prediction = SMARTPATH.predictJAMBScore(profile, masteryRows);
-      const target     = profile.target_score || 250;
-
-      if (!prediction) {
+      if (acc === null) {
         valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
-        if (hintEl) hintEl.textContent = 'Complete your first practice session to see your predicted score.';
+        if (hintEl) hintEl.textContent = 'Complete a session to see your accuracy.';
         if (fillEl) fillEl.style.width = '0%';
       } else {
-        valueEl.innerHTML = `${prediction.low}–${prediction.high}<span class="score-denom">/400</span>`;
-        const midpoint = Math.round((prediction.low + prediction.high) / 2);
-        const gap = target - midpoint;
-        if (hintEl) {
-          hintEl.textContent = gap > 0
-            ? `${gap} points away from your target of ${target}. Keep pushing!`
-            : `You've hit your target of ${target}! Aim higher? 🎉`;
-        }
-        if (fillEl) fillEl.style.width = prediction.pct + '%';
+        valueEl.innerHTML = `${acc}<span class="score-denom">%</span>`;
+        if (hintEl) hintEl.textContent = acc >= 70 ? 'Strong accuracy across both exams!' : 'Keep practising to improve your accuracy.';
+        if (fillEl) fillEl.style.width = acc + '%';
       }
       return;
     }
 
-    // ── WAEC / NECO only — show estimated grade ─────
-    if (!hasJAMB && hasWAEC) {
-      if (labelEl) labelEl.textContent = 'Estimated Grade';
-      if (wrapEl)  wrapEl.style.display = 'none'; // no progress bar for grades
+    // ── JAMB only (default) — score prediction ──
+    if (labelEl) labelEl.textContent = 'Predicted JAMB Score';
+    const prediction = SMARTPATH.predictJAMBScore(profile, masteryRows);
+    const target     = profile.target_score || 250;
 
-      const examLabel = exams.includes('WAEC') ? 'WAEC' : 'NECO';
-
-      // Derive accuracy from mastery rows
-      const active = masteryRows.filter(r => r.accuracy_avg !== null && r.accuracy_avg !== undefined);
-      if (active.length === 0) {
-        valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
-        if (hintEl) hintEl.textContent = `Complete a practice session to see your estimated ${examLabel} grade.`;
-        return;
-      }
-
-      const avgAcc  = active.reduce((s, r) => s + r.accuracy_avg, 0) / active.length;
-      const grade   = accToGrade(avgAcc);
-      const target  = profile.target_grade || 'B3';
-      const color   = grade.startsWith('A') ? 'var(--accent2)'
-                    : grade.startsWith('B') ? '#f59e0b'
-                    : grade.startsWith('C') ? 'var(--accent)'
-                    : 'var(--danger)';
-
-      valueEl.innerHTML = `<span style="color:${color}">${grade}</span>`;
-
-      const gradeOrder = ['A1','B2','B3','C4','C5','C6','D7','E8','F9'];
-      const currentIdx = gradeOrder.indexOf(grade);
-      const targetIdx  = gradeOrder.indexOf(target);
-
+    if (!prediction) {
+      valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
+      if (hintEl) hintEl.textContent = 'Complete your first practice session to see your predicted score.';
+      if (fillEl) fillEl.style.width = '0%';
+    } else {
+      valueEl.innerHTML = `${prediction.low}–${prediction.high}<span class="score-denom">/400</span>`;
+      const midpoint = Math.round((prediction.low + prediction.high) / 2);
+      const gap = target - midpoint;
       if (hintEl) {
-        if (currentIdx === -1 || currentIdx <= targetIdx) {
-          hintEl.textContent = `You're on track for your target of ${target} in ${examLabel}. Keep it up! 🎉`;
+        if (gap > 0) {
+          hintEl.textContent = `${gap} points away from your target of ${target}. Keep pushing!`;
         } else {
-          hintEl.textContent = `Target: ${target} in ${examLabel}. ${gradeOrder[currentIdx - 1] || target} is one step away — keep practising.`;
+          hintEl.innerHTML = `You've hit your target of ${target}! Aim higher? &#x1F389;`;
         }
       }
-      return;
+      if (fillEl) fillEl.style.width = prediction.pct + '%';
     }
-
-    // ── Both JAMB + WAEC — show accuracy % ──────────
-    if (hasJAMB && hasWAEC) {
-      if (labelEl) labelEl.textContent = 'Overall Accuracy';
-      if (wrapEl)  wrapEl.style.display = '';
-
-      const active = masteryRows.filter(r => r.accuracy_avg !== null && r.accuracy_avg !== undefined);
-      if (active.length === 0) {
-        valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
-        if (hintEl) hintEl.textContent = 'Complete a practice session to see your accuracy.';
-        if (fillEl) fillEl.style.width = '0%';
-        return;
-      }
-
-      const avgAcc = active.reduce((s, r) => s + r.accuracy_avg, 0) / active.length;
-      const pct    = Math.round(avgAcc * 100);
-      const estJAMB = Math.round(pct * 4);
-
-      valueEl.innerHTML = `${pct}<span class="score-denom">%</span>`;
-      if (hintEl) hintEl.textContent = `Est. JAMB ~${estJAMB}/400 · Grade ~${accToGrade(avgAcc)} for WAEC/NECO`;
-      if (fillEl) fillEl.style.width = pct + '%';
-    }
-  }
-
-  // ── Grade helper ──────────────────────────────────
-  function accToGrade(acc) {
-    // acc is 0–1 from mastery rows
-    const pct = acc <= 1 ? acc * 100 : acc;
-    if (pct >= 90) return 'A1';
-    if (pct >= 80) return 'B2';
-    if (pct >= 75) return 'B3';
-    if (pct >= 65) return 'C4';
-    if (pct >= 55) return 'C5';
-    if (pct >= 50) return 'C6';
-    if (pct >= 40) return 'D7';
-    if (pct >= 30) return 'E8';
-    return 'F9';
   }
 
   // ── Subjects Slider ───────────────────────────────
