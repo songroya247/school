@@ -104,10 +104,11 @@ const SMARTPATH = (function () {
 
   // ── Topic label formatter ─────────────────────────
   function formatTopicLabel(topicId) {
-    const tail = String(topicId).split('.').slice(1).join(' ') || topicId;
-    return tail
-      .split(/[._-]/).join(' ')
+    // Convert snake_case or dotted IDs to readable labels
+    return topicId
+      .split(/[._-]/).pop()
       .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/_/g, ' ')
       .replace(/\b\w/g, c => c.toUpperCase());
   }
 
