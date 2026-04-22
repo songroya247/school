@@ -107,9 +107,7 @@ if (emailParam) {
 // (page refresh after confirmation).
 
 // Guard: ensure we only process confirmation once even if both
-// the IIFE and onAuthStateChange fire at the same time.
-// TOKEN_REFRESHED is intentionally excluded — it fires on every page
-// load for existing sessions and must not re-trigger profile creation.
+// the IIFE and onAuthStateChange fire at the same time
 let _confirmHandled = false;
 
 async function handleConfirmation() {
@@ -119,17 +117,15 @@ async function handleConfirmation() {
   await AUTH.handlePostConfirm();
 }
 
-// Listen for SIGNED_IN only — fires when Supabase exchanges the token
-// from the email confirmation link.
+// Listen for auth state change (fires when Supabase exchanges the token)
 window.sb.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' && session) {
+  if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
     await handleConfirmation();
   }
 });
 
-// Also check on page load — handles the case where the user has already
-// confirmed and refreshed this page, or the token was exchanged before
-// the listener was registered.
+// Also check on page load — handles the case where the token was
+// already exchanged before the listener was registered
 (async () => {
   await new Promise(r => setTimeout(r, 500));
   const { data: { session } } = await window.sb.auth.getSession();
