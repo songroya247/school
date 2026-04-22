@@ -52,9 +52,12 @@
   //  When auth.js / handlePostConfirm / signup just navigated here,
   //  the SDK may not have replayed the session into the format we
   //  expect yet. Trust the SDK — let auth-guard.js handle validation.
+  //  NOTE: Do NOT remove the flag here. auth-guard.js removes it after
+  //  the full async validation succeeds, preventing a double-consume race
+  //  where a second gatekeeper execution (prefetch, bfcache restore) would
+  //  miss the flag and incorrectly redirect to login.
   try {
     if (sessionStorage.getItem('ue_just_signed_in') === '1') {
-      sessionStorage.removeItem('ue_just_signed_in');
       return; // skip gatekeeper this once; auth-guard does the real check
     }
   } catch (_) { /* sessionStorage blocked — fall through */ }
@@ -63,13 +66,22 @@
   //  We only want to know IF a session likely exists, not parse it.
   //  Any sb-*-auth-token key (including chunked .0/.1 variants)
   //  counts. Validation happens in auth-guard.js with the real SDK.
+  //  We check BOTH localStorage (standard) and sessionStorage (PKCE
+  //  code-exchange flow stores the verifier there and some Supabase
+  //  configs persist the token there too).
   var sessionPresent = false;
   try {
-    for (var i = 0; i < localStorage.length; i++) {
-      var key = localStorage.key(i);
-      if (key && key.indexOf('sb-') === 0 && key.indexOf('-auth-token') !== -1) {
-        sessionPresent = true;
-        break;
+    var stores = [];
+    try { stores.push(localStorage); } catch(_) {}
+    try { stores.push(sessionStorage); } catch(_) {}
+    outer: for (var s = 0; s < stores.length; s++) {
+      var store = stores[s];
+      for (var i = 0; i < store.length; i++) {
+        var key = store.key(i);
+        if (key && key.indexOf('sb-') === 0 && key.indexOf('-auth-token') !== -1) {
+          sessionPresent = true;
+          break outer;
+        }
       }
     }
   } catch (e) {
