@@ -160,22 +160,10 @@ const PAYMENT = (function () {
   /* ── 5. SERVER-SIDE VERIFICATION ──────────────────────────────── */
   async function verifyWithServer(reference, planKey) {
     try {
-      // Prefer auth token from UE_USER (seeded by head-gatekeeper / auth-guard).
-      // BUG-FIX #11: if window.sb is not yet initialised or getSession() returns
-      // null, accessToken would be undefined, producing "Bearer undefined" which
-      // the Edge Function rejects with a confusing 401.  We now bail early with a
-      // clear error message instead of sending a malformed Authorization header.
-      let accessToken = window.UE_USER && window.UE_USER.access_token;
-      if (!accessToken) {
-        if (!window.sb) {
-          return { success: false, message: 'Payment service not ready. Please refresh and try again.' };
-        }
-        const { data: { session } } = await window.sb.auth.getSession();
-        accessToken = session?.access_token;
-      }
-      if (!accessToken) {
-        return { success: false, message: 'Your session has expired. Please log in again and retry.' };
-      }
+      // Prefer auth token from UE_USER (seeded by head-gatekeeper / auth-guard)
+      const accessToken =
+        (window.UE_USER && window.UE_USER.access_token) ||
+        ((await window.sb.auth.getSession()).data.session?.access_token);
 
       const res = await fetch(getVerifyUrl(), {
         method:  'POST',
@@ -211,7 +199,6 @@ const PAYMENT = (function () {
      letting the call fail silently.
   ─────────────────────────────────────────────────────────────────── */
   async function openCheckout(planKey) {
-    const sb = window.sb; // captured for later closures
     // Guard: Paystack CDN
     if (!window.PaystackPop) {
       showPaymentModal('error', null, 'Payment service is not ready. Please refresh the page and try again.');
@@ -308,16 +295,12 @@ const PAYMENT = (function () {
         }
       },
 
-      // BUG-FIX #10: old onCancel was a plain arrow function — the .update() promise
-      // was fire-and-forget. On a slow network the payment record stayed as 'pending'
-      // indefinitely with no feedback. Now async so we can log failures.
-      onCancel: async () => {
+      onCancel: () => {
         setButtonLoading(planKey, false);
-        if (sb) {
-          const { error } = await sb.from('payments')
-            .update({ status: 'cancelled' })
+        if (window.sb) {
+          window.sb.from('payments')
+            .update({ status: 'failed' })
             .eq('reference', reference);
-          if (error) console.warn('[PAYMENT] onCancel status update failed:', error.message);
         }
       },
     });
