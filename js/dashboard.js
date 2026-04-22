@@ -106,17 +106,19 @@ const DASHBOARD = (function () {
     const welcomeEl = document.getElementById('dash-welcome-name');
     if (welcomeEl) welcomeEl.textContent = firstName;
 
-    // Subtitle — keep it short; the card already greets by name above.
+    // Subtitle
     const subEl = document.getElementById('dash-welcome-subtitle');
     if (subEl) {
-      const parts = [];
+      let text = '';
       if (examDays !== null && examDays > 0) {
-        parts.push(`${examDays} day${examDays !== 1 ? 's' : ''} to exam`);
+        text = `${examDays} day${examDays !== 1 ? 's' : ''} to your exam. `;
       } else if (examDays !== null && examDays <= 0) {
-        parts.push('Exam week');
+        text = 'Exam time is here! ';
       }
-      parts.push(streak > 0 ? `${streak}-day streak \u{1F525}` : 'No streak yet');
-      subEl.textContent = parts.join(' \u00B7 ');
+      text += streak > 0
+        ? `You're on a ${streak}-day streak — keep it up! &#x1F525;`
+        : 'Start a session today to build your streak.';
+      subEl.innerHTML = text; // innerHTML needed for HTML entities (emoji)
     }
 
     // Next recommended topic
