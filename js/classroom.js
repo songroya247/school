@@ -664,29 +664,14 @@ const CLASSROOM = (function () {
       practiceBtn.href = `cbt.html?subject=${parts.subj}&topic=${encodeURIComponent(parts.topic)}`;
     }
 
-    // Mark as studied in Supabase (fire-and-forget).
-    // BUG-FIX #14: the old code used upsert() without accuracy_avg / mastery_level,
-    // which reset those columns to NULL for any topic the student opened — wiping
-    // hard-earned mastery data.  We now use two targeted operations:
-    //   1. INSERT ... ON CONFLICT DO NOTHING   → creates the row if it doesn't exist.
-    //   2. UPDATE ... WHERE user_id = ...      → only touches last_studied + status,
-    //      leaving accuracy_avg / mastery_level completely untouched.
+    // Mark as studied in Supabase (fire-and-forget)
     if (userId) {
-      (async () => {
-        // Create the row if this is the student's first visit to this topic
-        await window.sb.from('topic_mastery').insert({
-          user_id:     userId,
-          topic_id:    topic.id,
-          last_studied: new Date().toISOString(),
-          status:      'IN_PROGRESS',
-        }).onConflict('user_id,topic_id').ignore();   // no-op if row already exists
-
-        // Update only the two fields we care about — accuracy untouched
-        await window.sb.from('topic_mastery')
-          .update({ last_studied: new Date().toISOString(), status: 'IN_PROGRESS' })
-          .eq('user_id', userId)
-          .eq('topic_id', topic.id);
-      })();
+      window.sb.from('topic_mastery').upsert({
+        user_id:     userId,
+        topic_id:    topic.id,
+        last_studied: new Date().toISOString(),
+        status:      'IN_PROGRESS'
+      }, { onConflict: 'user_id,topic_id', ignoreDuplicates: false }).then(() => {});
     }
   }
 
@@ -770,7 +755,7 @@ const CLASSROOM = (function () {
     setEl('quiz-q-total', String(quizState.questions.length));
 
     const questionEl = document.getElementById('quiz-question');
-    if (questionEl) questionEl.textContent = q.q;
+    if (questionEl) questionEl.innerHTML = q.q;
 
     // Dots
     const dotsEl = document.getElementById('quiz-dots');
@@ -788,8 +773,7 @@ const CLASSROOM = (function () {
       q.opts.forEach((opt, i) => {
         const btn = document.createElement('button');
         btn.className = 'drill-option';
-        btn.innerHTML = `<span class="opt-label">${String.fromCharCode(65 + i)}</span>`;
-        btn.appendChild(document.createTextNode(opt));
+        btn.innerHTML = `<span class="opt-label">${String.fromCharCode(65 + i)}</span>${opt}`;
         btn.onclick = () => checkAnswer(i, btn);
         optsEl.appendChild(btn);
       });
@@ -813,12 +797,10 @@ const CLASSROOM = (function () {
       fb.style.display = 'block';
       if (isCorrect) {
         fb.style.cssText = 'display:block;background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.25);padding:12px 16px;border-radius:10px;font-weight:600;margin-top:12px';
-        fb.innerHTML = '&#x2713; Correct! Well done.';
+        fb.textContent = '&#x2713; Correct! Well done.';
       } else {
         fb.style.cssText = 'display:block;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.25);padding:12px 16px;border-radius:10px;font-weight:600;margin-top:12px';
-        const safeAns = q.opts[q.ans]
-          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        fb.innerHTML = `&#x2717; Not quite. Correct answer: ${safeAns}.`;
+        fb.textContent = `&#x2717; Not quite. Correct answer: ${q.opts[q.ans]}.`;
         const allBtns = document.querySelectorAll('#quiz-options .drill-option');
         if (allBtns[q.ans]) allBtns[q.ans].style.borderColor = '#22c55e';
       }
