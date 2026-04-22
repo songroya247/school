@@ -664,14 +664,29 @@ const CLASSROOM = (function () {
       practiceBtn.href = `cbt.html?subject=${parts.subj}&topic=${encodeURIComponent(parts.topic)}`;
     }
 
-    // Mark as studied in Supabase (fire-and-forget)
+    // Mark as studied in Supabase (fire-and-forget).
+    // BUG-FIX #14: the old code used upsert() without accuracy_avg / mastery_level,
+    // which reset those columns to NULL for any topic the student opened — wiping
+    // hard-earned mastery data.  We now use two targeted operations:
+    //   1. INSERT ... ON CONFLICT DO NOTHING   → creates the row if it doesn't exist.
+    //   2. UPDATE ... WHERE user_id = ...      → only touches last_studied + status,
+    //      leaving accuracy_avg / mastery_level completely untouched.
     if (userId) {
-      window.sb.from('topic_mastery').upsert({
-        user_id:     userId,
-        topic_id:    topic.id,
-        last_studied: new Date().toISOString(),
-        status:      'IN_PROGRESS'
-      }, { onConflict: 'user_id,topic_id', ignoreDuplicates: false }).then(() => {});
+      (async () => {
+        // Create the row if this is the student's first visit to this topic
+        await window.sb.from('topic_mastery').insert({
+          user_id:     userId,
+          topic_id:    topic.id,
+          last_studied: new Date().toISOString(),
+          status:      'IN_PROGRESS',
+        }).onConflict('user_id,topic_id').ignore();   // no-op if row already exists
+
+        // Update only the two fields we care about — accuracy untouched
+        await window.sb.from('topic_mastery')
+          .update({ last_studied: new Date().toISOString(), status: 'IN_PROGRESS' })
+          .eq('user_id', userId)
+          .eq('topic_id', topic.id);
+      })();
     }
   }
 
