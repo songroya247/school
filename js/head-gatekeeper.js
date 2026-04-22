@@ -48,63 +48,90 @@
 
   if (!needsAuth) return; // public page — nothing to do
 
-  // ── Step 3: One-shot fresh-login bypass ─────────────────────────
-  //  When auth.js / handlePostConfirm / signup just navigated here,
-  //  the SDK may not have replayed the session into the format we
-  //  expect yet. Trust the SDK — let auth-guard.js handle validation.
-  //  NOTE: Do NOT remove the flag here. auth-guard.js removes it after
-  //  the full async validation succeeds, preventing a double-consume race
-  //  where a second gatekeeper execution (prefetch, bfcache restore) would
-  //  miss the flag and incorrectly redirect to login.
-  try {
-    if (sessionStorage.getItem('ue_just_signed_in') === '1') {
-      return; // skip gatekeeper this once; auth-guard does the real check
-    }
-  } catch (_) { /* sessionStorage blocked — fall through */ }
+  // ── Step 3: Read session from localStorage (SYNCHRONOUS) ────────
+  //  Supabase v2 persists the session under a key that follows the
+  //  pattern:  sb-<project-ref>-auth-token
+  //  We scan for it rather than hardcode the project ref so this
+  //  script survives a project migration.
+  var session = null;
 
-  // ── Step 3b: Best-effort presence check (NOT validation) ────────
-  //  We only want to know IF a session likely exists, not parse it.
-  //  Any sb-*-auth-token key (including chunked .0/.1 variants)
-  //  counts. Validation happens in auth-guard.js with the real SDK.
-  //  We check BOTH localStorage (standard) and sessionStorage (PKCE
-  //  code-exchange flow stores the verifier there and some Supabase
-  //  configs persist the token there too).
-  var sessionPresent = false;
   try {
-    var stores = [];
-    try { stores.push(localStorage); } catch(_) {}
-    try { stores.push(sessionStorage); } catch(_) {}
-    outer: for (var s = 0; s < stores.length; s++) {
-      var store = stores[s];
-      for (var i = 0; i < store.length; i++) {
-        var key = store.key(i);
-        if (key && key.indexOf('sb-') === 0 && key.indexOf('-auth-token') !== -1) {
-          sessionPresent = true;
-          break outer;
+    for (var i = 0; i < localStorage.length; i++) {
+      var key = localStorage.key(i);
+      if (key && key.indexOf('sb-') === 0 && key.indexOf('-auth-token') !== -1) {
+        var raw = localStorage.getItem(key);
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          // Supabase stores { access_token, expires_at, user, … }
+          // expires_at is a UNIX timestamp (seconds)
+          if (parsed && parsed.access_token) {
+            var expiresAt = parsed.expires_at || 0;
+            var nowSecs   = Math.floor(Date.now() / 1000);
+            if (expiresAt > nowSecs) {
+              session = parsed;
+            }
+            // Even an expired token is found — we'll let auth-guard
+            // handle the refresh below via UE_USER.expired flag.
+            if (!session && parsed.access_token) {
+              session = parsed;
+              session._expired = true;
+            }
+          }
         }
+        break;
       }
     }
   } catch (e) {
-    sessionPresent = false;
+    // localStorage blocked (private mode with strict settings) — treat as no session
+    session = null;
   }
 
   // ── Step 4: Hard-redirect if no session at all ─────────────────
-  if (!sessionPresent) {
+  if (!session) {
+    // window.location.replace prevents the protected page from
+    // appearing in browser history (can't press Back to get back in)
     window.location.replace(
       LOGIN_PAGE + '?next=' + encodeURIComponent(currentPage)
     );
+    // Throw to hard-stop any remaining synchronous script on this page
     throw new Error('[UE Gatekeeper] No session — redirecting to login.');
   }
 
-  // ── Step 5: Minimal optimistic seed ────────────────────────────
-  //  Real values come from auth-guard.js.
+  // ── Step 5: Seed window.UE_USER for downstream scripts ─────────
+  //  This is a LIGHTWEIGHT seed only — no DB call yet.
+  //  auth-guard.js will fully validate and enrich this object.
+  var user = (session.user) ? session.user : {};
+
+  // Build the global UE_USER object (non-enumerable to reduce console noise)
   Object.defineProperty(window, 'UE_USER', {
-    value: { id: null, email: null, full_name: null,
-             access_token: null, _expired: false, is_premium: null },
-    writable: true, configurable: true, enumerable: true,
+    value: {
+      id:           user.id           || null,
+      email:        user.email        || null,
+      full_name:    (user.user_metadata && user.user_metadata.full_name) || null,
+      access_token: session.access_token,
+      _expired:     !!session._expired,
+      // Premium status is UNKNOWN at this stage — auth-guard.js sets it
+      is_premium:   null,
+    },
+    writable:     true,   // auth-guard.js will overwrite with real profile data
+    configurable: true,
+    enumerable:   true,
   });
 
-  // ── Step 6: Premium page — optimistic client-side check ────────
+  // ── Step 6: Expired token fast-path ────────────────────────────
+  //  The token exists but has expired.  Hide the body until
+  //  auth-guard.js either refreshes the session or redirects.
+  if (session._expired) {
+    // Inject a temporary style to keep the page invisible
+    var s = document.createElement('style');
+    s.id = 'ue-gatekeeper-veil';
+    s.textContent = 'body{visibility:hidden!important}';
+    // document.head may not exist yet (we're at top of <head>)
+    // but createElement+appendChild works fine in partial parse state
+    (document.head || document.documentElement).appendChild(s);
+  }
+
+  // ── Step 7: Premium page — optimistic client-side check ────────
   //  A definitive check is done in auth-guard.js with a DB read.
   //  This is just a best-effort early redirect using cached profile
   //  data stored by auth-guard on last visit.
