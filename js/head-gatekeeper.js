@@ -59,6 +59,23 @@
     }
   } catch (_) { /* sessionStorage blocked — fall through */ }
 
+  // ── Step 3c: Redirect-reason bypass ─────────────────────────────
+  //  If auth-guard.js (on a protected page) sent us back here with
+  //  ?reason= or ?next=, it means the guard already handled the
+  //  session problem — the Auth Session it found was invalid/orphaned
+  //  and it has already called signOut() before redirecting.
+  //  In this case we must NOT immediately bounce the user back to
+  //  dashboard.html; we should let them see the login form.
+  //
+  //  We also skip if ?next= is present because that always signals an
+  //  intentional redirect from some other part of the app.
+  try {
+    var _qs = window.location.search;
+    if (_qs.indexOf('reason=') !== -1 || _qs.indexOf('next=') !== -1) {
+      return; // Let login.html's circuit breaker take over — do not redirect.
+    }
+  } catch (_) { /* non-fatal — fall through */ }
+
   // ── Step 3b: Best-effort presence check (NOT validation) ────────
   //  We only want to know IF a session likely exists, not parse it.
   //  Any sb-*-auth-token key (including chunked .0/.1 variants)
