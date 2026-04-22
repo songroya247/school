@@ -333,12 +333,68 @@
 // â”€â”€ Initialise Supabase â”€â”€
 // window.sb is set by js/supabase.js â€” credentials live only in js/config.js
 
-// Redirect already-logged-in users.
+// â”€â”€ Circuit-breaker: suppress auto-redirect when URL carries a reason â”€â”€â”€â”€â”€â”€
+//
+//  The redirect loop happens when:
+//    1. auth-guard.js on dashboard detects an orphaned user â†’ redirects to
+//       login.html?reason=no_profile&next=dashboard.html
+//    2. login.html sees a valid session â†’ redirects back to dashboard.html
+//    3. Go to 1 â†’ loop.
+//
+//  Rule: if ?reason= OR ?next= is present in the URL, a guard or server
+//  explicitly sent us here.  Do NOT auto-redirect.  Show the form instead
+//  so the user can re-authenticate (or see an error message).
+//
+//  auth-guard.js now calls signOut() before redirecting for the
+//  'no_profile' case, so by the time we check getSession() the session
+//  will be gone â€” but we keep this check as a belt-and-suspenders
+//  guard for any future reason codes where signOut() may not apply.
+//
+const _loginParams = new URLSearchParams(window.location.search);
+const _hasRedirectReason = _loginParams.has('reason') || _loginParams.has('next');
+
+// Surface reason-specific messages to the user
+(function () {
+  const reason = _loginParams.get('reason');
+  if (!reason) return;
+  const messages = {
+    no_profile:        'Your account data could not be found. Please sign in again.',
+    no_session:        'Your session has expired. Please sign in again.',
+    signed_out:        'You have been signed out.',
+    sdk_missing:       'A technical error occurred. Please refresh and try again.',
+    premium_required:  'This page requires a premium subscription.',
+    not_subscribed:    'Please subscribe to access this content.',
+    subscription_expired: 'Your subscription has expired. Please renew to continue.',
+  };
+  const msg = messages[reason];
+  if (msg) {
+    // Show the error banner as soon as the DOM is ready
+    const show = () => {
+      const el = document.getElementById('auth-error');
+      if (el) { el.textContent = msg; el.style.display = 'block'; }
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', show);
+    } else {
+      show();
+    }
+  }
+})();
+
+// Redirect already-logged-in users â€” but only if no redirect reason is present.
 // Uses replace() so the login page is NOT in browser history.
 // The onAuthStateChange listener below is suppressed on this page so
 // a SIGNED_IN event fired by the SDK init never double-redirects.
 let _loginChecked = false;
 (async () => {
+  // â”€â”€ Circuit breaker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  //  If the URL has ?reason= or ?next= the user was sent here by a
+  //  guard. Skip the auto-redirect entirely so they see the login form.
+  if (_hasRedirectReason) {
+    _loginChecked = true;
+    return;
+  }
+
   // Don't bounce a user who literally just signed in (defensive)
   if (sessionStorage.getItem('ue_just_signed_in') === '1') {
     _loginChecked = true;
