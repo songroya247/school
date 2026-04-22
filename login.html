@@ -339,13 +339,24 @@
 // a SIGNED_IN event fired by the SDK init never double-redirects.
 let _loginChecked = false;
 (async () => {
+  // Don't bounce a user who literally just signed in (defensive)
+  if (sessionStorage.getItem('ue_just_signed_in') === '1') {
+    _loginChecked = true;
+    return;
+  }
+  // Wait up to 2s for the Supabase SDK to be ready
+  for (let i = 0; i < 20 && !window.sb; i++) {
+    await new Promise(r => setTimeout(r, 100));
+  }
+  if (!window.sb) { _loginChecked = true; return; }
+
   try {
     const { data: { session } } = await window.sb.auth.getSession();
     if (session && !_loginChecked) {
       _loginChecked = true;
       window.location.replace('dashboard.html');
     } else {
-      _loginChecked = true; // mark done even if no session
+      _loginChecked = true;
     }
   } catch (e) {
     _loginChecked = true;
