@@ -92,7 +92,7 @@
     writable: true, configurable: true, enumerable: true,
   });
 
-  // ── Step 7: Premium page — optimistic client-side check ────────
+  // ── Step 6: Premium page — optimistic client-side check ────────
   //  A definitive check is done in auth-guard.js with a DB read.
   //  This is just a best-effort early redirect using cached profile
   //  data stored by auth-guard on last visit.
