@@ -77,22 +77,16 @@ const AUTH_GUARD = (function () {
 
   // ── Redirect helpers ───────────────────────────────────────────
   function redirectToLogin(reason) {
-    const page = currentPage();
-    // Never redirect to login if already on a non-protected page
-    if (page === LOGIN_PAGE || page === 'confirm.html' || page === 'index.html' ||
-        page === 'pricing.html' || page === 'forgot-password.html') return;
     window.location.replace(
-      LOGIN_PAGE + '?next=' + encodeURIComponent(page) +
+      LOGIN_PAGE + '?next=' + encodeURIComponent(currentPage()) +
       (reason ? '&reason=' + encodeURIComponent(reason) : '')
     );
   }
 
   function redirectToPricing(reason) {
-    const page = currentPage();
-    if (page === PRICING_PAGE) return;
     window.location.replace(
       PRICING_PAGE + '?reason=' + encodeURIComponent(reason || 'premium_required') +
-      '&next=' + encodeURIComponent(page)
+      '&next=' + encodeURIComponent(currentPage())
     );
   }
 
@@ -104,62 +98,22 @@ const AUTH_GUARD = (function () {
   }
 
   // ── Profile fetch ───────────────────────────────────────────────
-  //
-  //  Returns one of three things:
-  //    • A profile object  — row found, all good.
-  //    • null              — row definitively NOT FOUND (PGRST116).
-  //                          The user is orphaned; caller should sign out + redirect.
-  //    • PROFILE_NET_ERROR — transient error that persisted after all retries.
-  //                          Caller must NOT sign the user out.
-  //
-  //  Retry policy: on any non-PGRST116 error, wait 1.5 s and try once more
-  //  before returning PROFILE_NET_ERROR.  This silently recovers from the
-  //  brief TCP stall that mobile radios produce when waking from sleep.
-  //
-  const PROFILE_NET_ERROR = Symbol('PROFILE_NET_ERROR');
-
-  const PROFILE_SELECT =
-    'id, full_name, email, is_premium, subscription_expiry, ' +
-    'total_xp, accuracy_avg, mastery_level, status, ' +
-    'exam_types, exam_date, target_score, target_grade, current_skill_level, ' +
-    'report_share_token, usage_logs, exam_subjects, study_mode, ' +
-    'smartpath_queue, created_at';
-
-  async function _fetchProfileOnce(userId) {
+  async function getProfile(userId) {
     const { data, error } = await window.sb
       .from('profiles')
-      .select(PROFILE_SELECT)
+      .select(
+        'id, full_name, email, is_premium, subscription_expiry, ' +
+        'total_xp, accuracy_avg, mastery_level, status, ' +
+        'exam_types, exam_date, target_score, current_skill_level, ' +
+        'report_share_token, usage_logs, exam_subjects, study_mode, ' +
+        'smartpath_queue, created_at'
+      )
       .eq('id', userId)
       .single();
-    return { data, error };
-  }
-
-  async function getProfile(userId) {
-    let { data, error } = await _fetchProfileOnce(userId);
 
     if (error) {
-      // PGRST116 = "0 rows returned" for .single() — definitively no row.
-      if (error.code === 'PGRST116') {
-        console.warn('[AUTH_GUARD] Profile row not found for user:', userId);
-        return null; // Orphaned user — caller will sign out + redirect
-      }
-
-      // Any other error is treated as transient (network blip, 5xx, etc.).
-      // Wait 1.5 s and retry ONCE before giving up.
-      console.warn('[AUTH_GUARD] Profile fetch error on first attempt — retrying in 1.5 s:',
-                   error.code, error.message);
-      await new Promise(r => setTimeout(r, 1500));
-
-      ({ data, error } = await _fetchProfileOnce(userId));
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          console.warn('[AUTH_GUARD] Profile row not found (retry):', userId);
-          return null;
-        }
-        console.error('[AUTH_GUARD] Profile fetch failed after retry:', error.code, error.message);
-        return PROFILE_NET_ERROR;
-      }
+      console.error('[AUTH_GUARD] Profile fetch error:', error.message);
+      return null;
     }
 
     // Cache a lightweight version for the head-gatekeeper's optimistic check
@@ -201,7 +155,7 @@ const AUTH_GUARD = (function () {
         'This feature requires a UE School subscription. Choose a plan to continue.',
         'warning', 6000
       );
-      setTimeout(() => safeRedirectToPricing('not_subscribed'), 1800);
+      setTimeout(() => redirectToPricing('not_subscribed'), 1800);
       return false;
     }
 
@@ -210,7 +164,7 @@ const AUTH_GUARD = (function () {
         'Your subscription has expired. Renew your plan to access this content.',
         'warning', 6000
       );
-      setTimeout(() => safeRedirectToPricing('subscription_expired'), 1800);
+      setTimeout(() => redirectToPricing('subscription_expired'), 1800);
       return false;
     }
 
@@ -233,17 +187,6 @@ const AUTH_GUARD = (function () {
     if (avatarEl) avatarEl.innerHTML = initials + proBadge;
     if (nameEl)   nameEl.textContent = (profile.full_name || '').split(' ').slice(0, 2).join(' ');
     if (xpEl)     xpEl.textContent   = `${profile.total_xp ?? 0} XP`;
-
-    // Streak badge (parity with dashboard.js)
-    const streakEl = document.getElementById('nav-streak');
-    if (streakEl && profile && Array.isArray(profile.usage_logs)) {
-      const days = new Set(profile.usage_logs.map(l => new Date(l.ts).toDateString()));
-      let streak = 0, d = new Date();
-      while (days.has(d.toDateString())) { streak++; d.setDate(d.getDate() - 1); }
-      streakEl.innerHTML = streak > 0
-        ? `&#x1F525; ${streak}-day streak`
-        : '&#x1F525; Start streak';
-    }
 
     // Fallback: replace nav-right on pages that don't have avatar/name elements
     if (!avatarEl && !nameEl) {
@@ -269,23 +212,10 @@ const AUTH_GUARD = (function () {
 
   // ── Logout ──────────────────────────────────────────────────────
   async function logout() {
-    sessionStorage.removeItem('ue_profile_cache');
-    localStorage.removeItem('ue_profile_cache'); // belt + braces
     await window.sb.auth.signOut();
+    // Clear the profile cache on logout
+    try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
     window.location.replace(LOGIN_PAGE);
-  }
-
-  // ── Global redirect lock — prevents any double-navigation ─────
-  let _redirecting = false;
-  function safeRedirectToLogin(reason) {
-    if (_redirecting) return;
-    _redirecting = true;
-    redirectToLogin(reason);
-  }
-  function safeRedirectToPricing(reason) {
-    if (_redirecting) return;
-    _redirecting = true;
-    redirectToPricing(reason);
   }
 
   // ── Main init ────────────────────────────────────────────────────
@@ -294,7 +224,7 @@ const AUTH_GUARD = (function () {
     if (!window.sb) {
       if (!window.supabase) {
         console.error('[AUTH_GUARD] Supabase SDK not loaded.');
-        safeRedirectToLogin('sdk_missing');
+        redirectToLogin('sdk_missing');
         return null;
       }
       window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -306,7 +236,7 @@ const AUTH_GUARD = (function () {
     if (!session) {
       // No valid session (refresh failed or never existed)
       try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
-      safeRedirectToLogin('no_session');
+      redirectToLogin('no_session');
       return null;
     }
 
@@ -316,67 +246,12 @@ const AUTH_GUARD = (function () {
     // ── 4. Fetch the real profile from Supabase ──────────────────
     let profile = await getProfile(session.user.id);
 
-    // ── 4a. Handle network / transient errors ─────────────────────
-    //  PROFILE_NET_ERROR means the fetch + its one retry both failed.
-    //  Before showing the error toast, attempt to serve the last
-    //  cached profile from sessionStorage so the dashboard can still
-    //  render for users on intermittent connections.
-    //  We do NOT update the cache in this fallback path — the stale
-    //  data is display-only and the guard treats premium status as
-    //  'unknown' (neither upgrading nor downgrading access).
-    if (profile === PROFILE_NET_ERROR) {
-      liftVeil();
-      let cacheHit = false;
-      try {
-        const cached = sessionStorage.getItem('ue_profile_cache');
-        if (cached) {
-          const partial = JSON.parse(cached);
-          // Merge onto a skeleton so downstream code doesn't choke on nulls
-          profile = {
-            id:                  session.user.id,
-            email:               session.user.email,
-            full_name:           (window.UE_USER && window.UE_USER.full_name) || session.user.email.split('@')[0],
-            is_premium:          partial.is_premium          ?? false,
-            subscription_expiry: partial.subscription_expiry ?? null,
-            total_xp: 0, accuracy_avg: null, mastery_level: null,
-            status: null, exam_types: [], exam_date: null,
-            target_score: null, target_grade: null,
-            current_skill_level: null, report_share_token: null,
-            usage_logs: [], exam_subjects: [], study_mode: null,
-            smartpath_queue: [], created_at: null,
-            _fromCache: true, // flag so dashboard.js can show a soft warning
-          };
-          cacheHit = true;
-          console.warn('[AUTH_GUARD] Using cached profile after network error.');
-          showToast(
-            'Offline mode — showing last saved data. Some features may be limited.',
-            'warning', 6000
-          );
-        }
-      } catch (_) { /* cache parse failed — fall through to hard error */ }
-
-      if (!cacheHit) {
-        showToast(
-          'Could not reach the server. Please check your connection and refresh.',
-          'error', 8000
-        );
-        console.error('[AUTH_GUARD] Aborting: profile fetch failed and no cache available.');
-        return null; // Do not redirect — let the user retry manually.
-      }
-    }
-
-    if (profile === null) {
-      // Profile row is definitively missing (PGRST116 — 0 rows).
-      // This means the Auth record exists but there is no matching
-      // profiles row.  This is the "orphaned user" state that causes
-      // the redirect loop: login.html sees a valid session and bounces
-      // the user back here, which then redirects them back to login …
-      //
-      // FIX: Attempt auto-recovery first (new sign-up whose profile
-      // insert raced or failed).  If recovery succeeds, carry on.
-      // If recovery fails, SIGN OUT before redirecting so that
-      // login.html finds NO session and shows the form instead of
-      // immediately bouncing back.
+    if (!profile) {
+      // Profile missing — new user whose email was just confirmed.
+      // Attempt to build the profile from session metadata and
+      // sessionStorage (written during signup) rather than sending
+      // them to login (which causes a redirect loop because their
+      // session IS valid — login would immediately send them back here).
       try {
         const meta        = session.user.user_metadata || {};
         const pending     = sessionStorage.getItem('ue_pending_profile');
@@ -387,8 +262,7 @@ const AUTH_GUARD = (function () {
           email:       session.user.email,
           examTypes:   pendingData.examTypes   || [],
           examDate:    pendingData.examDate    || null,
-          targetScore: pendingData.targetScore || null,
-          targetGrade: pendingData.targetGrade || null,
+          targetScore: pendingData.targetScore || 250,
           subjects:    pendingData.subjects    || [],
           studyMode:   pendingData.studyMode   || 'drill'
         };
@@ -400,7 +274,6 @@ const AUTH_GUARD = (function () {
           exam_types:          formData.examTypes,
           exam_date:           formData.examDate || null,
           target_score:        formData.targetScore,
-          target_grade:        formData.targetGrade,
           current_skill_level: 3,
           status:              'NIL',
           is_premium:          false,
@@ -415,40 +288,13 @@ const AUTH_GUARD = (function () {
 
         // Re-fetch the profile we just created
         profile = await getProfile(session.user.id);
-
-        // If the re-fetch itself returned a network error, don't sign out
-        if (profile === PROFILE_NET_ERROR) {
-          liftVeil();
-          showToast(
-            'Could not reach the server after profile recovery. Please refresh.',
-            'error', 8000
-          );
-          return null;
-        }
       } catch (profileErr) {
         console.error('[AUTH_GUARD] profile auto-create failed:', profileErr);
       }
 
-      // ── Hard logout before redirect ──────────────────────────────
-      //  If the profile is STILL missing after the recovery attempt,
-      //  the user is genuinely orphaned and cannot be recovered here.
-      //  We MUST sign them out before redirecting to login.html.
-      //  Without this, login.html will see a valid session and bounce
-      //  the user straight back — causing the infinite redirect loop.
+      // If still no profile after recovery attempt, redirect to login
       if (!profile) {
-        console.warn('[AUTH_GUARD] Orphaned user detected. Signing out before redirect.');
-        try {
-          sessionStorage.removeItem('ue_profile_cache');
-          sessionStorage.removeItem('ue_pending_profile');
-        } catch (_) {}
-        try {
-          await window.sb.auth.signOut(); // ← clears localStorage session tokens
-        } catch (signOutErr) {
-          console.error('[AUTH_GUARD] signOut failed:', signOutErr);
-          // Even if signOut errors, still redirect — the session may be
-          // partially cleared; login.html's circuit breaker will handle it.
-        }
-        safeRedirectToLogin('no_profile');
+        redirectToLogin('no_profile');
         return null;
       }
     }
@@ -458,16 +304,12 @@ const AUTH_GUARD = (function () {
     if (premiumOk === false) return null; // redirect in progress
 
     // ── 6. Set up auth-state-change listener ────────────────────
-    // ONLY act on SIGNED_OUT. Every other event (INITIAL_SESSION,
-    // SIGNED_IN, TOKEN_REFRESHED arriving without session) fires
-    // legitimately during normal page loads and MUST NOT trigger a
-    // redirect — we already validated the session above.
     window.sb.auth.onAuthStateChange((event, newSession) => {
-      if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_OUT' || (!newSession && event !== 'INITIAL_SESSION')) {
         try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
-        safeRedirectToLogin('signed_out');
-        return;
+        redirectToLogin('signed_out');
       }
+      // TOKEN_REFRESHED — update the cached token in UE_USER
       if (event === 'TOKEN_REFRESHED' && newSession) {
         if (window.UE_USER) window.UE_USER.access_token = newSession.access_token;
         window.UE_SESSION = newSession;
