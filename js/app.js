@@ -9,21 +9,6 @@ function toast(msg, duration = 3000) {
   setTimeout(() => el.classList.remove('show'), duration);
 }
 
-// ── BUG-FIX #7: calcStreak was duplicated in dashboard.js and auth-guard.js.
-// Duplicates diverged — the nav streak and the dashboard streak could show
-// different values.  Single canonical implementation here; both files call this.
-function calcStreak(usageLogs) {
-  if (!usageLogs || usageLogs.length === 0) return 0;
-  const days = new Set(usageLogs.map(l => new Date(l.ts).toDateString()));
-  let streak = 0;
-  let d = new Date();
-  while (days.has(d.toDateString())) {
-    streak++;
-    d.setDate(d.getDate() - 1);
-  }
-  return streak;
-}
-
 // Slider factory
 function initSlider(trackId, prevBtnId, nextBtnId) {
   const track = document.getElementById(trackId);
