@@ -41,9 +41,9 @@
   --warning:      #f59e0b;
   --danger:       #ef4444;
 
-  --font-head:    'Syne', sans-serif;
-  --font-body:    'DM Sans', sans-serif;
-  --font-mono:    'JetBrains Mono', monospace;
+  --font-head:    'Syne', "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  --font-body:    'DM Sans', "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  --font-mono:    'JetBrains Mono', "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", monospace;
 
   --radius-sm:    8px;
   --radius:       14px;
@@ -133,7 +133,7 @@ a { text-decoration: none; color: inherit; }
   gap: 0;
 }
 .nav-logo {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: .06em;
@@ -239,7 +239,7 @@ a { text-decoration: none; color: inherit; }
 main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex; flex-direction: column; gap: 36px; }
 
 /* SECTION HEADERS */
-.section-title { font-family: var(--font-head); font-size: 1.5rem; font-weight: 700; color: var(--text); letter-spacing: -.02em; }
+.section-title { font-family: var(--font-head); font-size: 1.2rem; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
 .section-title span { color: var(--accent); }
 
 /* CARDS */
@@ -266,24 +266,24 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
 .dash-welcome-card { background: linear-gradient(135deg, #1a56ff 0%, #2563eb 50%, #1d4ed8 100%); border: none; border-radius: var(--radius-xl); overflow: hidden; position: relative; box-shadow: var(--shadow-accent); }
 .dash-welcome-card::before { content: ''; position: absolute; top: -60px; right: -60px; width: 280px; height: 280px; background: rgba(255,255,255,.06); border-radius: 50%; }
 .dash-welcome-card::after { content: ''; position: absolute; bottom: -80px; right: 60px; width: 200px; height: 200px; background: rgba(255,255,255,.04); border-radius: 50%; }
-.dash-welcome-card .card-body { padding: 32px; color: #fff; position: relative; z-index: 1; }
-.dash-welcome-card h1 { font-family: var(--font-head); font-size: 2rem; font-weight: 800; margin-bottom: 8px; line-height: 1.2; letter-spacing: -.03em; }
-.dash-welcome-card .subtitle { color: rgba(255,255,255,.75); margin-bottom: 24px; font-size: 1rem; }
-.dash-welcome-inner { background: rgba(0,0,0,.2); border: 1px solid rgba(255,255,255,.15); border-radius: var(--radius); padding: 16px 20px; display: inline-flex; align-items: center; gap: 16px; flex-wrap: wrap; backdrop-filter: blur(8px); }
-.dash-welcome-inner .icon { font-size: 1.6rem; flex-shrink: 0; }
-.dash-welcome-inner .label { font-size: .75rem; opacity: .7; margin-bottom: 2px; }
-.dash-welcome-inner .topic { font-weight: 700; font-size: .95rem; }
+.dash-welcome-card .card-body { padding: 28px; color: #fff; position: relative; z-index: 1; }
+.dash-welcome-card h1 { font-family: var(--font-head); font-size: 1.45rem; font-weight: 800; margin-bottom: 6px; line-height: 1.25; letter-spacing: -.02em; }
+.dash-welcome-card .subtitle { color: rgba(255,255,255,.75); margin-bottom: 20px; font-size: .88rem; }
+.dash-welcome-inner { background: rgba(0,0,0,.2); border: 1px solid rgba(255,255,255,.15); border-radius: var(--radius); padding: 13px 16px; display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; backdrop-filter: blur(8px); }
+.dash-welcome-inner .icon { font-size: 1.3rem; flex-shrink: 0; }
+.dash-welcome-inner .label { font-size: .7rem; opacity: .7; margin-bottom: 2px; }
+.dash-welcome-inner .topic { font-weight: 700; font-size: .86rem; }
 
 /* SCORE CARD */
 .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px 24px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 2px 12px rgba(26,86,255,.06); }
 .score-card::before { content: ''; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); width: 180px; height: 180px; background: radial-gradient(circle, rgba(26,86,255,.08) 0%, transparent 70%); pointer-events: none; }
-.score-label { font-size: .7rem; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px; }
-.score-value { font-family: 'Inter', sans-serif; font-size: 3rem; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 4px; letter-spacing: -.03em; }
-.score-denom { font-size: 1.2rem; color: var(--text-3); font-weight: 400; font-family: var(--font-mono); }
-.score-progress-wrap { width: 100%; max-width: 180px; margin: 16px auto 12px; }
-.progress-track { height: 6px; background: rgba(255,255,255,.08); border-radius: 100px; overflow: hidden; }
+.score-label { font-size: .65rem; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 10px; }
+.score-value { font-family: 'Inter', "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 2.4rem; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 4px; letter-spacing: -.03em; }
+.score-denom { font-size: 1rem; color: var(--text-3); font-weight: 400; font-family: var(--font-mono); }
+.score-progress-wrap { width: 100%; max-width: 160px; margin: 14px auto 10px; }
+.progress-track { height: 5px; background: var(--bg-3); border-radius: 100px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--warning), var(--accent)); transition: width .8s cubic-bezier(.4,0,.2,1); }
-.score-hint { font-size: .8rem; color: var(--text-2); font-weight: 600; line-height: 1.5; position: relative; z-index: 1; }
+.score-hint { font-size: .75rem; color: var(--text-2); font-weight: 600; line-height: 1.5; position: relative; z-index: 1; }
 
 /* SUBJECTS SLIDER */
 .dash-subj-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -329,6 +329,45 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
 .perf-topic-label { font-size: .75rem; font-weight: 700; min-width: 110px; color: var(--text-3); }
 .perf-topic-row .btn-sm { flex-shrink: 0; padding: 5px 12px; font-size: .72rem; }
 
+/* PERFORMANCE ANALYTICS CHART */
+.perf-analytics-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 2px 12px rgba(26,86,255,.06); }
+.perf-analytics-header { padding: 20px 24px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.perf-analytics-title { font-family: var(--font-head); font-weight: 700; font-size: 1rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.perf-analytics-title svg { color: var(--accent); flex-shrink: 0; }
+.perf-analytics-badge { font-size: .65rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; padding: 4px 10px; border-radius: 100px; background: rgba(26,86,255,.1); color: var(--accent); border: 1px solid rgba(26,86,255,.2); }
+.perf-analytics-meta { display: flex; gap: 20px; padding: 14px 24px 6px; flex-wrap: wrap; }
+.perf-analytics-stat { display: flex; flex-direction: column; gap: 2px; }
+.perf-analytics-stat .val { font-family: var(--font-mono); font-size: 1.25rem; font-weight: 700; line-height: 1; }
+.perf-analytics-stat .val.blue { color: var(--accent); }
+.perf-analytics-stat .val.green { color: #10b981; }
+.perf-analytics-stat .val.amber { color: var(--warning); }
+.perf-analytics-stat .lbl { font-size: .68rem; color: var(--text-3); font-weight: 600; }
+.perf-readiness-bar { margin: 0 24px 14px; background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; align-items: center; gap: 14px; border-left: 3px solid var(--danger); }
+.perf-readiness-bar.ready { border-left-color: #10b981; }
+.perf-readiness-bar.almost { border-left-color: var(--warning); }
+.perf-readiness-bar svg { flex-shrink: 0; }
+.perf-readiness-bar .rb-label { font-size: .72rem; color: var(--text-3); font-weight: 600; }
+.perf-readiness-bar .rb-value { font-size: .9rem; font-weight: 800; }
+.perf-readiness-bar .rb-badge { margin-left: auto; font-size: .7rem; font-weight: 700; padding: 4px 12px; border-radius: 100px; background: rgba(239,68,68,.12); color: var(--danger); border: 1px solid rgba(239,68,68,.25); display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.perf-readiness-bar.ready .rb-badge { background: rgba(16,185,129,.12); color: #10b981; border-color: rgba(16,185,129,.25); }
+.perf-readiness-bar.almost .rb-badge { background: rgba(245,158,11,.12); color: var(--warning); border-color: rgba(245,158,11,.25); }
+.perf-chart-wrap { padding: 0 24px 20px; position: relative; }
+.perf-chart-canvas-wrap { position: relative; width: 100%; }
+#perf-analytics-chart { width: 100%; display: block; }
+.perf-chart-legend { display: flex; gap: 16px; flex-wrap: wrap; padding: 10px 24px 18px; }
+.legend-item { display: flex; align-items: center; gap: 7px; font-size: .72rem; font-weight: 600; color: var(--text-2); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-line { width: 18px; height: 2px; border-radius: 2px; flex-shrink: 0; }
+
+@media (max-width: 768px) {
+  .perf-analytics-header { padding: 16px 16px 0; }
+  .perf-analytics-meta { padding: 10px 16px 4px; gap: 14px; }
+  .perf-analytics-stat .val { font-size: 1.1rem; }
+  .perf-readiness-bar { margin: 0 16px 12px; }
+  .perf-chart-wrap { padding: 0 16px 16px; }
+  .perf-chart-legend { padding: 8px 16px 14px; gap: 12px; }
+}
+
 /* SMARTPATH */
 .smartpath-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .smartpath-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; display: flex; flex-direction: column; gap: 0; transition: border-color .25s, transform .25s, box-shadow .25s; }
@@ -366,35 +405,43 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
 
 /* MOBILE */
 @media (max-width: 768px) {
-  .ue-nav .container { flex-wrap: wrap; height: auto; padding: 12px 16px; }
+  body { font-size: 14px; }
+  .ue-nav .container { flex-wrap: wrap; height: auto; padding: 10px 16px; }
   .nav-hamburger { display: flex; }
-  .nav-links { display: none; flex-direction: column; width: 100%; padding: 8px 0 4px; border-top: 1px solid var(--border); margin-top: 8px; gap: 0; }
-  .nav-links a { padding: 10px 4px; }
-  .nav-right { display: none; flex-direction: column; width: 100%; padding-bottom: 12px; gap: 10px; align-items: flex-start; }
+  .nav-links { display: none; flex-direction: column; width: 100%; padding: 6px 0 4px; border-top: 1px solid var(--border); margin-top: 8px; gap: 0; }
+  .nav-links a { padding: 9px 4px; font-size: .8rem; }
+  .nav-right { display: none; flex-direction: column; width: 100%; padding-bottom: 10px; gap: 8px; align-items: flex-start; }
   .nav-mobile-open .nav-links, .nav-mobile-open .nav-right { display: flex; }
   .dash-top-grid { grid-template-columns: 1fr !important; }
-  .dash-welcome-card .card-body { padding: 22px !important; }
-  .dash-welcome-card h1 { font-size: 1.55rem !important; }
-  .dash-welcome-card .subtitle { font-size: .9rem !important; margin-bottom: 16px !important; }
-  .dash-welcome-inner { display: grid !important; grid-template-columns: auto 1fr !important; grid-template-rows: auto auto !important; gap: 6px 12px !important; width: 100% !important; padding: 14px 16px !important; }
-  .dash-welcome-inner .icon { grid-column: 1; grid-row: 1 / 3; align-self: center; font-size: 1.4rem !important; }
+  .dash-welcome-card .card-body { padding: 18px !important; }
+  .dash-welcome-card h1 { font-size: 1.2rem !important; }
+  .dash-welcome-card .subtitle { font-size: .82rem !important; margin-bottom: 14px !important; }
+  .dash-welcome-inner { display: grid !important; grid-template-columns: auto 1fr !important; grid-template-rows: auto auto !important; gap: 5px 10px !important; width: 100% !important; padding: 11px 13px !important; }
+  .dash-welcome-inner .icon { grid-column: 1; grid-row: 1 / 3; align-self: center; font-size: 1.2rem !important; }
   .dash-welcome-inner > div:nth-child(2) { grid-column: 2; grid-row: 1; }
-  .dash-welcome-inner .btn { grid-column: 1 / -1; width: 100% !important; margin-left: 0 !important; margin-top: 8px; text-align: center; justify-content: center; }
-  .score-card { padding: 22px 16px !important; }
-  .score-value { font-size: 2.2rem !important; white-space: nowrap !important; }
-  .score-denom { font-size: 1rem !important; }
-  .score-progress-wrap { max-width: 160px !important; }
-  .dash-subj-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px; }
+  .dash-welcome-inner .btn { grid-column: 1 / -1; width: 100% !important; margin-left: 0 !important; margin-top: 8px; text-align: center; justify-content: center; font-size: .78rem !important; padding: 8px 16px !important; }
+  .score-card { padding: 18px 14px !important; }
+  .score-value { font-size: 2rem !important; white-space: nowrap !important; }
+  .score-denom { font-size: .9rem !important; }
+  .score-progress-wrap { max-width: 140px !important; }
+  .section-title { font-size: 1.05rem !important; }
+  .dash-subj-header { flex-direction: column !important; align-items: flex-start !important; gap: 8px; }
   .dash-subj-header-actions { align-self: flex-end; }
-  .dash-subj-slide { flex: 0 0 calc(100vw - 56px) !important; }
+  .dash-subj-slide { flex: 0 0 calc(100vw - 48px) !important; }
+  .dash-subj-card { padding: 16px !important; }
+  .dash-subj-name { font-size: .88rem !important; }
   .perf-topic-row { flex-wrap: wrap !important; gap: 6px 8px !important; }
   .perf-topic-name { width: 100%; font-weight: 600; }
   .perf-topic-track { width: 100% !important; }
   .perf-topic-label { flex: 1; }
   .perf-bar-track { display: none; }
-  .perf-bar-row { gap: 8px !important; }
+  .perf-bar-row { gap: 8px !important; padding: 13px 16px !important; }
+  .perf-subject-name { font-size: .82rem !important; min-width: 120px !important; }
+  .perf-pct { font-size: .78rem !important; }
   .smartpath-grid { grid-template-columns: 1fr !important; }
-  main { padding: 20px 16px 48px !important; gap: 28px !important; }
+  .smartpath-topic { font-size: .92rem !important; }
+  .smartpath-desc { font-size: .78rem !important; }
+  main { padding: 18px 14px 44px !important; gap: 22px !important; }
   .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
   .pricing-card.featured { transform: none; }
 }
@@ -449,7 +496,7 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
     </div>
 
     <div class="score-card" data-skeleton>
-      <div class="score-label">Predicted JAMB Score</div>
+      <div class="score-label">Your Score</div>
       <div class="score-value" id="score-value">
         <span style="font-size:1.5rem;color:var(--muted)">Loading…</span>
       </div>
@@ -477,6 +524,64 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
     </div>
     <div class="manage-btn-wrap" style="margin-top:14px">
       <a href="#" class="btn btn-outline" style="font-size:.82rem" id="manage-subjects-btn">Manage My Subjects</a>
+    </div>
+  </section>
+
+  <section class="fade-up">
+    <h2 class="section-title" style="margin-bottom:16px">Performance <span>Analytics</span></h2>
+    <div class="perf-analytics-card" id="perf-analytics-container">
+
+      <div class="perf-analytics-header">
+        <div class="perf-analytics-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Readiness Over Time
+        </div>
+        <span class="perf-analytics-badge" id="pa-exam-type">UTME</span>
+      </div>
+
+      <div class="perf-analytics-meta">
+        <div class="perf-analytics-stat">
+          <span class="val blue" id="pa-exams-taken">—</span>
+          <span class="lbl">Exams Taken</span>
+        </div>
+        <div class="perf-analytics-stat">
+          <span class="val green" id="pa-avg-score">—</span>
+          <span class="lbl">Avg Score</span>
+        </div>
+        <div class="perf-analytics-stat">
+          <span class="val amber" id="pa-coins">0</span>
+          <span class="lbl">Coins</span>
+        </div>
+        <div class="perf-analytics-stat" id="pa-days-wrap" style="display:none">
+          <span class="val" id="pa-days-left" style="color:var(--text)">—</span>
+          <span class="lbl">Days to Exam</span>
+        </div>
+      </div>
+
+      <div class="perf-readiness-bar" id="pa-readiness-bar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <div>
+          <div class="rb-label">Readiness Status</div>
+          <div class="rb-value"><span id="pa-readiness-pct">—</span> <span id="pa-readiness-label" style="font-size:.78rem;color:var(--text-2);font-weight:600">Not Ready</span></div>
+        </div>
+        <div class="rb-badge" id="pa-readiness-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Not Ready
+        </div>
+      </div>
+
+      <div class="perf-chart-wrap">
+        <div class="perf-chart-canvas-wrap">
+          <canvas id="perf-analytics-chart" height="220"></canvas>
+        </div>
+      </div>
+
+      <div class="perf-chart-legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#1a56ff"></span>Readiness %</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Avg Score %</div>
+        <div class="legend-item"><span class="legend-line" style="background:rgba(239,68,68,.6);border-top:2px dashed rgba(239,68,68,.6);width:18px;height:0"></span>Pass Threshold (70%)</div>
+      </div>
+
     </div>
   </section>
 
@@ -539,12 +644,10 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // AUTH_GUARD.init() boots window.sb using UE_CONFIG, validates session,
-    // fetches profile from DB, enforces premium gate, renders nav.
-    const authData = await AUTH_GUARD.init();
-    if (!authData) return; // redirect in progress
-
-    await DASHBOARD.init();
+    // DASHBOARD.init() calls AUTH_GUARD.init() internally — do NOT call it
+    // again here or it will double-fetch the session and profile from Supabase.
+    const ok = await DASHBOARD.init();
+    if (!ok) return; // redirect in progress
 
     if (typeof initSlider === 'function') {
       setTimeout(() => initSlider('dash-track', 'dash-prev', 'dash-next'), 100);
@@ -570,12 +673,381 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
 
     const manageBtn = document.getElementById('manage-subjects-btn');
     if (manageBtn) {
+      manageBtn.href = 'login.html?tab=signup';
+      manageBtn.setAttribute('title', 'Update your subject selection');
       manageBtn.onclick = (e) => {
         e.preventDefault();
-        toast('Subject management — coming in the next update!');
+        openSubjectManager();
       };
     }
   });
+</script>
+
+<!-- ── SUBJECT MANAGER MODAL ─────────────────────────────── -->
+<div id="subject-manager-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:5000;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)">
+  <div style="background:#fff;border-radius:18px;padding:32px;max-width:500px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.25)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 style="font-family:var(--font-head);font-size:1.4rem">My Subjects</h3>
+      <button onclick="closeSubjectManager()" style="background:var(--bg-2);border:none;width:32px;height:32px;border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">&#x2715;</button>
+    </div>
+    <p style="font-size:.88rem;color:var(--muted);margin-bottom:20px">Select the subjects you want to study. Your SmartPath and progress tracking will update accordingly.</p>
+    <div id="subject-manager-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:24px"></div>
+    <button onclick="saveSubjects()" class="btn btn-primary" style="width:100%;height:44px">Save Subjects</button>
+  </div>
+</div>
+
+<script>
+const ALL_SUBJECTS = [
+  {id:'mathematics', label:'Mathematics', icon:'&#x1F4D0;'},
+  {id:'english',     label:'English',     icon:'&#x1F4D6;'},
+  {id:'physics',     label:'Physics',     icon:'&#x269B;&#xFE0F;'},
+  {id:'chemistry',   label:'Chemistry',   icon:'&#x1F9EA;'},
+  {id:'biology',     label:'Biology',     icon:'&#x1F33F;'},
+  {id:'economics',   label:'Economics',   icon:'&#x1F4C8;'},
+  {id:'government',  label:'Government',  icon:'&#x1F3DB;'},
+  {id:'literature',  label:'Literature',  icon:'&#x1F4DA;'},
+  {id:'geography',   label:'Geography',   icon:'&#x1F30D;'},
+  {id:'commerce',    label:'Commerce',    icon:'&#x1F4BC;'},
+  {id:'accounts',    label:'Accounts',    icon:'&#x1F4BC;'},
+  {id:'crk',         label:'CRK',         icon:'&#x271D;&#xFE0F;'},
+];
+
+function openSubjectManager() {
+  const modal = document.getElementById('subject-manager-modal');
+  const grid  = document.getElementById('subject-manager-grid');
+  const current = (window.UE_PROFILE?.exam_subjects || []);
+  
+  grid.innerHTML = ALL_SUBJECTS.map(s => `
+    <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid ${current.includes(s.id)?'var(--accent)':'var(--border)'};border-radius:10px;cursor:pointer;background:${current.includes(s.id)?'rgba(26,86,255,.06)':'#fff'};transition:all .15s" id="sm-${s.id}">
+      <input type="checkbox" value="${s.id}" ${current.includes(s.id)?'checked':''} onchange="toggleSM('${s.id}',this)" style="display:none">
+      <span style="font-size:1.2rem">${s.icon}</span>
+      <span style="font-weight:600;font-size:.88rem">${s.label}</span>
+      <span style="margin-left:auto;color:var(--accent);font-size:1rem;opacity:${current.includes(s.id)?1:0}" id="sm-check-${s.id}">&#x2713;</span>
+    </label>
+  `).join('');
+  
+  modal.style.display = 'flex';
+}
+
+function toggleSM(id, cb) {
+  const label = document.getElementById('sm-' + id);
+  const check = document.getElementById('sm-check-' + id);
+  if (cb.checked) {
+    label.style.border = '1.5px solid var(--accent)';
+    label.style.background = 'rgba(26,86,255,.06)';
+    check.style.opacity = '1';
+  } else {
+    label.style.border = '1.5px solid var(--border)';
+    label.style.background = '#fff';
+    check.style.opacity = '0';
+  }
+}
+
+async function saveSubjects() {
+  const selected = Array.from(document.querySelectorAll('#subject-manager-grid input:checked')).map(i => i.value);
+  if (selected.length === 0) { toast('Please select at least one subject.'); return; }
+  
+  const btn = document.querySelector('#subject-manager-modal .btn-primary');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  
+  const { error } = await window.sb.from('profiles')
+    .update({ exam_subjects: selected })
+    .eq('id', window.UE_USER_ID);
+  
+  if (!error) {
+    if (window.UE_PROFILE) window.UE_PROFILE.exam_subjects = selected;
+    toast('Subjects updated! Refreshing dashboard…');
+    closeSubjectManager();
+    setTimeout(() => window.location.reload(), 1200);
+  } else {
+    toast('Error saving. Please try again.');
+    btn.disabled = false; btn.textContent = 'Save Subjects';
+  }
+}
+
+function closeSubjectManager() {
+  document.getElementById('subject-manager-modal').style.display = 'none';
+}
+// Close on backdrop click
+document.getElementById('subject-manager-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSubjectManager();
+});
+</script>
+<script>
+/* ── PERFORMANCE ANALYTICS CHART ─────────────────────────── */
+(function initPerfAnalytics() {
+
+  /* ─ helpers ─ */
+  function formatPct(v) { return (v == null ? '—' : Math.round(v) + '%'); }
+
+  function getReadinessClass(pct) {
+    if (pct >= 70) return 'ready';
+    if (pct >= 50) return 'almost';
+    return '';
+  }
+
+  function getReadinessLabel(pct) {
+    if (pct >= 70) return 'Ready';
+    if (pct >= 50) return 'Almost Ready';
+    return 'Not Ready';
+  }
+
+  /* ─ build chart from data ─ */
+  function buildChart(profile, exams) {
+    const canvas = document.getElementById('perf-analytics-chart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    /* derive exam date & days left */
+    const examDate = profile?.exam_date ? new Date(profile.exam_date) : null;
+    const today = new Date();
+    const daysLeft = examDate ? Math.max(0, Math.ceil((examDate - today) / 86400000)) : null;
+
+    /* populate meta stats */
+    const examType = (profile?.exam_type || 'UTME').toUpperCase();
+    document.getElementById('pa-exam-type').textContent = examType;
+    document.getElementById('pa-exams-taken').textContent = exams.length || '0';
+
+    const avgScore = exams.length
+      ? exams.reduce((s, e) => s + (e.score_pct || 0), 0) / exams.length
+      : null;
+    document.getElementById('pa-avg-score').textContent = avgScore != null ? Math.round(avgScore) + '%' : '—';
+    document.getElementById('pa-coins').textContent = profile?.coins ?? 0;
+
+    if (daysLeft != null) {
+      document.getElementById('pa-days-wrap').style.display = '';
+      document.getElementById('pa-days-left').textContent = daysLeft + 'd';
+    }
+
+    /* readiness = avg of last 3 scores weighted toward recent */
+    const recent = exams.slice(-5);
+    let readinessPct = 0;
+    if (recent.length) {
+      const weights = recent.map((_, i) => i + 1);
+      const wSum = weights.reduce((a, b) => a + b, 0);
+      readinessPct = recent.reduce((s, e, i) => s + (e.score_pct || 0) * weights[i], 0) / wSum;
+    }
+
+    document.getElementById('pa-readiness-pct').textContent = formatPct(readinessPct);
+    document.getElementById('pa-readiness-label').textContent = getReadinessLabel(readinessPct);
+    const bar = document.getElementById('pa-readiness-bar');
+    const badge = document.getElementById('pa-readiness-badge');
+    const cls = getReadinessClass(readinessPct);
+    bar.className = 'perf-readiness-bar' + (cls ? ' ' + cls : '');
+    badge.textContent = getReadinessLabel(readinessPct);
+    badge.className = 'rb-badge';
+
+    /* ─ build timeline labels ─ */
+    /* Strategy: if we have exam date, create week-buckets from first exam to exam date.
+       Otherwise just use exam ordinals. */
+    let labels = [], readinessData = [], scoreData = [];
+
+    if (exams.length === 0) {
+      /* No data yet — show a flat placeholder up to exam date */
+      const weeks = examDate ? Math.min(12, Math.max(4, daysLeft ? Math.ceil(daysLeft / 7) : 6)) : 6;
+      for (let w = 1; w <= weeks; w++) {
+        if (examDate) {
+          const d = new Date(today);
+          d.setDate(d.getDate() + (w - 1) * Math.floor(daysLeft / weeks));
+          labels.push(d.toLocaleDateString('en-NG', { month: 'short', day: 'numeric' }));
+        } else {
+          labels.push('Week ' + w);
+        }
+        readinessData.push(null);
+        scoreData.push(null);
+      }
+    } else {
+      exams.forEach((ex, i) => {
+        const d = ex.created_at ? new Date(ex.created_at) : null;
+        labels.push(d ? d.toLocaleDateString('en-NG', { month: 'short', day: 'numeric' }) : 'Exam ' + (i + 1));
+        scoreData.push(+(ex.score_pct || 0).toFixed(1));
+      });
+
+      /* rolling weighted readiness */
+      exams.forEach((_, i) => {
+        const slice = exams.slice(0, i + 1).slice(-3);
+        const w = slice.map((__, j) => j + 1);
+        const wS = w.reduce((a, b) => a + b, 0);
+        readinessData.push(+(slice.reduce((s, e, j) => s + (e.score_pct || 0) * w[j], 0) / wS).toFixed(1));
+      });
+
+      /* append future projected points to exam date */
+      if (examDate && daysLeft > 0) {
+        const weeksLeft = Math.min(4, Math.ceil(daysLeft / 7));
+        const lastReady = readinessData[readinessData.length - 1] || 0;
+        const lastScore = scoreData[scoreData.length - 1] || 0;
+        for (let w = 1; w <= weeksLeft; w++) {
+          const d = new Date(today);
+          d.setDate(d.getDate() + w * Math.floor(daysLeft / weeksLeft));
+          labels.push(d.toLocaleDateString('en-NG', { month: 'short', day: 'numeric' }));
+          /* Projected (linear extrapolation capped at 100) */
+          readinessData.push(Math.min(100, +(lastReady + w * 2).toFixed(1)));
+          scoreData.push(null); /* no score yet */
+        }
+      }
+    }
+
+    /* ─ draw chart ─ */
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.parentElement.clientWidth;
+    const H = 220;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.scale(dpr, dpr);
+
+    const PAD = { top: 18, right: 20, bottom: 42, left: 46 };
+    const cW = W - PAD.left - PAD.right;
+    const cH = H - PAD.top - PAD.bottom;
+    const n = labels.length;
+
+    /* grid lines */
+    ctx.save();
+    ctx.font = '10px JetBrains Mono, monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let pct = 0; pct <= 100; pct += 20) {
+      const y = PAD.top + cH - (pct / 100) * cH;
+      ctx.strokeStyle = 'rgba(59,130,246,.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(PAD.left, y);
+      ctx.lineTo(PAD.left + cW, y);
+      ctx.stroke();
+      ctx.fillStyle = '#6b82b0';
+      ctx.fillText(pct + '%', PAD.left - 8, y);
+    }
+
+    /* 70% threshold dashed line */
+    const threshY = PAD.top + cH - (70 / 100) * cH;
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = 'rgba(239,68,68,.45)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(PAD.left, threshY);
+    ctx.lineTo(PAD.left + cW, threshY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* x-axis labels */
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#6b82b0';
+    const step = n > 1 ? cW / (n - 1) : cW;
+    const maxLabels = Math.floor(cW / 60);
+    const skip = Math.max(1, Math.ceil(n / maxLabels));
+    for (let i = 0; i < n; i++) {
+      if (i % skip !== 0 && i !== n - 1) continue;
+      const x = PAD.left + (n === 1 ? cW / 2 : i * step);
+      ctx.fillText(labels[i], x, PAD.top + cH + 8);
+    }
+    ctx.restore();
+
+    /* helper: get point coords */
+    function pt(i, data) {
+      const val = data[i];
+      if (val == null) return null;
+      const x = PAD.left + (n === 1 ? cW / 2 : i * step);
+      const y = PAD.top + cH - (Math.min(100, Math.max(0, val)) / 100) * cH;
+      return { x, y };
+    }
+
+    /* draw filled area + line for a dataset */
+    function drawLine(data, color, fillColor, dashed) {
+      const pts = data.map((_, i) => pt(i, data)).filter(Boolean);
+      if (pts.length < 1) return;
+      ctx.save();
+      if (dashed) ctx.setLineDash([6, 4]);
+
+      /* fill */
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, PAD.top + cH);
+      pts.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(pts[pts.length - 1].x, PAD.top + cH);
+      ctx.closePath();
+      ctx.fillStyle = fillColor;
+      ctx.fill();
+
+      /* line */
+      ctx.beginPath();
+      pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      /* dots */
+      pts.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+
+      ctx.restore();
+    }
+
+    /* score line */
+    drawLine(scoreData, '#10b981', 'rgba(16,185,129,.08)', false);
+    /* readiness line */
+    drawLine(readinessData, '#1a56ff', 'rgba(26,86,255,.07)', false);
+  }
+
+  /* ─ wire up after DASHBOARD.init() ─ */
+  document.addEventListener('DOMContentLoaded', function () {
+    const originalInit = typeof DASHBOARD !== 'undefined' ? DASHBOARD.init : null;
+
+    function attemptBuild() {
+      const profile = window.UE_PROFILE || {};
+      /* Try to pull exam history from DASHBOARD's last render data, or fetch directly */
+      if (window._ueExamHistory !== undefined) {
+        buildChart(profile, window._ueExamHistory || []);
+        return;
+      }
+      /* Fallback: if supabase is ready, fetch directly */
+      if (window.sb && window.UE_USER_ID) {
+        window.sb.from('exam_attempts')
+          .select('score_pct, created_at, subject')
+          .eq('user_id', window.UE_USER_ID)
+          .order('created_at', { ascending: true })
+          .limit(30)
+          .then(({ data }) => {
+            buildChart(profile, data || []);
+          });
+      } else {
+        /* Show empty chart with placeholder */
+        buildChart(profile, []);
+      }
+    }
+
+    /* Give DASHBOARD.init() ~1.5s to run first */
+    setTimeout(attemptBuild, 1500);
+
+    /* Also re-draw on resize */
+    let resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        const profile = window.UE_PROFILE || {};
+        if (window.sb && window.UE_USER_ID) {
+          window.sb.from('exam_attempts')
+            .select('score_pct, created_at, subject')
+            .eq('user_id', window.UE_USER_ID)
+            .order('created_at', { ascending: true })
+            .limit(30)
+            .then(({ data }) => buildChart(profile, data || []));
+        } else {
+          buildChart(profile, []);
+        }
+      }, 200);
+    });
+  });
+})();
 </script>
 </body>
 </html>
