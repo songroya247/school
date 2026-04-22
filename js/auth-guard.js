@@ -104,6 +104,16 @@ const AUTH_GUARD = (function () {
   }
 
   // ── Profile fetch ───────────────────────────────────────────────
+  //
+  //  Returns one of three things:
+  //    • A profile object  — row found, all good.
+  //    • null              — row definitively NOT FOUND (PGRST116).
+  //                          The user is orphaned; caller should sign out + redirect.
+  //    • PROFILE_NET_ERROR — any other error (network timeout, RLS, 5xx …).
+  //                          Caller must NOT sign the user out; treat as transient.
+  //
+  const PROFILE_NET_ERROR = Symbol('PROFILE_NET_ERROR');
+
   async function getProfile(userId) {
     const { data, error } = await window.sb
       .from('profiles')
@@ -118,8 +128,19 @@ const AUTH_GUARD = (function () {
       .single();
 
     if (error) {
-      console.error('[AUTH_GUARD] Profile fetch error:', error.message);
-      return null;
+      // PGRST116 = "JSON object requested, multiple (or no) rows returned"
+      // This is PostgREST's code for "0 rows" when using .single().
+      // It is a definitive "row does not exist" — not a network fault.
+      if (error.code === 'PGRST116') {
+        console.warn('[AUTH_GUARD] Profile row not found for user:', userId);
+        return null; // Orphaned user — caller will sign out + redirect
+      }
+
+      // Everything else (network timeout, RLS policy rejection, Supabase 5xx …)
+      // is a transient or environment error. We must NOT sign the user out
+      // just because their internet blipped.
+      console.error('[AUTH_GUARD] Profile fetch error (non-fatal):', error.code, error.message);
+      return PROFILE_NET_ERROR;
     }
 
     // Cache a lightweight version for the head-gatekeeper's optimistic check
@@ -276,12 +297,33 @@ const AUTH_GUARD = (function () {
     // ── 4. Fetch the real profile from Supabase ──────────────────
     let profile = await getProfile(session.user.id);
 
-    if (!profile) {
-      // Profile missing — new user whose email was just confirmed.
-      // Attempt to build the profile from session metadata and
-      // sessionStorage (written during signup) rather than sending
-      // them to login (which causes a redirect loop because their
-      // session IS valid — login would immediately send them back here).
+    // ── 4a. Handle network / transient errors ─────────────────────
+    //  PROFILE_NET_ERROR means the fetch failed for a reason other than
+    //  "row doesn't exist" (e.g. offline, Supabase 5xx, RLS error).
+    //  We must NOT sign the user out — that would destroy a valid session
+    //  just because their internet blipped.  Show a soft error and stop.
+    if (profile === PROFILE_NET_ERROR) {
+      liftVeil();
+      showToast(
+        'Could not reach the server. Please check your connection and refresh.',
+        'error', 8000
+      );
+      console.error('[AUTH_GUARD] Aborting: profile fetch returned a network/server error.');
+      return null; // Do not redirect — let the user retry manually.
+    }
+
+    if (profile === null) {
+      // Profile row is definitively missing (PGRST116 — 0 rows).
+      // This means the Auth record exists but there is no matching
+      // profiles row.  This is the "orphaned user" state that causes
+      // the redirect loop: login.html sees a valid session and bounces
+      // the user back here, which then redirects them back to login …
+      //
+      // FIX: Attempt auto-recovery first (new sign-up whose profile
+      // insert raced or failed).  If recovery succeeds, carry on.
+      // If recovery fails, SIGN OUT before redirecting so that
+      // login.html finds NO session and shows the form instead of
+      // immediately bouncing back.
       try {
         const meta        = session.user.user_metadata || {};
         const pending     = sessionStorage.getItem('ue_pending_profile');
@@ -320,12 +362,39 @@ const AUTH_GUARD = (function () {
 
         // Re-fetch the profile we just created
         profile = await getProfile(session.user.id);
+
+        // If the re-fetch itself returned a network error, don't sign out
+        if (profile === PROFILE_NET_ERROR) {
+          liftVeil();
+          showToast(
+            'Could not reach the server after profile recovery. Please refresh.',
+            'error', 8000
+          );
+          return null;
+        }
       } catch (profileErr) {
         console.error('[AUTH_GUARD] profile auto-create failed:', profileErr);
       }
 
-      // If still no profile after recovery attempt, redirect to login
+      // ── Hard logout before redirect ──────────────────────────────
+      //  If the profile is STILL missing after the recovery attempt,
+      //  the user is genuinely orphaned and cannot be recovered here.
+      //  We MUST sign them out before redirecting to login.html.
+      //  Without this, login.html will see a valid session and bounce
+      //  the user straight back — causing the infinite redirect loop.
       if (!profile) {
+        console.warn('[AUTH_GUARD] Orphaned user detected. Signing out before redirect.');
+        try {
+          sessionStorage.removeItem('ue_profile_cache');
+          sessionStorage.removeItem('ue_pending_profile');
+        } catch (_) {}
+        try {
+          await window.sb.auth.signOut(); // ← clears localStorage session tokens
+        } catch (signOutErr) {
+          console.error('[AUTH_GUARD] signOut failed:', signOutErr);
+          // Even if signOut errors, still redirect — the session may be
+          // partially cleared; login.html's circuit breaker will handle it.
+        }
         safeRedirectToLogin('no_profile');
         return null;
       }
