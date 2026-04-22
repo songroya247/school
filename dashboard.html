@@ -267,7 +267,7 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
 .dash-welcome-card::before { content: ''; position: absolute; top: -60px; right: -60px; width: 280px; height: 280px; background: rgba(255,255,255,.06); border-radius: 50%; }
 .dash-welcome-card::after { content: ''; position: absolute; bottom: -80px; right: 60px; width: 200px; height: 200px; background: rgba(255,255,255,.04); border-radius: 50%; }
 .dash-welcome-card .card-body { padding: 28px; color: #fff; position: relative; z-index: 1; }
-.dash-welcome-card h1 { font-family: var(--font-head); font-size: 1.45rem; font-weight: 800; margin-bottom: 6px; line-height: 1.25; letter-spacing: -.02em; }
+.dash-welcome-card h1 { font-family: var(--font-head); font-size: 1.45rem; font-weight: 800; margin-bottom: 6px; line-height: 1.2; letter-spacing: 0; word-wrap: break-word; overflow-wrap: anywhere; }
 .dash-welcome-card .subtitle { color: rgba(255,255,255,.75); margin-bottom: 20px; font-size: .88rem; }
 .dash-welcome-inner { background: rgba(0,0,0,.2); border: 1px solid rgba(255,255,255,.15); border-radius: var(--radius); padding: 13px 16px; display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; backdrop-filter: blur(8px); }
 .dash-welcome-inner .icon { font-size: 1.3rem; flex-shrink: 0; }
@@ -644,9 +644,11 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // DASHBOARD.init() calls AUTH_GUARD.init() internally — do NOT call it
-    // again here or a duplicate onAuthStateChange listener will be registered,
-    // causing a redirect loop between login.html and dashboard.html.
+    // AUTH_GUARD.init() boots window.sb using UE_CONFIG, validates session,
+    // fetches profile from DB, enforces premium gate, renders nav.
+    const authData = await AUTH_GUARD.init();
+    if (!authData) return; // redirect in progress
+
     await DASHBOARD.init();
 
     if (typeof initSlider === 'function') {
