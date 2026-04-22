@@ -126,7 +126,6 @@ const AUTH = (function () {
       // ── AUTO-CONFIRMED (email confirmations disabled in Supabase) ────
       if (data.session) {
         await createProfile(data.user, formData);
-        sessionStorage.setItem('ue_just_signed_in', '1');
         window.location.replace('dashboard.html');
         return;
       }
@@ -181,12 +180,10 @@ const AUTH = (function () {
 
       // Small delay so the DB write completes before dashboard reads it
       await new Promise(r => setTimeout(r, 600));
-      sessionStorage.setItem('ue_just_signed_in', '1');
       window.location.replace('dashboard.html');
 
     } catch (err) {
       console.error('[AUTH] handlePostConfirm error:', err);
-      sessionStorage.setItem('ue_just_signed_in', '1');
       window.location.replace('dashboard.html');
     }
   }
@@ -226,7 +223,6 @@ const AUTH = (function () {
       const safeNext = ALLOWED_NEXT.includes(next) ? next : 'dashboard.html';
 
       // One-shot flag honoured by head-gatekeeper.js for the next page load.
-      sessionStorage.setItem('ue_just_signed_in', '1');
       window.location.replace(safeNext);
 
     } catch (err) {
