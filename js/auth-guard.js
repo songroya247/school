@@ -28,10 +28,10 @@ const AUTH_GUARD = (function () {
     if (existing) existing.remove();
 
     const colours = {
-      info:    { bg: '#1a56ff', icon: 'ℹ️' },
-      warning: { bg: '#d97706', icon: '⚠️' },
-      error:   { bg: '#dc2626', icon: '🚫' },
-      success: { bg: '#059669', icon: '✅' },
+      info:    { bg: '#1a56ff', icon: 'ℹ' },
+      warning: { bg: '#d97706', icon: '&#x26A0;&#xFE0F;' },
+      error:   { bg: '#dc2626', icon: '&#x1F6AB;' },
+      success: { bg: '#059669', icon: '&#x2705;' },
     };
     const c = colours[type] || colours.info;
 
@@ -77,16 +77,22 @@ const AUTH_GUARD = (function () {
 
   // ── Redirect helpers ───────────────────────────────────────────
   function redirectToLogin(reason) {
+    const page = currentPage();
+    // Never redirect to login if already on a non-protected page
+    if (page === LOGIN_PAGE || page === 'confirm.html' || page === 'index.html' ||
+        page === 'pricing.html' || page === 'forgot-password.html') return;
     window.location.replace(
-      LOGIN_PAGE + '?next=' + encodeURIComponent(currentPage()) +
+      LOGIN_PAGE + '?next=' + encodeURIComponent(page) +
       (reason ? '&reason=' + encodeURIComponent(reason) : '')
     );
   }
 
   function redirectToPricing(reason) {
+    const page = currentPage();
+    if (page === PRICING_PAGE) return;
     window.location.replace(
       PRICING_PAGE + '?reason=' + encodeURIComponent(reason || 'premium_required') +
-      '&next=' + encodeURIComponent(currentPage())
+      '&next=' + encodeURIComponent(page)
     );
   }
 
@@ -104,7 +110,7 @@ const AUTH_GUARD = (function () {
       .select(
         'id, full_name, email, is_premium, subscription_expiry, ' +
         'total_xp, accuracy_avg, mastery_level, status, ' +
-        'exam_types, exam_date, target_score, current_skill_level, ' +
+        'exam_types, exam_date, target_score, target_grade, current_skill_level, ' +
         'report_share_token, usage_logs, exam_subjects, study_mode, ' +
         'smartpath_queue, created_at'
       )
@@ -150,12 +156,18 @@ const AUTH_GUARD = (function () {
 
     const status = subscriptionStatus(profile);
 
+    // BUG-FIX #8: old delay was 1800 ms — long enough for a student to read and
+    // interact with premium content before the redirect fired.  Reduced to 400 ms:
+    // enough for the toast to appear and register visually, but too short to read
+    // any lesson content or start a CBT session.
+    const REDIRECT_DELAY_MS = 400;
+
     if (status === 'NIL') {
       showToast(
         'This feature requires a UE School subscription. Choose a plan to continue.',
         'warning', 6000
       );
-      setTimeout(() => redirectToPricing('not_subscribed'), 1800);
+      setTimeout(() => safeRedirectToPricing('not_subscribed'), REDIRECT_DELAY_MS);
       return false;
     }
 
@@ -164,7 +176,7 @@ const AUTH_GUARD = (function () {
         'Your subscription has expired. Renew your plan to access this content.',
         'warning', 6000
       );
-      setTimeout(() => redirectToPricing('subscription_expired'), 1800);
+      setTimeout(() => safeRedirectToPricing('subscription_expired'), REDIRECT_DELAY_MS);
       return false;
     }
 
@@ -187,6 +199,16 @@ const AUTH_GUARD = (function () {
     if (avatarEl) avatarEl.innerHTML = initials + proBadge;
     if (nameEl)   nameEl.textContent = (profile.full_name || '').split(' ').slice(0, 2).join(' ');
     if (xpEl)     xpEl.textContent   = `${profile.total_xp ?? 0} XP`;
+
+    // Streak badge — BUG-FIX #7: use shared calcStreak() from app.js
+    // (previously inlined here and in dashboard.js independently, risking drift)
+    const streakEl = document.getElementById('nav-streak');
+    if (streakEl && profile) {
+      const streak = calcStreak(profile.usage_logs);
+      streakEl.innerHTML = streak > 0
+        ? `&#x1F525; ${streak}-day streak`
+        : '&#x1F525; Start streak';
+    }
 
     // Fallback: replace nav-right on pages that don't have avatar/name elements
     if (!avatarEl && !nameEl) {
@@ -212,10 +234,23 @@ const AUTH_GUARD = (function () {
 
   // ── Logout ──────────────────────────────────────────────────────
   async function logout() {
+    sessionStorage.removeItem('ue_profile_cache');
+    localStorage.removeItem('ue_profile_cache'); // belt + braces
     await window.sb.auth.signOut();
-    // Clear the profile cache on logout
-    try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
     window.location.replace(LOGIN_PAGE);
+  }
+
+  // ── Global redirect lock — prevents any double-navigation ─────
+  let _redirecting = false;
+  function safeRedirectToLogin(reason) {
+    if (_redirecting) return;
+    _redirecting = true;
+    redirectToLogin(reason);
+  }
+  function safeRedirectToPricing(reason) {
+    if (_redirecting) return;
+    _redirecting = true;
+    redirectToPricing(reason);
   }
 
   // ── Main init ────────────────────────────────────────────────────
@@ -224,7 +259,7 @@ const AUTH_GUARD = (function () {
     if (!window.sb) {
       if (!window.supabase) {
         console.error('[AUTH_GUARD] Supabase SDK not loaded.');
-        redirectToLogin('sdk_missing');
+        safeRedirectToLogin('sdk_missing');
         return null;
       }
       window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -236,7 +271,7 @@ const AUTH_GUARD = (function () {
     if (!session) {
       // No valid session (refresh failed or never existed)
       try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
-      redirectToLogin('no_session');
+      safeRedirectToLogin('no_session');
       return null;
     }
 
@@ -244,13 +279,61 @@ const AUTH_GUARD = (function () {
     liftVeil();
 
     // ── 4. Fetch the real profile from Supabase ──────────────────
-    const profile = await getProfile(session.user.id);
+    let profile = await getProfile(session.user.id);
 
     if (!profile) {
-      // Profile missing — could be a brand-new user whose trigger hasn't
-      // fired yet, or a DB error. Redirect to login as safety measure.
-      redirectToLogin('no_profile');
-      return null;
+      // Profile missing — new user whose email was just confirmed.
+      // Attempt to build the profile from session metadata and
+      // sessionStorage (written during signup) rather than sending
+      // them to login (which causes a redirect loop because their
+      // session IS valid — login would immediately send them back here).
+      try {
+        const meta        = session.user.user_metadata || {};
+        const pending     = sessionStorage.getItem('ue_pending_profile');
+        const pendingData = pending ? JSON.parse(pending) : {};
+
+        const formData = {
+          fullName:    pendingData.fullName    || meta.full_name    || session.user.email.split('@')[0],
+          email:       session.user.email,
+          examTypes:   pendingData.examTypes   || [],
+          examDate:    pendingData.examDate    || null,
+          targetScore: pendingData.targetScore || null,
+          targetGrade: pendingData.targetGrade || null,
+          subjects:    pendingData.subjects    || [],
+          studyMode:   pendingData.studyMode   || 'drill'
+        };
+
+        await window.sb.from('profiles').upsert({
+          id:                  session.user.id,
+          full_name:           formData.fullName,
+          email:               formData.email,
+          exam_types:          formData.examTypes,
+          exam_date:           formData.examDate || null,
+          target_score:        formData.targetScore,
+          target_grade:        formData.targetGrade,
+          current_skill_level: 3,
+          status:              'NIL',
+          is_premium:          false,
+          exam_subjects:       formData.subjects,
+          study_mode:          formData.studyMode,
+          smartpath_queue:     [],
+          total_xp:            0,
+          usage_logs:          []
+        }, { onConflict: 'id', ignoreDuplicates: false });
+
+        if (pending) sessionStorage.removeItem('ue_pending_profile');
+
+        // Re-fetch the profile we just created
+        profile = await getProfile(session.user.id);
+      } catch (profileErr) {
+        console.error('[AUTH_GUARD] profile auto-create failed:', profileErr);
+      }
+
+      // If still no profile after recovery attempt, redirect to login
+      if (!profile) {
+        safeRedirectToLogin('no_profile');
+        return null;
+      }
     }
 
     // ── 5. Enforce premium gate (authoritative DB-backed check) ───
@@ -258,12 +341,16 @@ const AUTH_GUARD = (function () {
     if (premiumOk === false) return null; // redirect in progress
 
     // ── 6. Set up auth-state-change listener ────────────────────
+    // ONLY act on SIGNED_OUT. Every other event (INITIAL_SESSION,
+    // SIGNED_IN, TOKEN_REFRESHED arriving without session) fires
+    // legitimately during normal page loads and MUST NOT trigger a
+    // redirect — we already validated the session above.
     window.sb.auth.onAuthStateChange((event, newSession) => {
-      if (event === 'SIGNED_OUT' || (!newSession && event !== 'INITIAL_SESSION')) {
+      if (event === 'SIGNED_OUT') {
         try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
-        redirectToLogin('signed_out');
+        safeRedirectToLogin('signed_out');
+        return;
       }
-      // TOKEN_REFRESHED — update the cached token in UE_USER
       if (event === 'TOKEN_REFRESHED' && newSession) {
         if (window.UE_USER) window.UE_USER.access_token = newSession.access_token;
         window.UE_SESSION = newSession;
