@@ -369,43 +369,18 @@ const QUESTION_BANK = (function () {
     });
     if (error) throw new Error('[QUESTIONS] RPC error: ' + error.message);
     // DB rows have no `ans` field — that's the point
-    return data.map(r => ({
-      ...r,
-      examType: r.exam_type,   // add camelCase alias
-    }));
+    return data;
   }
 
   // ── Fetch questions from local bank (FALLBACK) ──────────────────
   //  Strips the `ans` field from returned objects in non-LOCAL_ONLY
   //  mode so callers always receive the same shape.
-  function _shuffleOpts(q) {
-    const pairs = q.opts.map((opt, i) => ({ opt, correct: i === q.ans }));
-    for (let i = pairs.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pairs[i], pairs[j]] = [pairs[j], pairs[i]];
-    }
-    return {
-      ...q,
-      opts: pairs.map(p => p.opt),
-      ans:  pairs.findIndex(p => p.correct),
-    };
-  }
-
-  function _shuffle(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  }
-
   function _fetchFromLocal({ subject, topic, examType, count = 10 }) {
     let filtered = [..._localBank];
     if (subject)  filtered = filtered.filter(q => q.subject  === subject.toLowerCase());
     if (topic)    filtered = filtered.filter(q => q.topic    === topic);
     if (examType) filtered = filtered.filter(q => q.examType === examType);
-    filtered = _shuffle(filtered).slice(0, Math.min(count, filtered.length));
-    filtered = filtered.map(_shuffleOpts);
+    filtered = filtered.sort(() => Math.random() - 0.5).slice(0, Math.min(count, filtered.length));
 
     if (LOCAL_ONLY) {
       // Return full objects including ans (local/dev mode)
@@ -428,12 +403,6 @@ const QUESTION_BANK = (function () {
   }
 
   // ── Public: mock exam (multi-subject) ──────────────────────────
-  // BUG-FIX #19: old version silently returned fewer questions than requested when
-  // the local bank was exhausted.  The caller used the *requested* totalQuestions
-  // for scoring (correct / 40) even when only 35 questions were returned, making
-  // the score percentage slightly wrong.
-  // Fix: return an object { questions, total } so the caller always uses the real
-  // count.  Also log a warning so the shortfall is visible during development.
   async function getMockExam(subjects, examType = 'JAMB', totalQuestions = 40) {
     const perSubject = Math.floor(totalQuestions / subjects.length);
     let questions = [];
@@ -441,21 +410,11 @@ const QUESTION_BANK = (function () {
       const qs = await getQuestions({ subject: subj, examType, count: perSubject });
       questions = questions.concat(qs);
     }
-    while (questions.length < totalQuestions) {
-      const need  = totalQuestions - questions.length;
-      const extra = await getQuestions({ examType, count: need });
-      const fresh = extra.filter(q => !questions.find(x => x.id === q.id));
-      if (fresh.length === 0) break; // bank exhausted
-      questions = questions.concat(fresh);
+    if (questions.length < totalQuestions) {
+      const extra = await getQuestions({ examType, count: totalQuestions - questions.length });
+      questions = questions.concat(extra.filter(q => !questions.find(x => x.id === q.id)));
     }
-    const shuffled = _shuffle(questions).slice(0, totalQuestions);
-    if (shuffled.length < totalQuestions) {
-      console.warn(
-        `[QUESTIONS] getMockExam: bank exhausted — returning ${shuffled.length} of ${totalQuestions} requested questions.`
-      );
-    }
-    // Return array directly for backward compat; real total accessible via .length
-    return shuffled;
+    return questions.sort(() => Math.random() - 0.5).slice(0, totalQuestions);
   }
 
   // ── Public: metadata helpers ────────────────────────────────────
@@ -473,19 +432,9 @@ const QUESTION_BANK = (function () {
     return b.length;
   }
 
-  async function gradeRemote(questionIds, answers) {
-    const { data, error } = await window.sb.rpc('grade_session', {
-      p_question_ids: questionIds,
-      p_answers:      answers,
-    });
-    if (error) throw new Error('[QUESTIONS] grade_session error: ' + error.message);
-    // returns [{ question_id, is_correct }, …]
-    return data;
-  }
-
   // ── IMPORTANT: _bank is NOT exported ──────────────────────────
   //  In v1, `_bank: bank` was exported, giving trivial console access.
   //  It is intentionally absent here.
-  return { getQuestions, getMockExam, gradeRemote, getSubjects, getTopics, countFor, LOCAL_ONLY };
+  return { getQuestions, getMockExam, getSubjects, getTopics, countFor };
 
 })();
