@@ -28,10 +28,10 @@ const AUTH_GUARD = (function () {
     if (existing) existing.remove();
 
     const colours = {
-      info:    { bg: '#1a56ff', icon: 'ℹ' },
-      warning: { bg: '#d97706', icon: '&#x26A0;&#xFE0F;' },
-      error:   { bg: '#dc2626', icon: '&#x1F6AB;' },
-      success: { bg: '#059669', icon: '&#x2705;' },
+      info:    { bg: '#1a56ff', icon: 'ℹ️' },
+      warning: { bg: '#d97706', icon: '⚠️' },
+      error:   { bg: '#dc2626', icon: '🚫' },
+      success: { bg: '#059669', icon: '✅' },
     };
     const c = colours[type] || colours.info;
 
