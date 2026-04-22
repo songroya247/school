@@ -268,6 +268,14 @@ const AUTH_GUARD = (function () {
     // ── 2. Get the session (SDK handles silent refresh for us) ────
     const session = await getSession();
 
+    // ── 2a. Clear the just-signed-in bypass flag now that the real
+    //        SDK has confirmed (or denied) the session. Clearing it
+    //        HERE (not in head-gatekeeper) avoids the double-consume
+    //        race: gatekeeper skips for any navigations while the flag
+    //        is set, and auth-guard clears it exactly once after full
+    //        async validation.
+    try { sessionStorage.removeItem('ue_just_signed_in'); } catch (_) {}
+
     if (!session) {
       // No valid session (refresh failed or never existed)
       try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
@@ -342,9 +350,11 @@ const AUTH_GUARD = (function () {
 
     // ── 6. Set up auth-state-change listener ────────────────────
     // ONLY act on SIGNED_OUT. Every other event (INITIAL_SESSION,
-    // SIGNED_IN, TOKEN_REFRESHED arriving without session) fires
-    // legitimately during normal page loads and MUST NOT trigger a
-    // redirect — we already validated the session above.
+    // SIGNED_IN, TOKEN_REFRESHED) fires legitimately during normal
+    // page loads and MUST NOT trigger a redirect — we already
+    // validated the session above with getSession().
+    // Specifically: INITIAL_SESSION with session=null fires during
+    // the SDK warm-up async gap and is NOT equivalent to a sign-out.
     window.sb.auth.onAuthStateChange((event, newSession) => {
       if (event === 'SIGNED_OUT') {
         try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
