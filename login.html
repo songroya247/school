@@ -333,18 +333,11 @@
 // â”€â”€ Initialise Supabase â”€â”€
 // window.sb is set by js/supabase.js â€” credentials live only in js/config.js
 
-// Redirect already-logged-in users.
-// Uses replace() so the login page is NOT in browser history.
-// The onAuthStateChange listener below is suppressed on this page so
-// a SIGNED_IN event fired by the SDK init never double-redirects.
+// Redirect already-logged-in users away from the login page.
+// Uses replace() so the login page is NOT left in browser history.
 let _loginChecked = false;
 (async () => {
-  // Don't bounce a user who literally just signed in (defensive)
-  if (sessionStorage.getItem('ue_just_signed_in') === '1') {
-    _loginChecked = true;
-    return;
-  }
-  // Wait up to 2s for the Supabase SDK to be ready
+  // Wait up to 2s for the Supabase SDK to be ready (loaded via CDN above)
   for (let i = 0; i < 20 && !window.sb; i++) {
     await new Promise(r => setTimeout(r, 100));
   }
@@ -354,7 +347,12 @@ let _loginChecked = false;
     const { data: { session } } = await window.sb.auth.getSession();
     if (session && !_loginChecked) {
       _loginChecked = true;
-      window.location.replace('dashboard.html');
+      // Honour ?next= if present, otherwise go to dashboard
+      const params  = new URLSearchParams(window.location.search);
+      const rawNext = params.get('next') || 'dashboard.html';
+      const ALLOWED = ['dashboard.html','report.html','classroom.html','cbt.html','daily-quiz.html','pricing.html'];
+      const dest    = ALLOWED.includes(decodeURIComponent(rawNext)) ? decodeURIComponent(rawNext) : 'dashboard.html';
+      window.location.replace(dest);
     } else {
       _loginChecked = true;
     }
