@@ -194,6 +194,17 @@ const AUTH_GUARD = (function () {
     if (nameEl)   nameEl.textContent = (profile.full_name || '').split(' ').slice(0, 2).join(' ');
     if (xpEl)     xpEl.textContent   = `${profile.total_xp ?? 0} XP`;
 
+    // Streak badge (parity with dashboard.js)
+    const streakEl = document.getElementById('nav-streak');
+    if (streakEl && profile && Array.isArray(profile.usage_logs)) {
+      const days = new Set(profile.usage_logs.map(l => new Date(l.ts).toDateString()));
+      let streak = 0, d = new Date();
+      while (days.has(d.toDateString())) { streak++; d.setDate(d.getDate() - 1); }
+      streakEl.innerHTML = streak > 0
+        ? `&#x1F525; ${streak}-day streak`
+        : '&#x1F525; Start streak';
+    }
+
     // Fallback: replace nav-right on pages that don't have avatar/name elements
     if (!avatarEl && !nameEl) {
       const rightEl = document.getElementById('nav-right');
@@ -218,9 +229,9 @@ const AUTH_GUARD = (function () {
 
   // ── Logout ──────────────────────────────────────────────────────
   async function logout() {
+    sessionStorage.removeItem('ue_profile_cache');
+    localStorage.removeItem('ue_profile_cache'); // belt + braces
     await window.sb.auth.signOut();
-    // Clear the profile cache on logout
-    try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
     window.location.replace(LOGIN_PAGE);
   }
 
