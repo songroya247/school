@@ -403,7 +403,7 @@ function updateSessionBadges(){
   const avail=QUESTION_BANK.countFor(subj,topic||null);
   document.getElementById('q-count-badge').textContent=`${Math.min(cfg.count,avail)||cfg.count} Questions`;
   document.getElementById('time-badge').textContent=`⏱ ${Math.round(cfg.seconds/60)} min`;
-  document.getElementById('grade-badge').textContent=`📊 ${GRADING.gradeLabel(currentGradeLevel)} Level`;
+  document.getElementById('grade-badge').textContent=`&#x1F4CA; ${GRADING.gradeLabel(currentGradeLevel)} Level`;
 }
 
 function getModeConfig(mode){
@@ -579,11 +579,11 @@ function showResults(gr){
   const icon=document.getElementById('results-icon');
   const title=document.getElementById('results-title');
   const sub=document.getElementById('results-subtitle');
-  if(pct>=70){icon.className='results-icon pass';icon.textContent='🎉';title.textContent='Excellent Work!';sub.textContent=`You scored ${pct}% — you're on track!`;}
-  else if(pct>=50){icon.className='results-icon ok';icon.textContent='👍';title.textContent='Good Effort!';sub.textContent=`You scored ${pct}%. Keep practising.`;}
-  else{icon.className='results-icon fail';icon.textContent='📚';title.textContent='Keep Practising';sub.textContent=`You scored ${pct}%. Review and try again.`;}
+  if(pct>=70){icon.className='results-icon pass';icon.textContent='&#x1F389;';title.textContent='Excellent Work!';sub.textContent=`You scored ${pct}% — you're on track!`;}
+  else if(pct>=50){icon.className='results-icon ok';icon.textContent='&#x1F44D;';title.textContent='Good Effort!';sub.textContent=`You scored ${pct}%. Keep practising.`;}
+  else{icon.className='results-icon fail';icon.textContent='&#x1F4DA;';title.textContent='Keep Practising';sub.textContent=`You scored ${pct}%. Review and try again.`;}
 
-  if(gr?.xpEarned){const x=document.getElementById('xp-badge');x.style.display='inline-flex';x.textContent=`⚡ +${gr.xpEarned} XP earned`;}
+  if(gr?.xpEarned){const x=document.getElementById('xp-badge');x.style.display='inline-flex';x.textContent=`&#x26A1; +${gr.xpEarned} XP earned`;}
 
   document.getElementById('results-grid').innerHTML=`
     <div class="result-stat"><div class="result-stat-label">Score</div><div class="result-stat-val">${correct}/${total}</div></div>
@@ -598,9 +598,9 @@ function showResults(gr){
     const oldG=sessionConfig.gradeLevel, newG=gr.newGradeLevel;
     const gTitle=document.getElementById('grade-title');
     const gBody=document.getElementById('grade-body');
-    if(newG<oldG){gTitle.textContent=`🚀 Level Up! ${GRADING.gradeLabel(oldG)} → ${GRADING.gradeLabel(newG)}`;gBody.textContent=`Your accuracy of ${pct}% qualifies you for harder questions next session.`;}
-    else if(newG>oldG){gTitle.textContent='📉 Adjusting Difficulty';gBody.textContent=`We'll reduce difficulty to help you build confidence at ${GRADING.gradeLabel(newG)} level.`;}
-    else{gTitle.textContent=`📊 ${GRADING.gradeLabel(newG)} Level`;gBody.textContent=`Continue at this level. Reach ${pct>=65?'80':'65'}% accuracy to advance.`;}
+    if(newG<oldG){gTitle.textContent=`&#x1F680; Level Up! ${GRADING.gradeLabel(oldG)} → ${GRADING.gradeLabel(newG)}`;gBody.textContent=`Your accuracy of ${pct}% qualifies you for harder questions next session.`;}
+    else if(newG>oldG){gTitle.textContent='&#x1F4C9; Adjusting Difficulty';gBody.textContent=`We'll reduce difficulty to help you build confidence at ${GRADING.gradeLabel(newG)} level.`;}
+    else{gTitle.textContent=`&#x1F4CA; ${GRADING.gradeLabel(newG)} Level`;gBody.textContent=`Continue at this level. Reach ${pct>=65?'80':'65'}% accuracy to advance.`;}
   }
 
   document.getElementById('exam-screen').style.display='none';
