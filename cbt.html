@@ -411,42 +411,23 @@ function getModeConfig(mode){
 }
 
 async function loadGradeLevel(userId,subject){
-  // BUG-FIX #20: destructure error so a silent RLS failure (e.g. expired session
-  // between AUTH_GUARD.init() and here) is surfaced rather than leaving the student
-  // stuck at Foundation level with no feedback.
-  const{data,error}=await window.sb.from('topic_mastery').select('grade_level').eq('user_id',userId).ilike('topic_id',subject+'.%').order('last_studied',{ascending:false}).limit(1);
-  if(error){console.warn('[CBT] loadGradeLevel error (defaulting to 3):', error.message);}
-  else if(data&&data.length>0) currentGradeLevel=data[0].grade_level;
+  const{data}=await window.sb.from('topic_mastery').select('grade_level').eq('user_id',userId).ilike('topic_id',subject+'.%').order('last_studied',{ascending:false}).limit(1);
+  if(data&&data.length>0) currentGradeLevel=data[0].grade_level;
   updateSessionBadges();
 }
 
 // ════════════ START ════════════
-// BUG-FIX #13: startExam must be async so we can await getQuestions().
-// Previously QUESTIONS was assigned a Promise object (not an array),
-// causing the !QUESTIONS.length guard to always fire and the exam to
-// never start when LOCAL_ONLY = false.
-async function startExam(){
+function startExam(){
   const mode=document.getElementById('sel-mode').value;
   const subj=document.getElementById('sel-subject').value;
   const topic=document.getElementById('sel-topic').value||null;
   const examType=document.getElementById('sel-examtype').value;
   const cfg=getModeConfig(mode);
 
-  // BUG-FIX #19: mock mode uses getMockExam() so all registered subjects are
-  // sampled, not just one.  Both paths are now awaited correctly.
-  if(mode==='mock'){
-    const userSubjects=(window.UE_PROFILE?.exam_subjects?.length)
-      ? window.UE_PROFILE.exam_subjects
-      : [subj];
-    QUESTIONS=await QUESTION_BANK.getMockExam(userSubjects, examType, cfg.count);
-  } else {
-    QUESTIONS=await QUESTION_BANK.getQuestions({subject:subj,topic,examType,count:cfg.count});
-  }
-  if(!QUESTIONS||!QUESTIONS.length){toast('No questions available for this selection. Try another topic.');return;}
+  QUESTIONS=QUESTION_BANK.getQuestions({subject:subj,topic,examType,count:cfg.count});
+  if(!QUESTIONS.length){toast('No questions available for this selection. Try another topic.');return;}
 
-  // Use the REAL question count for sessionConfig — if the bank was exhausted
-  // getMockExam may return fewer than cfg.count (bug 19 fix).
-  sessionConfig={mode,subject:subj,topic,examType,gradeLevel:currentGradeLevel,totalQuestions:QUESTIONS.length};
+  sessionConfig={mode,subject:subj,topic,examType,gradeLevel:currentGradeLevel};
   totalTime=cfg.seconds; timeLeft=cfg.seconds;
   currentQ=0; answers={}; flags=new Set(); timings={};
   sessionSubmitted=false; isReviewMode=false;
