@@ -415,10 +415,10 @@ function checkPasswordMatch() {
   if (pass2.length === 0) { msg.style.display = 'none'; return; }
   msg.style.display = 'block';
   if (pass === pass2) {
-    msg.textContent = '&#x2713; Passwords match';
+    msg.innerHTML = '&#x2713; Passwords match';
     msg.style.color = '#16a34a';
   } else {
-    msg.textContent = '&#x2717; Passwords do not match';
+    msg.innerHTML = '&#x2717; Passwords do not match';
     msg.style.color = '#dc2626';
   }
 }
@@ -487,9 +487,16 @@ function updateJAMBHint() {
 }
 
 // â”€â”€ Target score parse â”€â”€
+// BUG-FIX #5: option values may use en-dashes (â€“) from copy-paste.
+// Normalise all dash variants to ASCII hyphen before lookup so the
+// map always matches regardless of what the <select> value contains.
 function parseTargetScore(str) {
-  const map = { '200â€“220':210,'221â€“240':230,'241â€“260':250,'261â€“280':270,'281â€“300':290,'301â€“320':310,'320+':330 };
-  return map[str] || 250;
+  const norm = String(str || '').replace(/[â€“â€”\u2012\u2013\u2014]/g, '-').trim();
+  const map = {
+    '200-220': 210, '221-240': 230, '241-260': 250,
+    '261-280': 270, '281-300': 290, '301-320': 310, '320+': 330
+  };
+  return map[norm] || 250;
 }
 
 // â”€â”€ DO SIGNUP â”€â”€
@@ -516,11 +523,27 @@ async function doSignup() {
 }
 
 // â”€â”€ DO LOGIN â”€â”€
+let _loginInFlight = false;
 async function doLogin() {
+  if (_loginInFlight) return;
   const email    = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   if (!email || !password) { showStepError('Please fill in all fields.'); return; }
-  await AUTH.handleLogin(email, password);
+  _loginInFlight = true;
+  try {
+    await AUTH.handleLogin(email, password);
+    // AUTH.handleLogin navigates away on success, so code below only runs on failure.
+  } catch (err) {
+    // BUG-FIX #12: unexpected throws (network outage, SDK crash) would leave
+    // _loginInFlight = true permanently â€” the login button stays frozen until
+    // the page is refreshed.  Reset immediately in the catch so the user can retry.
+    showStepError('Something went wrong. Please check your connection and try again.');
+    console.error('[doLogin] unexpected error:', err);
+  } finally {
+    // Always unlock â€” if handleLogin succeeded it navigates away so this is a no-op;
+    // if it failed (handled error or unexpected throw) the button becomes clickable again.
+    _loginInFlight = false;
+  }
 }
 
 // â”€â”€ Enter key support â”€â”€
