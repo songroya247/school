@@ -1,4 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap');
+/* Noto Color Emoji — guarantees emoji glyphs on any device/browser
+   (older Windows, some Linux distros, embedded webviews) that lacks
+   a built-in color-emoji font. */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap');
 
 :root {
   --accent: #1a56ff;
@@ -437,7 +441,8 @@ select, input, textarea { font-family: inherit; }
   .stats-grid { grid-template-columns: repeat(3, 1fr); }
   .stat-item:nth-child(3) { border-right: none; }
   .hero-headline { font-size: 2.8rem; }
-  .nav-links { display: none; }
+  /* nav-links are hidden at 768px with hamburger — not at 900px */
+  .nav-links { gap: 12px; }
   .classroom-sidebar { display: none; }
   .classroom-layout { height: auto; flex-direction: column; }
   .classroom-main { padding: 16px; }
@@ -447,26 +452,25 @@ select, input, textarea { font-family: inherit; }
 @media (max-width: 768px) {
   .ue-nav .container { flex-wrap: wrap; height: auto; padding: 12px 16px; position: relative; }
   .nav-hamburger { display: flex; }
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    width: 100%;
-    gap: 0;
-    padding: 8px 0 12px;
-    border-top: 1px solid var(--border);
-    margin-top: 8px;
-  }
-  .nav-links a { padding: 10px 4px; font-size: .95rem; }
-  .nav-right { display: none; width: 100%; padding-bottom: 12px; flex-direction: column; gap: 8px; }
-  .nav-mobile-open .nav-links,
-  .nav-mobile-open .nav-right { display: flex; }
-  .nav-right .btn { width: 100%; text-align: center; justify-content: center; }
+  /* Nav link collapse handled by index.html inline styles using
+     max-height animation. These rules are kept minimal to avoid conflicts. */
+  .nav-links a { font-size: .92rem; }
+  .nav-right .btn { width: 100%; justify-content: center; }
   .pricing-card.featured { transform: none; }
 }
 @media (max-width: 600px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .stat-item:nth-child(2) { border-right: none; }
-  .hero-headline { font-size: 2.2rem; }
+  .hero-headline { font-size: 2.2rem; letter-spacing: .01em; }
   .container { padding: 0 16px; }
   .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+  /* Tighter, less-stretched typography on small screens */
+  h1, h2, h3, h4, h5 { letter-spacing: 0; line-height: 1.15; }
+  .section-title { font-size: 1.6rem; line-height: 1.2; }
+  .subject-name, .dash-subj-name { font-size: 1.25rem; }
+  .stat-value, .pricing-price { font-size: 1.7rem; letter-spacing: .01em; }
+  .nav-logo { font-size: 1.25rem; letter-spacing: .04em; }
+  body { font-size: 15px; }
+  /* Prevent long words/emails from overflowing card edges */
+  .card-body, .auth-card { word-wrap: break-word; overflow-wrap: anywhere; }
 }
