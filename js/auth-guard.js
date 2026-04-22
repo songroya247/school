@@ -109,38 +109,57 @@ const AUTH_GUARD = (function () {
   //    • A profile object  — row found, all good.
   //    • null              — row definitively NOT FOUND (PGRST116).
   //                          The user is orphaned; caller should sign out + redirect.
-  //    • PROFILE_NET_ERROR — any other error (network timeout, RLS, 5xx …).
-  //                          Caller must NOT sign the user out; treat as transient.
+  //    • PROFILE_NET_ERROR — transient error that persisted after all retries.
+  //                          Caller must NOT sign the user out.
+  //
+  //  Retry policy: on any non-PGRST116 error, wait 1.5 s and try once more
+  //  before returning PROFILE_NET_ERROR.  This silently recovers from the
+  //  brief TCP stall that mobile radios produce when waking from sleep.
   //
   const PROFILE_NET_ERROR = Symbol('PROFILE_NET_ERROR');
 
-  async function getProfile(userId) {
+  const PROFILE_SELECT =
+    'id, full_name, email, is_premium, subscription_expiry, ' +
+    'total_xp, accuracy_avg, mastery_level, status, ' +
+    'exam_types, exam_date, target_score, target_grade, current_skill_level, ' +
+    'report_share_token, usage_logs, exam_subjects, study_mode, ' +
+    'smartpath_queue, created_at';
+
+  async function _fetchProfileOnce(userId) {
     const { data, error } = await window.sb
       .from('profiles')
-      .select(
-        'id, full_name, email, is_premium, subscription_expiry, ' +
-        'total_xp, accuracy_avg, mastery_level, status, ' +
-        'exam_types, exam_date, target_score, target_grade, current_skill_level, ' +
-        'report_share_token, usage_logs, exam_subjects, study_mode, ' +
-        'smartpath_queue, created_at'
-      )
+      .select(PROFILE_SELECT)
       .eq('id', userId)
       .single();
+    return { data, error };
+  }
+
+  async function getProfile(userId) {
+    let { data, error } = await _fetchProfileOnce(userId);
 
     if (error) {
-      // PGRST116 = "JSON object requested, multiple (or no) rows returned"
-      // This is PostgREST's code for "0 rows" when using .single().
-      // It is a definitive "row does not exist" — not a network fault.
+      // PGRST116 = "0 rows returned" for .single() — definitively no row.
       if (error.code === 'PGRST116') {
         console.warn('[AUTH_GUARD] Profile row not found for user:', userId);
         return null; // Orphaned user — caller will sign out + redirect
       }
 
-      // Everything else (network timeout, RLS policy rejection, Supabase 5xx …)
-      // is a transient or environment error. We must NOT sign the user out
-      // just because their internet blipped.
-      console.error('[AUTH_GUARD] Profile fetch error (non-fatal):', error.code, error.message);
-      return PROFILE_NET_ERROR;
+      // Any other error is treated as transient (network blip, 5xx, etc.).
+      // Wait 1.5 s and retry ONCE before giving up.
+      console.warn('[AUTH_GUARD] Profile fetch error on first attempt — retrying in 1.5 s:',
+                   error.code, error.message);
+      await new Promise(r => setTimeout(r, 1500));
+
+      ({ data, error } = await _fetchProfileOnce(userId));
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          console.warn('[AUTH_GUARD] Profile row not found (retry):', userId);
+          return null;
+        }
+        console.error('[AUTH_GUARD] Profile fetch failed after retry:', error.code, error.message);
+        return PROFILE_NET_ERROR;
+      }
     }
 
     // Cache a lightweight version for the head-gatekeeper's optimistic check
@@ -298,18 +317,52 @@ const AUTH_GUARD = (function () {
     let profile = await getProfile(session.user.id);
 
     // ── 4a. Handle network / transient errors ─────────────────────
-    //  PROFILE_NET_ERROR means the fetch failed for a reason other than
-    //  "row doesn't exist" (e.g. offline, Supabase 5xx, RLS error).
-    //  We must NOT sign the user out — that would destroy a valid session
-    //  just because their internet blipped.  Show a soft error and stop.
+    //  PROFILE_NET_ERROR means the fetch + its one retry both failed.
+    //  Before showing the error toast, attempt to serve the last
+    //  cached profile from sessionStorage so the dashboard can still
+    //  render for users on intermittent connections.
+    //  We do NOT update the cache in this fallback path — the stale
+    //  data is display-only and the guard treats premium status as
+    //  'unknown' (neither upgrading nor downgrading access).
     if (profile === PROFILE_NET_ERROR) {
       liftVeil();
-      showToast(
-        'Could not reach the server. Please check your connection and refresh.',
-        'error', 8000
-      );
-      console.error('[AUTH_GUARD] Aborting: profile fetch returned a network/server error.');
-      return null; // Do not redirect — let the user retry manually.
+      let cacheHit = false;
+      try {
+        const cached = sessionStorage.getItem('ue_profile_cache');
+        if (cached) {
+          const partial = JSON.parse(cached);
+          // Merge onto a skeleton so downstream code doesn't choke on nulls
+          profile = {
+            id:                  session.user.id,
+            email:               session.user.email,
+            full_name:           (window.UE_USER && window.UE_USER.full_name) || session.user.email.split('@')[0],
+            is_premium:          partial.is_premium          ?? false,
+            subscription_expiry: partial.subscription_expiry ?? null,
+            total_xp: 0, accuracy_avg: null, mastery_level: null,
+            status: null, exam_types: [], exam_date: null,
+            target_score: null, target_grade: null,
+            current_skill_level: null, report_share_token: null,
+            usage_logs: [], exam_subjects: [], study_mode: null,
+            smartpath_queue: [], created_at: null,
+            _fromCache: true, // flag so dashboard.js can show a soft warning
+          };
+          cacheHit = true;
+          console.warn('[AUTH_GUARD] Using cached profile after network error.');
+          showToast(
+            'Offline mode — showing last saved data. Some features may be limited.',
+            'warning', 6000
+          );
+        }
+      } catch (_) { /* cache parse failed — fall through to hard error */ }
+
+      if (!cacheHit) {
+        showToast(
+          'Could not reach the server. Please check your connection and refresh.',
+          'error', 8000
+        );
+        console.error('[AUTH_GUARD] Aborting: profile fetch failed and no cache available.');
+        return null; // Do not redirect — let the user retry manually.
+      }
     }
 
     if (profile === null) {
