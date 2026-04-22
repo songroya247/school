@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login / Sign Up — UE School</title>
+<title>Login / Sign Up â€” UE School</title>
 <link rel="stylesheet" href="css/main.css">
 <style>
 .auth-wrap { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg); padding:24px; }
@@ -68,7 +68,7 @@
 
     <div id="auth-error"></div>
 
-    <!-- ══════════ LOGIN FORM ══════════ -->
+    <!-- â•â•â•â•â•â•â•â•â•â• LOGIN FORM â•â•â•â•â•â•â•â•â•â• -->
     <div id="login-form" style="display:none">
       <h2 style="font-family:var(--font-head);font-size:1.9rem;margin-bottom:6px">Welcome back</h2>
       <p style="font-size:.88rem;color:var(--muted);margin-bottom:24px">Log in to continue your exam prep.</p>
@@ -80,8 +80,8 @@
       <div class="form-group">
         <label class="form-label">Password</label>
         <div class="password-wrap">
-          <input type="password" class="form-input" placeholder="••••••••" id="login-password" autocomplete="current-password">
-          <button type="button" class="pw-toggle" onclick="togglePw('login-password',this)">👁</button>
+          <input type="password" class="form-input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" id="login-password" autocomplete="current-password">
+          <button type="button" class="pw-toggle" onclick="togglePw('login-password',this)">ðŸ‘</button>
         </div>
       </div>
 
@@ -89,16 +89,16 @@
 
       <div style="text-align:center;margin-top:16px;display:flex;justify-content:space-between">
         <a href="forgot-password.html" style="font-size:.85rem;color:var(--muted)">Forgot Password?</a>
-        <a href="#" style="font-size:.85rem;color:var(--accent)" onclick="switchTab('signup');return false">Create account →</a>
+        <a href="#" style="font-size:.85rem;color:var(--accent)" onclick="switchTab('signup');return false">Create account â†’</a>
       </div>
     </div>
 
-    <!-- ══════════ SIGNUP MULTI-STEP ══════════ -->
+    <!-- â•â•â•â•â•â•â•â•â•â• SIGNUP MULTI-STEP â•â•â•â•â•â•â•â•â•â• -->
     <div id="signup-form">
 
-      <!-- Step 1 — Account details -->
+      <!-- Step 1 â€” Account details -->
       <div id="step-1">
-        <div class="step-indicator">Step 1 of 4 — Account Details</div>
+        <div class="step-indicator">Step 1 of 4 â€” Account Details</div>
         <div class="step-bar"><div class="step-bar-fill" style="width:25%"></div></div>
         <h2 style="font-family:var(--font-head);font-size:1.9rem;margin-bottom:6px">Create your account</h2>
         <p style="font-size:.88rem;color:var(--muted);margin-bottom:24px">Join 12,000+ students already preparing smarter.</p>
@@ -116,7 +116,7 @@
           <div class="password-wrap">
             <input type="password" class="form-input" placeholder="Min. 8 characters" id="su-pass"
               autocomplete="new-password" oninput="checkStrength(this.value)">
-            <button type="button" class="pw-toggle" onclick="togglePw('su-pass',this)">👁</button>
+            <button type="button" class="pw-toggle" onclick="togglePw('su-pass',this)">ðŸ‘</button>
           </div>
           <div class="strength-bar" id="strength-bar" style="display:none"></div>
           <div class="form-hint" id="strength-label"></div>
@@ -125,16 +125,16 @@
           <label class="form-label">Confirm Password</label>
           <div class="password-wrap">
             <input type="password" class="form-input" placeholder="Repeat password" id="su-pass2" autocomplete="new-password" oninput="checkPasswordMatch()">
-            <button type="button" class="pw-toggle" onclick="togglePw('su-pass2',this)">👁</button>
+            <button type="button" class="pw-toggle" onclick="togglePw('su-pass2',this)">ðŸ‘</button>
           </div>
           <div id="pw-match-msg" style="font-size:.82rem;margin-top:5px;font-weight:600;display:none"></div>
         </div>
         <button class="btn btn-primary btn-block btn-lg" onclick="goStep(2)">Continue &rarr;</button>
       </div>
 
-      <!-- Step 2 — Exam goals -->
+      <!-- Step 2 â€” Exam goals -->
       <div id="step-2" style="display:none">
-        <div class="step-indicator">Step 2 of 4 — Exam Goals</div>
+        <div class="step-indicator">Step 2 of 4 â€” Exam Goals</div>
         <div class="step-bar"><div class="step-bar-fill" style="width:50%"></div></div>
         <h2 style="font-family:var(--font-head);font-size:1.9rem;margin-bottom:6px">Your exam goals</h2>
         <p style="font-size:.88rem;color:var(--muted);margin-bottom:24px">Help us personalise your learning plan.</p>
@@ -151,7 +151,7 @@
         <div class="form-group">
           <label class="form-label">When is your exam? <span style="color:var(--muted);font-weight:400">(optional)</span></label>
           <select class="form-select" id="su-date">
-            <option value="">Select month…</option>
+            <option value="">Select monthâ€¦</option>
             <option>May 2026</option><option>June 2026</option><option>July 2026</option>
             <option>August 2026</option><option>September 2026</option><option>October 2026</option>
             <option>November 2026</option><option>December 2026</option>
@@ -163,9 +163,9 @@
         <div class="form-group" id="goal-jamb" style="display:none">
           <label class="form-label">Target JAMB Score</label>
           <select class="form-select" id="su-target">
-            <option>200–220</option><option>221–240</option><option>241–260</option>
-            <option>261–280</option><option selected>281–300</option>
-            <option>301–320</option><option>320+</option>
+            <option>200â€“220</option><option>221â€“240</option><option>241â€“260</option>
+            <option>261â€“280</option><option selected>281â€“300</option>
+            <option>301â€“320</option><option>320+</option>
           </select>
         </div>
 
@@ -173,12 +173,12 @@
         <div class="form-group" id="goal-waec" style="display:none">
           <label class="form-label">Target WAEC/NECO Grade (per subject)</label>
           <select class="form-select" id="su-target-grade">
-            <option value="A1">A1 — Excellent (90%+)</option>
-            <option value="B2">B2 — Very Good (80–89%)</option>
-            <option value="B3" selected>B3 — Good (75–79%)</option>
-            <option value="C4">C4 — Credit (65–74%)</option>
-            <option value="C5">C5 — Credit (55–64%)</option>
-            <option value="C6">C6 — Credit (50–54%) — minimum pass</option>
+            <option value="A1">A1 â€” Excellent (90%+)</option>
+            <option value="B2">B2 â€” Very Good (80â€“89%)</option>
+            <option value="B3" selected>B3 â€” Good (75â€“79%)</option>
+            <option value="C4">C4 â€” Credit (65â€“74%)</option>
+            <option value="C5">C5 â€” Credit (55â€“64%)</option>
+            <option value="C6">C6 â€” Credit (50â€“54%) â€” minimum pass</option>
           </select>
         </div>
 
@@ -186,8 +186,8 @@
         <div class="form-group" id="goal-postutme" style="display:none">
           <label class="form-label">Target Post-UTME Score</label>
           <select class="form-select" id="su-target-postutme">
-            <option>50–60%</option><option selected>61–70%</option>
-            <option>71–80%</option><option>81–90%</option><option>90%+</option>
+            <option>50â€“60%</option><option selected>61â€“70%</option>
+            <option>71â€“80%</option><option>81â€“90%</option><option>90%+</option>
           </select>
         </div>
 
@@ -197,9 +197,9 @@
         </div>
       </div>
 
-      <!-- Step 3 — Subjects -->
+      <!-- Step 3 â€” Subjects -->
       <div id="step-3" style="display:none">
-        <div class="step-indicator">Step 3 of 4 — Your Subjects</div>
+        <div class="step-indicator">Step 3 of 4 â€” Your Subjects</div>
         <div class="step-bar"><div class="step-bar-fill" style="width:75%"></div></div>
         <h2 style="font-family:var(--font-head);font-size:1.9rem;margin-bottom:6px">Your subjects</h2>
         <p style="font-size:.88rem;color:var(--muted);margin-bottom:8px">Select all subjects you are sitting for.</p>
@@ -210,63 +210,63 @@
 
         <div class="subject-grid" id="subj-grid">
           <div class="subj-card" onclick="toggleSubj(this,'mathematics')">
-            <div class="subj-check">✓</div>
-            <div class="subj-card-icon">📐</div>
+            <div class="subj-check">âœ“</div>
+            <div class="subj-card-icon">ðŸ“</div>
             <div class="subj-card-name" style="color:#1a56ff">Mathematics</div>
           </div>
           <div class="subj-card selected" onclick="toggleSubj(this,'english')">
-            <div class="subj-check">✓</div>
-            <div class="subj-card-icon">📖</div>
+            <div class="subj-check">âœ“</div>
+            <div class="subj-card-icon">ðŸ“–</div>
             <div class="subj-card-name" style="color:#00c97a">English Language</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'physics')">
-            <div class="subj-check">✓</div>
-            <div class="subj-card-icon">⚛️</div>
+            <div class="subj-check">âœ“</div>
+            <div class="subj-card-icon">âš›ï¸</div>
             <div class="subj-card-name" style="color:#7c3aed">Physics</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'chemistry')">
-            <div class="subj-check">✓</div>
-            <div class="subj-card-icon">🧪</div>
+            <div class="subj-check">âœ“</div>
+            <div class="subj-card-icon">ðŸ§ª</div>
             <div class="subj-card-name" style="color:#ff6b35">Chemistry</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'biology')">
-            <div class="subj-check">✓</div>
-            <div class="subj-card-icon">🌿</div>
+            <div class="subj-check">âœ“</div>
+            <div class="subj-card-icon">ðŸŒ¿</div>
             <div class="subj-card-name" style="color:#0891b2">Biology</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'economics')">
-            <div class="subj-check">✓</div>
-            <div class="subj-card-icon">📈</div>
+            <div class="subj-check">âœ“</div>
+            <div class="subj-card-icon">ðŸ“ˆ</div>
             <div class="subj-card-name" style="color:#f59e0b">Economics</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'government')">
-            <div class="subj-check">✓</div>
-            <div class="subj-card-icon">🏛️</div>
+            <div class="subj-check">âœ“</div>
+            <div class="subj-card-icon">ðŸ›ï¸</div>
             <div class="subj-card-name" style="color:#6366f1">Government</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'literature')">
-            <div class="subj-check">✓</div>
-            <div class="subj-card-icon">📚</div>
+            <div class="subj-check">âœ“</div>
+            <div class="subj-card-icon">ðŸ“š</div>
             <div class="subj-card-name" style="color:#ec4899">Literature</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'geography')">
-            <div class="subj-check">✓</div>
-            <div class="subj-card-icon">🌍</div>
+            <div class="subj-check">âœ“</div>
+            <div class="subj-card-icon">ðŸŒ</div>
             <div class="subj-card-name" style="color:#10b981">Geography</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'commerce')">
-            <div class="subj-check">✓</div>
-            <div class="subj-card-icon">🏪</div>
+            <div class="subj-check">âœ“</div>
+            <div class="subj-card-icon">ðŸª</div>
             <div class="subj-card-name" style="color:#8b5cf6">Commerce</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'accounts')">
-            <div class="subj-check">✓</div>
-            <div class="subj-card-icon">💼</div>
+            <div class="subj-check">âœ“</div>
+            <div class="subj-card-icon">ðŸ’¼</div>
             <div class="subj-card-name" style="color:#14b8a6">Accounts</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'crk')">
-            <div class="subj-check">✓</div>
-            <div class="subj-card-icon">✝️</div>
+            <div class="subj-check">âœ“</div>
+            <div class="subj-card-icon">âœï¸</div>
             <div class="subj-card-name" style="color:#6d28d9">CRK</div>
           </div>
         </div>
@@ -277,9 +277,9 @@
         </div>
       </div>
 
-      <!-- Step 4 — Study mode -->
+      <!-- Step 4 â€” Study mode -->
       <div id="step-4" style="display:none">
-        <div class="step-indicator">Step 4 of 4 — Study Preference</div>
+        <div class="step-indicator">Step 4 of 4 â€” Study Preference</div>
         <div class="step-bar"><div class="step-bar-fill" style="width:100%"></div></div>
         <h2 style="font-family:var(--font-head);font-size:1.9rem;margin-bottom:6px">How do you like to study?</h2>
         <p style="font-size:.88rem;color:var(--muted);margin-bottom:20px">You can change this later in your settings.</p>
@@ -300,7 +300,7 @@
         </label>
 
         <div style="margin:16px 0;padding:14px 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;font-size:.85rem;">
-          <strong>📧 Almost done!</strong> After you click "Create Account", we'll send a confirmation email.
+          <strong>ðŸ“§ Almost done!</strong> After you click "Create Account", we'll send a confirmation email.
           Click the link in it to activate your account.
         </div>
 
@@ -330,71 +330,15 @@
 <script src="js/auth.js"></script>
 
 <script>
-// ── Initialise Supabase ──
-// window.sb is set by js/supabase.js — credentials live only in js/config.js
+// â”€â”€ Initialise Supabase â”€â”€
+// window.sb is set by js/supabase.js â€” credentials live only in js/config.js
 
-// ── Circuit-breaker: suppress auto-redirect when URL carries a reason ──────
-//
-//  The redirect loop happens when:
-//    1. auth-guard.js on dashboard detects an orphaned user → redirects to
-//       login.html?reason=no_profile&next=dashboard.html
-//    2. login.html sees a valid session → redirects back to dashboard.html
-//    3. Go to 1 → loop.
-//
-//  Rule: if ?reason= OR ?next= is present in the URL, a guard or server
-//  explicitly sent us here.  Do NOT auto-redirect.  Show the form instead
-//  so the user can re-authenticate (or see an error message).
-//
-//  auth-guard.js now calls signOut() before redirecting for the
-//  'no_profile' case, so by the time we check getSession() the session
-//  will be gone — but we keep this check as a belt-and-suspenders
-//  guard for any future reason codes where signOut() may not apply.
-//
-const _loginParams = new URLSearchParams(window.location.search);
-const _hasRedirectReason = _loginParams.has('reason') || _loginParams.has('next');
-
-// Surface reason-specific messages to the user
-(function () {
-  const reason = _loginParams.get('reason');
-  if (!reason) return;
-  const messages = {
-    no_profile:        'Your account data could not be found. Please sign in again.',
-    no_session:        'Your session has expired. Please sign in again.',
-    signed_out:        'You have been signed out.',
-    sdk_missing:       'A technical error occurred. Please refresh and try again.',
-    premium_required:  'This page requires a premium subscription.',
-    not_subscribed:    'Please subscribe to access this content.',
-    subscription_expired: 'Your subscription has expired. Please renew to continue.',
-  };
-  const msg = messages[reason];
-  if (msg) {
-    // Show the error banner as soon as the DOM is ready
-    const show = () => {
-      const el = document.getElementById('auth-error');
-      if (el) { el.textContent = msg; el.style.display = 'block'; }
-    };
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', show);
-    } else {
-      show();
-    }
-  }
-})();
-
-// Redirect already-logged-in users — but only if no redirect reason is present.
+// Redirect already-logged-in users.
 // Uses replace() so the login page is NOT in browser history.
 // The onAuthStateChange listener below is suppressed on this page so
 // a SIGNED_IN event fired by the SDK init never double-redirects.
 let _loginChecked = false;
 (async () => {
-  // ── Circuit breaker ─────────────────────────────────────────────
-  //  If the URL has ?reason= or ?next= the user was sent here by a
-  //  guard. Skip the auto-redirect entirely so they see the login form.
-  if (_hasRedirectReason) {
-    _loginChecked = true;
-    return;
-  }
-
   // Don't bounce a user who literally just signed in (defensive)
   if (sessionStorage.getItem('ue_just_signed_in') === '1') {
     _loginChecked = true;
@@ -410,7 +354,14 @@ let _loginChecked = false;
     const { data: { session } } = await window.sb.auth.getSession();
     if (session && !_loginChecked) {
       _loginChecked = true;
-      window.location.replace('dashboard.html');
+      // Tell the next page's gatekeeper we just authenticated so
+      // it doesn't bounce us back here on a session-hydration race.
+      try { sessionStorage.setItem('ue_just_signed_in', '1'); } catch (_) {}
+      // Honour ?next= so deep links work after login.
+      const next = new URLSearchParams(window.location.search).get('next');
+      const safe = (next && !/login|confirm/i.test(next) && !/^https?:/i.test(next))
+        ? decodeURIComponent(next) : 'dashboard.html';
+      window.location.replace(safe);
     } else {
       _loginChecked = true;
     }
@@ -420,11 +371,11 @@ let _loginChecked = false;
   }
 })();
 
-// ── State ──
+// â”€â”€ State â”€â”€
 let jambSelected = false;
 const selectedSubjects = new Set(['english']); // English pre-selected
 
-// ── Tab Switch ──
+// â”€â”€ Tab Switch â”€â”€
 function switchTab(tab) {
   document.getElementById('login-form').style.display  = tab === 'login'  ? 'block' : 'none';
   document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none';
@@ -433,7 +384,7 @@ function switchTab(tab) {
   document.getElementById('auth-error').style.display = 'none';
 }
 
-// ── Step Navigation ──
+// â”€â”€ Step Navigation â”€â”€
 function goStep(n) {
   // Validate before advancing
   if (n === 2) {
@@ -462,7 +413,7 @@ function showStepError(msg) {
   el.style.display = 'block';
 }
 
-// ── Password helpers ──
+// â”€â”€ Password helpers â”€â”€
 function checkPasswordMatch() {
   const pass  = document.getElementById('su-pass').value;
   const pass2 = document.getElementById('su-pass2').value;
@@ -481,8 +432,8 @@ function checkPasswordMatch() {
 
 function togglePw(id, btn) {
   const inp = document.getElementById(id);
-  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
-  else                         { inp.type = 'password'; btn.textContent = '👁'; }
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'ðŸ™ˆ'; }
+  else                         { inp.type = 'password'; btn.textContent = 'ðŸ‘'; }
 }
 
 function checkStrength(pw) {
@@ -495,16 +446,16 @@ function checkStrength(pw) {
     label.style.color = '#ef4444';
   } else if (pw.length < 10 || !/[0-9!@#$%]/.test(pw)) {
     bar.className = 'strength-bar strength-fair';
-    label.textContent = 'Fair — add numbers or symbols';
+    label.textContent = 'Fair â€” add numbers or symbols';
     label.style.color = '#f59e0b';
   } else {
     bar.className = 'strength-bar strength-strong';
-    label.textContent = 'Strong password ✓';
+    label.textContent = 'Strong password âœ“';
     label.style.color = '#22c55e';
   }
 }
 
-// ── Exam goal fields — show/hide based on selection ──
+// â”€â”€ Exam goal fields â€” show/hide based on selection â”€â”€
 function updateGoalFields() {
   const hasJAMB     = document.getElementById('chk-jamb')?.checked;
   const hasWAEC     = document.getElementById('chk-waec')?.checked;
@@ -520,7 +471,7 @@ function updateGoalFields() {
   updateJAMBHint();
 }
 
-// ── Legacy alias so any remaining onchange="checkJAMB()" calls still work ──
+// â”€â”€ Legacy alias so any remaining onchange="checkJAMB()" calls still work â”€â”€
 function checkJAMB() { updateGoalFields(); }
 
 function toggleSubj(el, id) {
@@ -542,13 +493,13 @@ function updateJAMBHint() {
   }
 }
 
-// ── Target score parse ──
+// â”€â”€ Target score parse â”€â”€
 function parseTargetScore(str) {
-  const map = { '200–220':210,'221–240':230,'241–260':250,'261–280':270,'281–300':290,'301–320':310,'320+':330 };
+  const map = { '200â€“220':210,'221â€“240':230,'241â€“260':250,'261â€“280':270,'281â€“300':290,'301â€“320':310,'320+':330 };
   return map[str] || 250;
 }
 
-// ── DO SIGNUP ──
+// â”€â”€ DO SIGNUP â”€â”€
 async function doSignup() {
   const examTypes = Array.from(document.querySelectorAll('.exam-checks input:checked')).map(c => c.value);
   const studyMode = document.querySelector('input[name=study_mode]:checked').value;
@@ -571,7 +522,7 @@ async function doSignup() {
   await AUTH.handleSignup(formData);
 }
 
-// ── DO LOGIN ──
+// â”€â”€ DO LOGIN â”€â”€
 async function doLogin() {
   const email    = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
@@ -579,14 +530,14 @@ async function doLogin() {
   await AUTH.handleLogin(email, password);
 }
 
-// ── Enter key support ──
+// â”€â”€ Enter key support â”€â”€
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;
   const loginVisible = document.getElementById('login-form').style.display !== 'none';
   if (loginVisible) doLogin();
 });
 
-// ── Check URL param — open login tab if ?tab=login ──
+// â”€â”€ Check URL param â€” open login tab if ?tab=login â”€â”€
 const urlTab = new URLSearchParams(window.location.search).get('tab');
 if (urlTab === 'login') switchTab('login');
 else switchTab('signup');
