@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   UE School — js/auth-guard.js  (HARDENED v2)
+   UE School — js/auth-guard.js
    ▸ Runs AFTER the Supabase SDK and config.js are loaded.
    ▸ Performs the full async session + premium validation.
    ▸ head-gatekeeper.js already stopped unauth'd page renders;
@@ -21,9 +21,8 @@ const AUTH_GUARD = (function () {
   const PRICING_PAGE  = cfg.PRICING_PAGE || 'pricing.html';
   const PREMIUM_PAGES = cfg.PREMIUM_PAGES || ['classroom.html', 'cbt.html'];
 
-  // ── Toast helper (used for premium-redirect messages) ──────────
+  // ── Toast helper ───────────────────────────────────────────────
   function showToast(message, type = 'info', duration = 5000) {
-    // Remove existing toast
     const existing = document.getElementById('ue-auth-toast');
     if (existing) existing.remove();
 
@@ -48,25 +47,22 @@ const AUTH_GUARD = (function () {
     toast.innerHTML = `<span>${c.icon}</span><span>${message}</span>`;
     document.body.appendChild(toast);
 
-    // Animate in
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         toast.style.transform = 'translateX(-50%) translateY(0)';
       });
     });
 
-    // Auto-dismiss
     setTimeout(() => {
       toast.style.transform = 'translateX(-50%) translateY(80px)';
       setTimeout(() => toast.remove(), 400);
     }, duration);
   }
 
-  // ── Remove the veil injected by head-gatekeeper (expired tokens) 
+  // ── Remove veil injected by head-gatekeeper ────────────────────
   function liftVeil() {
     const veil = document.getElementById('ue-gatekeeper-veil');
     if (veil) veil.remove();
-    // Also un-hide body visibility in case head-gatekeeper set it inline
     document.body.style.visibility = '';
   }
 
@@ -75,18 +71,30 @@ const AUTH_GUARD = (function () {
     return window.location.pathname.split('/').pop() || 'index.html';
   }
 
-  // ── Redirect helpers ───────────────────────────────────────────
-  function redirectToLogin(reason) {
+  // ── Global redirect lock — prevents any double-navigation ──────
+  let _redirecting = false;
+
+  function safeRedirectToLogin(reason) {
+    if (_redirecting) return;
+    _redirecting = true;
+    const page = currentPage();
+    // Never redirect to login from a public/auth page
+    if (page === LOGIN_PAGE || page === 'confirm.html' || page === 'index.html' ||
+        page === 'pricing.html' || page === 'forgot-password.html') return;
     window.location.replace(
-      LOGIN_PAGE + '?next=' + encodeURIComponent(currentPage()) +
+      LOGIN_PAGE + '?next=' + encodeURIComponent(page) +
       (reason ? '&reason=' + encodeURIComponent(reason) : '')
     );
   }
 
-  function redirectToPricing(reason) {
+  function safeRedirectToPricing(reason) {
+    if (_redirecting) return;
+    _redirecting = true;
+    const page = currentPage();
+    if (page === PRICING_PAGE) return;
     window.location.replace(
       PRICING_PAGE + '?reason=' + encodeURIComponent(reason || 'premium_required') +
-      '&next=' + encodeURIComponent(currentPage())
+      '&next=' + encodeURIComponent(page)
     );
   }
 
@@ -104,7 +112,7 @@ const AUTH_GUARD = (function () {
       .select(
         'id, full_name, email, is_premium, subscription_expiry, ' +
         'total_xp, accuracy_avg, mastery_level, status, ' +
-        'exam_types, exam_date, target_score, current_skill_level, ' +
+        'exam_types, exam_date, target_score, target_grade, current_skill_level, ' +
         'report_share_token, usage_logs, exam_subjects, study_mode, ' +
         'smartpath_queue, created_at'
       )
@@ -116,24 +124,23 @@ const AUTH_GUARD = (function () {
       return null;
     }
 
-    // Cache a lightweight version for the head-gatekeeper's optimistic check
     try {
       sessionStorage.setItem('ue_profile_cache', JSON.stringify({
         is_premium:          data.is_premium,
         subscription_expiry: data.subscription_expiry,
       }));
-    } catch (_) { /* storage full / blocked — non-fatal */ }
+    } catch (_) {}
 
     return data;
   }
 
   // ── Subscription status ─────────────────────────────────────────
   function subscriptionStatus(profile) {
-    if (!profile)                       return 'NIL';
-    if (!profile.is_premium)            return 'NIL';
-    if (!profile.subscription_expiry)   return 'NIL';
+    if (!profile)                     return 'NIL';
+    if (!profile.is_premium)          return 'NIL';
+    if (!profile.subscription_expiry) return 'NIL';
     const expiry = new Date(profile.subscription_expiry);
-    if (expiry < new Date())            return 'EXPIRED';
+    if (expiry < new Date())          return 'EXPIRED';
     return 'ACTIVE';
   }
 
@@ -142,33 +149,26 @@ const AUTH_GUARD = (function () {
   }
 
   // ── Premium gate ────────────────────────────────────────────────
-  //  Called AFTER the real profile has been fetched from the DB.
-  //  This is the authoritative check — not the optimistic cache one.
   function enforcePremiumGate(profile) {
     const page = currentPage();
-    if (PREMIUM_PAGES.indexOf(page) === -1) return; // page doesn't need premium
+    if (PREMIUM_PAGES.indexOf(page) === -1) return true;
 
     const status = subscriptionStatus(profile);
+    const REDIRECT_DELAY_MS = 400;
 
     if (status === 'NIL') {
-      showToast(
-        'This feature requires a UE School subscription. Choose a plan to continue.',
-        'warning', 6000
-      );
-      setTimeout(() => redirectToPricing('not_subscribed'), 1800);
+      showToast('This feature requires a UE School subscription. Choose a plan to continue.', 'warning', 6000);
+      setTimeout(() => safeRedirectToPricing('not_subscribed'), REDIRECT_DELAY_MS);
       return false;
     }
 
     if (status === 'EXPIRED') {
-      showToast(
-        'Your subscription has expired. Renew your plan to access this content.',
-        'warning', 6000
-      );
-      setTimeout(() => redirectToPricing('subscription_expired'), 1800);
+      showToast('Your subscription has expired. Renew your plan to access this content.', 'warning', 6000);
+      setTimeout(() => safeRedirectToPricing('subscription_expired'), REDIRECT_DELAY_MS);
       return false;
     }
 
-    return true; // ACTIVE — all good
+    return true;
   }
 
   // ── Nav rendering ───────────────────────────────────────────────
@@ -181,14 +181,18 @@ const AUTH_GUARD = (function () {
       .split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
     const status   = subscriptionStatus(profile);
-    const proBadge = status === 'ACTIVE'
-      ? '<span class="nav-pro-badge">PRO</span>' : '';
+    const proBadge = status === 'ACTIVE' ? '<span class="nav-pro-badge">PRO</span>' : '';
 
     if (avatarEl) avatarEl.innerHTML = initials + proBadge;
     if (nameEl)   nameEl.textContent = (profile.full_name || '').split(' ').slice(0, 2).join(' ');
     if (xpEl)     xpEl.textContent   = `${profile.total_xp ?? 0} XP`;
 
-    // Fallback: replace nav-right on pages that don't have avatar/name elements
+    const streakEl = document.getElementById('nav-streak');
+    if (streakEl && profile && typeof calcStreak === 'function') {
+      const streak = calcStreak(profile.usage_logs);
+      streakEl.innerHTML = streak > 0 ? `🔥 ${streak}-day streak` : '🔥 Start streak';
+    }
+
     if (!avatarEl && !nameEl) {
       const rightEl = document.getElementById('nav-right');
       if (!rightEl) return;
@@ -212,9 +216,9 @@ const AUTH_GUARD = (function () {
 
   // ── Logout ──────────────────────────────────────────────────────
   async function logout() {
-    await window.sb.auth.signOut();
-    // Clear the profile cache on logout
     try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
+    try { localStorage.removeItem('ue_profile_cache'); }  catch (_) {}
+    await window.sb.auth.signOut();
     window.location.replace(LOGIN_PAGE);
   }
 
@@ -224,46 +228,80 @@ const AUTH_GUARD = (function () {
     if (!window.sb) {
       if (!window.supabase) {
         console.error('[AUTH_GUARD] Supabase SDK not loaded.');
-        redirectToLogin('sdk_missing');
+        safeRedirectToLogin('sdk_missing');
         return null;
       }
       window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
     }
 
-    // ── 2. Get the session (SDK handles silent refresh for us) ────
+    // ── 2. Get the session (SDK handles silent refresh) ───────────
     const session = await getSession();
 
     if (!session) {
-      // No valid session (refresh failed or never existed)
       try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
-      redirectToLogin('no_session');
+      safeRedirectToLogin('no_session');
       return null;
     }
 
-    // ── 3. Lift the veil (for expired-token path from gatekeeper) ─
+    // ── 3. Lift the veil (expired-token path from gatekeeper) ─────
     liftVeil();
 
-    // ── 4. Fetch the real profile from Supabase ──────────────────
-    const profile = await getProfile(session.user.id);
+    // ── 4. Fetch the real profile from Supabase ───────────────────
+    let profile = await getProfile(session.user.id);
 
     if (!profile) {
-      // Profile missing — could be a brand-new user whose trigger hasn't
-      // fired yet, or a DB error. Redirect to login as safety measure.
-      redirectToLogin('no_profile');
-      return null;
+      // Profile missing — new user whose email was just confirmed.
+      // Build it from session metadata rather than sending them to login
+      // (login would immediately bounce back here because the session IS valid).
+      try {
+        const meta        = session.user.user_metadata || {};
+        const pending     = sessionStorage.getItem('ue_pending_profile');
+        const pendingData = pending ? JSON.parse(pending) : {};
+
+        await window.sb.from('profiles').upsert({
+          id:                  session.user.id,
+          full_name:           pendingData.fullName    || meta.full_name    || session.user.email.split('@')[0],
+          email:               session.user.email,
+          exam_types:          pendingData.examTypes   || [],
+          exam_date:           pendingData.examDate    || null,
+          target_score:        pendingData.targetScore || null,
+          target_grade:        pendingData.targetGrade || null,
+          current_skill_level: 3,
+          status:              'NIL',
+          is_premium:          false,
+          exam_subjects:       pendingData.subjects    || [],
+          study_mode:          pendingData.studyMode   || 'drill',
+          smartpath_queue:     [],
+          total_xp:            0,
+          usage_logs:          []
+        }, { onConflict: 'id', ignoreDuplicates: false });
+
+        if (pending) sessionStorage.removeItem('ue_pending_profile');
+        profile = await getProfile(session.user.id);
+      } catch (profileErr) {
+        console.error('[AUTH_GUARD] profile auto-create failed:', profileErr);
+      }
+
+      if (!profile) {
+        safeRedirectToLogin('no_profile');
+        return null;
+      }
     }
 
     // ── 5. Enforce premium gate (authoritative DB-backed check) ───
     const premiumOk = enforcePremiumGate(profile);
-    if (premiumOk === false) return null; // redirect in progress
+    if (premiumOk === false) return null;
 
-    // ── 6. Set up auth-state-change listener ────────────────────
+    // ── 6. Auth-state-change listener ────────────────────────────
+    //  Only act on SIGNED_OUT — every other event (INITIAL_SESSION,
+    //  SIGNED_IN, TOKEN_REFRESHED) fires legitimately during normal
+    //  page loads and must not trigger a redirect.
     window.sb.auth.onAuthStateChange((event, newSession) => {
-      if (event === 'SIGNED_OUT' || (!newSession && event !== 'INITIAL_SESSION')) {
+      if (event === 'SIGNED_OUT') {
         try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
-        redirectToLogin('signed_out');
+        safeRedirectToLogin('signed_out');
+        return;
       }
-      // TOKEN_REFRESHED — update the cached token in UE_USER
       if (event === 'TOKEN_REFRESHED' && newSession) {
         if (window.UE_USER) window.UE_USER.access_token = newSession.access_token;
         window.UE_SESSION = newSession;
@@ -280,10 +318,9 @@ const AUTH_GUARD = (function () {
       _expired:     false,
     };
 
-    // Also expose the full objects for other scripts
     window.UE_SESSION = session;
     window.UE_PROFILE = profile;
-    window.UE_USER_ID = session.user.id;  // convenience shorthand
+    window.UE_USER_ID = session.user.id;
 
     // ── 8. Render UI ─────────────────────────────────────────────
     renderNavUser(profile);
