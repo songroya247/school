@@ -61,6 +61,7 @@ const AUTH_GUARD = (function () {
 
   // ── Remove veil injected by head-gatekeeper ────────────────────
   function liftVeil() {
+    if (window.__ueGatekeeperTimer) clearTimeout(window.__ueGatekeeperTimer);
     const veil = document.getElementById('ue-gatekeeper-veil');
     if (veil) veil.remove();
     document.body.style.visibility = '';
@@ -237,14 +238,15 @@ const AUTH_GUARD = (function () {
     // ── 2. Get the session (SDK handles silent refresh) ───────────
     const session = await getSession();
 
+    // Always lift the veil now — we have an answer from the SDK.
+    // If we're about to redirect, lifting it first prevents a blank page.
+    liftVeil();
+
     if (!session) {
       try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
       safeRedirectToLogin('no_session');
       return null;
     }
-
-    // ── 3. Lift the veil (expired-token path from gatekeeper) ─────
-    liftVeil();
 
     // ── 4. Fetch the real profile from Supabase ───────────────────
     let profile = await getProfile(session.user.id);
@@ -315,7 +317,6 @@ const AUTH_GUARD = (function () {
       full_name:    profile.full_name,
       access_token: session.access_token,
       is_premium:   isPremium(profile),
-      _expired:     false,
     };
 
     window.UE_SESSION = session;
