@@ -244,59 +244,13 @@ const AUTH_GUARD = (function () {
     liftVeil();
 
     // ── 4. Fetch the real profile from Supabase ──────────────────
-    let profile = await getProfile(session.user.id);
+    const profile = await getProfile(session.user.id);
 
     if (!profile) {
-      // Profile missing — new user whose email was just confirmed.
-      // Attempt to build the profile from session metadata and
-      // sessionStorage (written during signup) rather than sending
-      // them to login (which causes a redirect loop because their
-      // session IS valid — login would immediately send them back here).
-      try {
-        const meta        = session.user.user_metadata || {};
-        const pending     = sessionStorage.getItem('ue_pending_profile');
-        const pendingData = pending ? JSON.parse(pending) : {};
-
-        const formData = {
-          fullName:    pendingData.fullName    || meta.full_name    || session.user.email.split('@')[0],
-          email:       session.user.email,
-          examTypes:   pendingData.examTypes   || [],
-          examDate:    pendingData.examDate    || null,
-          targetScore: pendingData.targetScore || 250,
-          subjects:    pendingData.subjects    || [],
-          studyMode:   pendingData.studyMode   || 'drill'
-        };
-
-        await window.sb.from('profiles').upsert({
-          id:                  session.user.id,
-          full_name:           formData.fullName,
-          email:               formData.email,
-          exam_types:          formData.examTypes,
-          exam_date:           formData.examDate || null,
-          target_score:        formData.targetScore,
-          current_skill_level: 3,
-          status:              'NIL',
-          is_premium:          false,
-          exam_subjects:       formData.subjects,
-          study_mode:          formData.studyMode,
-          smartpath_queue:     [],
-          total_xp:            0,
-          usage_logs:          []
-        }, { onConflict: 'id', ignoreDuplicates: false });
-
-        if (pending) sessionStorage.removeItem('ue_pending_profile');
-
-        // Re-fetch the profile we just created
-        profile = await getProfile(session.user.id);
-      } catch (profileErr) {
-        console.error('[AUTH_GUARD] profile auto-create failed:', profileErr);
-      }
-
-      // If still no profile after recovery attempt, redirect to login
-      if (!profile) {
-        redirectToLogin('no_profile');
-        return null;
-      }
+      // Profile missing — could be a brand-new user whose trigger hasn't
+      // fired yet, or a DB error. Redirect to login as safety measure.
+      redirectToLogin('no_profile');
+      return null;
     }
 
     // ── 5. Enforce premium gate (authoritative DB-backed check) ───
