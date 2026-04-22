@@ -570,105 +570,12 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
 
     const manageBtn = document.getElementById('manage-subjects-btn');
     if (manageBtn) {
-      manageBtn.href = 'login.html?tab=signup';
-      manageBtn.setAttribute('title', 'Update your subject selection');
       manageBtn.onclick = (e) => {
         e.preventDefault();
-        openSubjectManager();
+        toast('Subject management — coming in the next update!');
       };
     }
   });
-</script>
-
-<!-- ── SUBJECT MANAGER MODAL ─────────────────────────────── -->
-<div id="subject-manager-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:5000;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)">
-  <div style="background:#fff;border-radius:18px;padding:32px;max-width:500px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.25)">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <h3 style="font-family:var(--font-head);font-size:1.4rem">My Subjects</h3>
-      <button onclick="closeSubjectManager()" style="background:var(--bg-2);border:none;width:32px;height:32px;border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">&#x2715;</button>
-    </div>
-    <p style="font-size:.88rem;color:var(--muted);margin-bottom:20px">Select the subjects you want to study. Your SmartPath and progress tracking will update accordingly.</p>
-    <div id="subject-manager-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:24px"></div>
-    <button onclick="saveSubjects()" class="btn btn-primary" style="width:100%;height:44px">Save Subjects</button>
-  </div>
-</div>
-
-<script>
-const ALL_SUBJECTS = [
-  {id:'mathematics', label:'Mathematics', icon:'&#x1F4D0;'},
-  {id:'english',     label:'English',     icon:'&#x1F4D6;'},
-  {id:'physics',     label:'Physics',     icon:'&#x269B;'},
-  {id:'chemistry',   label:'Chemistry',   icon:'&#x1F9EA;'},
-  {id:'biology',     label:'Biology',     icon:'&#x1F33F;'},
-  {id:'economics',   label:'Economics',   icon:'&#x1F4C8;'},
-  {id:'government',  label:'Government',  icon:'&#x1F3DB;'},
-  {id:'literature',  label:'Literature',  icon:'&#x1F4DA;'},
-  {id:'geography',   label:'Geography',   icon:'&#x1F30D;'},
-  {id:'commerce',    label:'Commerce',    icon:'&#x1F4BC;'},
-  {id:'accounts',    label:'Accounts',    icon:'&#x1F4CA;'},
-  {id:'crk',         label:'CRK',         icon:'&#x271D;'},
-];
-
-function openSubjectManager() {
-  const modal = document.getElementById('subject-manager-modal');
-  const grid  = document.getElementById('subject-manager-grid');
-  const current = (window.UE_PROFILE?.exam_subjects || []);
-  
-  grid.innerHTML = ALL_SUBJECTS.map(s => `
-    <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid ${current.includes(s.id)?'var(--accent)':'var(--border)'};border-radius:10px;cursor:pointer;background:${current.includes(s.id)?'rgba(26,86,255,.06)':'#fff'};transition:all .15s" id="sm-${s.id}">
-      <input type="checkbox" value="${s.id}" ${current.includes(s.id)?'checked':''} onchange="toggleSM('${s.id}',this)" style="display:none">
-      <span style="font-size:1.2rem">${s.icon}</span>
-      <span style="font-weight:600;font-size:.88rem">${s.label}</span>
-      <span style="margin-left:auto;color:var(--accent);font-size:1rem;opacity:${current.includes(s.id)?1:0}" id="sm-check-${s.id}">&#x2713;</span>
-    </label>
-  `).join('');
-  
-  modal.style.display = 'flex';
-}
-
-function toggleSM(id, cb) {
-  const label = document.getElementById('sm-' + id);
-  const check = document.getElementById('sm-check-' + id);
-  if (cb.checked) {
-    label.style.border = '1.5px solid var(--accent)';
-    label.style.background = 'rgba(26,86,255,.06)';
-    check.style.opacity = '1';
-  } else {
-    label.style.border = '1.5px solid var(--border)';
-    label.style.background = '#fff';
-    check.style.opacity = '0';
-  }
-}
-
-async function saveSubjects() {
-  const selected = Array.from(document.querySelectorAll('#subject-manager-grid input:checked')).map(i => i.value);
-  if (selected.length === 0) { toast('Please select at least one subject.'); return; }
-  
-  const btn = document.querySelector('#subject-manager-modal .btn-primary');
-  btn.disabled = true; btn.textContent = 'Saving…';
-  
-  const { error } = await window.sb.from('profiles')
-    .update({ exam_subjects: selected })
-    .eq('id', window.UE_USER_ID);
-  
-  if (!error) {
-    if (window.UE_PROFILE) window.UE_PROFILE.exam_subjects = selected;
-    toast('Subjects updated! Refreshing dashboard…');
-    closeSubjectManager();
-    setTimeout(() => window.location.reload(), 1200);
-  } else {
-    toast('Error saving. Please try again.');
-    btn.disabled = false; btn.textContent = 'Save Subjects';
-  }
-}
-
-function closeSubjectManager() {
-  document.getElementById('subject-manager-modal').style.display = 'none';
-}
-// Close on backdrop click
-document.getElementById('subject-manager-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeSubjectManager();
-});
 </script>
 </body>
 </html>
