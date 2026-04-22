@@ -172,57 +172,14 @@ const GRADING = (function () {
 
   // ── Upsert topic_mastery ────────────────────────────────────────
   async function upsertTopicMastery(userId, topicId, results, gradeLevel) {
-    const { data: existing } = await window.sb
-      .from('topic_mastery')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('topic_id', topicId)
-      .maybeSingle();
-
-    const sessionAccuracy = results.filter(r => r.isCorrect).length / results.length;
-
-    let newAccuracy, newGrade, newAttempts;
-
-    if (existing) {
-      const oldN   = 10;
-      const newN   = results.length;
-      const blended = ((existing.accuracy_avg || 0) * oldN + sessionAccuracy * newN) / (oldN + newN);
-      newAccuracy  = Math.round(blended * 1000) / 1000;
-      newGrade     = nextGradeLevel(existing.grade_level || 3, sessionAccuracy, existing.attempts_at_grade1 || 0);
-      newAttempts  = existing.grade_level === 1
-        ? (existing.attempts_at_grade1 || 0) + 1
-        : (existing.attempts_at_grade1 || 0);
-    } else {
-      newAccuracy = Math.round(sessionAccuracy * 1000) / 1000;
-      newGrade    = nextGradeLevel(3, sessionAccuracy, 0);
-      newAttempts = 0;
-    }
-
-    const masteryLevel = calcMasteryLevel(newAccuracy, newGrade);
-    const status = masteryLevel >= 0.75 ? 'MASTERED'
-                 : masteryLevel  > 0    ? 'IN_PROGRESS'
-                 : 'NIL';
-
-    const payload = {
-      accuracy_avg:       newAccuracy,
-      mastery_level:      masteryLevel,
-      grade_level:        newGrade,
-      attempts_at_grade1: newAttempts,
-      status,
-      last_studied:       new Date().toISOString(),
-    };
-
-    if (existing) {
-      await window.sb.from('topic_mastery')
-        .update(payload)
-        .eq('id', existing.id);
-    } else {
-      await window.sb.from('topic_mastery').insert({
-        user_id: userId,
-        topic_id: topicId,
-        ...payload,
-      });
-    }
+    const sessionAcc = results.filter(r => r.isCorrect).length / results.length;
+    const { error } = await window.sb.rpc('upsert_topic_mastery', {
+      p_topic_id:    topicId,
+      p_session_acc: Math.round(sessionAcc * 1000) / 1000,
+      p_session_n:   results.length,
+      p_grade_level: gradeLevel,
+    });
+    if (error) console.error('[GRADING] upsert_topic_mastery RPC error:', error.message);
   }
 
   // ── Update profile aggregate stats ─────────────────────────────
@@ -294,18 +251,31 @@ const GRADING = (function () {
 
     if (!userId || !questions.length) return null;
 
-    // ── 1. Score the session client-side ──────────────────────────
-    let correct = 0;
-    const results = questions.map((q, i) => {
-      const isCorrect = answers[i] === q.ans;
-      if (isCorrect) correct++;
-      return {
+    // ── 1. Score the session ──────────────────────────────────────
+    let results;
+
+    if (!QUESTION_BANK.LOCAL_ONLY) {
+      // DB mode — server grades
+      const ids   = questions.map(q => q.id);
+      const arr   = questions.map((_, i) => answers[i] ?? -1);
+      const graded = await QUESTION_BANK.gradeRemote(ids, arr);
+      const map = Object.fromEntries(graded.map(g => [g.question_id, g.is_correct]));
+      results = questions.map((q, i) => ({
         question:  q,
         selected:  answers[i],
-        isCorrect,
+        isCorrect: !!map[q.id],
         timeSpent: timings?.[i] || 0,
-      };
-    });
+      }));
+    } else {
+      // Local mode — answer key in JS (current behaviour)
+      results = questions.map((q, i) => ({
+        question:  q,
+        selected:  answers[i],
+        isCorrect: answers[i] === q.ans,
+        timeSpent: timings?.[i] || 0,
+      }));
+    }
+    const correct = results.filter(r => r.isCorrect).length;
 
     const total    = questions.length;
     const accuracy = correct / total;
