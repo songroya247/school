@@ -644,11 +644,9 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // AUTH_GUARD.init() boots window.sb using UE_CONFIG, validates session,
-    // fetches profile from DB, enforces premium gate, renders nav.
-    const authData = await AUTH_GUARD.init();
-    if (!authData) return; // redirect in progress
-
+    // DASHBOARD.init() calls AUTH_GUARD.init() internally — do NOT call it
+    // again here or a duplicate onAuthStateChange listener will be registered,
+    // causing a redirect loop between login.html and dashboard.html.
     await DASHBOARD.init();
 
     if (typeof initSlider === 'function') {
