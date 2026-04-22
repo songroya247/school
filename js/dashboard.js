@@ -10,7 +10,7 @@ const DASHBOARD = (function () {
   const SUBJECT_META = {
     mathematics: { icon: '&#x1F4D0;', label: 'Mathematics',     color: '#3b82f6' },
     english:     { icon: '&#x1F4D6;', label: 'English Language', color: '#10b981' },
-    physics:     { icon: '&#x269B;&#xFE0F;', label: 'Physics',          color: '#7c3aed' },
+    physics:     { icon: '&#x269B;', label: 'Physics',          color: '#7c3aed' },
     chemistry:   { icon: '&#x1F9EA;', label: 'Chemistry',        color: '#ff6b35' },
     biology:     { icon: '&#x1F33F;', label: 'Biology',           color: '#0891b2' },
     economics:   { icon: '&#x1F4C8;', label: 'Economics',        color: '#f59e0b' },
@@ -19,7 +19,7 @@ const DASHBOARD = (function () {
     geography:   { icon: '&#x1F30D;', label: 'Geography',         color: '#10b981' },
     commerce:    { icon: '&#x1F3EA;', label: 'Commerce',          color: '#8b5cf6' },
     accounts:    { icon: '&#x1F4BC;', label: 'Accounts',          color: '#14b8a6' },
-    crk:         { icon: '&#x271D;&#xFE0F;', label: 'CRK',               color: '#6d28d9' },
+    crk:         { icon: '&#x271D;', label: 'CRK',               color: '#6d28d9' },
   };
 
   // Topic lists per subject
@@ -47,33 +47,28 @@ const DASHBOARD = (function () {
   }
 
   // ── Days until exam ───────────────────────────────
-  // BUG-FIX #21: exam_date is stored as a DATE column in Supabase and returned
-  // as "YYYY-MM-DD" (e.g. "2025-11-01"), not "Month YYYY" as the old regex
-  // expected.  The old regex never matched, so the countdown always returned null.
-  // Fix: accept both ISO date strings and the legacy "Month YYYY" format.
   function daysUntil(dateStr) {
     if (!dateStr) return null;
-    let d;
-    // ISO date: "2025-11-01" or "2025-11-01T00:00:00"
-    const iso = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (iso) {
-      d = new Date(parseInt(iso[1], 10), parseInt(iso[2], 10) - 1, parseInt(iso[3], 10));
-    } else {
-      // Legacy "Month YYYY" format kept for backward compat with any old records
-      const m = String(dateStr).match(/^([A-Za-z]+)\s+(\d{4})$/);
-      if (!m) return null;
-      const months = ['january','february','march','april','may','june',
-                      'july','august','september','october','november','december'];
-      const monthIdx = months.indexOf(m[1].toLowerCase());
-      if (monthIdx < 0) return null;
-      d = new Date(parseInt(m[2], 10), monthIdx, 1);
-    }
+    // examDate stored as "May 2026" — parse to 1st of that month
+    const d = new Date(dateStr);
+    if (isNaN(d)) return null;
     return Math.ceil((d - Date.now()) / 86400000);
   }
 
   // ── Streak calculation ────────────────────────────
-  // BUG-FIX #7: removed local copy — delegates to window.calcStreak()
-  // defined in app.js so dashboard and nav always show the same value.
+  function calcStreak(usageLogs) {
+    if (!usageLogs || usageLogs.length === 0) return 0;
+    const days = new Set(
+      usageLogs.map(l => new Date(l.ts).toDateString())
+    );
+    let streak = 0;
+    let d = new Date();
+    while (days.has(d.toDateString())) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    }
+    return streak;
+  }
 
   // ── Aggregate mastery by subject ──────────────────
   function groupMasteryBySubject(masteryRows) {
@@ -148,100 +143,19 @@ const DASHBOARD = (function () {
     if (xpEl) xpEl.textContent = `${profile.total_xp ?? 0} XP`;
   }
 
-  // ── Exam context helpers ──────────────────────────
-  function getExamContext(profile) {
-    const exams = profile.exam_types || [];
-    return {
-      isJAMBOnly:  exams.includes('JAMB') && !exams.includes('WAEC') && !exams.includes('NECO'),
-      isGradeOnly: !exams.includes('JAMB') && (exams.includes('WAEC') || exams.includes('NECO')),
-      hasBoth:     exams.includes('JAMB') && (exams.includes('WAEC') || exams.includes('NECO')),
-      exams
-    };
-  }
-
-  function accToGrade(acc) {
-    if (acc >= 90) return 'A1'; if (acc >= 80) return 'B2';
-    if (acc >= 75) return 'B3'; if (acc >= 65) return 'C4';
-    if (acc >= 55) return 'C5'; if (acc >= 50) return 'C6';
-    if (acc >= 40) return 'D7'; if (acc >= 30) return 'E8';
-    return 'F9';
-  }
-
   // ── Score Prediction Card ─────────────────────────
   function renderScoreCard(profile, masteryRows) {
-    const ctx     = getExamContext(profile);
-    const cardEl  = document.querySelector('.score-card');
-    const labelEl = cardEl?.querySelector('.score-label');
+    const prediction = SMARTPATH.predictJAMBScore(profile, masteryRows);
+    const target     = profile.target_score || 250;
+
     const valueEl = document.getElementById('score-value');
     const hintEl  = document.getElementById('score-hint');
     const fillEl  = document.getElementById('score-progress-fill');
 
     if (!valueEl) return;
 
-    // ── WAEC/NECO only — show grade tracker instead ──
-    if (ctx.isGradeOnly) {
-      if (labelEl) labelEl.textContent = 'Estimated Grade';
-      if (fillEl) fillEl.closest('.score-progress-wrap') && (fillEl.closest('.score-progress-wrap').style.display = 'none');
-
-      const accRows = masteryRows.filter(
-        r => r.accuracy_avg !== null && r.accuracy_avg !== undefined
-      );
-      const acc = accRows.length
-        ? (accRows.reduce((s, r) => s + r.accuracy_avg, 0) / accRows.length) * 100
-        : null;
-      const target   = profile.target_grade || 'B3';
-
-      if (acc === null) {
-        valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
-        if (hintEl) hintEl.textContent = 'Complete your first practice session to see your estimated grade.';
-      } else {
-        const grade = accToGrade(acc);
-        valueEl.innerHTML = `${grade}<span class="score-denom" style="font-size:1.2rem;margin-left:6px">/ A1</span>`;
-        if (hintEl) {
-          const RANK = { A1:1, B2:2, B3:3, C4:4, C5:5, C6:6, D7:7, E8:8, F9:9 };
-          if ((RANK[grade] || 9) <= (RANK[target] || 9)) {
-            hintEl.innerHTML = `You're on track for ${target} or better. Keep it up! &#x1F31F;`;
-          } else {
-            hintEl.textContent = `Target: ${target}. Focus on weak topics to push your grade up.`;
-          }
-        }
-        if (fillEl) {
-          const gradeMap = { A1:100, B2:87, B3:77, C4:70, C5:60, C6:52, D7:45, E8:35, F9:20 };
-          fillEl.style.width = (gradeMap[grade] || 0) + '%';
-          if (fillEl.closest('.score-progress-wrap')) fillEl.closest('.score-progress-wrap').style.display = '';
-        }
-      }
-      return;
-    }
-
-    // ── Mixed (JAMB + WAEC) — show accuracy % ──
-    if (ctx.hasBoth) {
-      if (labelEl) labelEl.textContent = 'Overall Accuracy';
-      const accRows = masteryRows.filter(
-        r => r.accuracy_avg !== null && r.accuracy_avg !== undefined
-      );
-      const acc = accRows.length
-        ? (accRows.reduce((s, r) => s + r.accuracy_avg, 0) / accRows.length) * 100
-        : null;
-
-      if (acc === null) {
-        valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
-        if (hintEl) hintEl.textContent = 'Complete a session to see your accuracy.';
-        if (fillEl) fillEl.style.width = '0%';
-      } else {
-        valueEl.innerHTML = `${acc}<span class="score-denom">%</span>`;
-        if (hintEl) hintEl.textContent = acc >= 70 ? 'Strong accuracy across both exams!' : 'Keep practising to improve your accuracy.';
-        if (fillEl) fillEl.style.width = acc + '%';
-      }
-      return;
-    }
-
-    // ── JAMB only (default) — score prediction ──
-    if (labelEl) labelEl.textContent = 'Predicted JAMB Score';
-    const prediction = SMARTPATH.predictJAMBScore(profile, masteryRows);
-    const target     = profile.target_score || 250;
-
     if (!prediction) {
+      // New user — no data yet
       valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
       if (hintEl) hintEl.textContent = 'Complete your first practice session to see your predicted score.';
       if (fillEl) fillEl.style.width = '0%';
@@ -459,7 +373,7 @@ const DASHBOARD = (function () {
   // ════════════════════════════════════════════════
   async function init() {
     const authResult = await AUTH_GUARD.init();
-    if (!authResult) return null; // redirecting to login
+    if (!authResult) return; // redirecting to login
 
     const { profile, session } = authResult;
     const userId = session.user.id;
@@ -500,8 +414,6 @@ const DASHBOARD = (function () {
 
     // ── Track dashboard visit ──
     await AUTH.trackAction('dashboard_view');
-
-    return true; // signal success to the caller
   }
 
   function showSkeletons() {
