@@ -47,10 +47,7 @@ const AUTH = (function () {
 
   // ── CREATE PROFILE (called after email confirm, or at signup) ──
   async function createProfile(user, formData) {
-    // Use upsert so a duplicate call (double-fire from confirm.html) never
-    // throws a unique-key error. onConflict:'id' means: if the profile
-    // row already exists, update it rather than failing.
-    const { error } = await window.sb.from('profiles').upsert({
+    const { error } = await window.sb.from('profiles').insert({
       id:                  user.id,
       full_name:           formData.fullName,
       email:               user.email,
@@ -67,39 +64,24 @@ const AUTH = (function () {
       smartpath_queue:     [],
       total_xp:            0,
       usage_logs:          []
-    }, { onConflict: 'id', ignoreDuplicates: false });
-    if (error) console.error('[AUTH] createProfile error:', error.message);
+    });
     return error;
   }
 
   // ── SIGNUP ────────────────────────────────────────
-
-  // ── Build the redirect URL robustly ──────────────────────────────
-  // window.location.origin alone is enough for most hosts.
-  // For GitHub Pages subdirectory deploys the pathname prefix is needed.
-  // We also strip any trailing /index.html so the URL is clean.
-  function buildRedirectUrl(page) {
-    const origin  = window.location.origin; // e.g. https://school.ultimateedge.info
-    const path    = window.location.pathname
-      .replace(/\/[^/]*\.html$/, '') // remove filename
-      .replace(/\/$/, '');           // remove trailing slash
-    // path will be '' for root domains, '/subfolder' for subdirectory deploys
-    return origin + path + '/' + page;
-  }
 
   async function handleSignup(formData) {
     clearError();
     setLoading('btn-create-account', true, 'Creating account…');
 
     try {
-      const redirectUrl = buildRedirectUrl('confirm.html');
-
       const { data, error } = await window.sb.auth.signUp({
         email:    formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: redirectUrl,
+          emailRedirectTo: window.location.origin + '/confirm.html',
           data: {
+            // Store form data in user metadata for use after confirmation
             full_name:    formData.fullName,
             exam_types:   JSON.stringify(formData.examTypes),
             exam_date:    formData.examDate || '',
@@ -112,29 +94,22 @@ const AUTH = (function () {
 
       if (error) { showError(error.message); return; }
 
-      // ── SILENT DUPLICATE DETECTION ───────────────────────────────────
-      // Supabase returns { user:{identities:[]}, session:null, error:null }
-      // for already-registered emails. No error thrown, no email sent.
-      // Without this check the user waits forever on confirm.html.
-      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-        showError('An account with this email already exists. Please log in, or use Forgot Password to reset your password.');
-        return;
-      }
-
-      // ── AUTO-CONFIRMED (email confirmations disabled in Supabase) ────
+      // Check if Supabase auto-confirmed (rare, but handle it)
       if (data.session) {
+        // Auto-confirmed — create profile immediately
         await createProfile(data.user, formData);
         window.location.href = 'dashboard.html';
         return;
       }
 
-      // ── NORMAL FLOW ───────────────────────────────────────────────
+      // Normal flow — email confirmation required
+      // Save form data to sessionStorage so confirm.html can use it
       sessionStorage.setItem('ue_pending_profile', JSON.stringify(formData));
       window.location.href = 'confirm.html?email=' + encodeURIComponent(formData.email);
 
     } catch (err) {
-      showError('Something went wrong. Please check your connection and try again.');
-      console.error('[AUTH] signup error:', err);
+      showError('Something went wrong. Please try again.');
+      console.error(err);
     } finally {
       setLoading('btn-create-account', false, 'Create Account');
     }
@@ -142,47 +117,40 @@ const AUTH = (function () {
 
   // ── PROFILE CREATION AFTER EMAIL CONFIRM ─────────
 
-  // Guard flag — prevents handlePostConfirm from running twice
-  // (confirm.html fires both the IIFE check AND onAuthStateChange)
-  let _postConfirmRunning = false;
-
   async function handlePostConfirm() {
-    if (_postConfirmRunning) return;
-    _postConfirmRunning = true;
+    // Called on confirm.html after user clicks email link and lands back
+    const session = (await window.sb.auth.getSession()).data.session;
+    if (!session) return;
 
-    try {
-      const session = (await window.sb.auth.getSession()).data.session;
-      if (!session) { _postConfirmRunning = false; return; }
+    // Check if profile already exists
+    const { data: existing } = await window.sb
+      .from('profiles').select('id').eq('id', session.user.id).maybeSingle();
 
-      // Always upsert the profile — safe whether it exists or not
-      const meta = session.user.user_metadata || {};
-      const pending = sessionStorage.getItem('ue_pending_profile');
-      const pendingData = pending ? JSON.parse(pending) : {};
-
-      const formData = {
-        fullName:    pendingData.fullName    || meta.full_name    || session.user.email.split('@')[0],
-        email:       session.user.email,
-        examTypes:   pendingData.examTypes   || tryParse(meta.exam_types, []),
-        examDate:    pendingData.examDate    || meta.exam_date    || null,
-        targetScore: pendingData.targetScore || parseInt(meta.target_score) || 250,
-        subjects:    pendingData.subjects    || tryParse(meta.subjects, []),
-        studyMode:   pendingData.studyMode   || meta.study_mode   || 'drill'
-      };
-
-      const profileError = await createProfile(session.user, formData);
-
-      if (!profileError) {
-        sessionStorage.removeItem('ue_pending_profile');
-      }
-
-      // Small delay so the DB write completes before dashboard reads it
-      await new Promise(r => setTimeout(r, 600));
-      window.location.replace('dashboard.html');
-
-    } catch (err) {
-      console.error('[AUTH] handlePostConfirm error:', err);
-      window.location.replace('dashboard.html');
+    if (existing) {
+      // Profile exists — go to dashboard
+      window.location.href = 'dashboard.html';
+      return;
     }
+
+    // Try to rebuild profile from user metadata
+    const meta = session.user.user_metadata || {};
+    const formData = {
+      fullName:    meta.full_name || session.user.email.split('@')[0],
+      email:       session.user.email,
+      examTypes:   tryParse(meta.exam_types, []),
+      examDate:    meta.exam_date || null,
+      targetScore: parseInt(meta.target_score) || 250,
+      subjects:    tryParse(meta.subjects, []),
+      studyMode:   meta.study_mode || 'drill'
+    };
+
+    // Also check sessionStorage fallback
+    const pending = sessionStorage.getItem('ue_pending_profile');
+    const merged  = pending ? { ...formData, ...JSON.parse(pending) } : formData;
+
+    await createProfile(session.user, merged);
+    sessionStorage.removeItem('ue_pending_profile');
+    window.location.href = 'dashboard.html';
   }
 
   function tryParse(str, fallback) {
@@ -231,7 +199,7 @@ const AUTH = (function () {
 
     try {
       const { error } = await window.sb.auth.resetPasswordForEmail(email, {
-        redirectTo: buildRedirectUrl('reset-password.html')
+        redirectTo: window.location.origin + '/reset-password.html'
       });
 
       if (error) { showError(error.message); return; }
