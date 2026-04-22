@@ -755,7 +755,7 @@ const CLASSROOM = (function () {
     setEl('quiz-q-total', String(quizState.questions.length));
 
     const questionEl = document.getElementById('quiz-question');
-    if (questionEl) questionEl.innerHTML = q.q;
+    if (questionEl) questionEl.textContent = q.q;
 
     // Dots
     const dotsEl = document.getElementById('quiz-dots');
@@ -773,7 +773,8 @@ const CLASSROOM = (function () {
       q.opts.forEach((opt, i) => {
         const btn = document.createElement('button');
         btn.className = 'drill-option';
-        btn.innerHTML = `<span class="opt-label">${String.fromCharCode(65 + i)}</span>${opt}`;
+        btn.innerHTML = `<span class="opt-label">${String.fromCharCode(65 + i)}</span>`;
+        btn.appendChild(document.createTextNode(opt));
         btn.onclick = () => checkAnswer(i, btn);
         optsEl.appendChild(btn);
       });
@@ -797,10 +798,12 @@ const CLASSROOM = (function () {
       fb.style.display = 'block';
       if (isCorrect) {
         fb.style.cssText = 'display:block;background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.25);padding:12px 16px;border-radius:10px;font-weight:600;margin-top:12px';
-        fb.textContent = '&#x2713; Correct! Well done.';
+        fb.innerHTML = '&#x2713; Correct! Well done.';
       } else {
         fb.style.cssText = 'display:block;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.25);padding:12px 16px;border-radius:10px;font-weight:600;margin-top:12px';
-        fb.textContent = `&#x2717; Not quite. Correct answer: ${q.opts[q.ans]}.`;
+        const safeAns = q.opts[q.ans]
+          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        fb.innerHTML = `&#x2717; Not quite. Correct answer: ${safeAns}.`;
         const allBtns = document.querySelectorAll('#quiz-options .drill-option');
         if (allBtns[q.ans]) allBtns[q.ans].style.borderColor = '#22c55e';
       }
