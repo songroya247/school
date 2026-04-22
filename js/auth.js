@@ -38,12 +38,11 @@ const AUTH = (function () {
   // ── TARGET SCORE MAPPING ──────────────────────────
   // Maps the select string to an integer midpoint
   function parseTargetScore(str) {
-    const norm = String(str || '').replace(/[–—-]/g, '-');  // unify dashes
     const map = {
-      '200-220': 210, '221-240': 230, '241-260': 250,
-      '261-280': 270, '281-300': 290, '301-320': 310, '320+': 330
+      '200–220': 210, '221–240': 230, '241–260': 250,
+      '261–280': 270, '281–300': 290, '301–320': 310, '320+': 330
     };
-    return map[norm] || 250;
+    return map[str] || 250;
   }
 
   // ── CREATE PROFILE (called after email confirm, or at signup) ──
@@ -58,7 +57,6 @@ const AUTH = (function () {
       exam_types:          formData.examTypes,
       exam_date:           formData.examDate || null,
       target_score:        formData.targetScore,
-      target_grade:        formData.targetGrade || null,
       current_skill_level: 3,
       accuracy_avg:        null,
       mastery_level:       null,
@@ -126,14 +124,13 @@ const AUTH = (function () {
       // ── AUTO-CONFIRMED (email confirmations disabled in Supabase) ────
       if (data.session) {
         await createProfile(data.user, formData);
-        sessionStorage.setItem('ue_just_signed_in', '1');
-        window.location.replace('dashboard.html');
+        window.location.href = 'dashboard.html';
         return;
       }
 
       // ── NORMAL FLOW ───────────────────────────────────────────────
       sessionStorage.setItem('ue_pending_profile', JSON.stringify(formData));
-      window.location.replace('confirm.html?email=' + encodeURIComponent(formData.email));
+      window.location.href = 'confirm.html?email=' + encodeURIComponent(formData.email);
 
     } catch (err) {
       showError('Something went wrong. Please check your connection and try again.');
@@ -167,8 +164,7 @@ const AUTH = (function () {
         email:       session.user.email,
         examTypes:   pendingData.examTypes   || tryParse(meta.exam_types, []),
         examDate:    pendingData.examDate    || meta.exam_date    || null,
-        targetScore: pendingData.targetScore || parseInt(meta.target_score) || null,
-        targetGrade: pendingData.targetGrade || meta.target_grade || null,
+        targetScore: pendingData.targetScore || parseInt(meta.target_score) || 250,
         subjects:    pendingData.subjects    || tryParse(meta.subjects, []),
         studyMode:   pendingData.studyMode   || meta.study_mode   || 'drill'
       };
@@ -181,12 +177,10 @@ const AUTH = (function () {
 
       // Small delay so the DB write completes before dashboard reads it
       await new Promise(r => setTimeout(r, 600));
-      sessionStorage.setItem('ue_just_signed_in', '1');
       window.location.replace('dashboard.html');
 
     } catch (err) {
       console.error('[AUTH] handlePostConfirm error:', err);
-      sessionStorage.setItem('ue_just_signed_in', '1');
       window.location.replace('dashboard.html');
     }
   }
@@ -217,17 +211,10 @@ const AUTH = (function () {
         return;
       }
 
-      // Check for intended destination — whitelist known app pages only
-      const ALLOWED_NEXT = ['dashboard.html','report.html','classroom.html','cbt.html','daily-quiz.html','pricing.html'];
-      const params  = new URLSearchParams(window.location.search);
-      const rawNext = params.get('next') || 'dashboard.html';
-      const next    = decodeURIComponent(rawNext);
-      // Only redirect to a known internal page; everything else → dashboard
-      const safeNext = ALLOWED_NEXT.includes(next) ? next : 'dashboard.html';
-
-      // One-shot flag honoured by head-gatekeeper.js for the next page load.
-      sessionStorage.setItem('ue_just_signed_in', '1');
-      window.location.replace(safeNext);
+      // Check for intended destination
+      const params = new URLSearchParams(window.location.search);
+      const next   = params.get('next') || 'dashboard.html';
+      window.location.href = decodeURIComponent(next);
 
     } catch (err) {
       showError('Something went wrong. Please try again.');
@@ -285,11 +272,9 @@ const AUTH = (function () {
 
   async function trackAction(action, meta = {}) {
     if (!window.UE_USER_ID) return;
-    // BUG-FIX #1: append_usage_log no longer accepts uid as a parameter —
-    // the RPC derives the user from auth.uid() server-side to prevent
-    // any authenticated user from poisoning another user's usage_logs.
     try {
       await window.sb.rpc('append_usage_log', {
+        uid:   window.UE_USER_ID,
         entry: { action, ...meta, ts: new Date().toISOString() }
       });
     } catch {}
