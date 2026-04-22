@@ -3,151 +3,128 @@
    ▸ PURPOSE : Prevent "Flash of Protected Content" (FOPC).
    ▸ WHERE   : Place this <script> tag at the VERY TOP of <head>,
                BEFORE any CSS link, font, or body content.
-   ▸ HOW     : Reads and PARSES the Supabase session from localStorage.
-               If no valid session exists the browser is immediately
-               redirected — the rest of the page never renders.
-               If a session IS found, it seeds window.UE_USER so every
-               later script can consume it without an extra round-trip.
 
-   LOAD ORDER for every protected page:
-     <head>
-       <script src="js/config.js"></script>          ← defines UE_CONFIG
-       <script src="js/head-gatekeeper.js"></script>  ← this file (blocks FOPC)
-       … fonts, CSS …
-     </head>
-     <body>
-       …
-       <script src="…supabase.min.js"></script>
-       <script src="js/auth-guard.js"></script>       ← full async validation
-       …
-     </body>
+   STORAGE FORMAT COMPATIBILITY
+   ────────────────────────────
+   Supabase JS v2 has used two localStorage formats depending on version:
 
-   DESIGN NOTES
-   ────────────
-   • We PARSE the stored token and check expires_at so an expired token
-     on its own never counts as a valid session. auth-guard.js will
-     attempt a silent refresh for expired-but-refreshable tokens.
-   • We do NOT use a ue_just_signed_in flag. That flag introduced a race
-     condition: bfcache restores or double-runs consumed the flag before
-     auth-guard.js could validate the session, causing a redirect loop.
-     Parsing the token directly is simpler and race-free.
-   • Supabase v2 chunks large tokens: sb-*-auth-token.0, .1 …
-     We try the base key first, then fall back to chunk .0.
+   Format A (pre-2.39, "flat"):
+     { access_token, refresh_token, expires_at, user, … }
+
+   Format B (2.39+, "wrapped"):
+     { currentSession: { access_token, refresh_token, expires_at, user }, expiresAt }
+
+   This gatekeeper handles BOTH so it works regardless of which CDN
+   version is served. auth-guard.js uses the real SDK and is always
+   format-agnostic — this file is the only one that reads raw storage.
 ═══════════════════════════════════════════════════════════════════ */
 
 (function () {
   'use strict';
 
-  // ── Step 1: Resolve config ──────────────────────────────────────
   var cfg          = window.UE_CONFIG || {};
   var LOGIN_PAGE   = cfg.LOGIN_PAGE   || 'login.html';
   var PRICING_PAGE = cfg.PRICING_PAGE || 'pricing.html';
 
-  // ── Step 2: Determine which page we are on ─────────────────────
   var currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
-  var PROTECTED = cfg.PROTECTED_PAGES ||
-    ['dashboard.html', 'classroom.html', 'cbt.html', 'report.html'];
-
-  var PREMIUM_REQUIRED = cfg.PREMIUM_PAGES ||
-    ['classroom.html', 'cbt.html'];
+  var PROTECTED        = cfg.PROTECTED_PAGES || ['dashboard.html', 'classroom.html', 'cbt.html', 'report.html'];
+  var PREMIUM_REQUIRED = cfg.PREMIUM_PAGES   || ['classroom.html', 'cbt.html'];
 
   var needsAuth    = PROTECTED.indexOf(currentPage)       !== -1;
   var needsPremium = PREMIUM_REQUIRED.indexOf(currentPage) !== -1;
 
-  if (!needsAuth) return; // public page — nothing to do
+  if (!needsAuth) return;
 
-  // ── Step 3: Read & parse session from localStorage ──────────────
-  //  Supabase v2 key pattern:  sb-<project-ref>-auth-token
-  //  Large tokens are chunked:  sb-<ref>-auth-token.0, .1, …
-  //  We scan for the base key OR the .0 chunk (always has access_token).
-  var session = null;
+  // ── Read & parse session — supports both Supabase v2 storage formats ──
+  var tokenData    = null;
+  var accessToken  = null;
+  var expiresAt    = 0;
+  var userObj      = null;
 
   try {
     for (var i = 0; i < localStorage.length; i++) {
       var key = localStorage.key(i);
       if (!key) continue;
 
-      var isBase  = key.indexOf('sb-') === 0 && key.indexOf('-auth-token') !== -1 &&
-                    key.indexOf('-auth-token.') === -1;
-      var isChunk = key.indexOf('sb-') === 0 && key.indexOf('-auth-token.0') !== -1;
-
-      if (!isBase && !isChunk) continue;
+      // Match: sb-*-auth-token  OR  sb-*-auth-token.0  (chunked large tokens)
+      var isAuthKey = key.indexOf('sb-') === 0 && key.indexOf('-auth-token') !== -1;
+      if (!isAuthKey) continue;
 
       var raw = localStorage.getItem(key);
       if (!raw) continue;
 
       var parsed = JSON.parse(raw);
-      if (!parsed || !parsed.access_token) continue;
+      if (!parsed) continue;
 
-      var expiresAt = parsed.expires_at || 0;
-      var nowSecs   = Math.floor(Date.now() / 1000);
-
-      if (expiresAt > nowSecs) {
-        session = parsed;             // valid, non-expired
-      } else {
-        parsed._expired = true;
-        session = parsed;             // expired — auth-guard.js will refresh
+      // ── Format B (Supabase 2.39+): { currentSession: {...}, expiresAt }
+      if (parsed.currentSession && parsed.currentSession.access_token) {
+        tokenData   = parsed.currentSession;
+        accessToken = parsed.currentSession.access_token;
+        expiresAt   = parsed.currentSession.expires_at || parsed.expiresAt || 0;
+        userObj     = parsed.currentSession.user || {};
+        break;
       }
-      break;
+
+      // ── Format A (pre-2.39): { access_token, expires_at, user, … }
+      if (parsed.access_token) {
+        tokenData   = parsed;
+        accessToken = parsed.access_token;
+        expiresAt   = parsed.expires_at || 0;
+        userObj     = parsed.user || {};
+        break;
+      }
     }
   } catch (e) {
-    session = null; // localStorage blocked (strict private mode)
+    // localStorage blocked (strict private mode) — no session
   }
 
-  // ── Step 4: Hard-redirect if no session at all ─────────────────
-  if (!session) {
-    window.location.replace(
-      LOGIN_PAGE + '?next=' + encodeURIComponent(currentPage)
-    );
+  // ── No token found at all → redirect to login ──────────────────
+  if (!accessToken) {
+    window.location.replace(LOGIN_PAGE + '?next=' + encodeURIComponent(currentPage));
     throw new Error('[UE Gatekeeper] No session — redirecting to login.');
   }
 
-  // ── Step 5: Seed window.UE_USER for downstream scripts ─────────
-  var user = session.user || {};
+  // ── Check expiry ────────────────────────────────────────────────
+  var nowSecs  = Math.floor(Date.now() / 1000);
+  var expired  = expiresAt > 0 && expiresAt < nowSecs;
 
+  // ── Seed window.UE_USER (lightweight — auth-guard.js enriches it) ─
   Object.defineProperty(window, 'UE_USER', {
     value: {
-      id:           user.id                                               || null,
-      email:        user.email                                           || null,
-      full_name:    (user.user_metadata && user.user_metadata.full_name) || null,
-      access_token: session.access_token,
-      _expired:     !!session._expired,
+      id:           (userObj && userObj.id)    || null,
+      email:        (userObj && userObj.email) || null,
+      full_name:    (userObj && userObj.user_metadata && userObj.user_metadata.full_name) || null,
+      access_token: accessToken,
+      _expired:     expired,
       is_premium:   null,
     },
-    writable:     true,
-    configurable: true,
-    enumerable:   true,
+    writable: true, configurable: true, enumerable: true,
   });
 
-  // ── Step 6: Expired token — hide body until auth-guard refreshes ─
-  if (session._expired) {
+  // ── Expired: hide body until auth-guard.js refreshes the token ──
+  if (expired) {
     var veil = document.createElement('style');
     veil.id = 'ue-gatekeeper-veil';
     veil.textContent = 'body{visibility:hidden!important}';
     (document.head || document.documentElement).appendChild(veil);
   }
 
-  // ── Step 7: Premium page — optimistic client-side check ────────
-  //  Definitive check done in auth-guard.js with a real DB read.
-  //  This is a best-effort early redirect using cached profile data.
+  // ── Premium optimistic check (best-effort, DB check done in auth-guard) ─
   if (needsPremium) {
     try {
-      var cachedProfile = sessionStorage.getItem('ue_profile_cache');
-      if (cachedProfile) {
-        var prof      = JSON.parse(cachedProfile);
-        var expiry    = prof.subscription_expiry ? new Date(prof.subscription_expiry) : null;
-        var isPremium = prof.is_premium && expiry && expiry > new Date();
-        if (!isPremium) {
-          window.location.replace(
-            PRICING_PAGE + '?reason=premium_required&next=' + encodeURIComponent(currentPage)
-          );
-          throw new Error('[UE Gatekeeper] Premium required — redirecting to pricing.');
+      var cached = sessionStorage.getItem('ue_profile_cache');
+      if (cached) {
+        var prof      = JSON.parse(cached);
+        var subExpiry = prof.subscription_expiry ? new Date(prof.subscription_expiry) : null;
+        var hasPremium = prof.is_premium && subExpiry && subExpiry > new Date();
+        if (!hasPremium) {
+          window.location.replace(PRICING_PAGE + '?reason=premium_required&next=' + encodeURIComponent(currentPage));
+          throw new Error('[UE Gatekeeper] Premium required.');
         }
       }
     } catch (e2) {
       if (e2.message && e2.message.indexOf('[UE Gatekeeper]') === 0) throw e2;
-      // JSON parse error — ignore; auth-guard.js will do the authoritative check
     }
   }
 
