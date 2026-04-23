@@ -286,7 +286,7 @@ const PAYMENT = (function () {
           } catch (_) {}
 
           showPaymentModal('success', plan);
-          setTimeout(() => { window.location.href = 'dashboard.html'; }, 3000);
+          setTimeout(() => { window.location.href = 'thankyou.html?plan=' + planKey; }, 3000);
         } else {
           showPaymentModal('error', null,
             (result.message || 'Verification failed.') +
