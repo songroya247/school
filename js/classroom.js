@@ -543,7 +543,7 @@ const CLASSROOM = (function () {
 
       return `<button class="topic-item ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}"
                 data-topic-id="${topic.id}"
-                onclick="CLASSROOM.selectTopic('${topic.id}')">
+                onclick="CLASSROOM.loadTopic('${topic.id}')">
                 ${icon}
                 <span class="topic-text">${idx + 1}. ${topic.title}</span>
                 ${isLocked ? '<span style="font-size:.7rem;color:var(--muted);margin-left:auto">PRO</span>' : ''}
@@ -840,8 +840,16 @@ const CLASSROOM = (function () {
     overlay?.classList.toggle('open', isOpen);
   }
 
+  // ─── loadTopic — public alias used by Skill Chamber monkey-patch ─
+  // skill_chamber.js wraps this function to intercept topic loading
+  // and run the adaptive diagnostic before rendering the lesson.
+  function loadTopic(topicId, opts) {
+    opts = opts || {};
+    selectTopic(topicId);
+  }
+
   return {
-    init, switchSubject, selectTopic, nextLesson, prevLesson,
+    init, switchSubject, selectTopic, loadTopic, nextLesson, prevLesson,
     playVideo, toggleSidebar, closeSidebar, CURRICULUM
   };
 
