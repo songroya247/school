@@ -242,10 +242,23 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;ba
 <div id="toast"></div>
 <div class="sidebar-overlay" onclick="CLASSROOM.closeSidebar()"></div>
 
+<link rel="stylesheet" href="css/skill_chamber.css">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/auth-guard.js"></script>
+
+<!-- Skill Chamber dependencies (load order matters) -->
+<script src="js/storage.js"></script>
+<script src="js/skill_questions.js"></script>
+<script src="js/curriculum.js"></script>
+<script src="js/intervention_modal.js"></script>
+
+<!-- Main classroom engine (must come after skill chamber deps) -->
 <script src="js/classroom.js"></script>
+
+<!-- Skill Chamber router — monkey-patches CLASSROOM.loadTopic -->
+<script src="js/skill_chamber.js"></script>
 
 <script>
 function toast(msg, dur = 2800) {
