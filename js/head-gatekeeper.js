@@ -88,12 +88,20 @@
 
   // ── Step 4: Hard-redirect if no session at all ─────────────────
   if (!session) {
-    // window.location.replace prevents the protected page from
-    // appearing in browser history (can't press Back to get back in)
+    // Guard: don't redirect if we just came FROM login (avoids
+    // a race on very slow connections where localStorage hasn't
+    // been written yet by the time gatekeeper runs on next page).
+    var referrer = document.referrer || '';
+    var comingFromLogin = referrer.indexOf('login.html') !== -1 ||
+                          referrer.indexOf('confirm.html') !== -1;
+    if (comingFromLogin) {
+      // Let auth-guard.js handle it — it will redirect properly
+      // once the SDK has a chance to refresh the session.
+      return;
+    }
     window.location.replace(
       LOGIN_PAGE + '?next=' + encodeURIComponent(currentPage)
     );
-    // Throw to hard-stop any remaining synchronous script on this page
     throw new Error('[UE Gatekeeper] No session — redirecting to login.');
   }
 
