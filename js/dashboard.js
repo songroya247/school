@@ -143,19 +143,93 @@ const DASHBOARD = (function () {
     if (xpEl) xpEl.textContent = `${profile.total_xp ?? 0} XP`;
   }
 
+  // ── Exam context helpers ──────────────────────────
+  function getExamContext(profile) {
+    const exams = profile.exam_types || [];
+    return {
+      isJAMBOnly:  exams.includes('JAMB') && !exams.includes('WAEC') && !exams.includes('NECO'),
+      isGradeOnly: !exams.includes('JAMB') && (exams.includes('WAEC') || exams.includes('NECO')),
+      hasBoth:     exams.includes('JAMB') && (exams.includes('WAEC') || exams.includes('NECO')),
+      exams
+    };
+  }
+
+  function accToGrade(acc) {
+    if (acc >= 90) return 'A1'; if (acc >= 80) return 'B2';
+    if (acc >= 75) return 'B3'; if (acc >= 65) return 'C4';
+    if (acc >= 55) return 'C5'; if (acc >= 50) return 'C6';
+    if (acc >= 40) return 'D7'; if (acc >= 30) return 'E8';
+    return 'F9';
+  }
+
   // ── Score Prediction Card ─────────────────────────
   function renderScoreCard(profile, masteryRows) {
-    const prediction = SMARTPATH.predictJAMBScore(profile, masteryRows);
-    const target     = profile.target_score || 250;
-
+    const ctx     = getExamContext(profile);
+    const cardEl  = document.querySelector('.score-card');
+    const labelEl = cardEl?.querySelector('.score-label');
     const valueEl = document.getElementById('score-value');
     const hintEl  = document.getElementById('score-hint');
     const fillEl  = document.getElementById('score-progress-fill');
 
     if (!valueEl) return;
 
+    // ── WAEC/NECO only — show grade tracker instead ──
+    if (ctx.isGradeOnly) {
+      if (labelEl) labelEl.textContent = 'Estimated Grade';
+      if (fillEl) fillEl.closest('.score-progress-wrap') && (fillEl.closest('.score-progress-wrap').style.display = 'none');
+
+      const totalQ   = masteryRows.reduce((s, r) => s + (r.attempts || 0), 0);
+      const totalC   = masteryRows.reduce((s, r) => s + (r.correct  || 0), 0);
+      const acc      = totalQ > 0 ? (totalC / totalQ) * 100 : null;
+      const target   = profile.target_grade || 'B3';
+
+      if (acc === null) {
+        valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
+        if (hintEl) hintEl.textContent = 'Complete your first practice session to see your estimated grade.';
+      } else {
+        const grade = accToGrade(acc);
+        valueEl.innerHTML = `${grade}<span class="score-denom" style="font-size:1.2rem;margin-left:6px">/ A1</span>`;
+        if (hintEl) {
+          if (grade <= target) {
+            hintEl.innerHTML = `You're on track for ${target} or better. Keep it up! &#x1F31F;`;
+          } else {
+            hintEl.textContent = `Target: ${target}. Focus on weak topics to push your grade up.`;
+          }
+        }
+        if (fillEl) {
+          const gradeMap = { A1:100, B2:87, B3:77, C4:70, C5:60, C6:52, D7:45, E8:35, F9:20 };
+          fillEl.style.width = (gradeMap[grade] || 0) + '%';
+          if (fillEl.closest('.score-progress-wrap')) fillEl.closest('.score-progress-wrap').style.display = '';
+        }
+      }
+      return;
+    }
+
+    // ── Mixed (JAMB + WAEC) — show accuracy % ──
+    if (ctx.hasBoth) {
+      if (labelEl) labelEl.textContent = 'Overall Accuracy';
+      const totalQ = masteryRows.reduce((s, r) => s + (r.attempts || 0), 0);
+      const totalC = masteryRows.reduce((s, r) => s + (r.correct  || 0), 0);
+      const acc    = totalQ > 0 ? Math.round((totalC / totalQ) * 100) : null;
+
+      if (acc === null) {
+        valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
+        if (hintEl) hintEl.textContent = 'Complete a session to see your accuracy.';
+        if (fillEl) fillEl.style.width = '0%';
+      } else {
+        valueEl.innerHTML = `${acc}<span class="score-denom">%</span>`;
+        if (hintEl) hintEl.textContent = acc >= 70 ? 'Strong accuracy across both exams!' : 'Keep practising to improve your accuracy.';
+        if (fillEl) fillEl.style.width = acc + '%';
+      }
+      return;
+    }
+
+    // ── JAMB only (default) — score prediction ──
+    if (labelEl) labelEl.textContent = 'Predicted JAMB Score';
+    const prediction = SMARTPATH.predictJAMBScore(profile, masteryRows);
+    const target     = profile.target_score || 250;
+
     if (!prediction) {
-      // New user — no data yet
       valueEl.innerHTML = `<span style="font-size:1.5rem;color:var(--muted)">No data yet</span>`;
       if (hintEl) hintEl.textContent = 'Complete your first practice session to see your predicted score.';
       if (fillEl) fillEl.style.width = '0%';
