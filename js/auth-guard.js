@@ -77,16 +77,22 @@ const AUTH_GUARD = (function () {
 
   // ── Redirect helpers ───────────────────────────────────────────
   function redirectToLogin(reason) {
+    const page = currentPage();
+    // Never redirect to login if already on a non-protected page
+    if (page === LOGIN_PAGE || page === 'confirm.html' || page === 'index.html' ||
+        page === 'pricing.html' || page === 'forgot-password.html') return;
     window.location.replace(
-      LOGIN_PAGE + '?next=' + encodeURIComponent(currentPage()) +
+      LOGIN_PAGE + '?next=' + encodeURIComponent(page) +
       (reason ? '&reason=' + encodeURIComponent(reason) : '')
     );
   }
 
   function redirectToPricing(reason) {
+    const page = currentPage();
+    if (page === PRICING_PAGE) return;
     window.location.replace(
       PRICING_PAGE + '?reason=' + encodeURIComponent(reason || 'premium_required') +
-      '&next=' + encodeURIComponent(currentPage())
+      '&next=' + encodeURIComponent(page)
     );
   }
 
@@ -104,7 +110,7 @@ const AUTH_GUARD = (function () {
       .select(
         'id, full_name, email, is_premium, subscription_expiry, ' +
         'total_xp, accuracy_avg, mastery_level, status, ' +
-        'exam_types, exam_date, target_score, current_skill_level, ' +
+        'exam_types, exam_date, target_score, target_grade, current_skill_level, ' +
         'report_share_token, usage_logs, exam_subjects, study_mode, ' +
         'smartpath_queue, created_at'
       )
@@ -155,7 +161,7 @@ const AUTH_GUARD = (function () {
         'This feature requires a UE School subscription. Choose a plan to continue.',
         'warning', 6000
       );
-      setTimeout(() => redirectToPricing('not_subscribed'), 1800);
+      setTimeout(() => safeRedirectToPricing('not_subscribed'), 1800);
       return false;
     }
 
@@ -164,7 +170,7 @@ const AUTH_GUARD = (function () {
         'Your subscription has expired. Renew your plan to access this content.',
         'warning', 6000
       );
-      setTimeout(() => redirectToPricing('subscription_expired'), 1800);
+      setTimeout(() => safeRedirectToPricing('subscription_expired'), 1800);
       return false;
     }
 
@@ -218,13 +224,26 @@ const AUTH_GUARD = (function () {
     window.location.replace(LOGIN_PAGE);
   }
 
+  // ── Global redirect lock — prevents any double-navigation ─────
+  let _redirecting = false;
+  function safeRedirectToLogin(reason) {
+    if (_redirecting) return;
+    _redirecting = true;
+    redirectToLogin(reason);
+  }
+  function safeRedirectToPricing(reason) {
+    if (_redirecting) return;
+    _redirecting = true;
+    redirectToPricing(reason);
+  }
+
   // ── Main init ────────────────────────────────────────────────────
   async function init() {
     // ── 1. Boot the Supabase client (idempotent) ──────────────────
     if (!window.sb) {
       if (!window.supabase) {
         console.error('[AUTH_GUARD] Supabase SDK not loaded.');
-        redirectToLogin('sdk_missing');
+        safeRedirectToLogin('sdk_missing');
         return null;
       }
       window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -236,7 +255,7 @@ const AUTH_GUARD = (function () {
     if (!session) {
       // No valid session (refresh failed or never existed)
       try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
-      redirectToLogin('no_session');
+      safeRedirectToLogin('no_session');
       return null;
     }
 
@@ -262,7 +281,8 @@ const AUTH_GUARD = (function () {
           email:       session.user.email,
           examTypes:   pendingData.examTypes   || [],
           examDate:    pendingData.examDate    || null,
-          targetScore: pendingData.targetScore || 250,
+          targetScore: pendingData.targetScore || null,
+          targetGrade: pendingData.targetGrade || null,
           subjects:    pendingData.subjects    || [],
           studyMode:   pendingData.studyMode   || 'drill'
         };
@@ -274,6 +294,7 @@ const AUTH_GUARD = (function () {
           exam_types:          formData.examTypes,
           exam_date:           formData.examDate || null,
           target_score:        formData.targetScore,
+          target_grade:        formData.targetGrade,
           current_skill_level: 3,
           status:              'NIL',
           is_premium:          false,
@@ -294,7 +315,7 @@ const AUTH_GUARD = (function () {
 
       // If still no profile after recovery attempt, redirect to login
       if (!profile) {
-        redirectToLogin('no_profile');
+        safeRedirectToLogin('no_profile');
         return null;
       }
     }
@@ -304,12 +325,16 @@ const AUTH_GUARD = (function () {
     if (premiumOk === false) return null; // redirect in progress
 
     // ── 6. Set up auth-state-change listener ────────────────────
+    // ONLY act on SIGNED_OUT. Every other event (INITIAL_SESSION,
+    // SIGNED_IN, TOKEN_REFRESHED arriving without session) fires
+    // legitimately during normal page loads and MUST NOT trigger a
+    // redirect — we already validated the session above.
     window.sb.auth.onAuthStateChange((event, newSession) => {
-      if (event === 'SIGNED_OUT' || (!newSession && event !== 'INITIAL_SESSION')) {
+      if (event === 'SIGNED_OUT') {
         try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
-        redirectToLogin('signed_out');
+        safeRedirectToLogin('signed_out');
+        return;
       }
-      // TOKEN_REFRESHED — update the cached token in UE_USER
       if (event === 'TOKEN_REFRESHED' && newSession) {
         if (window.UE_USER) window.UE_USER.access_token = newSession.access_token;
         window.UE_SESSION = newSession;
