@@ -142,10 +142,10 @@
         <div class="form-group">
           <label class="form-label">Which exams are you sitting?</label>
           <div class="exam-checks">
-            <label class="exam-check-label"><input type="checkbox" value="JAMB" id="chk-jamb" onchange="checkJAMB()"> JAMB / UTME</label>
-            <label class="exam-check-label"><input type="checkbox" value="WAEC"> WAEC / GCE</label>
-            <label class="exam-check-label"><input type="checkbox" value="NECO"> NECO</label>
-            <label class="exam-check-label"><input type="checkbox" value="Post-UTME"> Post-UTME</label>
+            <label class="exam-check-label"><input type="checkbox" value="JAMB" id="chk-jamb" onchange="updateGoalFields()"> JAMB / UTME</label>
+            <label class="exam-check-label"><input type="checkbox" value="WAEC" id="chk-waec" onchange="updateGoalFields()"> WAEC / GCE</label>
+            <label class="exam-check-label"><input type="checkbox" value="NECO" id="chk-neco" onchange="updateGoalFields()"> NECO</label>
+            <label class="exam-check-label"><input type="checkbox" value="Post-UTME" id="chk-postutme" onchange="updateGoalFields()"> Post-UTME</label>
           </div>
         </div>
         <div class="form-group">
@@ -159,12 +159,35 @@
             <option>March 2027</option><option>April 2027</option>
           </select>
         </div>
-        <div class="form-group">
+        <!-- JAMB-only: Target Score -->
+        <div class="form-group" id="goal-jamb" style="display:none">
           <label class="form-label">Target JAMB Score</label>
           <select class="form-select" id="su-target">
             <option>200â€“220</option><option>221â€“240</option><option>241â€“260</option>
             <option>261â€“280</option><option selected>281â€“300</option>
             <option>301â€“320</option><option>320+</option>
+          </select>
+        </div>
+
+        <!-- WAEC/NECO only: Target Grade -->
+        <div class="form-group" id="goal-waec" style="display:none">
+          <label class="form-label">Target WAEC/NECO Grade (per subject)</label>
+          <select class="form-select" id="su-target-grade">
+            <option value="A1">A1 â€” Excellent (90%+)</option>
+            <option value="B2">B2 â€” Very Good (80â€“89%)</option>
+            <option value="B3" selected>B3 â€” Good (75â€“79%)</option>
+            <option value="C4">C4 â€” Credit (65â€“74%)</option>
+            <option value="C5">C5 â€” Credit (55â€“64%)</option>
+            <option value="C6">C6 â€” Credit (50â€“54%) â€” minimum pass</option>
+          </select>
+        </div>
+
+        <!-- Post-UTME: Target percentage -->
+        <div class="form-group" id="goal-postutme" style="display:none">
+          <label class="form-label">Target Post-UTME Score</label>
+          <select class="form-select" id="su-target-postutme">
+            <option>50â€“60%</option><option selected>61â€“70%</option>
+            <option>71â€“80%</option><option>81â€“90%</option><option>90%+</option>
           </select>
         </div>
 
@@ -310,10 +333,24 @@
 // â”€â”€ Initialise Supabase â”€â”€
 // window.sb is set by js/supabase.js â€” credentials live only in js/config.js
 
-// Redirect already-logged-in users
+// Redirect already-logged-in users.
+// Uses replace() so the login page is NOT in browser history.
+// The onAuthStateChange listener below is suppressed on this page so
+// a SIGNED_IN event fired by the SDK init never double-redirects.
+let _loginChecked = false;
 (async () => {
-  const { data: { session } } = await window.sb.auth.getSession();
-  if (session) { window.location.href = 'dashboard.html'; }
+  try {
+    const { data: { session } } = await window.sb.auth.getSession();
+    if (session && !_loginChecked) {
+      _loginChecked = true;
+      window.location.replace('dashboard.html');
+    } else {
+      _loginChecked = true; // mark done even if no session
+    }
+  } catch (e) {
+    _loginChecked = true;
+    console.warn('[login] getSession error:', e);
+  }
 })();
 
 // â”€â”€ State â”€â”€
@@ -400,12 +437,24 @@ function checkStrength(pw) {
   }
 }
 
-// â”€â”€ JAMB check â”€â”€
-function checkJAMB() {
-  const checked = document.querySelectorAll('.exam-checks input:checked');
-  jambSelected = Array.from(checked).some(c => c.value === 'JAMB');
+// â”€â”€ Exam goal fields â€” show/hide based on selection â”€â”€
+function updateGoalFields() {
+  const hasJAMB     = document.getElementById('chk-jamb')?.checked;
+  const hasWAEC     = document.getElementById('chk-waec')?.checked;
+  const hasNECO     = document.getElementById('chk-neco')?.checked;
+  const hasPostUTME = document.getElementById('chk-postutme')?.checked;
+
+  document.getElementById('goal-jamb').style.display     = hasJAMB ? 'block' : 'none';
+  document.getElementById('goal-waec').style.display     = (hasWAEC || hasNECO) ? 'block' : 'none';
+  document.getElementById('goal-postutme').style.display = hasPostUTME ? 'block' : 'none';
+
+  // Keep JAMB hint in step-3 in sync
+  jambSelected = !!hasJAMB;
   updateJAMBHint();
 }
+
+// â”€â”€ Legacy alias so any remaining onchange="checkJAMB()" calls still work â”€â”€
+function checkJAMB() { updateGoalFields(); }
 
 function toggleSubj(el, id) {
   el.classList.toggle('selected');
@@ -437,13 +486,17 @@ async function doSignup() {
   const examTypes = Array.from(document.querySelectorAll('.exam-checks input:checked')).map(c => c.value);
   const studyMode = document.querySelector('input[name=study_mode]:checked').value;
 
+  const hasJAMB = examTypes.includes('JAMB');
+  const hasGrade = examTypes.includes('WAEC') || examTypes.includes('NECO');
+
   const formData = {
     fullName:    document.getElementById('su-name').value.trim(),
     email:       document.getElementById('su-email').value.trim(),
     password:    document.getElementById('su-pass').value,
     examTypes,
     examDate:    document.getElementById('su-date').value || null,
-    targetScore: parseTargetScore(document.getElementById('su-target').value),
+    targetScore: hasJAMB ? parseTargetScore(document.getElementById('su-target')?.value) : null,
+    targetGrade: hasGrade ? (document.getElementById('su-target-grade')?.value || 'B3') : null,
     subjects:    Array.from(selectedSubjects),
     studyMode
   };
