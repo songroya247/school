@@ -57,6 +57,7 @@ const AUTH = (function () {
       exam_types:          formData.examTypes,
       exam_date:           formData.examDate || null,
       target_score:        formData.targetScore,
+      target_grade:        formData.targetGrade || null,
       current_skill_level: 3,
       accuracy_avg:        null,
       mastery_level:       null,
@@ -124,13 +125,13 @@ const AUTH = (function () {
       // ── AUTO-CONFIRMED (email confirmations disabled in Supabase) ────
       if (data.session) {
         await createProfile(data.user, formData);
-        window.location.href = 'dashboard.html';
+        window.location.replace('dashboard.html');
         return;
       }
 
       // ── NORMAL FLOW ───────────────────────────────────────────────
       sessionStorage.setItem('ue_pending_profile', JSON.stringify(formData));
-      window.location.href = 'confirm.html?email=' + encodeURIComponent(formData.email);
+      window.location.replace('confirm.html?email=' + encodeURIComponent(formData.email));
 
     } catch (err) {
       showError('Something went wrong. Please check your connection and try again.');
@@ -164,7 +165,8 @@ const AUTH = (function () {
         email:       session.user.email,
         examTypes:   pendingData.examTypes   || tryParse(meta.exam_types, []),
         examDate:    pendingData.examDate    || meta.exam_date    || null,
-        targetScore: pendingData.targetScore || parseInt(meta.target_score) || 250,
+        targetScore: pendingData.targetScore || parseInt(meta.target_score) || null,
+        targetGrade: pendingData.targetGrade || meta.target_grade || null,
         subjects:    pendingData.subjects    || tryParse(meta.subjects, []),
         studyMode:   pendingData.studyMode   || meta.study_mode   || 'drill'
       };
@@ -211,10 +213,15 @@ const AUTH = (function () {
         return;
       }
 
-      // Check for intended destination
+      // Check for intended destination — sanitise to prevent redirect loops
       const params = new URLSearchParams(window.location.search);
-      const next   = params.get('next') || 'dashboard.html';
-      window.location.href = decodeURIComponent(next);
+      const rawNext = params.get('next') || 'dashboard.html';
+      const next = decodeURIComponent(rawNext);
+      // Never redirect back to login or auth pages
+      const safeNext = (next.includes('login') || next.includes('confirm') || next.startsWith('http'))
+        ? 'dashboard.html'
+        : next;
+      window.location.replace(safeNext);
 
     } catch (err) {
       showError('Something went wrong. Please try again.');
