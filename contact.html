@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact Us — UE School</title>
+<title>Contact Us &mdash; UE School</title>
 <meta name="description" content="Get in touch with the UE School team for support, partnerships, or general enquiries.">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 <style>
-/* ── MOBILE NAV — matches index.html professional slide-down ── */
+/* ── MOBILE NAV &mdash; matches index.html professional slide-down ── */
 .nav-hamburger {
   display: none;
   flex-direction: column;
@@ -226,7 +226,7 @@
 <div class="legal-hero">
   <div class="container">
     <h1>Contact Us</h1>
-    <p>We typically respond within one business day. Students always come first — reach out any time.</p>
+    <p>We typically respond within one business day. Students always come first &mdash; reach out any time.</p>
   </div>
 </div>
 
@@ -269,7 +269,7 @@
         </div>
 
         <div id="contact-success">
-          <div class="check">✅</div>
+          <div class="check">&#x2705;</div>
           <h3>Message Received!</h3>
           <p>We'll get back to you at the email you provided within one business day.</p>
         </div>
@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Auth-aware nav for public pages
 (async function() {
   try {
-    // sb/SB is set by js/supabase.js shim — credentials live only in js/config.js
+    // sb/SB is set by js/supabase.js shim \u2014 credentials live only in js/config.js
 const SB = window.sb;
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
