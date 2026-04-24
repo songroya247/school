@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login / Sign Up â€” UE School</title>
+<title>Login / Sign Up &mdash; UE School</title>
 <link rel="stylesheet" href="css/main.css">
 <style>
 .auth-wrap { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg); padding:24px; }
@@ -68,7 +68,7 @@
 
     <div id="auth-error"></div>
 
-    <!-- â•â•â•â•â•â•â•â•â•â• LOGIN FORM â•â•â•â•â•â•â•â•â•â• -->
+    <!-- ══════════ LOGIN FORM ══════════ -->
     <div id="login-form" style="display:none">
       <h2 style="font-family:var(--font-head);font-size:1.9rem;margin-bottom:6px">Welcome back</h2>
       <p style="font-size:.88rem;color:var(--muted);margin-bottom:24px">Log in to continue your exam prep.</p>
@@ -80,8 +80,8 @@
       <div class="form-group">
         <label class="form-label">Password</label>
         <div class="password-wrap">
-          <input type="password" class="form-input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" id="login-password" autocomplete="current-password">
-          <button type="button" class="pw-toggle" onclick="togglePw('login-password',this)">ðŸ‘</button>
+          <input type="password" class="form-input" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" id="login-password" autocomplete="current-password">
+          <button type="button" class="pw-toggle" onclick="togglePw('login-password',this)">&#x1F441;</button>
         </div>
       </div>
 
@@ -89,16 +89,16 @@
 
       <div style="text-align:center;margin-top:16px;display:flex;justify-content:space-between">
         <a href="forgot-password.html" style="font-size:.85rem;color:var(--muted)">Forgot Password?</a>
-        <a href="#" style="font-size:.85rem;color:var(--accent)" onclick="switchTab('signup');return false">Create account â†’</a>
+        <a href="#" style="font-size:.85rem;color:var(--accent)" onclick="switchTab('signup');return false">Create account &rarr;</a>
       </div>
     </div>
 
-    <!-- â•â•â•â•â•â•â•â•â•â• SIGNUP MULTI-STEP â•â•â•â•â•â•â•â•â•â• -->
+    <!-- ══════════ SIGNUP MULTI-STEP ══════════ -->
     <div id="signup-form">
 
-      <!-- Step 1 â€” Account details -->
+      <!-- Step 1 &mdash; Account details -->
       <div id="step-1">
-        <div class="step-indicator">Step 1 of 4 â€” Account Details</div>
+        <div class="step-indicator">Step 1 of 4 &mdash; Account Details</div>
         <div class="step-bar"><div class="step-bar-fill" style="width:25%"></div></div>
         <h2 style="font-family:var(--font-head);font-size:1.9rem;margin-bottom:6px">Create your account</h2>
         <p style="font-size:.88rem;color:var(--muted);margin-bottom:24px">Join 12,000+ students already preparing smarter.</p>
@@ -112,7 +112,7 @@
           <input type="email" class="form-input" placeholder="chioma@example.com" id="su-email" autocomplete="email">
         </div>
         <div class="form-group">
-          <label class="form-label">Phone (WhatsApp) <span style="color:var(--muted);font-weight:400">(optional â€” lets our coaches reach you)</span></label>
+          <label class="form-label">Phone (WhatsApp) <span style="color:var(--muted);font-weight:400">(optional &mdash; lets our coaches reach you)</span></label>
           <input type="tel" class="form-input" placeholder="+234 803 000 0000" id="su-phone" autocomplete="tel">
         </div>
         <div class="form-group">
@@ -120,7 +120,7 @@
           <div class="password-wrap">
             <input type="password" class="form-input" placeholder="Min. 8 characters" id="su-pass"
               autocomplete="new-password" oninput="checkStrength(this.value)">
-            <button type="button" class="pw-toggle" onclick="togglePw('su-pass',this)">ðŸ‘</button>
+            <button type="button" class="pw-toggle" onclick="togglePw('su-pass',this)">&#x1F441;</button>
           </div>
           <div class="strength-bar" id="strength-bar" style="display:none"></div>
           <div class="form-hint" id="strength-label"></div>
@@ -129,16 +129,16 @@
           <label class="form-label">Confirm Password</label>
           <div class="password-wrap">
             <input type="password" class="form-input" placeholder="Repeat password" id="su-pass2" autocomplete="new-password" oninput="checkPasswordMatch()">
-            <button type="button" class="pw-toggle" onclick="togglePw('su-pass2',this)">ðŸ‘</button>
+            <button type="button" class="pw-toggle" onclick="togglePw('su-pass2',this)">&#x1F441;</button>
           </div>
           <div id="pw-match-msg" style="font-size:.82rem;margin-top:5px;font-weight:600;display:none"></div>
         </div>
         <button class="btn btn-primary btn-block btn-lg" onclick="goStep(2)">Continue &rarr;</button>
       </div>
 
-      <!-- Step 2 â€” Exam goals -->
+      <!-- Step 2 &mdash; Exam goals -->
       <div id="step-2" style="display:none">
-        <div class="step-indicator">Step 2 of 4 â€” Exam Goals</div>
+        <div class="step-indicator">Step 2 of 4 &mdash; Exam Goals</div>
         <div class="step-bar"><div class="step-bar-fill" style="width:50%"></div></div>
         <h2 style="font-family:var(--font-head);font-size:1.9rem;margin-bottom:6px">Your exam goals</h2>
         <p style="font-size:.88rem;color:var(--muted);margin-bottom:24px">Help us personalise your learning plan.</p>
@@ -155,7 +155,7 @@
         <div class="form-group">
           <label class="form-label">When is your exam? <span style="color:var(--muted);font-weight:400">(optional)</span></label>
           <select class="form-select" id="su-date">
-            <option value="">Select monthâ€¦</option>
+            <option value="">Select month…</option>
             <option>May 2026</option><option>June 2026</option><option>July 2026</option>
             <option>August 2026</option><option>September 2026</option><option>October 2026</option>
             <option>November 2026</option><option>December 2026</option>
@@ -167,9 +167,9 @@
         <div class="form-group" id="goal-jamb" style="display:none">
           <label class="form-label">Target JAMB Score</label>
           <select class="form-select" id="su-target">
-            <option>200â€“220</option><option>221â€“240</option><option>241â€“260</option>
-            <option>261â€“280</option><option selected>281â€“300</option>
-            <option>301â€“320</option><option>320+</option>
+            <option>200&ndash;220</option><option>221&ndash;240</option><option>241&ndash;260</option>
+            <option>261&ndash;280</option><option selected>281&ndash;300</option>
+            <option>301&ndash;320</option><option>320+</option>
           </select>
         </div>
 
@@ -177,12 +177,12 @@
         <div class="form-group" id="goal-waec" style="display:none">
           <label class="form-label">Target WAEC/NECO Grade (per subject)</label>
           <select class="form-select" id="su-target-grade">
-            <option value="A1">A1 â€” Excellent (90%+)</option>
-            <option value="B2">B2 â€” Very Good (80â€“89%)</option>
-            <option value="B3" selected>B3 â€” Good (75â€“79%)</option>
-            <option value="C4">C4 â€” Credit (65â€“74%)</option>
-            <option value="C5">C5 â€” Credit (55â€“64%)</option>
-            <option value="C6">C6 â€” Credit (50â€“54%) â€” minimum pass</option>
+            <option value="A1">A1 &mdash; Excellent (90%+)</option>
+            <option value="B2">B2 &mdash; Very Good (80&ndash;89%)</option>
+            <option value="B3" selected>B3 &mdash; Good (75&ndash;79%)</option>
+            <option value="C4">C4 &mdash; Credit (65&ndash;74%)</option>
+            <option value="C5">C5 &mdash; Credit (55&ndash;64%)</option>
+            <option value="C6">C6 &mdash; Credit (50&ndash;54%) &mdash; minimum pass</option>
           </select>
         </div>
 
@@ -190,8 +190,8 @@
         <div class="form-group" id="goal-postutme" style="display:none">
           <label class="form-label">Target Post-UTME Score</label>
           <select class="form-select" id="su-target-postutme">
-            <option>50â€“60%</option><option selected>61â€“70%</option>
-            <option>71â€“80%</option><option>81â€“90%</option><option>90%+</option>
+            <option>50&ndash;60%</option><option selected>61&ndash;70%</option>
+            <option>71&ndash;80%</option><option>81&ndash;90%</option><option>90%+</option>
           </select>
         </div>
 
@@ -201,9 +201,9 @@
         </div>
       </div>
 
-      <!-- Step 3 â€” Subjects -->
+      <!-- Step 3 &mdash; Subjects -->
       <div id="step-3" style="display:none">
-        <div class="step-indicator">Step 3 of 4 â€” Your Subjects</div>
+        <div class="step-indicator">Step 3 of 4 &mdash; Your Subjects</div>
         <div class="step-bar"><div class="step-bar-fill" style="width:75%"></div></div>
         <h2 style="font-family:var(--font-head);font-size:1.9rem;margin-bottom:6px">Your subjects</h2>
         <p style="font-size:.88rem;color:var(--muted);margin-bottom:8px">Select all subjects you are sitting for.</p>
@@ -214,63 +214,63 @@
 
         <div class="subject-grid" id="subj-grid">
           <div class="subj-card" onclick="toggleSubj(this,'mathematics')">
-            <div class="subj-check">âœ“</div>
-            <div class="subj-card-icon">ðŸ“</div>
+            <div class="subj-check">&#x2713;</div>
+            <div class="subj-card-icon">📐</div>
             <div class="subj-card-name" style="color:#1a56ff">Mathematics</div>
           </div>
           <div class="subj-card selected" onclick="toggleSubj(this,'english')">
-            <div class="subj-check">âœ“</div>
-            <div class="subj-card-icon">ðŸ“–</div>
+            <div class="subj-check">&#x2713;</div>
+            <div class="subj-card-icon">📖</div>
             <div class="subj-card-name" style="color:#00c97a">English Language</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'physics')">
-            <div class="subj-check">âœ“</div>
-            <div class="subj-card-icon">âš›ï¸</div>
+            <div class="subj-check">&#x2713;</div>
+            <div class="subj-card-icon">⚛️</div>
             <div class="subj-card-name" style="color:#7c3aed">Physics</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'chemistry')">
-            <div class="subj-check">âœ“</div>
-            <div class="subj-card-icon">ðŸ§ª</div>
+            <div class="subj-check">&#x2713;</div>
+            <div class="subj-card-icon">🧪</div>
             <div class="subj-card-name" style="color:#ff6b35">Chemistry</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'biology')">
-            <div class="subj-check">âœ“</div>
-            <div class="subj-card-icon">ðŸŒ¿</div>
+            <div class="subj-check">&#x2713;</div>
+            <div class="subj-card-icon">🌿</div>
             <div class="subj-card-name" style="color:#0891b2">Biology</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'economics')">
-            <div class="subj-check">âœ“</div>
-            <div class="subj-card-icon">ðŸ“ˆ</div>
+            <div class="subj-check">&#x2713;</div>
+            <div class="subj-card-icon">&#x1F4C8;</div>
             <div class="subj-card-name" style="color:#f59e0b">Economics</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'government')">
-            <div class="subj-check">âœ“</div>
-            <div class="subj-card-icon">ðŸ›ï¸</div>
+            <div class="subj-check">&#x2713;</div>
+            <div class="subj-card-icon">🏛️</div>
             <div class="subj-card-name" style="color:#6366f1">Government</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'literature')">
-            <div class="subj-check">âœ“</div>
-            <div class="subj-card-icon">ðŸ“š</div>
+            <div class="subj-check">&#x2713;</div>
+            <div class="subj-card-icon">📚</div>
             <div class="subj-card-name" style="color:#ec4899">Literature</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'geography')">
-            <div class="subj-check">âœ“</div>
-            <div class="subj-card-icon">ðŸŒ</div>
+            <div class="subj-check">&#x2713;</div>
+            <div class="subj-card-icon">🌍</div>
             <div class="subj-card-name" style="color:#10b981">Geography</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'commerce')">
-            <div class="subj-check">âœ“</div>
-            <div class="subj-card-icon">ðŸª</div>
+            <div class="subj-check">&#x2713;</div>
+            <div class="subj-card-icon">🏪</div>
             <div class="subj-card-name" style="color:#8b5cf6">Commerce</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'accounts')">
-            <div class="subj-check">âœ“</div>
-            <div class="subj-card-icon">ðŸ’¼</div>
+            <div class="subj-check">&#x2713;</div>
+            <div class="subj-card-icon">💼</div>
             <div class="subj-card-name" style="color:#14b8a6">Accounts</div>
           </div>
           <div class="subj-card" onclick="toggleSubj(this,'crk')">
-            <div class="subj-check">âœ“</div>
-            <div class="subj-card-icon">âœï¸</div>
+            <div class="subj-check">&#x2713;</div>
+            <div class="subj-card-icon">✝️</div>
             <div class="subj-card-name" style="color:#6d28d9">CRK</div>
           </div>
         </div>
@@ -281,9 +281,9 @@
         </div>
       </div>
 
-      <!-- Step 4 â€” Study mode -->
+      <!-- Step 4 &mdash; Study mode -->
       <div id="step-4" style="display:none">
-        <div class="step-indicator">Step 4 of 4 â€” Study Preference</div>
+        <div class="step-indicator">Step 4 of 4 &mdash; Study Preference</div>
         <div class="step-bar"><div class="step-bar-fill" style="width:100%"></div></div>
         <h2 style="font-family:var(--font-head);font-size:1.9rem;margin-bottom:6px">How do you like to study?</h2>
         <p style="font-size:.88rem;color:var(--muted);margin-bottom:20px">You can change this later in your settings.</p>
@@ -304,7 +304,7 @@
         </label>
 
         <div style="margin:16px 0;padding:14px 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;font-size:.85rem;">
-          <strong>ðŸ“§ Almost done!</strong> After you click "Create Account", we'll send a confirmation email.
+          <strong>📧 Almost done!</strong> After you click "Create Account", we'll send a confirmation email.
           Click the link in it to activate your account.
         </div>
 
@@ -334,8 +334,8 @@
 <script src="js/auth.js"></script>
 
 <script>
-// â”€â”€ Initialise Supabase â”€â”€
-// window.sb is set by js/supabase.js â€” credentials live only in js/config.js
+// ── Initialise Supabase ──
+// window.sb is set by js/supabase.js \u2014 credentials live only in js/config.js
 
 // Redirect already-logged-in users.
 // Uses replace() so the login page is NOT in browser history.
@@ -357,11 +357,11 @@ let _loginChecked = false;
   }
 })();
 
-// â”€â”€ State â”€â”€
+// ── State ──
 let jambSelected = false;
 const selectedSubjects = new Set(['english']); // English pre-selected
 
-// â”€â”€ Tab Switch â”€â”€
+// ── Tab Switch ──
 function switchTab(tab) {
   document.getElementById('login-form').style.display  = tab === 'login'  ? 'block' : 'none';
   document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none';
@@ -370,7 +370,7 @@ function switchTab(tab) {
   document.getElementById('auth-error').style.display = 'none';
 }
 
-// â”€â”€ Step Navigation â”€â”€
+// ── Step Navigation ──
 function goStep(n) {
   // Validate before advancing
   if (n === 2) {
@@ -399,7 +399,7 @@ function showStepError(msg) {
   el.style.display = 'block';
 }
 
-// â”€â”€ Password helpers â”€â”€
+// ── Password helpers ──
 function checkPasswordMatch() {
   const pass  = document.getElementById('su-pass').value;
   const pass2 = document.getElementById('su-pass2').value;
@@ -408,18 +408,18 @@ function checkPasswordMatch() {
   if (pass2.length === 0) { msg.style.display = 'none'; return; }
   msg.style.display = 'block';
   if (pass === pass2) {
-    msg.textContent = '&#x2713; Passwords match';
+    msg.textContent = '\u2713 Passwords match';
     msg.style.color = '#16a34a';
   } else {
-    msg.textContent = '&#x2717; Passwords do not match';
+    msg.textContent = '\u2717 Passwords do not match';
     msg.style.color = '#dc2626';
   }
 }
 
 function togglePw(id, btn) {
   const inp = document.getElementById(id);
-  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'ðŸ™ˆ'; }
-  else                         { inp.type = 'password'; btn.textContent = 'ðŸ‘'; }
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '\uD83D\uDE48'; }
+  else                         { inp.type = 'password'; btn.textContent = '\uD83D\uDC41'; }
 }
 
 function checkStrength(pw) {
@@ -432,16 +432,16 @@ function checkStrength(pw) {
     label.style.color = '#ef4444';
   } else if (pw.length < 10 || !/[0-9!@#$%]/.test(pw)) {
     bar.className = 'strength-bar strength-fair';
-    label.textContent = 'Fair â€” add numbers or symbols';
+    label.textContent = 'Fair \u2014 add numbers or symbols';
     label.style.color = '#f59e0b';
   } else {
     bar.className = 'strength-bar strength-strong';
-    label.textContent = 'Strong password âœ“';
+    label.textContent = 'Strong password \u2713';
     label.style.color = '#22c55e';
   }
 }
 
-// â”€â”€ Exam goal fields â€” show/hide based on selection â”€â”€
+// ── Exam goal fields \u2014 show/hide based on selection ──
 function updateGoalFields() {
   const hasJAMB     = document.getElementById('chk-jamb')?.checked;
   const hasWAEC     = document.getElementById('chk-waec')?.checked;
@@ -457,7 +457,7 @@ function updateGoalFields() {
   updateJAMBHint();
 }
 
-// â”€â”€ Legacy alias so any remaining onchange="checkJAMB()" calls still work â”€â”€
+// ── Legacy alias so any remaining onchange="checkJAMB()" calls still work ──
 function checkJAMB() { updateGoalFields(); }
 
 function toggleSubj(el, id) {
@@ -479,13 +479,13 @@ function updateJAMBHint() {
   }
 }
 
-// â”€â”€ Target score parse â”€â”€
+// ── Target score parse ──
 function parseTargetScore(str) {
-  const map = { '200â€“220':210,'221â€“240':230,'241â€“260':250,'261â€“280':270,'281â€“300':290,'301â€“320':310,'320+':330 };
+  const map = { '200\u2013220':210,'221\u2013240':230,'241\u2013260':250,'261\u2013280':270,'281\u2013300':290,'301\u2013320':310,'320+':330 };
   return map[str] || 250;
 }
 
-// â”€â”€ DO SIGNUP â”€â”€
+// ── DO SIGNUP ──
 async function doSignup() {
   const examTypes = Array.from(document.querySelectorAll('.exam-checks input:checked')).map(c => c.value);
   const studyMode = document.querySelector('input[name=study_mode]:checked').value;
@@ -509,7 +509,7 @@ async function doSignup() {
   await AUTH.handleSignup(formData);
 }
 
-// â”€â”€ DO LOGIN â”€â”€
+// ── DO LOGIN ──
 async function doLogin() {
   const email    = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
@@ -517,14 +517,14 @@ async function doLogin() {
   await AUTH.handleLogin(email, password);
 }
 
-// â”€â”€ Enter key support â”€â”€
+// ── Enter key support ──
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;
   const loginVisible = document.getElementById('login-form').style.display !== 'none';
   if (loginVisible) doLogin();
 });
 
-// â”€â”€ Check URL param â€” open login tab if ?tab=login â”€â”€
+// ── Check URL param \u2014 open login tab if ?tab=login ──
 const urlTab = new URLSearchParams(window.location.search).get('tab');
 if (urlTab === 'login') switchTab('login');
 else switchTab('signup');
