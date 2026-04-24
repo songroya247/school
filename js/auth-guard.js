@@ -104,6 +104,10 @@ const AUTH_GUARD = (function () {
   }
 
   // ── Profile fetch ───────────────────────────────────────────────
+  //   Uses .maybeSingle() so a missing row returns { data: null }
+  //   instead of throwing PGRST116 (which the old code logged as an
+  //   "error" and caused the dashboard to redirect to login on first
+  //   confirm — the redirect-loop bug).
   async function getProfile(userId) {
     const { data, error } = await window.sb
       .from('profiles')
@@ -115,12 +119,13 @@ const AUTH_GUARD = (function () {
         'smartpath_queue, created_at'
       )
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('[AUTH_GUARD] Profile fetch error:', error.message);
       return null;
     }
+    if (!data) return null;
 
     // Cache a lightweight version for the head-gatekeeper's optimistic check
     try {
@@ -238,8 +243,15 @@ const AUTH_GUARD = (function () {
   // ── Logout ──────────────────────────────────────────────────────
   async function logout() {
     await window.sb.auth.signOut();
-    // Clear the profile cache on logout
-    try { sessionStorage.removeItem('ue_profile_cache'); } catch (_) {}
+    // Clear ALL UE-owned session keys so the next user on the same
+    // browser doesn't inherit pending data, profile cache, or the
+    // one-shot profile-autocreate flag.
+    try {
+      sessionStorage.removeItem('ue_profile_cache');
+      sessionStorage.removeItem('ue_pending_profile');
+      sessionStorage.removeItem('ue_selected_plan');
+      sessionStorage.removeItem('ue_profile_autocreate_tried');
+    } catch (_) {}
     window.location.replace(LOGIN_PAGE);
   }
 
@@ -282,59 +294,87 @@ const AUTH_GUARD = (function () {
     liftVeil();
 
     // ── 4. Fetch the real profile from Supabase ──────────────────
+    //   Retry once with a small delay to absorb the brief window
+    //   between auth-confirm and the row appearing (replication lag,
+    //   slow trigger). Without this, freshly-confirmed users were
+    //   bounced to login on their first dashboard load.
     let profile = await getProfile(session.user.id);
+    if (!profile) {
+      await new Promise(r => setTimeout(r, 500));
+      profile = await getProfile(session.user.id);
+    }
 
     if (!profile) {
-      // Profile missing — new user whose email was just confirmed.
-      // Attempt to build the profile from session metadata and
-      // sessionStorage (written during signup) rather than sending
-      // them to login (which causes a redirect loop because their
-      // session IS valid — login would immediately send them back here).
-      try {
-        const meta        = session.user.user_metadata || {};
-        const pending     = sessionStorage.getItem('ue_pending_profile');
-        const pendingData = pending ? JSON.parse(pending) : {};
+      // Profile still missing — new user whose email was just confirmed.
+      // Build the profile from session metadata + the sessionStorage
+      // payload written during signup. We do NOT redirect them to
+      // login because their session IS valid — login would just send
+      // them straight back here and create an infinite loop.
+      //
+      // Use a one-shot session flag so we only attempt the upsert
+      // once per browser tab. If the upsert keeps failing (RLS,
+      // missing table, NOT NULL violation), the user is sent to
+      // pricing with a friendly toast instead of looping forever.
+      const ATTEMPT_KEY = 'ue_profile_autocreate_tried';
+      const alreadyTried = sessionStorage.getItem(ATTEMPT_KEY) === '1';
+      try { sessionStorage.setItem(ATTEMPT_KEY, '1'); } catch (_) {}
 
-        const formData = {
-          fullName:    pendingData.fullName    || meta.full_name    || session.user.email.split('@')[0],
-          email:       session.user.email,
-          examTypes:   pendingData.examTypes   || [],
-          examDate:    pendingData.examDate    || null,
-          targetScore: pendingData.targetScore || null,
-          targetGrade: pendingData.targetGrade || null,
-          subjects:    pendingData.subjects    || [],
-          studyMode:   pendingData.studyMode   || 'drill'
-        };
+      if (!alreadyTried) {
+        try {
+          const meta        = session.user.user_metadata || {};
+          const pending     = sessionStorage.getItem('ue_pending_profile');
+          const pendingData = pending ? JSON.parse(pending) : {};
 
-        await window.sb.from('profiles').upsert({
-          id:                  session.user.id,
-          full_name:           formData.fullName,
-          email:               formData.email,
-          exam_types:          formData.examTypes,
-          exam_date:           formData.examDate || null,
-          target_score:        formData.targetScore,
-          target_grade:        formData.targetGrade,
-          current_skill_level: 3,
-          status:              'NIL',
-          is_premium:          false,
-          exam_subjects:       formData.subjects,
-          study_mode:          formData.studyMode,
-          smartpath_queue:     [],
-          total_xp:            0,
-          usage_logs:          []
-        }, { onConflict: 'id', ignoreDuplicates: false });
+          const formData = {
+            fullName:    pendingData.fullName    || meta.full_name    || session.user.email.split('@')[0],
+            email:       session.user.email,
+            examTypes:   pendingData.examTypes   || [],
+            examDate:    pendingData.examDate    || null,
+            targetScore: pendingData.targetScore || null,
+            targetGrade: pendingData.targetGrade || null,
+            subjects:    pendingData.subjects    || [],
+            studyMode:   pendingData.studyMode   || 'drill'
+          };
 
-        if (pending) sessionStorage.removeItem('ue_pending_profile');
+          const { error: upsertErr } = await window.sb.from('profiles').upsert({
+            id:                  session.user.id,
+            full_name:           formData.fullName,
+            email:               formData.email,        // <-- now ALWAYS set
+            exam_types:          formData.examTypes,
+            exam_date:           formData.examDate || null,
+            target_score:        formData.targetScore,
+            target_grade:        formData.targetGrade,
+            current_skill_level: 3,
+            status:              'NIL',
+            is_premium:          false,
+            exam_subjects:       formData.subjects,
+            study_mode:          formData.studyMode,
+            smartpath_queue:     [],
+            total_xp:            0,
+            usage_logs:          []
+          }, { onConflict: 'id', ignoreDuplicates: false });
 
-        // Re-fetch the profile we just created
-        profile = await getProfile(session.user.id);
-      } catch (profileErr) {
-        console.error('[AUTH_GUARD] profile auto-create failed:', profileErr);
+          if (upsertErr) {
+            console.error('[AUTH_GUARD] profile upsert failed:', upsertErr.message);
+          } else if (pending) {
+            sessionStorage.removeItem('ue_pending_profile');
+          }
+
+          // Re-fetch the profile we just created
+          profile = await getProfile(session.user.id);
+        } catch (profileErr) {
+          console.error('[AUTH_GUARD] profile auto-create exception:', profileErr);
+        }
       }
 
-      // If still no profile after recovery attempt, redirect to login
+      // If still no profile, show a clear message and stop. Do NOT
+      // redirect to login (that just loops back to here).
       if (!profile) {
-        safeRedirectToLogin('no_profile');
+        liftVeil();
+        showToast(
+          'We could not load your profile. Please contact support.',
+          'error', 8000
+        );
         return null;
       }
     }
