@@ -108,7 +108,7 @@ const AUTH_GUARD = (function () {
     const { data, error } = await window.sb
       .from('profiles')
       .select(
-        'id, full_name, email, is_premium, subscription_expiry, ' +
+        'id, full_name, email, phone, is_admin, is_premium, subscription_expiry, ' +
         'total_xp, accuracy_avg, mastery_level, status, ' +
         'exam_types, exam_date, target_score, target_grade, current_skill_level, ' +
         'report_share_token, usage_logs, exam_subjects, study_mode, ' +
@@ -133,9 +133,24 @@ const AUTH_GUARD = (function () {
     return data;
   }
 
+  // ── Admin pass-through ──────────────────────────────────────────
+  // An admin (profiles.is_admin === true OR email in
+  // UE_CONFIG.ADMIN_EMAILS) is treated as a fully-active premium
+  // subscriber so they can sign up like a normal student and still
+  // see/feel every premium page. The authoritative check is RLS on
+  // the server; this is the front-end UX hint.
+  function isAdmin(profile) {
+    if (!profile) return false;
+    if (profile.is_admin === true) return true;
+    const list = (window.UE_CONFIG && window.UE_CONFIG.ADMIN_EMAILS) || [];
+    return list.length > 0 && profile.email
+      && list.map(e => e.toLowerCase()).includes(profile.email.toLowerCase());
+  }
+
   // ── Subscription status ─────────────────────────────────────────
   function subscriptionStatus(profile) {
     if (!profile)                       return 'NIL';
+    if (isAdmin(profile))               return 'ACTIVE';   // admin pass-through
     if (!profile.is_premium)            return 'NIL';
     if (!profile.subscription_expiry)   return 'NIL';
     const expiry = new Date(profile.subscription_expiry);
@@ -187,8 +202,12 @@ const AUTH_GUARD = (function () {
       .split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
     const status   = subscriptionStatus(profile);
-    const proBadge = status === 'ACTIVE'
-      ? '<span class="nav-pro-badge">PRO</span>' : '';
+    const admin    = isAdmin(profile);
+    const proBadge = admin
+      ? '<span class="nav-pro-badge" style="background:#7c3aed">ADMIN</span>'
+      : (status === 'ACTIVE'
+          ? '<span class="nav-pro-badge">PRO</span>'
+          : '');
 
     if (avatarEl) avatarEl.innerHTML = initials + proBadge;
     if (nameEl)   nameEl.textContent = (profile.full_name || '').split(' ').slice(0, 2).join(' ');
@@ -348,6 +367,7 @@ const AUTH_GUARD = (function () {
       full_name:    profile.full_name,
       access_token: session.access_token,
       is_premium:   isPremium(profile),
+      is_admin:     isAdmin(profile),
       _expired:     false,
     };
 
@@ -372,6 +392,7 @@ const AUTH_GUARD = (function () {
     showToast,
     subscriptionStatus,
     isPremium,
+    isAdmin,
   };
 
 })();
