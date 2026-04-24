@@ -1297,11 +1297,15 @@ function openDrawer(userId) {
 
     <div>
       <div style="font-size:.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">CS Notes</div>
-      <textarea id="cs-notes" placeholder="Add customer service notes about this user…" style="
+      <textarea id="cs-notes" placeholder="Add customer service notes about this user…"
+        onblur="saveCsNotes()" style="
         width:100%;min-height:80px;background:var(--surface2);border:1px solid var(--border);
         border-radius:8px;padding:10px;color:var(--text);font-family:var(--font-body);
         font-size:.8rem;outline:none;resize:vertical;line-height:1.5
-      ">${u._cs_notes||''}</textarea>
+      ">${u.cs_notes||''}</textarea>
+      <div id="cs-notes-status" style="font-size:.72rem;color:var(--muted);margin-top:6px">
+        Auto-saves when you click outside the box.
+      </div>
     </div>
   `;
 
@@ -1325,13 +1329,52 @@ function copyContact() {
 function callUser(userId) {
   const u = allUsers.find(x=>x.id===userId);
   if (!u) return;
-  const contact = u.phone || u.email;
-  showToast(`📞 Calling ${u.full_name} — ${contact}`);
+  if (u.phone) {
+    // Open the device dialer / WhatsApp prompt
+    window.location.href = 'tel:' + u.phone.replace(/\s+/g,'');
+    showToast(`📞 Dialling ${u.full_name}`);
+  } else if (u.email) {
+    window.location.href = 'mailto:' + u.email + '?subject=' +
+      encodeURIComponent('UE School — checking in');
+    showToast(`✉️ No phone on file — opening email`);
+  }
 }
 
 function flagUser(userId) {
   const u = allUsers.find(x=>x.id===userId);
-  showToast(`⚑ ${u?.full_name} flagged for follow-up`);
+  if (!u) return;
+  const stamp = new Date().toLocaleDateString('en-NG');
+  const note  = `[FLAGGED ${stamp}] follow-up needed\n` + (u.cs_notes || '');
+  sb.from('profiles').update({ cs_notes: note }).eq('id', u.id).then(({error}) => {
+    if (error) { showToast('Flag failed: ' + error.message); return; }
+    u.cs_notes = note;
+    showToast(`⚑ ${u.full_name} flagged for follow-up`);
+  });
+}
+
+// ── Save the drawer's CS notes back to Supabase ──────────────────
+async function saveCsNotes() {
+  if (!activeUser) return;
+  const ta = document.getElementById('cs-notes');
+  const status = document.getElementById('cs-notes-status');
+  if (!ta) return;
+  const value = ta.value;
+  if (status) { status.textContent = 'Saving…'; status.style.color = 'var(--muted)'; }
+  const { error } = await sb.from('profiles')
+    .update({ cs_notes: value })
+    .eq('id', activeUser.id);
+  if (error) {
+    if (status) { status.textContent = 'Could not save: ' + error.message; status.style.color = 'var(--danger)'; }
+    return;
+  }
+  activeUser.cs_notes = value;
+  // Reflect in the in-memory list so re-opening the drawer shows the new text
+  const i = allUsers.findIndex(x => x.id === activeUser.id);
+  if (i >= 0) allUsers[i].cs_notes = value;
+  if (status) {
+    status.textContent = 'Saved ' + new Date().toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'});
+    status.style.color = 'var(--accent2)';
+  }
 }
 
 function openImpersonate() {
