@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Plans & Pricing â€” UE School</title>
+<title>Plans & Pricing &mdash; UE School</title>
 <link rel="stylesheet" href="css/main.css">
 <style>
 .pricing-wrap {
@@ -139,6 +139,53 @@
   .pricing-card.featured { transform: none; }
   .faq-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Mobile nav hamburger (matches index/about/dashboard) ── */
+.nav-hamburger {
+  display: none; flex-direction: column; justify-content: center; align-items: center;
+  gap: 5px; width: 40px; height: 40px; padding: 8px;
+  background: rgba(26,86,255,.06); border: 1.5px solid var(--border2);
+  border-radius: 9px; cursor: pointer; margin-left: auto; flex-shrink: 0;
+  z-index: 210; transition: background .2s, border-color .2s;
+}
+.nav-hamburger:hover { background: rgba(26,86,255,.12); border-color: var(--accent); }
+.nav-hamburger span {
+  display: block; width: 18px; height: 2px; background: var(--text);
+  border-radius: 2px; transition: transform .3s ease, opacity .3s ease;
+  transform-origin: center center;
+}
+.nav-mobile-open .nav-hamburger { background: rgba(26,86,255,.1); border-color: var(--accent); }
+.nav-mobile-open .nav-hamburger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-mobile-open .nav-hamburger span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-mobile-open .nav-hamburger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+@media (max-width: 768px) {
+  .ue-nav { height: auto; }
+  .ue-nav .container { flex-wrap: wrap; height: auto; padding: 0 16px; }
+  .nav-logo { padding: 14px 0; flex: 1; }
+  .nav-hamburger { display: flex; }
+  .nav-links, .nav-right {
+    display: flex !important; flex-direction: column; width: 100%;
+    overflow: hidden; max-height: 0; opacity: 0; pointer-events: none;
+    transition: max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s ease, padding .3s ease;
+  }
+  .nav-links { gap: 2px; padding: 0; order: 3; }
+  .nav-right  { gap: 8px; padding: 0; order: 4; }
+  .nav-mobile-open .nav-links {
+    max-height: 320px; opacity: 1; pointer-events: auto;
+    padding: 8px 0 4px; border-top: 1px solid var(--border); margin-top: 4px;
+  }
+  .nav-mobile-open .nav-right {
+    max-height: 120px; opacity: 1; pointer-events: auto; padding: 10px 0 14px;
+  }
+  .nav-links a {
+    display: flex; align-items: center; padding: 11px 14px; font-size: .92rem;
+    font-weight: 600; color: var(--text); border-radius: 9px;
+    transition: background .15s, color .15s;
+  }
+  .nav-links a:hover, .nav-links a.active { background: rgba(26,86,255,.07); color: var(--accent); }
+  .nav-right .btn { width: 100%; justify-content: center; height: 44px; }
+}
 </style>
 </head>
 <body class="pricing-wrap">
@@ -151,6 +198,10 @@
       <a href="classroom.html">Classroom</a>
       <a href="cbt.html">Practice</a>
     </div>
+    <button class="nav-hamburger" id="nav-toggle" aria-label="Toggle menu"
+            onclick="this.closest('.ue-nav').classList.toggle('nav-mobile-open')">
+      <span></span><span></span><span></span>
+    </button>
     <div class="nav-right" id="nav-right">
       <a href="login.html" class="btn btn-primary" id="nav-login-btn">Login / Sign Up</a>
     </div>
@@ -176,12 +227,12 @@
     <div class="pricing-grid" id="pricing-grid">
       <!-- Populated by PAYMENT.renderPricingSection() -->
       <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">
-        Loading plansâ€¦
+        Loading plans…
       </div>
     </div>
 
     <p style="text-align:center;margin-top:28px;font-size:.82rem;color:var(--muted)">
-      ðŸ”’ Secured by Paystack &nbsp;Â·&nbsp; â‚¦ NGN &nbsp;Â·&nbsp; Instant activation after payment
+      &#x1F512; Secured by Paystack &nbsp;·&nbsp; &#x20A6; NGN &nbsp;·&nbsp; Instant activation after payment
     </p>
 
   </div>
@@ -198,11 +249,11 @@
       </div>
       <div class="faq-item">
         <div class="faq-q">What payment methods are accepted?</div>
-        <div class="faq-a">We accept all Nigerian bank cards (Visa, Mastercard), bank transfers, and USSD via Paystack â€” Nigeria's most trusted payment gateway.</div>
+        <div class="faq-a">We accept all Nigerian bank cards (Visa, Mastercard), bank transfers, and USSD via Paystack &mdash; Nigeria's most trusted payment gateway.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Is there a free trial?</div>
-        <div class="faq-a">Yes! You can create a free account and take practice sessions. Premium unlocks all video lessons and full SmartPathâ„¢ analysis.</div>
+        <div class="faq-a">Yes! You can create a free account and take practice sessions. Premium unlocks all video lessons and full SmartPath™ analysis.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q">What if I have payment issues?</div>
@@ -214,7 +265,7 @@
       </div>
       <div class="faq-item">
         <div class="faq-q">Is my data secure?</div>
-        <div class="faq-a">All data is stored securely in Supabase with row-level security. Payments are handled entirely by Paystack â€” we never see your card details.</div>
+        <div class="faq-a">All data is stored securely in Supabase with row-level security. Payments are handled entirely by Paystack &mdash; we never see your card details.</div>
       </div>
     </div>
   </div>
@@ -222,10 +273,10 @@
 
 <!-- Guarantee -->
 <div class="guarantee-strip">
-  <div style="font-size:2.5rem;margin-bottom:12px">ðŸŽ¯</div>
+  <div style="font-size:2.5rem;margin-bottom:12px">&#x1F3AF;</div>
   <h2 style="font-family:var(--font-head);font-size:1.9rem;margin-bottom:10px;color:#fff">Pass or We Help You Retry</h2>
   <p style="color:rgba(255,255,255,.75);max-width:480px;margin:0 auto 24px;font-size:.95rem;line-height:1.6">
-    If you complete 80% of your SmartPathâ„¢ plan and don't improve your mock score, contact us and we'll extend your subscription for free.
+    If you complete 80% of your SmartPath™ plan and don't improve your mock score, contact us and we'll extend your subscription for free.
   </p>
   <a href="login.html" class="btn btn-white btn-lg">Get Started Free</a>
 </div>
@@ -264,14 +315,14 @@
 <div id="toast"></div>
 
 <!--
-  SCRIPT LOAD ORDER â€” do not reorder:
-  1. config.js    â€” window.UE_CONFIG (URL + anon key, no hardcoding)
-  2. supabase CDN â€” SDK must load before shim
-  3. supabase.js  â€” sets window.sb using UE_CONFIG
-  4. Paystack CDN â€” payment popup library
-  5. app.js       â€” utilities
+  SCRIPT LOAD ORDER &mdash; do not reorder:
+  1. config.js    &mdash; window.UE_CONFIG (URL + anon key, no hardcoding)
+  2. supabase CDN &mdash; SDK must load before shim
+  3. supabase.js  &mdash; sets window.sb using UE_CONFIG
+  4. Paystack CDN &mdash; payment popup library
+  5. app.js       &mdash; utilities
   6. auth-guard.js
-  7. payment.js   â€” PAYMENT module
+  7. payment.js   &mdash; PAYMENT module
 -->
 <script src="js/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -282,23 +333,23 @@
 <script src="js/payment.js"></script>
 
 <script>
-// window.sb is set by supabase.js shim â€” no credentials here
+// window.sb is set by supabase.js shim \u2014 no credentials here
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Keep banner hidden until auth state is resolved to prevent flash
-  // â”€â”€ Render tiered pricing cards (Basic / Pro / Elite) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Render tiered pricing cards (Basic / Pro / Elite) ──────────
   // PAYMENT.renderPricingSection reads plan definitions from payment.js
-  // so features are always in sync â€” no separate HTML to maintain.
+  // so features are always in sync \u2014 no separate HTML to maintain.
   PAYMENT.renderPricingSection('pricing-grid');
 
-  // â”€â”€ Auth-aware UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Auth-aware UI ───────────────────────────────────────────────
   const { data: { session } } = await window.sb.auth.getSession();
 
   const banner   = document.getElementById('auth-state-banner');
   const bannerTx = document.getElementById('auth-banner-text');
   const navRight = document.getElementById('nav-right');
 
-  // Reveal banner now that we know the auth state â€” prevents flash
+  // Reveal banner now that we know the auth state \u2014 prevents flash
   banner.style.display = 'block';
 
   if (session) {
@@ -308,7 +359,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       .eq('id', session.user.id)
       .single();
 
-    // â”€â”€ Nav: show user pill + dashboard link â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Nav: show user pill + dashboard link ──────────────────────
     if (navRight) {
       const initials  = (profile?.full_name || 'U')
         .split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -324,7 +375,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
     }
 
-    // â”€â”€ Auth-state banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Auth-state banner ─────────────────────────────────────────
     const isPremium = profile?.is_premium;
     const expiry    = profile?.subscription_expiry ? new Date(profile.subscription_expiry) : null;
     const isActive  = isPremium && expiry && expiry > new Date();
@@ -335,22 +386,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       banner.style.background   = '#d1fae5';
       banner.style.borderColor  = '#6ee7b7';
       bannerTx.style.color      = '#065f46';
-      bannerTx.innerHTML = `&#x2705; <strong>Your subscription is active</strong> â€” ${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining. <a href="dashboard.html">Go to Dashboard â†’</a>`;
+      bannerTx.innerHTML = `\u2705 <strong>Your subscription is active</strong> \u2014 ${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining. <a href="dashboard.html">Go to Dashboard \u2192</a>`;
       markCurrentPlan(daysLeft);
     } else if (isExpired) {
       banner.style.background   = '#fee2e2';
       banner.style.borderColor  = '#fca5a5';
       bannerTx.style.color      = '#991b1b';
-      bannerTx.innerHTML = `&#x26A0;&#xFE0F; Your subscription expired. Renew a plan below to restore full access.`;
+      bannerTx.innerHTML = `\u26A0\uFE0F Your subscription expired. Renew a plan below to restore full access.`;
     } else {
       const firstName = (profile?.full_name || '').split(' ')[0];
-      bannerTx.innerHTML = `&#x1F44B; Welcome back, ${firstName}! Subscribe below to unlock full access.`;
+      bannerTx.innerHTML = `\uD83D\uDC4B Welcome back, ${firstName}! Subscribe below to unlock full access.`;
     }
 
     PAYMENT.checkPendingPlan();
 
   } else {
-    bannerTx.innerHTML = `&#x1F512; <a href="login.html">Sign in</a> or <a href="login.html#signup">create a free account</a> to get started.`;
+    bannerTx.innerHTML = `\uD83D\uDD12 <a href="login.html">Sign in</a> or <a href="login.html#signup">create a free account</a> to get started.`;
   }
   // Defaulter banner is intentionally absent on pricing.html
 });
@@ -359,7 +410,7 @@ function markCurrentPlan(daysLeft) {
   const planKey = daysLeft > 180 ? 'annual' : daysLeft > 60 ? 'quarterly' : 'monthly';
   const btn = document.querySelector(`[data-plan="${planKey}"]`);
   if (btn) {
-    btn.textContent = 'âœ“ Current Plan';
+    btn.textContent = '\u2713 Current Plan';
     btn.disabled    = true;
     btn.style.opacity = '.65';
   }
