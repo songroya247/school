@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard — UE School</title>
+<title>Dashboard &mdash; UE School</title>
 
 <!-- ╔══════════════════════════════════════════════════════╗
-     ║  SECURITY BLOCK — must be first in <head>           ║
+     ║  SECURITY BLOCK &mdash; must be first in <head>           ║
      ╚══════════════════════════════════════════════════════╝ -->
 <script src="js/config.js"></script>
 <script src="js/head-gatekeeper.js"></script>
@@ -238,6 +238,102 @@ a { text-decoration: none; color: inherit; }
 /* MAIN LAYOUT */
 main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex; flex-direction: column; gap: 36px; }
 
+/* QUOTE RIBBON */
+.quote-ribbon {
+  background: linear-gradient(135deg, rgba(26,86,255,.06), rgba(14,165,233,.05));
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 8px rgba(26,86,255,.05);
+  cursor: pointer;
+  transition: opacity .35s ease, transform .25s ease, box-shadow .25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.quote-ribbon:hover { box-shadow: 0 4px 20px rgba(26,86,255,.10); }
+.quote-ribbon.is-fading { opacity: 0; }
+.quote-ribbon::before {
+  content: '\201C';
+  font-family: var(--font-head);
+  font-size: 3.2rem;
+  line-height: .85;
+  color: var(--accent);
+  opacity: .35;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: -4px;
+}
+.quote-ribbon-body { flex: 1; min-width: 0; }
+.quote-ribbon-text {
+  font-family: var(--font-body);
+  font-size: .95rem;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.45;
+  font-weight: 500;
+}
+.quote-ribbon-author {
+  display: block;
+  margin-top: 6px;
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+@media(max-width:600px) {
+  .quote-ribbon { padding: 14px 16px; gap: 12px; }
+  .quote-ribbon::before { font-size: 2.4rem; }
+  .quote-ribbon-text { font-size: .88rem; }
+}
+
+/* WEEKLY EMAIL TOGGLE */
+.weekly-email-row {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.weekly-email-row .we-icon {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(26,86,255,.10);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.weekly-email-row .we-text { flex: 1; min-width: 0; }
+.weekly-email-row .we-title { font-size: .88rem; font-weight: 700; color: var(--text); }
+.weekly-email-row .we-sub   { font-size: .76rem; color: var(--text-3); margin-top: 1px; }
+.we-switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+.we-switch input { opacity: 0; width: 0; height: 0; }
+.we-switch .we-slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: var(--border-2); border-radius: 999px;
+  transition: background .2s;
+}
+.we-switch .we-slider::before {
+  content: ''; position: absolute;
+  height: 18px; width: 18px;
+  left: 3px; bottom: 3px;
+  background: #fff; border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,.18);
+  transition: transform .22s;
+}
+.we-switch input:checked + .we-slider { background: var(--accent); }
+.we-switch input:checked + .we-slider::before { transform: translateX(20px); }
+.we-switch input:disabled + .we-slider { opacity: .55; cursor: wait; }
+
 /* SECTION HEADERS */
 .section-title { font-family: var(--font-head); font-size: 1.2rem; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
 .section-title span { color: var(--accent); }
@@ -448,6 +544,12 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
 </style>
 </head>
 <body>
+<noscript>
+  <div style="padding:40px;text-align:center;font-family:system-ui">
+    <h2>JavaScript is required</h2>
+    <p>Please enable JavaScript or <a href="login.html">click here to log in</a>.</p>
+  </div>
+</noscript>
 
 <div id="defaulter-banner">Your subscription has expired. <a href="index.html#pricing">Renew Now</a></div>
 
@@ -464,12 +566,12 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
       <span></span><span></span><span></span>
     </button>
     <div class="nav-right" id="nav-right">
-      <div class="streak-badge" id="nav-streak">🔥 —</div>
+      <div class="streak-badge" id="nav-streak">&#x1F525; &mdash;</div>
       <div class="nav-user-pill">
-        <div class="nav-avatar" id="nav-avatar">—</div>
+        <div class="nav-avatar" id="nav-avatar">&mdash;</div>
         <div>
           <div class="nav-user-name" id="nav-user-name">Loading…</div>
-          <div class="nav-xp" id="nav-xp">— XP</div>
+          <div class="nav-xp" id="nav-xp">&mdash; XP</div>
         </div>
       </div>
       <button class="btn btn-outline btn-sm" onclick="AUTH_GUARD.logout()" style="padding:6px 12px;font-size:.78rem">Logout</button>
@@ -479,16 +581,24 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
 
 <main>
 
+  <!-- ─── Motivational quote (auto-rotates every 12s · click to advance) ─── -->
+  <div id="ue-quote-ribbon" class="quote-ribbon fade-up" role="region" aria-label="Daily motivation">
+    <div class="quote-ribbon-body">
+      <span class="quote-ribbon-text" data-ue-quote-text>Loading&hellip;</span>
+      <span class="quote-ribbon-author" data-ue-quote-author></span>
+    </div>
+  </div>
+
   <div class="dash-top-grid fade-up">
     <div class="dash-welcome-card">
       <div class="card-body">
         <h1>Welcome back, <span id="dash-welcome-name">…</span>!</h1>
         <p class="subtitle" id="dash-welcome-subtitle">Loading your progress…</p>
         <div class="dash-welcome-inner">
-          <span class="icon">🎯</span>
+          <span class="icon">&#x1F3AF;</span>
           <div>
             <div class="label">Next Recommended Topic</div>
-            <div class="topic" id="dash-next-topic">—</div>
+            <div class="topic" id="dash-next-topic">&mdash;</div>
           </div>
           <a href="classroom.html" class="btn btn-white" style="margin-left:auto">Start Lesson</a>
         </div>
@@ -541,11 +651,11 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
 
       <div class="perf-analytics-meta">
         <div class="perf-analytics-stat">
-          <span class="val blue" id="pa-exams-taken">—</span>
+          <span class="val blue" id="pa-exams-taken">&mdash;</span>
           <span class="lbl">Exams Taken</span>
         </div>
         <div class="perf-analytics-stat">
-          <span class="val green" id="pa-avg-score">—</span>
+          <span class="val green" id="pa-avg-score">&mdash;</span>
           <span class="lbl">Avg Score</span>
         </div>
         <div class="perf-analytics-stat">
@@ -553,7 +663,7 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
           <span class="lbl">Coins</span>
         </div>
         <div class="perf-analytics-stat" id="pa-days-wrap" style="display:none">
-          <span class="val" id="pa-days-left" style="color:var(--text)">—</span>
+          <span class="val" id="pa-days-left" style="color:var(--text)">&mdash;</span>
           <span class="lbl">Days to Exam</span>
         </div>
       </div>
@@ -562,7 +672,7 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         <div>
           <div class="rb-label">Readiness Status</div>
-          <div class="rb-value"><span id="pa-readiness-pct">—</span> <span id="pa-readiness-label" style="font-size:.78rem;color:var(--text-2);font-weight:600">Not Ready</span></div>
+          <div class="rb-value"><span id="pa-readiness-pct">&mdash;</span> <span id="pa-readiness-label" style="font-size:.78rem;color:var(--text-2);font-weight:600">Not Ready</span></div>
         </div>
         <div class="rb-badge" id="pa-readiness-badge">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -580,6 +690,21 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
         <div class="legend-item"><span class="legend-dot" style="background:#1a56ff"></span>Readiness %</div>
         <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Avg Score %</div>
         <div class="legend-item"><span class="legend-line" style="background:rgba(239,68,68,.6);border-top:2px dashed rgba(239,68,68,.6);width:18px;height:0"></span>Pass Threshold (70%)</div>
+      </div>
+
+      <!-- ─── Weekly e-mail report opt-in (sent every Saturday) ─── -->
+      <div class="weekly-email-row" id="weekly-email-row" style="display:none">
+        <div class="we-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="we-text">
+          <div class="we-title">Weekly performance report by email</div>
+          <div class="we-sub">A snapshot of your readiness, mastery and recent sessions every Saturday morning. Unsubscribe any time.</div>
+        </div>
+        <label class="we-switch" title="Toggle weekly report email">
+          <input type="checkbox" id="weekly-email-toggle" disabled>
+          <span class="we-slider"></span>
+        </label>
       </div>
 
     </div>
@@ -608,7 +733,7 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
     <div style="font-size:1.8rem;margin-bottom:8px">🚀</div>
     <h3 style="font-family:var(--font-head);font-size:1.4rem;margin-bottom:8px">Unlock Full Access</h3>
     <p style="opacity:.8;font-size:.9rem;margin-bottom:20px">Subscribe to access all video lessons, unlimited CBT practice, and your full SmartPath™ plan.</p>
-    <a href="pricing.html" class="btn btn-white btn-lg">View Plans from ₦1,500/month</a>
+    <a href="pricing.html" class="btn btn-white btn-lg">View Plans from &#x20A6;1,500/month</a>
   </div>
 </div>
 
@@ -620,7 +745,7 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
     </div>
     <div class="pricing-grid" id="dash-pricing-grid"></div>
     <p style="text-align:center;margin-top:20px;font-size:.82rem;color:var(--muted)">
-      🔒 Secured by Paystack &nbsp;·&nbsp; Instant activation &nbsp;·&nbsp; <a href="pricing.html" style="color:var(--accent)">Full pricing FAQ →</a>
+      &#x1F512; Secured by Paystack &nbsp;·&nbsp; Instant activation &nbsp;·&nbsp; <a href="pricing.html" style="color:var(--accent)">Full pricing FAQ &rarr;</a>
     </p>
   </div>
 </section>
@@ -633,6 +758,74 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
 <script src="js/smartpath.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/payment.js"></script>
+<script src="js/quotes.js"></script>
+
+<!-- ─── Weekly-email opt-in wiring ───────────────────────────────────
+     Reads & writes profiles.weekly_report_optin via the user's own RLS
+     policy (each row owner can update their own row). Silently no-ops if
+     the column doesn't exist yet \u2014 so this works even before the
+     002 migration is applied, and breaks nothing if the feature is off.
+─────────────────────────────────────────────────────────────────────── -->
+<script>
+(function () {
+  'use strict';
+  var row    = document.getElementById('weekly-email-row');
+  var toggle = document.getElementById('weekly-email-toggle');
+  if (!row || !toggle) return;
+
+  function waitFor(cond, cb, tries) {
+    tries = tries || 30;
+    if (cond()) return cb();
+    if (tries <= 0) return;
+    setTimeout(function () { waitFor(cond, cb, tries - 1); }, 250);
+  }
+
+  waitFor(
+    function () { return window.sb && window.UE_USER_ID; },
+    function () {
+      window.sb
+        .from('profiles')
+        .select('weekly_report_optin')
+        .eq('id', window.UE_USER_ID)
+        .single()
+        .then(function (res) {
+          // Column missing \u2192 migration not yet applied \u2192 hide silently
+          if (res.error) {
+            var msg = (res.error.message || '').toLowerCase();
+            if (msg.indexOf('weekly_report_optin') !== -1 || msg.indexOf('does not exist') !== -1 || msg.indexOf('column') !== -1) {
+              return;
+            }
+            return; // any other error: also hide rather than confuse the user
+          }
+          var current = res.data && res.data.weekly_report_optin !== false; // default ON
+          toggle.checked  = current;
+          toggle.disabled = false;
+          row.style.display = 'flex';
+        });
+
+      toggle.addEventListener('change', function () {
+        var nextVal = !!toggle.checked;
+        toggle.disabled = true;
+        window.sb
+          .from('profiles')
+          .update({ weekly_report_optin: nextVal })
+          .eq('id', window.UE_USER_ID)
+          .then(function (res) {
+            toggle.disabled = false;
+            if (res.error) {
+              toggle.checked = !nextVal; // revert
+              if (typeof window.toast === 'function') window.toast('Could not save preference.');
+              return;
+            }
+            if (typeof window.toast === 'function') {
+              window.toast(nextVal ? 'Weekly emails ON' : 'Weekly emails OFF');
+            }
+          });
+      });
+    }
+  );
+})();
+</script>
 
 <script>
   function toggleExpand(id, rowEl) {
@@ -700,18 +893,18 @@ main { max-width: 1140px; margin: 0 auto; padding: 36px 24px 60px; display: flex
 
 <script>
 const ALL_SUBJECTS = [
-  {id:'mathematics', label:'Mathematics', icon:'&#x1F4D0;'},
-  {id:'english',     label:'English',     icon:'&#x1F4D6;'},
-  {id:'physics',     label:'Physics',     icon:'&#x269B;'},
-  {id:'chemistry',   label:'Chemistry',   icon:'&#x1F9EA;'},
-  {id:'biology',     label:'Biology',     icon:'&#x1F33F;'},
-  {id:'economics',   label:'Economics',   icon:'&#x1F4C8;'},
-  {id:'government',  label:'Government',  icon:'&#x1F3DB;'},
-  {id:'literature',  label:'Literature',  icon:'&#x1F4DA;'},
-  {id:'geography',   label:'Geography',   icon:'&#x1F30D;'},
-  {id:'commerce',    label:'Commerce',    icon:'&#x1F4BC;'},
-  {id:'accounts',    label:'Accounts',    icon:'&#x1F4CA;'},
-  {id:'crk',         label:'CRK',         icon:'&#x271D;'},
+  {id:'mathematics', label:'Mathematics', icon:'\uD83D\uDCD0'},
+  {id:'english',     label:'English',     icon:'\uD83D\uDCD6'},
+  {id:'physics',     label:'Physics',     icon:'\u269B'},
+  {id:'chemistry',   label:'Chemistry',   icon:'\uD83E\uDDEA'},
+  {id:'biology',     label:'Biology',     icon:'\uD83C\uDF3F'},
+  {id:'economics',   label:'Economics',   icon:'\uD83D\uDCC8'},
+  {id:'government',  label:'Government',  icon:'\uD83C\uDFDB'},
+  {id:'literature',  label:'Literature',  icon:'\uD83D\uDCDA'},
+  {id:'geography',   label:'Geography',   icon:'\uD83C\uDF0D'},
+  {id:'commerce',    label:'Commerce',    icon:'\uD83D\uDCBC'},
+  {id:'accounts',    label:'Accounts',    icon:'\uD83D\uDCCA'},
+  {id:'crk',         label:'CRK',         icon:'\u271D'},
 ];
 
 function openSubjectManager() {
@@ -724,7 +917,7 @@ function openSubjectManager() {
       <input type="checkbox" value="${s.id}" ${current.includes(s.id)?'checked':''} onchange="toggleSM('${s.id}',this)" style="display:none">
       <span style="font-size:1.2rem">${s.icon}</span>
       <span style="font-weight:600;font-size:.88rem">${s.label}</span>
-      <span style="margin-left:auto;color:var(--accent);font-size:1rem;opacity:${current.includes(s.id)?1:0}" id="sm-check-${s.id}">&#x2713;</span>
+      <span style="margin-left:auto;color:var(--accent);font-size:1rem;opacity:${current.includes(s.id)?1:0}" id="sm-check-${s.id}">\u2713</span>
     </label>
   `).join('');
   
@@ -780,7 +973,7 @@ document.getElementById('subject-manager-modal').addEventListener('click', funct
 (function initPerfAnalytics() {
 
   /* ─ helpers ─ */
-  function formatPct(v) { return (v == null ? '—' : Math.round(v) + '%'); }
+  function formatPct(v) { return (v == null ? '\u2014' : Math.round(v) + '%'); }
 
   function getReadinessClass(pct) {
     if (pct >= 70) return 'ready';
@@ -813,7 +1006,7 @@ document.getElementById('subject-manager-modal').addEventListener('click', funct
     const avgScore = exams.length
       ? exams.reduce((s, e) => s + (e.score_pct || 0), 0) / exams.length
       : null;
-    document.getElementById('pa-avg-score').textContent = avgScore != null ? Math.round(avgScore) + '%' : '—';
+    document.getElementById('pa-avg-score').textContent = avgScore != null ? Math.round(avgScore) + '%' : '\u2014';
     document.getElementById('pa-coins').textContent = profile?.coins ?? 0;
 
     if (daysLeft != null) {
@@ -845,7 +1038,7 @@ document.getElementById('subject-manager-modal').addEventListener('click', funct
     let labels = [], readinessData = [], scoreData = [];
 
     if (exams.length === 0) {
-      /* No data yet — show a flat placeholder up to exam date */
+      /* No data yet \u2014 show a flat placeholder up to exam date */
       const weeks = examDate ? Math.min(12, Math.max(4, daysLeft ? Math.ceil(daysLeft / 7) : 6)) : 6;
       for (let w = 1; w <= weeks; w++) {
         if (examDate) {
