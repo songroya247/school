@@ -259,7 +259,7 @@ const DASHBOARD = (function () {
       track.innerHTML = `
         <div style="padding:32px;color:var(--muted);font-size:.9rem;text-align:center;width:100%">
           No subjects selected yet.
-          <a href="login.html?tab=signup" style="color:var(--accent);font-weight:700">Update your profile →</a>
+          <a href="login.html?tab=signup" style="color:var(--accent);font-weight:700">Update your profile \u2192</a>
         </div>`;
       return;
     }
