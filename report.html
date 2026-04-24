@@ -119,16 +119,16 @@ thead tr{background:var(--bg)}
         <div><div class="stat-label">Total XP</div><div class="stat-value" id="info-xp">—</div></div>
       </div>
 
-      <!-- Predictions -->
-      <div style="background:var(--bg);border-radius:12px;padding:24px;margin-bottom:36px">
+      <!-- Predictions (each column hidden if not relevant to user's exam mix) -->
+      <div style="background:var(--bg);border-radius:12px;padding:24px;margin-bottom:36px" id="predictions-block">
         <div class="section-head">Score Predictions</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px" class="pred-grid">
-          <div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px" class="pred-grid" id="predictions-grid">
+          <div id="pred-jamb-col">
             <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:6px">Predicted JAMB Score</div>
             <div style="font-family:var(--font-head);font-size:2rem;color:var(--accent)" id="pred-jamb">No data yet</div>
             <div style="font-size:.82rem;color:var(--muted);margin-top:4px" id="pred-jamb-sub">Complete practice sessions to see your prediction</div>
           </div>
-          <div>
+          <div id="pred-waec-col">
             <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:8px">WAEC / NECO Grade Estimates</div>
             <div id="grade-predictions"><div style="color:var(--muted);font-size:.88rem">No session data yet</div></div>
           </div>
@@ -182,18 +182,39 @@ function pColor(p){if(!p)return'fill-grey';if(p>=70)return'fill-green';if(p>=40)
 function statusBadge(c){const m={'On Track':'<span class="status-good">On Track</span>','Building Up':'<span class="status-warn">Building Up</span>','Needs Attention':'<span class="status-danger">Needs Attention</span>','Not Started':'<span class="status-nil">Not Started</span>'};return m[c]||'<span class="status-nil">—</span>';}
 
 function renderReport(profile,masteryRows,sessions){
+  const examTypes=profile.exam_types||[];
+  const hasJAMB = examTypes.includes('JAMB') || examTypes.includes('Post-UTME');
+  const hasGrade= examTypes.includes('WAEC') || examTypes.includes('NECO');
+
   setEl('info-name',profile.full_name||'—');
-  setEl('info-exams',(profile.exam_types||[]).join(' / ')||'—');
+  setEl('info-exams',examTypes.join(' / ')||'—');
   setEl('info-exam-date',profile.exam_date?fmtDate(profile.exam_date+'-01'):'—');
-  setEl('info-target',profile.target_score?profile.target_score+' / 400':'—');
+  // Target line: JAMB users see "/ 400", WAEC-only users see the grade letter
+  if (hasJAMB && profile.target_score) {
+    setEl('info-target', profile.target_score + ' / 400');
+  } else if (!hasJAMB && hasGrade && profile.target_grade) {
+    setEl('info-target', 'Grade ' + profile.target_grade);
+  } else {
+    setEl('info-target', '—');
+  }
+
+  // Show / hide the right prediction column for this user
+  const jambCol=document.getElementById('pred-jamb-col');
+  const waecCol=document.getElementById('pred-waec-col');
+  const grid   =document.getElementById('predictions-grid');
+  if(jambCol) jambCol.style.display = hasJAMB  ? '' : 'none';
+  if(waecCol) waecCol.style.display = hasGrade ? '' : 'none';
+  if(grid && (!hasJAMB || !hasGrade)) grid.style.gridTemplateColumns = '1fr';
   setEl('info-mode',profile.study_mode==='cbt_only'?'CBT Only':'Drill + Videos');
   setEl('info-xp',(profile.total_xp??0)+' XP');
   setEl('report-generated-date','Generated: '+fmtDate(new Date().toISOString())+' · Shareable Report');
   setEl('report-token','RPT-'+(profile.report_share_token||'').toString().toUpperCase().slice(0,8));
 
   const rows=(masteryRows||[]).filter(r=>r.mastery_level!==null);
-  const pred=SMARTPATH.predictJAMBScore(profile,rows);
-  if(pred){setEl('pred-jamb',`${pred.low}–${pred.high} / 400`);setEl('pred-jamb-sub',`Based on ${rows.length} topic${rows.length!==1?'s':''} practiced`);}
+  if(hasJAMB){
+    const pred=SMARTPATH.predictJAMBScore(profile,rows);
+    if(pred){setEl('pred-jamb',`${pred.low}–${pred.high} / 400`);setEl('pred-jamb-sub',`Based on ${rows.length} topic${rows.length!==1?'s':''} practiced`);}
+  }
 
   const subjMap={};
   for(const r of rows){const s=r.topic_id.split('.')[0];if(!subjMap[s])subjMap[s]=[];subjMap[s].push(r.mastery_level);}
