@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UE School — Admin Command Centre</title>
+<title>UE School &mdash; Admin Command Centre</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -507,7 +507,7 @@
     /* Content padding */
     .content { padding:14px 14px; }
 
-    /* KPIs — 2×2 grid on mobile */
+    /* KPIs &mdash; 2&times;2 grid on mobile */
     .kpi-grid { grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
     .kpi-value { font-size:1.5rem; }
     .kpi-card { padding:14px; }
@@ -692,7 +692,7 @@
     </div>
     <div class="pin-error-msg" id="pin-error"></div>
     <div class="pin-attempts" id="pin-attempts"></div>
-    <div class="pin-locked-msg" id="pin-locked">🔒 Too many attempts. Try again in <span id="pin-countdown">30</span>s.</div>
+    <div class="pin-locked-msg" id="pin-locked">&#x1F512; Too many attempts. Try again in <span id="pin-countdown">30</span>s.</div>
   </div>
 </div>
 
@@ -706,7 +706,7 @@
     <nav class="sidebar-nav">
       <div class="nav-section-label">Overview</div>
       <div class="nav-item active" onclick="switchView('overview')">
-        <span class="nav-icon">📊</span> Dashboard
+        <span class="nav-icon">&#x1F4CA;</span> Dashboard
       </div>
       <div class="nav-item" onclick="switchView('users')">
         <span class="nav-icon">👥</span> All Users
@@ -717,7 +717,7 @@
       </div>
       <div class="nav-section-label">Tools</div>
       <div class="nav-item" onclick="switchView('impersonate')">
-        <span class="nav-icon">🔑</span> Login as User
+        <span class="nav-icon">&#x1F511;</span> Login as User
       </div>
       <div class="nav-item" onclick="switchView('payments')">
         <span class="nav-icon">💳</span> Payments
@@ -727,7 +727,7 @@
       </div>
       <div class="nav-section-label">System</div>
       <div class="nav-item" onclick="openSupabase()">
-        <span class="nav-icon">🗄️</span> Supabase Console ↗
+        <span class="nav-icon">🗄️</span> Supabase Console &#x2197;
       </div>
     </nav>
     <div class="sidebar-bottom">
@@ -742,7 +742,7 @@
   <div class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:10px">
-        <button class="hamburger" onclick="toggleMobileSidebar()" aria-label="Menu">☰</button>
+        <button class="hamburger" onclick="toggleMobileSidebar()" aria-label="Menu">&#x2630;</button>
         <div class="topbar-title" id="page-title">Command Centre</div>
       </div>
       <div class="topbar-actions">
@@ -757,33 +757,33 @@
       <div class="kpi-grid" id="kpi-grid">
         <div class="kpi-card" style="--kpi-color:#1a56ff">
           <div class="kpi-label">Total Users</div>
-          <div class="kpi-value" id="kpi-total">—</div>
+          <div class="kpi-value" id="kpi-total">&mdash;</div>
           <div class="kpi-sub"><span class="up" id="kpi-total-sub">Loading…</span></div>
         </div>
         <div class="kpi-card" style="--kpi-color:#00c97a">
           <div class="kpi-label">Premium Users</div>
-          <div class="kpi-value" id="kpi-premium">—</div>
+          <div class="kpi-value" id="kpi-premium">&mdash;</div>
           <div class="kpi-sub" id="kpi-premium-sub">Loading…</div>
         </div>
         <div class="kpi-card" style="--kpi-color:#f59e0b">
           <div class="kpi-label">Active (7d)</div>
-          <div class="kpi-value" id="kpi-active">—</div>
+          <div class="kpi-value" id="kpi-active">&mdash;</div>
           <div class="kpi-sub">Users with activity in last 7 days</div>
         </div>
         <div class="kpi-card" style="--kpi-color:#e93b81">
           <div class="kpi-label">Need Help</div>
-          <div class="kpi-value" id="kpi-help">—</div>
+          <div class="kpi-value" id="kpi-help">&mdash;</div>
           <div class="kpi-sub">Users at risk / low activity</div>
         </div>
       </div>
 
       <!-- Impersonate note -->
       <div class="impersonate-note">
-        <div class="impersonate-icon">🔑</div>
+        <div class="impersonate-icon">&#x1F511;</div>
         <div class="impersonate-body">
-          <strong>Developer / Admin Access — How to see what users see</strong>
+          <strong>Developer / Admin Access &mdash; How to see what users see</strong>
           <p>
-            In <strong>Supabase Dashboard → Authentication → Users</strong>, find any user and click <strong>"Send magic link"</strong> — paste that link in an incognito window to log in as them.<br>
+            In <strong>Supabase Dashboard &rarr; Authentication &rarr; Users</strong>, find any user and click <strong>"Send magic link"</strong> &mdash; paste that link in an incognito window to log in as them.<br>
             For a permanent admin account: create a normal user, then run <code>UPDATE profiles SET is_premium = true WHERE email = 'your@email.com';</code> in the SQL Editor. Full setup instructions are in the guide document.
           </p>
         </div>
@@ -808,7 +808,7 @@
         <!-- Top Performers -->
         <div class="panel">
           <div class="panel-header">
-            <div class="panel-title">🏆 Top Performers</div>
+            <div class="panel-title">&#x1F3C6; Top Performers</div>
             <span style="font-size:.72rem;color:var(--muted)">By XP this week</span>
           </div>
           <div class="panel-body" id="top-panel">
@@ -823,7 +823,7 @@
       <!-- Users Table -->
       <div class="section-header">
         <div class="section-title">All Registered Users</div>
-        <span style="font-size:.78rem;color:var(--muted)" id="user-count-label">—</span>
+        <span style="font-size:.78rem;color:var(--muted)" id="user-count-label">&mdash;</span>
       </div>
 
       <div class="table-wrap">
@@ -867,7 +867,7 @@
             <tbody id="users-tbody">
               <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:40px">
                 <div>Connect your Supabase credentials to load live user data.</div>
-                <div style="margin-top:8px"><button class="btn btn-primary" onclick="showConfigModal()">⚙ Configure Supabase</button></div>
+                <div style="margin-top:8px"><button class="btn btn-primary" onclick="showConfigModal()">&#x2699; Configure Supabase</button></div>
               </td></tr>
             </tbody>
           </table>
@@ -884,12 +884,12 @@
 <div class="drawer" id="user-drawer">
   <div class="drawer-header">
     <div class="drawer-title" id="drawer-username">User Profile</div>
-    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    <button class="drawer-close" onclick="closeDrawer()">&#x2715;</button>
   </div>
   <div class="drawer-body" id="drawer-body"></div>
   <div class="drawer-footer">
-    <button class="btn btn-ghost" style="flex:1" onclick="copyContact()">📋 Copy Contact Info</button>
-    <button class="btn btn-primary" style="flex:1" onclick="openImpersonate()">🔑 Login as User</button>
+    <button class="btn btn-ghost" style="flex:1" onclick="copyContact()">&#x1F4CB; Copy Contact Info</button>
+    <button class="btn btn-primary" style="flex:1" onclick="openImpersonate()">&#x1F511; Login as User</button>
   </div>
 </div>
 
@@ -930,7 +930,7 @@
 
 <script>
 // ════════════════════════════════════════════════
-//  UE School — Admin Dashboard
+//  UE School \u2014 Admin Dashboard
 //  Connects to Supabase via Service-Role-safe anon
 //  (for full admin access, use service_role key only
 //   from a server-side proxy, never in browser)
@@ -988,7 +988,7 @@ async function connectSupabase(silent = false) {
 async function loadAllData() {
   showLoading();
   try {
-    // Load profiles — admin must have a policy that allows SELECT *
+    // Load profiles \u2014 admin must have a policy that allows SELECT *
     // (Run: CREATE POLICY "admin_read_all" ON profiles FOR SELECT USING (true);
     //  after verifying this page is only accessible to your team)
     const { data: profiles, error } = await sb
@@ -1094,7 +1094,7 @@ function renderScore(user) {
     const color = grade.startsWith('A') ? '#00c97a' : grade.startsWith('B') ? '#f59e0b' : '#ef4444';
     return `<span style="font-weight:700;color:${color}">${grade}</span>`;
   } else {
-    // Both — show acc%
+    // Both \u2014 show acc%
     return `<span style="font-weight:600">${acc}%</span>`;
   }
 }
@@ -1143,7 +1143,7 @@ function renderTable() {
           </div>
         </div>
       </td>
-      <td style="color:var(--muted)">${u.phone || '—'}</td>
+      <td style="color:var(--muted)">${u.phone || '\u2014'}</td>
       <td>${exams.map(e=>examPill(e)).join('')}</td>
       <td><span class="plan-badge ${u.is_premium?'plan-premium':'plan-free'}">${u.is_premium?'Premium':'Free'}</span></td>
       <td>${renderScore(u)}</td>
@@ -1151,8 +1151,8 @@ function renderTable() {
       <td style="color:var(--muted);font-size:.75rem">${lastLog}</td>
       <td>${statusDot(status)}</td>
       <td onclick="event.stopPropagation()">
-        <button class="action-btn call" onclick="callUser('${u.id}')">📞 Call</button>
-        <button class="action-btn flag" onclick="flagUser('${u.id}')">⚑</button>
+        <button class="action-btn call" onclick="callUser('${u.id}')">\uD83D\uDCDE Call</button>
+        <button class="action-btn flag" onclick="flagUser('${u.id}')">\u2691</button>
       </td>
     </tr>`;
   }).join('');
@@ -1183,7 +1183,7 @@ function renderAlerts() {
 
   const panel = document.getElementById('alerts-panel');
   if (atRisk.length === 0) {
-    panel.innerHTML = '<div style="color:var(--accent2);text-align:center;padding:20px">✅ No users currently need immediate support.</div>';
+    panel.innerHTML = '<div style="color:var(--accent2);text-align:center;padding:20px">\u2705 No users currently need immediate support.</div>';
     return;
   }
 
@@ -1193,12 +1193,12 @@ function renderAlerts() {
     const lastActivity = logs.length > 0
       ? timeSince(Math.max(...logs.map(l=>new Date(l.ts).getTime())))
       : 'Never active';
-    const icon = status === 'inactive' ? '😴' : '⚠️';
+    const icon = status === 'inactive' ? '\uD83D\uDE34' : '\u26A0';
     const iconClass = status === 'inactive' ? 'danger' : 'warn';
     const reason = status === 'inactive'
-      ? 'No activity — may need a check-in call'
+      ? 'No activity \u2014 may need a check-in call'
       : (u._avgAccuracy !== null && u._avgAccuracy < 35)
-        ? `Low accuracy (${u._avgAccuracy}%) — struggling with content`
+        ? `Low accuracy (${u._avgAccuracy}%) \u2014 struggling with content`
         : 'Reduced activity in past 5 days';
     const tag = status === 'inactive' ? 'tag-danger' : 'tag-warn';
     const tagText = status === 'inactive' ? 'INACTIVE' : 'AT RISK';
@@ -1209,7 +1209,7 @@ function renderAlerts() {
         <div class="alert-name">${escHtml(u.full_name||'Unknown')}<span class="tag ${tag}">${tagText}</span></div>
         <div class="alert-desc">${reason}</div>
         <div style="margin-top:5px;display:flex;gap:6px">
-          <button class="action-btn call" onclick="event.stopPropagation();callUser('${u.id}')">📞 ${u.phone||u.email}</button>
+          <button class="action-btn call" onclick="event.stopPropagation();callUser('${u.id}')">\uD83D\uDCDE ${u.phone||u.email}</button>
         </div>
       </div>
       <div class="alert-time">${lastActivity}</div>
@@ -1224,14 +1224,14 @@ function renderTopUsers() {
   const top = [...allUsers]
     .sort((a,b)=>(b.total_xp||0)-(a.total_xp||0))
     .slice(0,8);
-  const medals = ['🥇','🥈','🥉'];
+  const medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
   const panel = document.getElementById('top-panel');
   panel.innerHTML = top.map((u,i) => `
     <div class="alert-item" onclick="openDrawer('${u.id}')" style="cursor:pointer">
       <div style="width:28px;text-align:center;font-size:1.1rem">${medals[i]||`#${i+1}`}</div>
       <div class="alert-body">
         <div class="alert-name">${escHtml(u.full_name||'Unknown')}</div>
-        <div class="alert-desc">${(u.exam_types||[]).join(' · ')||'—'}</div>
+        <div class="alert-desc">${(u.exam_types||[]).join(' · ')||'\u2014'}</div>
       </div>
       <div style="font-family:var(--font-head);font-weight:800;font-size:.88rem;color:var(--accent3)">${(u.total_xp||0).toLocaleString()} XP</div>
     </div>`).join('');
@@ -1255,14 +1255,14 @@ function openDrawer(userId) {
   let scoreSection = '';
   if (hasJAMB && !hasWAEC) {
     const est = u._avgAccuracy !== null ? Math.round(u._avgAccuracy * 4) : null;
-    scoreSection = `<div class="info-row"><span class="info-key">Est. JAMB Score</span><span class="info-val" style="color:var(--accent);font-weight:800">${est !== null ? est+' / 400' : '—'}</span></div>
-    <div class="info-row"><span class="info-key">Target Score</span><span class="info-val">${u.target_score||'—'}</span></div>`;
+    scoreSection = `<div class="info-row"><span class="info-key">Est. JAMB Score</span><span class="info-val" style="color:var(--accent);font-weight:800">${est !== null ? est+' / 400' : '\u2014'}</span></div>
+    <div class="info-row"><span class="info-key">Target Score</span><span class="info-val">${u.target_score||'\u2014'}</span></div>`;
   } else if (!hasJAMB && hasWAEC) {
     const grade = u._avgAccuracy !== null ? accToGrade(u._avgAccuracy) : null;
-    scoreSection = `<div class="info-row"><span class="info-key">Est. WAEC Grade</span><span class="info-val" style="color:var(--accent2);font-weight:800">${grade||'—'}</span></div>
-    <div class="info-row"><span class="info-key">Avg. Accuracy</span><span class="info-val">${u._avgAccuracy !== null ? u._avgAccuracy+'%' : '—'}</span></div>`;
+    scoreSection = `<div class="info-row"><span class="info-key">Est. WAEC Grade</span><span class="info-val" style="color:var(--accent2);font-weight:800">${grade||'\u2014'}</span></div>
+    <div class="info-row"><span class="info-key">Avg. Accuracy</span><span class="info-val">${u._avgAccuracy !== null ? u._avgAccuracy+'%' : '\u2014'}</span></div>`;
   } else {
-    scoreSection = `<div class="info-row"><span class="info-key">Avg. Accuracy</span><span class="info-val">${u._avgAccuracy !== null ? u._avgAccuracy+'%' : '—'}</span></div>`;
+    scoreSection = `<div class="info-row"><span class="info-key">Avg. Accuracy</span><span class="info-val">${u._avgAccuracy !== null ? u._avgAccuracy+'%' : '\u2014'}</span></div>`;
   }
 
   document.getElementById('drawer-body').innerHTML = `
@@ -1275,9 +1275,9 @@ function openDrawer(userId) {
 
     <div style="margin-bottom:18px">
       <div style="font-size:.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Exam Profile</div>
-      <div class="info-row"><span class="info-key">Exams</span><span class="info-val">${exams.map(e=>examPill(e)).join('')||'—'}</span></div>
-      <div class="info-row"><span class="info-key">Exam Date</span><span class="info-val">${u.exam_date||'—'}</span></div>
-      <div class="info-row"><span class="info-key">Subjects</span><span class="info-val" style="font-size:.75rem">${(u.exam_subjects||[]).join(', ')||'—'}</span></div>
+      <div class="info-row"><span class="info-key">Exams</span><span class="info-val">${exams.map(e=>examPill(e)).join('')||'\u2014'}</span></div>
+      <div class="info-row"><span class="info-key">Exam Date</span><span class="info-val">${u.exam_date||'\u2014'}</span></div>
+      <div class="info-row"><span class="info-key">Subjects</span><span class="info-val" style="font-size:.75rem">${(u.exam_subjects||[]).join(', ')||'\u2014'}</span></div>
     </div>
 
     <div style="margin-bottom:18px">
@@ -1292,7 +1292,7 @@ function openDrawer(userId) {
     <div style="margin-bottom:18px">
       <div style="font-size:.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Plan</div>
       <div class="info-row"><span class="info-key">Subscription</span><span class="info-val"><span class="plan-badge ${u.is_premium?'plan-premium':'plan-free'}">${u.is_premium?'Premium':'Free'}</span></span></div>
-      <div class="info-row"><span class="info-key">Expires</span><span class="info-val">${u.subscription_expiry?new Date(u.subscription_expiry).toLocaleDateString():'—'}</span></div>
+      <div class="info-row"><span class="info-key">Expires</span><span class="info-val">${u.subscription_expiry?new Date(u.subscription_expiry).toLocaleDateString():'\u2014'}</span></div>
     </div>
 
     <div>
@@ -1332,11 +1332,11 @@ function callUser(userId) {
   if (u.phone) {
     // Open the device dialer / WhatsApp prompt
     window.location.href = 'tel:' + u.phone.replace(/\s+/g,'');
-    showToast(`📞 Dialling ${u.full_name}`);
+    showToast(`\uD83D\uDCDE Dialling ${u.full_name}`);
   } else if (u.email) {
     window.location.href = 'mailto:' + u.email + '?subject=' +
-      encodeURIComponent('UE School — checking in');
-    showToast(`✉️ No phone on file — opening email`);
+      encodeURIComponent('UE School \u2014 checking in');
+    showToast(`\u2709 No phone on file \u2014 opening email`);
   }
 }
 
@@ -1348,7 +1348,7 @@ function flagUser(userId) {
   sb.from('profiles').update({ cs_notes: note }).eq('id', u.id).then(({error}) => {
     if (error) { showToast('Flag failed: ' + error.message); return; }
     u.cs_notes = note;
-    showToast(`⚑ ${u.full_name} flagged for follow-up`);
+    showToast(`\u2691 ${u.full_name} flagged for follow-up`);
   });
 }
 
@@ -1378,7 +1378,7 @@ async function saveCsNotes() {
 }
 
 function openImpersonate() {
-  showToast('See guide doc: use Supabase Dashboard → Auth → Magic Link to login as this user.');
+  showToast('See guide doc: use Supabase Dashboard \u2192 Auth \u2192 Magic Link to login as this user.');
 }
 
 // ── Filtering ─────────────────────────────────────
@@ -1423,7 +1423,7 @@ function goPage(n) { currentPage=n; renderTable(); }
 
 // ── Utilities ─────────────────────────────────────
 function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'\u0026').replace(/</g,'\u003C').replace(/>/g,'\u003E').replace(/"/g,'\u0022');
 }
 
 function timeSince(ts) {
@@ -1481,7 +1481,7 @@ function exportCSV() {
       u.full_name||'',u.email||'',u.phone||'',
       (u.exam_types||[]).join('|'),
       u.is_premium?'Premium':'Free',
-      u._avgAccuracy!==null?u._avgAccuracy+'%':'—',
+      u._avgAccuracy!==null?u._avgAccuracy+'%':'\u2014',
       u.total_xp||0,
       classifyUser(u),
       new Date(u.created_at).toLocaleDateString()
@@ -1514,7 +1514,7 @@ function switchView(v) {
 //   crypto.subtle.digest('SHA-256', new TextEncoder().encode('YOUR_PIN'))
 //     .then(b => console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))
 //
-// Default PIN is 482650 — CHANGE THIS BEFORE DEPLOYING.
+// Default PIN is 482650 \u2014 CHANGE THIS BEFORE DEPLOYING.
 // SHA-256 of "482650":
 const PIN_HASH = 'f9963dcd58cbac9c306e202fc1dcf8fdc8deb974ab93b452aafca77009908d27';
 
@@ -1585,7 +1585,7 @@ async function checkPin() {
   } else {
     document.getElementById('pin-error').textContent = 'Incorrect PIN.';
     document.getElementById('pin-attempts').textContent =
-      remaining === 1 ? '⚠ 1 attempt remaining' : `${remaining} attempts remaining`;
+      remaining === 1 ? '\u26A0 1 attempt remaining' : `${remaining} attempts remaining`;
   }
 }
 
@@ -1642,7 +1642,7 @@ function pinKeyboard(e) {
 
 // ── Boot ─────────────────────────────────────────
 // init() is now called by unlock() above, not directly
-// init();  ← removed — PIN gate calls it after auth
+// init();  \u2190 removed \u2014 PIN gate calls it after auth
 </script>
 </body>
 </html>
