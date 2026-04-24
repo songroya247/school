@@ -112,6 +112,10 @@
           <input type="email" class="form-input" placeholder="chioma@example.com" id="su-email" autocomplete="email">
         </div>
         <div class="form-group">
+          <label class="form-label">Phone (WhatsApp) <span style="color:var(--muted);font-weight:400">(optional â€” lets our coaches reach you)</span></label>
+          <input type="tel" class="form-input" placeholder="+234 803 000 0000" id="su-phone" autocomplete="tel">
+        </div>
+        <div class="form-group">
           <label class="form-label">Password</label>
           <div class="password-wrap">
             <input type="password" class="form-input" placeholder="Min. 8 characters" id="su-pass"
@@ -492,6 +496,7 @@ async function doSignup() {
   const formData = {
     fullName:    document.getElementById('su-name').value.trim(),
     email:       document.getElementById('su-email').value.trim(),
+    phone:       (document.getElementById('su-phone')?.value || '').trim(),
     password:    document.getElementById('su-pass').value,
     examTypes,
     examDate:    document.getElementById('su-date').value || null,
