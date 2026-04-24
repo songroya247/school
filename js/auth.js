@@ -21,7 +21,7 @@ const AUTH = (function () {
     if (el) { el.textContent = ''; el.style.display = 'none'; }
   }
 
-  function setLoading(btnId, loading, label = 'Continue →') {
+  function setLoading(btnId, loading, label = 'Continue \u2192') {
     const btn = document.getElementById(btnId);
     if (!btn) return;
     btn.disabled = loading;
