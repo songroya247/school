@@ -54,6 +54,7 @@ const AUTH = (function () {
       id:                  user.id,
       full_name:           formData.fullName,
       email:               user.email,
+      phone:               formData.phone || null,
       exam_types:          formData.examTypes,
       exam_date:           formData.examDate || null,
       target_score:        formData.targetScore,
@@ -102,6 +103,7 @@ const AUTH = (function () {
           emailRedirectTo: redirectUrl,
           data: {
             full_name:    formData.fullName,
+            phone:        formData.phone || '',
             exam_types:   JSON.stringify(formData.examTypes),
             exam_date:    formData.examDate || '',
             target_score: String(formData.targetScore),
