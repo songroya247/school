@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Terms of Service — UE School</title>
-<meta name="description" content="UE School Terms of Service — the rules and conditions governing your use of the platform.">
+<title>Terms of Service &mdash; UE School</title>
+<meta name="description" content="UE School Terms of Service &mdash; the rules and conditions governing your use of the platform.">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 <style>
-/* ── MOBILE NAV — matches index.html professional slide-down ── */
+/* ── MOBILE NAV &mdash; matches index.html professional slide-down ── */
 .nav-hamburger {
   display: none;
   flex-direction: column;
@@ -202,7 +202,7 @@
     <h2 id="subscriptions">4. Subscriptions &amp; Payments</h2>
     <p>UE School offers free and paid subscription plans. Paid plans are billed on a monthly or annual basis as stated at the point of purchase.</p>
     <ul>
-      <li>All payments are processed securely by Paystack in Nigerian Naira (₦).</li>
+      <li>All payments are processed securely by Paystack in Nigerian Naira (&#x20A6;).</li>
       <li>Your subscription renews automatically at the end of each billing cycle unless cancelled.</li>
       <li>You may cancel your subscription at any time from your account settings. Cancellation takes effect at the end of your current billing period; you will retain access until then.</li>
       <li>Prices may change. We will give at least 14 days' notice of any price increase before it takes effect on your account.</li>
@@ -225,7 +225,7 @@
     <p>Violation of these rules may result in immediate account suspension or termination without refund.</p>
 
     <h2 id="ip">7. Intellectual Property</h2>
-    <p>All content on UE School — including questions, explanations, video scripts, graphics, the SmartPath™ algorithm, and the UE School brand — is the intellectual property of UE School or its licensors and is protected by Nigerian and international copyright law.</p>
+    <p>All content on UE School &mdash; including questions, explanations, video scripts, graphics, the SmartPath™ algorithm, and the UE School brand &mdash; is the intellectual property of UE School or its licensors and is protected by Nigerian and international copyright law.</p>
     <p>We grant you a limited, non-exclusive, non-transferable licence to access and use the content solely for your personal, non-commercial educational purposes. No other rights are granted.</p>
 
     <h2 id="disclaimers">8. Disclaimers</h2>
@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Auth-aware nav for public pages
 (async function() {
   try {
-    // sb/SB is set by js/supabase.js shim — credentials live only in js/config.js
+    // sb/SB is set by js/supabase.js shim \u2014 credentials live only in js/config.js
 const SB = window.sb;
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
