@@ -67,7 +67,7 @@ const AUTH_GUARD = (function () {
     const veil = document.getElementById('ue-gatekeeper-veil');
     if (veil) veil.remove();
     // Also un-hide body visibility in case head-gatekeeper set it inline
-    document.body.style.visibility = '';
+    if (document.body) document.body.style.visibility = '';
   }
 
   // ── Current page helper ─────────────────────────────────────────
@@ -167,69 +167,64 @@ const AUTH_GUARD = (function () {
     return subscriptionStatus(profile) === 'ACTIVE';
   }
 
-  // ── Premium content veil ────────────────────────────────────────
-  //  Injected immediately on premium pages so content is NEVER
-  //  visible while we wait for the async profile fetch to complete.
-  //  Lifted instantly if the user is confirmed premium.
-  //  If the user fails the gate we redirect before lifting it —
-  //  they never see a single pixel of protected content.
-  function injectPremiumVeil() {
-    if (document.getElementById('ue-premium-veil')) return;
-    const veil = document.createElement('div');
-    veil.id = 'ue-premium-veil';
-    veil.style.cssText = [
-      'position:fixed', 'inset:0', 'z-index:2147483647',
-      'background:#0f172a',
-      'display:flex', 'flex-direction:column',
-      'align-items:center', 'justify-content:center', 'gap:16px',
-    ].join(';');
-    veil.innerHTML = `
-      <div style="width:48px;height:48px;border:4px solid #1a56ff;border-top-color:transparent;
-                  border-radius:50%;animation:ue-spin .8s linear infinite"></div>
-      <p style="color:#94a3b8;font-family:sans-serif;font-size:.9rem;margin:0">
-        Verifying access…
-      </p>
-      <style>@keyframes ue-spin{to{transform:rotate(360deg)}}</style>
-    `;
-    // Insert as the very first child of body so nothing leaks around it
-    document.body.insertBefore(veil, document.body.firstChild);
-  }
-
-  function liftPremiumVeil() {
-    const veil = document.getElementById('ue-premium-veil');
-    if (veil) veil.remove();
-  }
-
   // ── Premium gate ────────────────────────────────────────────────
   //  Called AFTER the real profile has been fetched from the DB.
   //  This is the authoritative check — not the optimistic cache one.
+  //
+  //  IMPORTANT: we redirect IMMEDIATELY (no setTimeout). The veil is
+  //  still in place at this point, so the user never sees premium
+  //  content — only the toast on the destination page.
   function enforcePremiumGate(profile) {
     const page = currentPage();
-    if (PREMIUM_PAGES.indexOf(page) === -1) return; // page doesn't need premium
+    if (PREMIUM_PAGES.indexOf(page) === -1) return true; // page doesn't need premium
 
     const status = subscriptionStatus(profile);
 
     if (status === 'NIL') {
-      // Redirect immediately — veil stays up so content is never exposed
-      showToast(
-        'This feature requires a UE School subscription. Choose a plan to continue.',
-        'warning', 6000
-      );
+      try {
+        sessionStorage.setItem(
+          'ue_premium_redirect_msg',
+          'This feature requires a UE School subscription. Choose a plan to continue.'
+        );
+      } catch (_) {}
       safeRedirectToPricing('not_subscribed');
       return false;
     }
 
     if (status === 'EXPIRED') {
-      showToast(
-        'Your subscription has expired. Renew your plan to access this content.',
-        'warning', 6000
-      );
+      try {
+        sessionStorage.setItem(
+          'ue_premium_redirect_msg',
+          'Your subscription has expired. Renew your plan to access this content.'
+        );
+      } catch (_) {}
       safeRedirectToPricing('subscription_expired');
       return false;
     }
 
-    // ACTIVE — confirmed premium, lift the veil and show the page
-    liftPremiumVeil();
+    return true; // ACTIVE — all good
+  }
+
+  // ── Admin gate ─────────────────────────────────────────────────
+  //  Pages in ADMIN_ONLY_PAGES require profile.is_admin === true.
+  //  Authenticated non-admin users are sent to dashboard.
+  function enforceAdminGate(profile) {
+    const ADMIN_ONLY = (cfg.ADMIN_ONLY_PAGES) ||
+      ['admin-dashboard.html', 'admin-actions.html'];
+    const page = currentPage();
+    if (ADMIN_ONLY.indexOf(page) === -1) return true;
+
+    if (!isAdmin(profile)) {
+      try {
+        sessionStorage.setItem(
+          'ue_admin_redirect_msg',
+          'Admin access only.'
+        );
+      } catch (_) {}
+      _redirecting = true;
+      window.location.replace('dashboard.html?reason=admin_only');
+      return false;
+    }
     return true;
   }
 
@@ -306,12 +301,6 @@ const AUTH_GUARD = (function () {
 
   // ── Main init ────────────────────────────────────────────────────
   async function init() {
-    // ── 0. Veil premium pages immediately (before ANY async work) ───────
-    const page = currentPage();
-    if (PREMIUM_PAGES.indexOf(page) !== -1) {
-      injectPremiumVeil();
-    }
-
     // ── 1. Boot the Supabase client (idempotent) ──────────────────
     if (!window.sb) {
       if (!window.supabase) {
@@ -332,8 +321,9 @@ const AUTH_GUARD = (function () {
       return null;
     }
 
-    // ── 3. Lift the veil (for expired-token path from gatekeeper) ─
-    liftVeil();
+    // ── 3. Veil stays in place until ALL gates pass (step 5c). ────
+    //   Removing the veil here was the original bug: free users got
+    //   ~1.8s of premium page access while waiting for the redirect.
 
     // ── 4. Fetch the real profile from Supabase ──────────────────
     //   Retry once with a small delay to absorb the brief window
@@ -421,9 +411,16 @@ const AUTH_GUARD = (function () {
       }
     }
 
-    // ── 5. Enforce premium gate (authoritative DB-backed check) ───
+    // ── 5a. Enforce admin gate (admin-only pages) ────────────────
+    const adminOk = enforceAdminGate(profile);
+    if (adminOk === false) return null; // redirect in progress
+
+    // ── 5b. Enforce premium gate (authoritative DB-backed check) ──
     const premiumOk = enforcePremiumGate(profile);
     if (premiumOk === false) return null; // redirect in progress
+
+    // ── 5c. ALL gates passed — safe to reveal the page now ────────
+    liftVeil();
 
     // ── 6. Set up auth-state-change listener ────────────────────
     // ONLY act on SIGNED_OUT. Every other event (INITIAL_SESSION,
