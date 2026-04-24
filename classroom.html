@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Classroom — UE School</title>
+<title>Classroom &mdash; UE School</title>
 
 <!-- ╔══════════════════════════════════════════════════════╗
-     ║  SECURITY BLOCK — must be first in <head>           ║
+     ║  SECURITY BLOCK &mdash; must be first in <head>           ║
      ╚══════════════════════════════════════════════════════╝ -->
 <script src="js/config.js"></script>
 <script src="js/head-gatekeeper.js"></script>
@@ -167,13 +167,19 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;ba
 </style>
 </head>
 <body>
+<noscript>
+  <div style="padding:40px;text-align:center;font-family:system-ui">
+    <h2>JavaScript is required</h2>
+    <p>Please enable JavaScript or <a href="login.html">click here to log in</a>.</p>
+  </div>
+</noscript>
 
 <div id="defaulter-banner">Your subscription has expired. <a href="pricing.html">Renew Now</a></div>
 
 <header>
   <div class="nav-inner">
     <div class="nav-left">
-      <button id="sidebar-toggle" title="Topics" onclick="CLASSROOM.toggleSidebar()">☰</button>
+      <button id="sidebar-toggle" title="Topics" onclick="CLASSROOM.toggleSidebar()">&#x2630;</button>
       <a href="dashboard.html" class="btn-icon" title="Back to Dashboard">&#8249;</a>
       <a href="index.html" class="nav-logo">UE School</a>
     </div>
@@ -201,21 +207,21 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;ba
       <div class="video-area" id="video-area">
         <div class="video-bg"></div>
         <div class="video-grid"></div>
-        <div class="video-play-btn" onclick="CLASSROOM.playVideo(null)">▶</div>
-        <div class="video-duration" id="video-duration-badge">—</div>
+        <div class="video-play-btn" onclick="CLASSROOM.playVideo(null)">&#x25B6;</div>
+        <div class="video-duration" id="video-duration-badge">&mdash;</div>
       </div>
 
       <div>
         <div class="lesson-meta-row">
           <span class="topic-tag" id="topic-tag">Topic</span>
-          <span class="lesson-duration" id="lesson-duration-badge">— mins</span>
+          <span class="lesson-duration" id="lesson-duration-badge">&mdash; mins</span>
         </div>
         <h1 class="topic-title" id="topic-title">Select a topic</h1>
 
         <div class="btn-row">
           <a href="cbt.html" class="btn btn-primary btn-lg" id="practice-btn">📝 Practice Questions</a>
-          <button class="btn btn-outline btn-lg" onclick="CLASSROOM.nextLesson()">Next Lesson →</button>
-          <button class="btn btn-outline btn-lg" onclick="CLASSROOM.prevLesson()" style="padding:11px 16px">← Prev</button>
+          <button class="btn btn-outline btn-lg" onclick="CLASSROOM.nextLesson()">Next Lesson &rarr;</button>
+          <button class="btn btn-outline btn-lg" onclick="CLASSROOM.prevLesson()" style="padding:11px 16px">&larr; Prev</button>
         </div>
 
         <div id="lesson-content">
@@ -258,7 +264,7 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;ba
 <script src="js/gdrive-video.js"></script>
 <script src="js/classroom.js"></script>
 
-<!-- Skill Chamber router — monkey-patches CLASSROOM.loadTopic -->
+<!-- Skill Chamber router &mdash; monkey-patches CLASSROOM.loadTopic -->
 <script src="js/skill_chamber.js"></script>
 
 <script>
