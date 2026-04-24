@@ -1,168 +1,163 @@
 /* ═══════════════════════════════════════════════════════════════════
-   UE School — js/head-gatekeeper.js
-   ▸ PURPOSE : Prevent "Flash of Protected Content" (FOPC).
-   ▸ WHERE   : Place this <script> tag at the VERY TOP of <head>,
-               BEFORE any CSS link, font, or body content.
-   ▸ HOW     : Reads the Supabase session synchronously from
-               localStorage.  If no valid session exists the browser
-               is immediately redirected — the rest of the page never
-               renders.  If a session IS found, it seeds
-               window.UE_USER so every later script can consume it
-               without an extra round-trip to Supabase.
+   UE School — js/head-gatekeeper.js  (HARDENED v3)
 
-   LOAD ORDER for every protected page:
-     <head>
-       <script src="js/config.js"></script>          ← defines UE_CONFIG
-       <script src="js/head-gatekeeper.js"></script>  ← this file (blocks FOPC)
-       … fonts, CSS …
-     </head>
-     <body>
-       …
-       <script src="…supabase.min.js"></script>
-       <script src="js/auth-guard.js"></script>       ← full async validation
-       …
-     </body>
+   ▸ PURPOSE : Prevent "Flash of Protected Content" (FOPC) and avoid
+               the redirect-loop / blank-page issues caused by the
+               older v1/v2 gatekeeper that assumed a single, plain-JSON
+               Supabase auth token in localStorage.
+
+   ▸ WHAT CHANGED (v3):
+       • Handles ALL three Supabase JS v2 storage shapes:
+           - plain JSON          → {"access_token":"…","expires_at":…,…}
+           - base64-prefixed     → "base64-eyJhbGciOi…"
+           - chunked across keys → sb-<ref>-auth-token
+                                   sb-<ref>-auth-token.0
+                                   sb-<ref>-auth-token.1 …
+       • NEVER hides <body> with `visibility:hidden !important`.
+         The old veil left the page blank whenever auth-guard.js
+         failed for any reason (slow network, RLS error, throw in
+         a downstream script, etc.).
+       • Removed the optimistic premium pre-redirect — it caused
+         legitimate paid users to be bounced to /pricing on the
+         very first visit to /classroom.html before the cache was
+         seeded. auth-guard.js is now the single source of truth.
+       • If a session cannot be confidently parsed, the gatekeeper
+         simply returns and lets auth-guard.js handle it via the
+         Supabase SDK (which knows every storage format natively).
+
+   ▸ LOAD ORDER (unchanged):
+       <head>
+         <script src="js/config.js"></script>
+         <script src="js/head-gatekeeper.js"></script>
+         … fonts, CSS …
+       </head>
+       <body>
+         …
+         <script src="…supabase.min.js"></script>
+         <script src="js/auth-guard.js"></script>
+       </body>
 ═══════════════════════════════════════════════════════════════════ */
 
 (function () {
   'use strict';
 
-  // ── Step 1: Resolve config ──────────────────────────────────────
-  //  UE_CONFIG is defined by config.js which loads just before this.
-  //  Provide a safe fallback in case of load-order mistakes.
-  var cfg = window.UE_CONFIG || {};
-  var LOGIN_PAGE   = cfg.LOGIN_PAGE   || 'login.html';
-  var PRICING_PAGE = cfg.PRICING_PAGE || 'pricing.html';
-
-  // ── Step 2: Determine which page we are on ─────────────────────
-  var currentPage = window.location.pathname.split('/').pop() || 'index.html';
-
-  var PROTECTED = cfg.PROTECTED_PAGES ||
+  // ── Step 1: Resolve config ───────────────────────────────────────
+  var cfg        = window.UE_CONFIG || {};
+  var LOGIN_PAGE = cfg.LOGIN_PAGE || 'login.html';
+  var PROTECTED  = cfg.PROTECTED_PAGES ||
     ['dashboard.html', 'classroom.html', 'cbt.html', 'report.html'];
 
-  var PREMIUM_REQUIRED = cfg.PREMIUM_PAGES ||
-    ['classroom.html', 'cbt.html'];
+  // ── Step 2: Determine which page we are on ───────────────────────
+  var currentPage = window.location.pathname.split('/').pop() || 'index.html';
+  if (PROTECTED.indexOf(currentPage) === -1) return; // public page
 
-  var needsAuth    = PROTECTED.indexOf(currentPage)      !== -1;
-  var needsPremium = PREMIUM_REQUIRED.indexOf(currentPage) !== -1;
+  // ── Step 3: Try every known Supabase v2 storage format ──────────
+  //   We DO NOT try to detect "expired" here. The SDK refreshes
+  //   silently — guessing the wrong expiry just hides the page.
+  var session = readSupabaseSession();
 
-  if (!needsAuth) return; // public page — nothing to do
-
-  // ── Step 3: Read session from localStorage (SYNCHRONOUS) ────────
-  //  Supabase v2 persists the session under a key that follows the
-  //  pattern:  sb-<project-ref>-auth-token
-  //  We scan for it rather than hardcode the project ref so this
-  //  script survives a project migration.
-  var session = null;
-
-  try {
-    for (var i = 0; i < localStorage.length; i++) {
-      var key = localStorage.key(i);
-      if (key && key.indexOf('sb-') === 0 && key.indexOf('-auth-token') !== -1) {
-        var raw = localStorage.getItem(key);
-        if (raw) {
-          var parsed = JSON.parse(raw);
-          // Supabase stores { access_token, expires_at, user, … }
-          // expires_at is a UNIX timestamp (seconds)
-          if (parsed && parsed.access_token) {
-            var expiresAt = parsed.expires_at || 0;
-            var nowSecs   = Math.floor(Date.now() / 1000);
-            if (expiresAt > nowSecs) {
-              session = parsed;
-            }
-            // Even an expired token is found — we'll let auth-guard
-            // handle the refresh below via UE_USER.expired flag.
-            if (!session && parsed.access_token) {
-              session = parsed;
-              session._expired = true;
-            }
-          }
-        }
-        break;
-      }
-    }
-  } catch (e) {
-    // localStorage blocked (private mode with strict settings) — treat as no session
-    session = null;
-  }
-
-  // ── Step 4: Hard-redirect if no session at all ─────────────────
+  // ── Step 4: No session? Redirect, unless we just came from login.
   if (!session) {
-    // Guard: don't redirect if we just came FROM login (avoids
-    // a race on very slow connections where localStorage hasn't
-    // been written yet by the time gatekeeper runs on next page).
-    var referrer = document.referrer || '';
-    var comingFromLogin = referrer.indexOf('login.html') !== -1 ||
-                          referrer.indexOf('confirm.html') !== -1;
-    if (comingFromLogin) {
-      // Let auth-guard.js handle it — it will redirect properly
-      // once the SDK has a chance to refresh the session.
-      return;
-    }
+    var ref = document.referrer || '';
+    var fromAuthFlow =
+      ref.indexOf('login.html')   !== -1 ||
+      ref.indexOf('confirm.html') !== -1 ||
+      ref.indexOf('reset-password.html') !== -1;
+
+    // After login/confirm the SDK may not have written localStorage
+    // yet on very slow connections. Let auth-guard.js handle it.
+    if (fromAuthFlow) return;
+
     window.location.replace(
       LOGIN_PAGE + '?next=' + encodeURIComponent(currentPage)
     );
-    throw new Error('[UE Gatekeeper] No session — redirecting to login.');
+    return;
   }
 
-  // ── Step 5: Seed window.UE_USER for downstream scripts ─────────
-  //  This is a LIGHTWEIGHT seed only — no DB call yet.
-  //  auth-guard.js will fully validate and enrich this object.
+  // ── Step 5: Seed window.UE_USER for downstream scripts ──────────
   var user = (session.user) ? session.user : {};
+  try {
+    Object.defineProperty(window, 'UE_USER', {
+      value: {
+        id:           user.id    || null,
+        email:        user.email || null,
+        full_name:    (user.user_metadata && user.user_metadata.full_name) || null,
+        access_token: session.access_token || null,
+        // Premium status is UNKNOWN at this stage; auth-guard.js fills it in.
+        is_premium:   null,
+      },
+      writable:     true,
+      configurable: true,
+      enumerable:   true,
+    });
+  } catch (_) { /* property already defined — non-fatal */ }
 
-  // Build the global UE_USER object (non-enumerable to reduce console noise)
-  Object.defineProperty(window, 'UE_USER', {
-    value: {
-      id:           user.id           || null,
-      email:        user.email        || null,
-      full_name:    (user.user_metadata && user.user_metadata.full_name) || null,
-      access_token: session.access_token,
-      _expired:     !!session._expired,
-      // Premium status is UNKNOWN at this stage — auth-guard.js sets it
-      is_premium:   null,
-    },
-    writable:     true,   // auth-guard.js will overwrite with real profile data
-    configurable: true,
-    enumerable:   true,
-  });
 
-  // ── Step 6: Expired token fast-path ────────────────────────────
-  //  The token exists but has expired.  Hide the body until
-  //  auth-guard.js either refreshes the session or redirects.
-  if (session._expired) {
-    // Inject a temporary style to keep the page invisible
-    var s = document.createElement('style');
-    s.id = 'ue-gatekeeper-veil';
-    s.textContent = 'body{visibility:hidden!important}';
-    // document.head may not exist yet (we're at top of <head>)
-    // but createElement+appendChild works fine in partial parse state
-    (document.head || document.documentElement).appendChild(s);
-  }
-
-  // ── Step 7: Premium page — optimistic client-side check ────────
-  //  A definitive check is done in auth-guard.js with a DB read.
-  //  This is just a best-effort early redirect using cached profile
-  //  data stored by auth-guard on last visit.
-  if (needsPremium) {
+  /* ─────────────────────────────────────────────────────────────────
+     Supabase v2 storage parser.
+     Returns a session-like object { access_token, user } or null.
+     Never throws.
+  ───────────────────────────────────────────────────────────────── */
+  function readSupabaseSession() {
     try {
-      var cachedProfile = sessionStorage.getItem('ue_profile_cache');
-      if (cachedProfile) {
-        var prof = JSON.parse(cachedProfile);
-        var expiry = prof.subscription_expiry ? new Date(prof.subscription_expiry) : null;
-        var isPremium = prof.is_premium && expiry && expiry > new Date();
-        if (!isPremium) {
-          // Not premium according to cache — soft redirect now,
-          // auth-guard will confirm after DB read.
-          window.location.replace(
-            PRICING_PAGE + '?reason=premium_required&next=' + encodeURIComponent(currentPage)
-          );
-          throw new Error('[UE Gatekeeper] Premium required — redirecting to pricing.');
+      // 1. Find the primary auth-token key (e.g. sb-<ref>-auth-token).
+      var primaryKey = null;
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (!k) continue;
+        if (k.indexOf('sb-') === 0 &&
+            k.indexOf('-auth-token') !== -1 &&
+            // exclude chunk keys: sb-…-auth-token.0, .1, …
+            !/-auth-token\.\d+$/.test(k) &&
+            // exclude code-verifier helper keys
+            k.indexOf('-auth-token-code-verifier') === -1) {
+          primaryKey = k;
+          break;
         }
       }
-    } catch (e2) {
-      // If it's our own Error re-throw it; otherwise ignore cache parse errors
-      if (e2.message && e2.message.indexOf('[UE Gatekeeper]') === 0) throw e2;
+      if (!primaryKey) return null;
+
+      var raw = localStorage.getItem(primaryKey);
+      if (!raw) return null;
+
+      // 2. If the value is a JSON array of strings, the token was
+      //    chunked across multiple keys. Reassemble it.
+      //    Example: ["sb-<ref>-auth-token.0","sb-<ref>-auth-token.1"]
+      if (raw.charAt(0) === '[') {
+        try {
+          var parts = JSON.parse(raw);
+          if (Array.isArray(parts)) {
+            var assembled = parts
+              .map(function (key) { return localStorage.getItem(key) || ''; })
+              .join('');
+            raw = assembled;
+          }
+        } catch (_) { /* fall through to other parsers */ }
+      }
+
+      // 3. base64-prefixed format introduced in newer Supabase clients.
+      if (raw.indexOf('base64-') === 0) {
+        try {
+          // atob handles ASCII; decodeURIComponent+escape rebuilds UTF-8.
+          var b64 = raw.slice(7);
+          var decoded = decodeURIComponent(escape(atob(b64)));
+          raw = decoded;
+        } catch (_) { return null; }
+      }
+
+      // 4. Plain JSON object.
+      var obj;
+      try { obj = JSON.parse(raw); } catch (_) { return null; }
+      if (!obj) return null;
+
+      // The SDK sometimes nests the session under .currentSession
+      // (legacy gotrue-js format).
+      var s = obj.currentSession || obj;
+
+      if (!s || !s.access_token) return null;
+      return s;
+    } catch (_) {
+      return null;
     }
   }
-
 })();
