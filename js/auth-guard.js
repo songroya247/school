@@ -167,6 +167,39 @@ const AUTH_GUARD = (function () {
     return subscriptionStatus(profile) === 'ACTIVE';
   }
 
+  // ── Premium content veil ────────────────────────────────────────
+  //  Injected immediately on premium pages so content is NEVER
+  //  visible while we wait for the async profile fetch to complete.
+  //  Lifted instantly if the user is confirmed premium.
+  //  If the user fails the gate we redirect before lifting it —
+  //  they never see a single pixel of protected content.
+  function injectPremiumVeil() {
+    if (document.getElementById('ue-premium-veil')) return;
+    const veil = document.createElement('div');
+    veil.id = 'ue-premium-veil';
+    veil.style.cssText = [
+      'position:fixed', 'inset:0', 'z-index:2147483647',
+      'background:#0f172a',
+      'display:flex', 'flex-direction:column',
+      'align-items:center', 'justify-content:center', 'gap:16px',
+    ].join(';');
+    veil.innerHTML = `
+      <div style="width:48px;height:48px;border:4px solid #1a56ff;border-top-color:transparent;
+                  border-radius:50%;animation:ue-spin .8s linear infinite"></div>
+      <p style="color:#94a3b8;font-family:sans-serif;font-size:.9rem;margin:0">
+        Verifying access…
+      </p>
+      <style>@keyframes ue-spin{to{transform:rotate(360deg)}}</style>
+    `;
+    // Insert as the very first child of body so nothing leaks around it
+    document.body.insertBefore(veil, document.body.firstChild);
+  }
+
+  function liftPremiumVeil() {
+    const veil = document.getElementById('ue-premium-veil');
+    if (veil) veil.remove();
+  }
+
   // ── Premium gate ────────────────────────────────────────────────
   //  Called AFTER the real profile has been fetched from the DB.
   //  This is the authoritative check — not the optimistic cache one.
@@ -177,11 +210,12 @@ const AUTH_GUARD = (function () {
     const status = subscriptionStatus(profile);
 
     if (status === 'NIL') {
+      // Redirect immediately — veil stays up so content is never exposed
       showToast(
         'This feature requires a UE School subscription. Choose a plan to continue.',
         'warning', 6000
       );
-      setTimeout(() => safeRedirectToPricing('not_subscribed'), 1800);
+      safeRedirectToPricing('not_subscribed');
       return false;
     }
 
@@ -190,11 +224,13 @@ const AUTH_GUARD = (function () {
         'Your subscription has expired. Renew your plan to access this content.',
         'warning', 6000
       );
-      setTimeout(() => safeRedirectToPricing('subscription_expired'), 1800);
+      safeRedirectToPricing('subscription_expired');
       return false;
     }
 
-    return true; // ACTIVE — all good
+    // ACTIVE — confirmed premium, lift the veil and show the page
+    liftPremiumVeil();
+    return true;
   }
 
   // ── Nav rendering ───────────────────────────────────────────────
@@ -270,6 +306,12 @@ const AUTH_GUARD = (function () {
 
   // ── Main init ────────────────────────────────────────────────────
   async function init() {
+    // ── 0. Veil premium pages immediately (before ANY async work) ───────
+    const page = currentPage();
+    if (PREMIUM_PAGES.indexOf(page) !== -1) {
+      injectPremiumVeil();
+    }
+
     // ── 1. Boot the Supabase client (idempotent) ──────────────────
     if (!window.sb) {
       if (!window.supabase) {
