@@ -19,8 +19,12 @@
     LOGIN_PAGE:    'login.html',
     PRICING_PAGE:  'pricing.html',
 
-    PROTECTED_PAGES: ['dashboard.html', 'classroom.html', 'cbt.html', 'report.html'],
-    PREMIUM_PAGES:   ['classroom.html', 'cbt.html'],
+    PROTECTED_PAGES: [
+      'dashboard.html', 'classroom.html', 'cbt.html', 'report.html',
+      'admin-dashboard.html', 'admin-actions.html'
+    ],
+    PREMIUM_PAGES:    ['classroom.html', 'cbt.html'],
+    ADMIN_ONLY_PAGES: ['admin-dashboard.html', 'admin-actions.html'],
 
     // ── Admin pass-through ────────────────────────────────────────
     // Any account whose `is_admin` column is TRUE in `profiles` is
