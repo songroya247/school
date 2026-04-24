@@ -21,7 +21,7 @@ window.QUESTION_BANK = {
     { id:'q2', q:'Solve: x² − 5x + 6 = 0',
       options:['x = 2 or 3','x = -2 or -3','x = 1 or 6','x = 0 or 5'],
       answer:0, difficulty:2, sub_skill_tag:'factorising',
-      explain:'(x − 2)(x − 3) = 0  ⇒  x = 2 or 3.' },
+      explain:'(x − 2)(x − 3) = 0  \u21D2  x = 2 or 3.' },
     { id:'q3', q:'For x² + 4x + 5 = 0, what does the discriminant tell us?',
       options:['Two real roots','One repeated root','No real roots','Cannot tell'],
       answer:2, difficulty:3, sub_skill_tag:'discriminant',
@@ -39,7 +39,7 @@ window.QUESTION_BANK = {
     { id:'d3', q:'How many real roots does 2x² + 3x − 5 = 0 have?',
       options:['0','1','2','3'],
       answer:2, difficulty:2, is_drill:true, sub_skill_tag:'discriminant',
-      explain:'Δ = 9 + 40 = 49 > 0 ⇒ two real roots.' }
+      explain:'Δ = 9 + 40 = 49 > 0 \u21D2 two real roots.' }
   ],
 
   /* ====== mathematics.linear_equations ====== */
@@ -47,7 +47,7 @@ window.QUESTION_BANK = {
     { id:'q1', q:'Solve: 3x − 7 = 11',
       options:['x = 4','x = 6','x = 18/3','x = -6'],
       answer:1, difficulty:1, sub_skill_tag:'isolate',
-      explain:'3x = 18  ⇒  x = 6.' },
+      explain:'3x = 18  \u21D2  x = 6.' },
     { id:'q2', q:'What is the slope of y = -2x + 5?',
       options:['5','-2','2','-5'],
       answer:1, difficulty:1, sub_skill_tag:'graphing',
@@ -55,11 +55,11 @@ window.QUESTION_BANK = {
     { id:'q3', q:'Solve simultaneously: x + y = 10, x − y = 2',
       options:['x=4, y=6','x=6, y=4','x=5, y=5','x=8, y=2'],
       answer:1, difficulty:2, sub_skill_tag:'simultaneous',
-      explain:'Add the equations: 2x = 12  ⇒  x = 6, then y = 4.' },
+      explain:'Add the equations: 2x = 12  \u21D2  x = 6, then y = 4.' },
 
     { id:'d1', q:'Solve: 4(x − 1) = 12', options:['x = 3','x = 4','x = 2','x = 6'],
       answer:1, difficulty:1, is_drill:true, sub_skill_tag:'isolate',
-      explain:'x − 1 = 3  ⇒  x = 4.' },
+      explain:'x − 1 = 3  \u21D2  x = 4.' },
     { id:'d2', q:'Slope between (1,2) and (3,8)?', options:['2','3','4','6'],
       answer:1, difficulty:2, is_drill:true, sub_skill_tag:'graphing',
       explain:'(8−2)/(3−1) = 6/2 = 3.' }
@@ -69,7 +69,7 @@ window.QUESTION_BANK = {
   'mathematics.indices': [
     { id:'q1', q:'Simplify: 2³ × 2⁴', options:['2⁷','2¹²','4⁷','2¹'],
       answer:0, difficulty:1, sub_skill_tag:'index_laws',
-      explain:'aᵐ × aⁿ = aᵐ⁺ⁿ ⇒ 2³⁺⁴ = 2⁷.' },
+      explain:'aᵐ × aⁿ = aᵐ⁺ⁿ \u21D2 2³⁺⁴ = 2⁷.' },
     { id:'q2', q:'What is 5⁰?', options:['0','1','5','undefined'],
       answer:1, difficulty:1, sub_skill_tag:'index_laws',
       explain:'Any non-zero number raised to 0 is 1.' },
@@ -80,7 +80,7 @@ window.QUESTION_BANK = {
 
     { id:'d1', q:'Simplify: (3²)³', options:['3⁵','3⁶','3⁹','9³'],
       answer:1, difficulty:2, is_drill:true, sub_skill_tag:'index_laws',
-      explain:'(aᵐ)ⁿ = aᵐⁿ ⇒ 3²ˣ³ = 3⁶.' }
+      explain:'(aᵐ)ⁿ = aᵐⁿ \u21D2 3²ˣ³ = 3⁶.' }
   ],
 
   /* ====== literature.lion_and_the_jewel ====== */
@@ -183,11 +183,11 @@ window.QUESTION_BANK = {
     { id:'q2', q:'Either John or his brothers ____ responsible.',
       options:['is','are','was','be'],
       answer:1, difficulty:2, sub_skill_tag:'compound_subjects',
-      explain:'With "either…or", the verb agrees with the nearer subject ("brothers" → are).' },
+      explain:'With "either…or", the verb agrees with the nearer subject ("brothers" \u2192 are).' },
     { id:'q3', q:'Everyone in the class ____ the answer.',
       options:['know','knows','are knowing','have known'],
       answer:1, difficulty:2, sub_skill_tag:'indefinite',
-      explain:'"Everyone" is a singular indefinite pronoun → singular verb "knows".' },
+      explain:'"Everyone" is a singular indefinite pronoun \u2192 singular verb "knows".' },
 
     { id:'d1', q:'My friend, along with her cousins, ____ here.',
       options:['are','were','is','have'],
@@ -196,7 +196,7 @@ window.QUESTION_BANK = {
     { id:'d2', q:'Each of the students ____ a book.',
       options:['have','has','are having','having'],
       answer:1, difficulty:1, is_drill:true, sub_skill_tag:'indefinite',
-      explain:'"Each" is singular → "has".' }
+      explain:'"Each" is singular \u2192 "has".' }
   ],
 
   /* ====== english.tenses ====== */
@@ -208,16 +208,16 @@ window.QUESTION_BANK = {
     { id:'q2', q:'Choose the Past Simple form: "go".',
       options:['gone','goes','going','went'],
       answer:3, difficulty:1, sub_skill_tag:'simple',
-      explain:'go → went (irregular past simple).' },
+      explain:'go \u2192 went (irregular past simple).' },
     { id:'q3', q:'"I ___ here since 2020." (live)',
       options:['live','am living','have lived','lived'],
       answer:2, difficulty:2, sub_skill_tag:'perfect',
-      explain:'"Since 2020" needs Present Perfect → have lived.' },
+      explain:'"Since 2020" needs Present Perfect \u2192 have lived.' },
 
     { id:'d1', q:'Past participle of "write"?',
       options:['wrote','writted','written','writing'],
       answer:2, difficulty:1, is_drill:true, sub_skill_tag:'perfect',
-      explain:'write → wrote → written.' }
+      explain:'write \u2192 wrote \u2192 written.' }
   ]
 };
 
