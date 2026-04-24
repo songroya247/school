@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CBT Practice — UE School</title>
+<title>CBT Practice &mdash; UE School</title>
 
 <!-- ╔══════════════════════════════════════════════════════╗
-     ║  SECURITY BLOCK — must be first in <head>           ║
+     ║  SECURITY BLOCK &mdash; must be first in <head>           ║
      ╚══════════════════════════════════════════════════════╝ -->
 <script src="js/config.js"></script>
 <script src="js/head-gatekeeper.js"></script>
@@ -187,6 +187,12 @@ body{font-family:'Inter',"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoj
 </style>
 </head>
 <body>
+<noscript>
+  <div style="padding:40px;text-align:center;font-family:system-ui">
+    <h2>JavaScript is required</h2>
+    <p>Please enable JavaScript or <a href="login.html">click here to log in</a>.</p>
+  </div>
+</noscript>
 
 <div id="defaulter-banner">
   Your subscription has expired. <a href="pricing.html">Renew Now</a>
@@ -242,11 +248,11 @@ body{font-family:'Inter',"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoj
     <div class="session-info-row">
       <span class="session-badge" id="q-count-badge">10 Questions</span>
       <span class="session-badge" id="time-badge">⏱ 20 min</span>
-      <span class="grade-badge"   id="grade-badge">📊 Foundation Level</span>
+      <span class="grade-badge"   id="grade-badge">&#x1F4CA; Foundation Level</span>
     </div>
 
-    <button class="btn-start" id="btn-start" onclick="startExam()">▶ Start Session</button>
-    <a href="dashboard.html" class="setup-back">← Back to Dashboard</a>
+    <button class="btn-start" id="btn-start" onclick="startExam()">&#x25B6; Start Session</button>
+    <a href="dashboard.html" class="setup-back">&larr; Back to Dashboard</a>
   </div>
 </div>
 
@@ -255,15 +261,15 @@ body{font-family:'Inter',"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoj
   <header class="exam-header">
     <div class="exam-header-left">
       <div class="exam-logo-pill">UE School</div>
-      <div id="exam-title">Mathematics — Topic Practice</div>
+      <div id="exam-title">Mathematics &mdash; Topic Practice</div>
     </div>
     <div class="exam-header-right">
       <button id="map-toggle-btn"
         onclick="document.getElementById('exam-aside').classList.toggle('open');
-                 this.textContent=document.getElementById('exam-aside').classList.contains('open')?'✕ Hide Map':'▦ Question Map'">
-        ▦ Question Map
+                 this.textContent=document.getElementById('exam-aside').classList.contains('open')?'&#x2715; Hide Map':'&#x25A6; Question Map'">
+        &#x25A6; Question Map
       </button>
-      <div class="jamb-pred-pill">Pred. JAMB: <span id="jamb-pred">—</span></div>
+      <div class="jamb-pred-pill">Pred. JAMB: <span id="jamb-pred">&mdash;</span></div>
       <div class="timer-box" id="timer-display">20:00</div>
     </div>
   </header>
@@ -272,7 +278,7 @@ body{font-family:'Inter',"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoj
     <main class="exam-main">
       <div class="q-meta-row">
         <div class="q-counter-pill" id="q-counter">Question 1 of 10</div>
-        <button class="btn-flag" id="flag-btn" onclick="toggleFlag()">⚑ Flag</button>
+        <button class="btn-flag" id="flag-btn" onclick="toggleFlag()">&#x2691; Flag</button>
       </div>
       <div class="q-card">
         <div class="q-number-badge" id="q-number-badge">Question 1</div>
@@ -281,8 +287,8 @@ body{font-family:'Inter',"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoj
         <div class="explanation-box" id="explanation-box"></div>
       </div>
       <div class="q-nav-row">
-        <button class="btn-nav btn-nav-prev" onclick="navQ(-1)" id="prev-btn">← Previous</button>
-        <button class="btn-nav btn-nav-next" onclick="navQ(1)"  id="next-btn">Next →</button>
+        <button class="btn-nav btn-nav-prev" onclick="navQ(-1)" id="prev-btn">&larr; Previous</button>
+        <button class="btn-nav btn-nav-next" onclick="navQ(1)"  id="next-btn">Next &rarr;</button>
       </div>
     </main>
 
@@ -298,7 +304,7 @@ body{font-family:'Inter',"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoj
         </div>
       </div>
       <div class="aside-foot">
-        <button class="btn-submit" onclick="promptSubmit()">Submit Exam ✓</button>
+        <button class="btn-submit" onclick="promptSubmit()">Submit Exam &#x2713;</button>
       </div>
     </aside>
   </div>
@@ -325,7 +331,7 @@ body{font-family:'Inter',"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoj
 <!-- ══ RESULTS SCREEN ══ -->
 <div id="results-screen">
   <div class="results-card">
-    <div class="results-icon pass" id="results-icon">🎉</div>
+    <div class="results-icon pass" id="results-icon">&#x1F389;</div>
     <h1 id="results-title">Exam Completed</h1>
     <p id="results-subtitle">Here is your performance breakdown.</p>
     <div class="xp-badge" id="xp-badge" style="display:none">⚡ +0 XP earned</div>
@@ -336,8 +342,8 @@ body{font-family:'Inter',"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoj
     </div>
     <div class="results-actions">
       <button class="btn-results-outline" onclick="retryExam()">🔁 Retry Session</button>
-      <button class="btn-results-outline" onclick="reviewAnswers()">📋 Review Answers</button>
-      <a href="dashboard.html" class="btn-results-primary">Dashboard →</a>
+      <button class="btn-results-outline" onclick="reviewAnswers()">&#x1F4CB; Review Answers</button>
+      <a href="dashboard.html" class="btn-results-primary">Dashboard &rarr;</a>
     </div>
   </div>
 </div>
@@ -361,7 +367,7 @@ let isReviewMode=false;
 const URL_PARAMS=new URLSearchParams(window.location.search);
 
 // ════════════ INIT ════════════
-// window.sb is initialised by auth-guard.js using UE_CONFIG — no credentials here.
+// window.sb is initialised by auth-guard.js using UE_CONFIG \u2014 no credentials here.
 
 document.addEventListener('DOMContentLoaded', async ()=>{
   // AUTH_GUARD.init() boots window.sb from UE_CONFIG, validates session,
@@ -405,7 +411,7 @@ function updateSessionBadges(){
   const avail=QUESTION_BANK.countFor(subj,topic||null);
   document.getElementById('q-count-badge').textContent=`${Math.min(cfg.count,avail)||cfg.count} Questions`;
   document.getElementById('time-badge').textContent=`⏱ ${Math.round(cfg.seconds/60)} min`;
-  document.getElementById('grade-badge').textContent=`&#x1F4CA; ${GRADING.gradeLabel(currentGradeLevel)} Level`;
+  document.getElementById('grade-badge').textContent=`\uD83D\uDCCA ${GRADING.gradeLabel(currentGradeLevel)} Level`;
 }
 
 function getModeConfig(mode){
@@ -438,7 +444,7 @@ function startExam(){
   const parts=[subjLabel];
   if(topic) parts.push(topic);
   parts.push(mode==='mock'?'Mock Exam':mode==='quick'?'Quick Drill':'Practice');
-  document.getElementById('exam-title').textContent=parts.join(' — ');
+  document.getElementById('exam-title').textContent=parts.join(' \u2014 ');
 
   document.getElementById('setup-screen').style.display='none';
   document.getElementById('exam-screen').style.display='flex';
@@ -480,7 +486,7 @@ function renderQ(){
 
   const fb=document.getElementById('flag-btn');
   fb.classList.toggle('flagged',flags.has(currentQ));
-  fb.textContent=flags.has(currentQ)?'⚑ Flagged':'⚑ Flag';
+  fb.textContent=flags.has(currentQ)?'\u2691 Flagged':'\u2691 Flag';
 
   const oc=document.getElementById('q-options'); oc.innerHTML='';
   q.opts.forEach((opt,i)=>{
@@ -495,10 +501,10 @@ function renderQ(){
   document.getElementById('prev-btn').disabled=currentQ===0;
   const nb=document.getElementById('next-btn');
   if(currentQ===QUESTIONS.length-1){
-    nb.textContent='Submit ✓'; nb.onclick=promptSubmit;
+    nb.textContent='Submit \u2713'; nb.onclick=promptSubmit;
     nb.style.background='linear-gradient(135deg,#059669,#047857)';
   } else {
-    nb.textContent='Next →'; nb.onclick=()=>navQ(1); nb.style.background='';
+    nb.textContent='Next \u2192'; nb.onclick=()=>navQ(1); nb.style.background='';
   }
 
   // Live pred
@@ -537,7 +543,7 @@ function renderMap(){
     if(i===currentQ) dot.classList.add('current');
     else if(flags.has(i)) dot.classList.add('flagged');
     else if(answers[i]!==undefined) dot.classList.add('answered');
-    dot.textContent=flags.has(i)&&i!==currentQ?'⚑':i+1;
+    dot.textContent=flags.has(i)&&i!==currentQ?'\u2691':i+1;
     dot.onclick=()=>{currentQ=i;if(isReviewMode)renderReviewQ();else renderQ();renderMap();};
     map.appendChild(dot);
   });
@@ -581,11 +587,11 @@ function showResults(gr){
   const icon=document.getElementById('results-icon');
   const title=document.getElementById('results-title');
   const sub=document.getElementById('results-subtitle');
-  if(pct>=70){icon.className='results-icon pass';icon.textContent='&#x1F389;';title.textContent='Excellent Work!';sub.textContent=`You scored ${pct}% — you're on track!`;}
-  else if(pct>=50){icon.className='results-icon ok';icon.textContent='&#x1F44D;';title.textContent='Good Effort!';sub.textContent=`You scored ${pct}%. Keep practising.`;}
-  else{icon.className='results-icon fail';icon.textContent='&#x1F4DA;';title.textContent='Keep Practising';sub.textContent=`You scored ${pct}%. Review and try again.`;}
+  if(pct>=70){icon.className='results-icon pass';icon.textContent='\uD83C\uDF89';title.textContent='Excellent Work!';sub.textContent=`You scored ${pct}% \u2014 you're on track!`;}
+  else if(pct>=50){icon.className='results-icon ok';icon.textContent='\uD83D\uDC4D';title.textContent='Good Effort!';sub.textContent=`You scored ${pct}%. Keep practising.`;}
+  else{icon.className='results-icon fail';icon.textContent='\uD83D\uDCDA';title.textContent='Keep Practising';sub.textContent=`You scored ${pct}%. Review and try again.`;}
 
-  if(gr?.xpEarned){const x=document.getElementById('xp-badge');x.style.display='inline-flex';x.textContent=`&#x26A1; +${gr.xpEarned} XP earned`;}
+  if(gr?.xpEarned){const x=document.getElementById('xp-badge');x.style.display='inline-flex';x.textContent=`\u26A1 +${gr.xpEarned} XP earned`;}
 
   document.getElementById('results-grid').innerHTML=`
     <div class="result-stat"><div class="result-stat-label">Score</div><div class="result-stat-val">${correct}/${total}</div></div>
@@ -600,9 +606,9 @@ function showResults(gr){
     const oldG=sessionConfig.gradeLevel, newG=gr.newGradeLevel;
     const gTitle=document.getElementById('grade-title');
     const gBody=document.getElementById('grade-body');
-    if(newG<oldG){gTitle.textContent=`&#x1F680; Level Up! ${GRADING.gradeLabel(oldG)} → ${GRADING.gradeLabel(newG)}`;gBody.textContent=`Your accuracy of ${pct}% qualifies you for harder questions next session.`;}
-    else if(newG>oldG){gTitle.textContent='&#x1F4C9; Adjusting Difficulty';gBody.textContent=`We'll reduce difficulty to help you build confidence at ${GRADING.gradeLabel(newG)} level.`;}
-    else{gTitle.textContent=`&#x1F4CA; ${GRADING.gradeLabel(newG)} Level`;gBody.textContent=`Continue at this level. Reach ${pct>=65?'80':'65'}% accuracy to advance.`;}
+    if(newG<oldG){gTitle.textContent=`\uD83D\uDE80 Level Up! ${GRADING.gradeLabel(oldG)} \u2192 ${GRADING.gradeLabel(newG)}`;gBody.textContent=`Your accuracy of ${pct}% qualifies you for harder questions next session.`;}
+    else if(newG>oldG){gTitle.textContent='\uD83D\uDCC9 Adjusting Difficulty';gBody.textContent=`We'll reduce difficulty to help you build confidence at ${GRADING.gradeLabel(newG)} level.`;}
+    else{gTitle.textContent=`\uD83D\uDCCA ${GRADING.gradeLabel(newG)} Level`;gBody.textContent=`Continue at this level. Reach ${pct>=65?'80':'65'}% accuracy to advance.`;}
   }
 
   document.getElementById('exam-screen').style.display='none';
@@ -635,7 +641,7 @@ function reviewAnswers(){
 
 function renderReviewQ(){
   const q=QUESTIONS[currentQ], sel=answers[currentQ], isC=sel===q.ans;
-  document.getElementById('q-counter').textContent=`Review — Question ${currentQ+1} of ${QUESTIONS.length}`;
+  document.getElementById('q-counter').textContent=`Review \u2014 Question ${currentQ+1} of ${QUESTIONS.length}`;
   document.getElementById('q-number-badge').textContent=`Question ${currentQ+1}`;
   document.getElementById('q-text').textContent=q.text;
 
@@ -660,7 +666,7 @@ function renderReviewQ(){
     nb.textContent='Back to Results';nb.style.background='';
     nb.onclick=()=>{document.getElementById('exam-screen').style.display='none';document.getElementById('results-screen').style.display='flex';};
   } else {
-    nb.textContent='Next →';nb.style.background='';nb.onclick=()=>{currentQ++;renderReviewQ();renderMap();};
+    nb.textContent='Next \u2192';nb.style.background='';nb.onclick=()=>{currentQ++;renderReviewQ();renderMap();};
   }
 }
 
