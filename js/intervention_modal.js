@@ -1,18 +1,18 @@
 /* ============================================================
-   intervention_modal.js — Adaptive Skill Chamber UI.
+   intervention_modal.js \u2014 Adaptive Skill Chamber UI.
 
    The diagnostic now ROUTES students to the correct video tier
-   instead of gate-keeping them. Every student gets a lesson —
+   instead of gate-keeping them. Every student gets a lesson \u2014
    the system just picks the right *level* of explanation.
 
-     Score 0–39%  →  Foundation video (slow, basics, examples)
-     Score 40–79% →  Standard   video (default lesson)
-     Score 80%+   →  Mastery    video (exam-focused, fast)
+     Score 0\u201339%  \u2192  Foundation video (slow, basics, examples)
+     Score 40\u201379% \u2192  Standard   video (default lesson)
+     Score 80%+   \u2192  Mastery    video (exam-focused, fast)
 
    Public API:
      InterventionModal.open({ topicId, mode, payload, onClose })
      InterventionModal.close()
-     scoreToTier(pct, history)   ← exported helper
+     scoreToTier(pct, history)   \u2190 exported helper
 ============================================================ */
 
 (function(){
@@ -22,9 +22,9 @@
   const TIER_BLURB  = {
     foundation: 'Slower pace, more worked examples, no prior knowledge assumed.',
     standard:   'The default lesson at expected grade level.',
-    mastery:    'Faster pace, exam-focused — past-paper patterns and trickier cases.'
+    mastery:    'Faster pace, exam-focused \u2014 past-paper patterns and trickier cases.'
   };
-  const TIER_THRESHOLD = { mastery: 0.80, standard: 0.40 };  // ≥80 mastery, ≥40 standard, else foundation
+  const TIER_THRESHOLD = { mastery: 0.80, standard: 0.40 };  // \u226580 mastery, \u226540 standard, else foundation
 
   function scoreToTier(pct){
     if (pct >= TIER_THRESHOLD.mastery * 100) return 'mastery';
@@ -83,7 +83,7 @@
   }
 
   /* =========================================================
-     MODE: DIAGNOSTIC — short check, then route to a tier.
+     MODE: DIAGNOSTIC \u2014 short check, then route to a tier.
      ========================================================= */
   function renderDiagnostic(bp, payload){
     const questions = window.getQuickCheck(bp.id).slice(0, 3);
@@ -91,10 +91,10 @@
 
     const head = el('div','sc-head');
     head.innerHTML = `
-      <span class="sc-mode-tag boss">⚡ Quick Skill Check</span>
+      <span class="sc-mode-tag boss">\u26A1 Quick Skill Check</span>
       <button class="sc-close" aria-label="Close">×</button>
       <h2 class="sc-title">${escapeHtml(bp.title)}</h2>
-      <p class="sc-subtitle">3 quick questions so we pick the right version of the video for you. There's no wrong outcome — every result unlocks a lesson tailored to your level.</p>`;
+      <p class="sc-subtitle">3 quick questions so we pick the right version of the video for you. There's no wrong outcome \u2014 every result unlocks a lesson tailored to your level.</p>`;
     head.querySelector('.sc-close').addEventListener('click', close);
 
     const body = el('div','sc-body');
@@ -151,7 +151,7 @@
       // Persist recommended tier.
       window.STORAGE.setRecommendedTier(bp.id, tier, pct);
 
-      // Find weakest sub-skill — used if the student wants extra support.
+      // Find weakest sub-skill \u2014 used if the student wants extra support.
       const ranked = Object.entries(state.perSubSkill)
         .sort(([,a],[,b]) => (a.ok/a.n) - (b.ok/b.n))
         .map(([tag]) => tag);
@@ -165,7 +165,7 @@
   }
 
   /* =========================================================
-     MODE: TIER RESULT — show recommended tier + switcher + extras.
+     MODE: TIER RESULT \u2014 show recommended tier + switcher + extras.
      ========================================================= */
   function renderTierResult(bp, payload){
     const { pct, tier, weak, onCleared } = payload;
@@ -173,10 +173,10 @@
 
     const head = el('div','sc-head');
     head.innerHTML = `
-      <span class="sc-mode-tag success">✓ Lesson Ready</span>
+      <span class="sc-mode-tag success">\u2713 Lesson Ready</span>
       <button class="sc-close" aria-label="Close">×</button>
       <h2 class="sc-title">Your level: <span style="color:#1d4ed8">${TIER_LABEL[tier]}</span></h2>
-      <p class="sc-subtitle">You scored <strong>${pct}%</strong> on the check. Based on that, here's the lesson version we recommend — but you can change it any time on the lesson page.</p>`;
+      <p class="sc-subtitle">You scored <strong>${pct}%</strong> on the check. Based on that, here's the lesson version we recommend \u2014 but you can change it any time on the lesson page.</p>`;
     head.querySelector('.sc-close').addEventListener('click', () => { close(); if (onCleared) onCleared(tier); });
 
     const body = el('div','sc-body');
@@ -217,7 +217,7 @@
       });
       foot.appendChild(reinforce);
     }
-    const go = el('button','sc-btn primary',`Open ${TIER_LABEL[tier]} lesson →`);
+    const go = el('button','sc-btn primary',`Open ${TIER_LABEL[tier]} lesson \u2192`);
     go.addEventListener('click', () => { close(); if (onCleared) onCleared(tier); });
     foot.appendChild(go);
 
@@ -225,12 +225,12 @@
   }
 
   /* =========================================================
-     MODE: POWERUP — subject-specific scaffold (optional).
+     MODE: POWERUP \u2014 subject-specific scaffold (optional).
      ========================================================= */
   function renderPowerUp(bp, payload){
     const head = el('div','sc-head');
     head.innerHTML = `
-      <span class="sc-mode-tag powerup">⚡ Power-Up</span>
+      <span class="sc-mode-tag powerup">\u26A1 Power-Up</span>
       <button class="sc-close" aria-label="Close">×</button>
       <h2 class="sc-title">Quick scaffold before the lesson</h2>
       <p class="sc-subtitle">A 30-second visual aid for <strong>${escapeHtml(bp.title)}</strong>. Read it, then open the lesson.</p>`;
@@ -247,7 +247,7 @@
       });
       foot.appendChild(drill);
     }
-    const go = el('button','sc-btn primary','Open lesson →');
+    const go = el('button','sc-btn primary','Open lesson \u2192');
     go.addEventListener('click', () => { close(); if (payload.onCleared) payload.onCleared(payload.tier); });
     foot.appendChild(go);
 
@@ -278,7 +278,7 @@
         <div class="pu-note">A safety net when factorising looks ugly. It works every time.</div>
       </div>
       <div class="pu-steps">
-        <div class="pu-step"><div class="pu-step-num">1</div><div class="pu-step-text"><strong>Slide</strong> — multiply <code>a</code> into <code>c</code>. New equation: <code>x² + bx + (a·c) = 0</code>.</div></div>
+        <div class="pu-step"><div class="pu-step-num">1</div><div class="pu-step-text"><strong>Slide</strong> \u2014 multiply <code>a</code> into <code>c</code>. New equation: <code>x² + bx + (a·c) = 0</code>.</div></div>
         <div class="pu-step"><div class="pu-step-num">2</div><div class="pu-step-text"><strong>Factor</strong> as <code>(x + p)(x + q) = 0</code>. Find two numbers that multiply to <code>a·c</code> and add to <code>b</code>.</div></div>
         <div class="pu-step"><div class="pu-step-num">3</div><div class="pu-step-text"><strong>Divide</strong> each <code>p</code> and <code>q</code> by the original <code>a</code>, then simplify.</div></div>
       </div>`;
@@ -305,7 +305,7 @@
         </svg>
       </div>
       <div class="pu-card"><div class="pu-formula">${top} = ${left} × ${right}      ${left} = ${top} ÷ ${right}      ${right} = ${top} ÷ ${left}</div>
-      <div class="pu-note">Cover the unknown letter with your finger — what's left is the formula you need.</div></div>`;
+      <div class="pu-note">Cover the unknown letter with your finger \u2014 what's left is the formula you need.</div></div>`;
     return wrap;
   }
 
@@ -316,7 +316,7 @@
     let html = `<div class="pu-section-title">Character Map</div><div class="pu-tree">`;
     nodes.forEach(n => {
       html += `<div class="pu-tree-node">
-        <div class="pu-tree-icon">${escapeHtml(n.icon || '🎭')}</div>
+        <div class="pu-tree-icon">${escapeHtml(n.icon || '\uD83C\uDFAD')}</div>
         <div><div class="pu-tree-name">${escapeHtml(n.name)}</div>
         <div class="pu-tree-role">${escapeHtml(n.role || '')}</div></div></div>`;
     });
@@ -336,17 +336,17 @@
     items.forEach(it => {
       html += `<div class="pu-decode">
         <div class="pu-decode-tag">${escapeHtml(it.tag)}</div>
-        <div class="pu-decode-arrow">→</div>
+        <div class="pu-decode-arrow">\u2192</div>
         <div class="pu-decode-meaning">${escapeHtml(it.meaning)}</div></div>`;
     });
-    html += `</div><div class="pu-card"><div class="pu-note">Break long biology words into prefixes and suffixes — most exam terms are built from just a few of these parts.</div></div>`;
+    html += `</div><div class="pu-card"><div class="pu-note">Break long biology words into prefixes and suffixes \u2014 most exam terms are built from just a few of these parts.</div></div>`;
     wrap.innerHTML = html;
     return wrap;
   }
 
   function renderGrammarFormula(c){
     const wrap = el('div');
-    const tokens = (c && c.tokens) || ['Singular Subject','+','Verb-s','=','✔'];
+    const tokens = (c && c.tokens) || ['Singular Subject','+','Verb-s','=','\u2714'];
     const note   = (c && c.note)   || 'When the subject is one person/thing, add an "s" to the verb.';
     let formula = '<div class="pu-grammar"><div class="pu-grammar-formula">';
     tokens.forEach(t => {
@@ -361,7 +361,7 @@
   }
 
   /* =========================================================
-     MODE: DRILL — focused practice, drills are excluded from
+     MODE: DRILL \u2014 focused practice, drills are excluded from
      Predicted Score (see storage.js).
      ========================================================= */
   function renderDrill(bp, payload){
@@ -373,10 +373,10 @@
 
     const head = el('div','sc-head');
     head.innerHTML = `
-      <span class="sc-mode-tag drill">🎯 Skill Drill · ${escapeHtml(subSkillTag || 'practice')}</span>
+      <span class="sc-mode-tag drill">\uD83C\uDFAF Skill Drill · ${escapeHtml(subSkillTag || 'practice')}</span>
       <button class="sc-close" aria-label="Close">×</button>
       <h2 class="sc-title">Lock in the sub-skill</h2>
-      <p class="sc-subtitle">Drills don't affect your Predicted Score — they only ever help.</p>`;
+      <p class="sc-subtitle">Drills don't affect your Predicted Score \u2014 they only ever help.</p>`;
     head.querySelector('.sc-close').addEventListener('click', close);
 
     const body = el('div','sc-body');
