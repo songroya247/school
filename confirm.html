@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Confirm Your Email — UE School</title>
+<title>Confirm Your Email &mdash; UE School</title>
 <link rel="stylesheet" href="css/main.css">
 <style>
 body { min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--bg); padding:24px; }
@@ -35,7 +35,7 @@ body { min-height:100vh; display:flex; align-items:center; justify-content:cente
 
 <div class="confirm-card">
   <div id="state-waiting">
-    <div class="confirm-icon">📧</div>
+    <div class="confirm-icon">ðŸ“§</div>
     <div class="confirm-title">Check Your Email</div>
 
     <div id="email-badge-wrap">
@@ -47,11 +47,11 @@ body { min-height:100vh; display:flex; align-items:center; justify-content:cente
       Click the link to activate your account and start preparing for your exams.
     </div>
 
-    <a href="login.html" class="btn btn-outline btn-block">← Back to Login</a>
+    <a href="login.html" class="btn btn-outline btn-block">&larr; Back to Login</a>
 
     <div class="status-checking">
       <div class="dot-pulse"><span></span><span></span><span></span></div>
-      Waiting for confirmation…
+      Waiting for confirmationâ€¦
     </div>
 
     <div class="resend-link">
@@ -62,14 +62,14 @@ body { min-height:100vh; display:flex; align-items:center; justify-content:cente
   </div>
 
   <div id="state-confirmed" style="display:none">
-    <div class="confirm-icon" style="animation:none">✅</div>
+    <div class="confirm-icon" style="animation:none">&#x2705;</div>
     <div class="confirm-title">Email Confirmed!</div>
     <div class="confirm-desc">
-      Your account is now active. Setting up your profile…
+      Your account is now active. Setting up your profileâ€¦
     </div>
     <div class="status-checking">
       <div class="dot-pulse"><span></span><span></span><span></span></div>
-      Redirecting to your dashboard…
+      Redirecting to your dashboardâ€¦
     </div>
   </div>
 </div>
@@ -83,16 +83,16 @@ body { min-height:100vh; display:flex; align-items:center; justify-content:cente
 <script src="js/auth.js"></script>
 
 <script>
-// window.sb is set by js/supabase.js — credentials live only in js/config.js
+// window.sb is set by js/supabase.js \u2014 credentials live only in js/config.js
 
-// ── Display the email they signed up with ──
+// â”€â”€ Display the email they signed up with â”€â”€
 const params = new URLSearchParams(window.location.search);
 const emailParam = params.get('email');
 if (emailParam) {
   document.getElementById('email-display').textContent = decodeURIComponent(emailParam);
 }
 
-// ── CRITICAL: Handle the Supabase email confirmation token ───────────
+// â”€â”€ CRITICAL: Handle the Supabase email confirmation token â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // When a user clicks the confirmation link in their email, Supabase
 // redirects them back to confirm.html with one of two formats:
 //
@@ -124,7 +124,7 @@ window.sb.auth.onAuthStateChange(async (event, session) => {
   }
 });
 
-// Also check on page load — handles the case where the token was
+// Also check on page load \u2014 handles the case where the token was
 // already exchanged before the listener was registered
 (async () => {
   await new Promise(r => setTimeout(r, 500));
@@ -141,7 +141,7 @@ function showConfirmed() {
   if (confirmed) confirmed.style.display = 'block';
 }
 
-// ── Resend confirmation ──
+// â”€â”€ Resend confirmation â”€â”€
 let resendCooldown = 0;
 
 async function resendConfirmation() {
