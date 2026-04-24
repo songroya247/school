@@ -1,5 +1,5 @@
 /* ============================================================
-   curriculum.js — Subjects, topics, and the TOPIC_BLUEPRINT
+   curriculum.js \u2014 Subjects, topics, and the TOPIC_BLUEPRINT
    ============================================================ */
 
 window.SUBJECTS = [
@@ -9,7 +9,7 @@ window.SUBJECTS = [
   { id: 'english',     name: 'English',     accent: '#ea580c' }
 ];
 
-/* TOPIC_BLUEPRINT — single source of truth for topics, lessons,
+/* TOPIC_BLUEPRINT \u2014 single source of truth for topics, lessons,
    diagnostics, drills, and power-ups per topic. */
 window.TOPIC_BLUEPRINT = {
 
@@ -32,10 +32,10 @@ window.TOPIC_BLUEPRINT = {
     ],
     formulas: [
       'ax² + bx + c = 0',
-      'x = (-b ± √(b² − 4ac)) / 2a',
+      'x = (-b ± \u221A(b² \u2212 4ac)) / 2a',
       'Sum of roots = -b/a',
       'Product of roots = c/a',
-      'Discriminant Δ = b² − 4ac',
+      'Discriminant Δ = b² \u2212 4ac',
       '(x + p)(x + q) = 0'
     ],
     subSkills: ['factorising','formula','discriminant'],
@@ -58,7 +58,7 @@ window.TOPIC_BLUEPRINT = {
       'Solve simultaneous linear equations by elimination and substitution.',
       'Identify slope and y-intercept from y = mx + c.'
     ],
-    formulas: ['y = mx + c', 'm = (y₂ − y₁)/(x₂ − x₁)', 'ax + b = 0  ⇒  x = -b/a'],
+    formulas: ['y = mx + c', 'm = (y\u2082 \u2212 y\u2081)/(x\u2082 \u2212 x\u2081)', 'ax + b = 0  \u21D2  x = -b/a'],
     subSkills: ['isolate','simultaneous','graphing'],
     powerUp: { kind: 'math.formula_triangle', content: { top: 'd', left: 's', right: 't' } }
   },
@@ -79,7 +79,7 @@ window.TOPIC_BLUEPRINT = {
       'Express numbers in standard form.',
       'Rationalise simple surd denominators.'
     ],
-    formulas: ['aᵐ × aⁿ = aᵐ⁺ⁿ','aᵐ ÷ aⁿ = aᵐ⁻ⁿ','(aᵐ)ⁿ = aᵐⁿ','a⁰ = 1','a⁻ⁿ = 1/aⁿ','√a × √b = √(ab)'],
+    formulas: ['aᵐ × a\u207F = aᵐ\u207A\u207F','aᵐ ÷ a\u207F = aᵐ\u207B\u207F','(aᵐ)\u207F = aᵐ\u207F','a\u2070 = 1','a\u207B\u207F = 1/a\u207F','\u221Aa × \u221Ab = \u221A(ab)'],
     subSkills: ['index_laws','standard_form','surds'],
     powerUp: { kind: 'math.slide_divide' }
   },
@@ -112,15 +112,15 @@ window.TOPIC_BLUEPRINT = {
       kind: 'literature.character_tree',
       content: {
         nodes: [
-          { id: 'sidi',    icon: '👸', name: 'Sidi',    role: 'The "Jewel" of Ilujinle — proud and beautiful.' },
-          { id: 'baroka',  icon: '🦁', name: 'Baroka',  role: 'The Lion — cunning village Bale (chief).' },
-          { id: 'lakunle', icon: '👨‍🏫', name: 'Lakunle', role: 'The young schoolteacher — modern, idealistic.' },
-          { id: 'sadiku',  icon: '👵', name: 'Sadiku',  role: 'Baroka\'s eldest wife and matchmaker.' }
+          { id: 'sidi',    icon: '\uD83D\uDC78', name: 'Sidi',    role: 'The "Jewel" of Ilujinle \u2014 proud and beautiful.' },
+          { id: 'baroka',  icon: '\uD83E\uDD81', name: 'Baroka',  role: 'The Lion \u2014 cunning village Bale (chief).' },
+          { id: 'lakunle', icon: '\uD83D\uDC68\u200D\uD83C\uDFEB', name: 'Lakunle', role: 'The young schoolteacher \u2014 modern, idealistic.' },
+          { id: 'sadiku',  icon: '\uD83D\uDC75', name: 'Sadiku',  role: 'Baroka\'s eldest wife and matchmaker.' }
         ],
         edges: [
-          'Lakunle ❤ wants to marry → Sidi (refuses bride-price)',
-          'Baroka 🦁 schemes for → Sidi (uses Sadiku as pawn)',
-          'Sadiku 👵 reports false news → Sidi → Baroka\'s trap'
+          'Lakunle \u2764 wants to marry \u2192 Sidi (refuses bride-price)',
+          'Baroka \uD83E\uDD81 schemes for \u2192 Sidi (uses Sadiku as pawn)',
+          'Sadiku \uD83D\uDC75 reports false news \u2192 Sidi \u2192 Baroka\'s trap'
         ]
       }
     }
@@ -148,15 +148,15 @@ window.TOPIC_BLUEPRINT = {
       kind: 'literature.character_tree',
       content: {
         nodes: [
-          { id: 'okonkwo', icon: '⚔️', name: 'Okonkwo', role: 'Tragic hero — driven by fear of weakness.' },
-          { id: 'nwoye',   icon: '🙇', name: 'Nwoye',   role: 'Okonkwo\'s son — converts to Christianity.' },
-          { id: 'ezinma',  icon: '🌟', name: 'Ezinma',  role: 'His favourite daughter — wise beyond her years.' },
-          { id: 'obierika',icon: '🤝', name: 'Obierika', role: 'Okonkwo\'s thoughtful friend & moral mirror.' }
+          { id: 'okonkwo', icon: '\u2694️', name: 'Okonkwo', role: 'Tragic hero \u2014 driven by fear of weakness.' },
+          { id: 'nwoye',   icon: '\uD83D\uDE47', name: 'Nwoye',   role: 'Okonkwo\'s son \u2014 converts to Christianity.' },
+          { id: 'ezinma',  icon: '\uD83C\uDF1F', name: 'Ezinma',  role: 'His favourite daughter \u2014 wise beyond her years.' },
+          { id: 'obierika',icon: '\uD83E\uDD1D', name: 'Obierika', role: 'Okonkwo\'s thoughtful friend & moral mirror.' }
         ],
         edges: [
-          'Okonkwo ⚔️ disowns → Nwoye (for joining missionaries)',
-          'Okonkwo ⚔️ secretly admires → Ezinma',
-          'Obierika 🤝 questions → Umuofia\'s harsh customs'
+          'Okonkwo \u2694️ disowns \u2192 Nwoye (for joining missionaries)',
+          'Okonkwo \u2694️ secretly admires \u2192 Ezinma',
+          'Obierika \uD83E\uDD1D questions \u2192 Umuofia\'s harsh customs'
         ]
       }
     }
@@ -173,16 +173,16 @@ window.TOPIC_BLUEPRINT = {
       standard:   { url: 'https://placeholder.video/enzymes-standard',   duration: '12 mins', tagline: 'Default lesson · lock-and-key, factors & denaturation' },
       mastery:    { url: 'https://placeholder.video/enzymes-mastery',    duration: '8 mins',  tagline: 'Exam-focused · graph interpretation, induced fit & inhibitor types' }
     },
-    blurb: 'Biological catalysts — how they speed up reactions without being consumed.',
+    blurb: 'Biological catalysts \u2014 how they speed up reactions without being consumed.',
     objectives: [
       'Define an enzyme and describe its protein structure.',
       'Explain the lock-and-key model of enzyme action.',
       'Identify factors that affect enzyme activity.'
     ],
     formulas: [
-      'Substrate + Enzyme → ES complex → Product + Enzyme',
-      'Optimum pH ≈ 7  (most human enzymes)',
-      'Optimum T ≈ 37 °C (human body)',
+      'Substrate + Enzyme \u2192 ES complex \u2192 Product + Enzyme',
+      'Optimum pH \u2248 7  (most human enzymes)',
+      'Optimum T \u2248 37 °C (human body)',
       'Denatured > 60 °C'
     ],
     subSkills: ['definition','mechanism','factors'],
@@ -217,7 +217,7 @@ window.TOPIC_BLUEPRINT = {
       'Distinguish between the light-dependent and light-independent stages.'
     ],
     formulas: [
-      '6CO₂ + 6H₂O —(light, chlorophyll)→ C₆H₁₂O₆ + 6O₂',
+      '6CO\u2082 + 6H\u2082O \u2014(light, chlorophyll)\u2192 C\u2086H\u2081\u2082O\u2086 + 6O\u2082',
       'Light stage · in the thylakoid',
       'Calvin cycle · in the stroma',
       'Pigment · chlorophyll a & b'
@@ -241,7 +241,7 @@ window.TOPIC_BLUEPRINT = {
   'english.subject_verb_agreement': {
     id: 'english.subject_verb_agreement',
     subject: 'english',
-    title: 'Subject–Verb Agreement',
+    title: 'Subject\u2013Verb Agreement',
     duration: '9 mins',
     videos: {
       foundation: { url: 'https://placeholder.video/sva-foundation', duration: '14 mins', tagline: 'Built from scratch · what is a subject, what is a verb, with examples' },
@@ -257,14 +257,14 @@ window.TOPIC_BLUEPRINT = {
     formulas: [
       'Singular subject + Verb-s   ·  "She runs"',
       'Plural subject + Verb       ·  "They run"',
-      'Either / Or → verb agrees with the nearest subject',
-      'Each / Every / Everyone → singular verb'
+      'Either / Or \u2192 verb agrees with the nearest subject',
+      'Each / Every / Everyone \u2192 singular verb'
     ],
     subSkills: ['singular_plural','compound_subjects','indefinite'],
     powerUp: {
       kind: 'english.grammar_formula',
       content: {
-        tokens: ['Singular Subject', '+', 'Verb-s', '=', '✔ Agreement'],
+        tokens: ['Singular Subject', '+', 'Verb-s', '=', '\u2714 Agreement'],
         note: 'When the subject is one person/thing, add an "s" to the present-tense verb. The dog barks. (NOT: The dog bark.)'
       }
     }
@@ -280,7 +280,7 @@ window.TOPIC_BLUEPRINT = {
       standard:   { url: 'https://placeholder.video/tenses-standard',   duration: '11 mins', tagline: 'Default lesson · simple, continuous & perfect forms' },
       mastery:    { url: 'https://placeholder.video/tenses-mastery',    duration: '7 mins',  tagline: 'Exam-focused · tense-shift errors & narrative consistency' }
     },
-    blurb: 'Past, present, future — and how each one branches into simple, continuous and perfect.',
+    blurb: 'Past, present, future \u2014 and how each one branches into simple, continuous and perfect.',
     objectives: [
       'Form the simple, continuous and perfect tenses.',
       'Use time markers to choose the right tense.',
@@ -289,15 +289,15 @@ window.TOPIC_BLUEPRINT = {
     formulas: [
       'Present Simple · S + V / V-s',
       'Present Continuous · S + am/is/are + V-ing',
-      'Past Simple · S + V-ed / V₂',
-      'Present Perfect · S + has/have + V₃'
+      'Past Simple · S + V-ed / V\u2082',
+      'Present Perfect · S + has/have + V\u2083'
     ],
     subSkills: ['simple','continuous','perfect'],
     powerUp: {
       kind: 'english.grammar_formula',
       content: {
-        tokens: ['Subject', '+', 'has/have', '+', 'V₃'],
-        note: 'Present Perfect describes past actions still relevant now. "She has finished her homework." (V₃ = past participle)'
+        tokens: ['Subject', '+', 'has/have', '+', 'V\u2083'],
+        note: 'Present Perfect describes past actions still relevant now. "She has finished her homework." (V\u2083 = past participle)'
       }
     }
   }
