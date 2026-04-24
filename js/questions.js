@@ -391,7 +391,19 @@ const QUESTION_BANK = (function () {
   }
 
   // ── Public: get questions (auto-selects source) ─────────────────
+  // Priority order:
+  //   1. Google Sheets (if UE_CONFIG.GOOGLE_SHEET_QUESTIONS_CSV_URL is set)
+  //   2. Supabase RPC (if LOCAL_ONLY === false)
+  //   3. Bundled local bank (always available)
   async function getQuestions({ subject, topic, examType, count = 10 } = {}) {
+    if (window.GSHEET_QUESTIONS && window.GSHEET_QUESTIONS.isEnabled()) {
+      try {
+        const rows = await window.GSHEET_QUESTIONS.getQuestions({ subject, topic, examType, count });
+        if (rows && rows.length) return rows;
+      } catch (e) {
+        console.warn('[QUESTIONS] Sheets fetch failed, falling through:', e.message);
+      }
+    }
     if (!LOCAL_ONLY && window.sb) {
       try {
         return await _fetchFromDB({ subject, topic, examType, count });
