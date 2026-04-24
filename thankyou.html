@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Welcome to UE School — Payment Confirmed</title>
+<title>Welcome to UE School &mdash; Payment Confirmed</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/main.css">
 <style>
@@ -294,7 +294,7 @@ body {
 
   <div class="ty-badge">Payment Confirmed</div>
 
-  <div class="ty-ring" id="ty-emoji">🎉</div>
+  <div class="ty-ring" id="ty-emoji">&#x1F389;</div>
 
   <h1 class="ty-title">You're all set!</h1>
   <p class="ty-sub">
@@ -302,7 +302,7 @@ body {
     and every past-paper is now unlocked and ready for you.
   </p>
 
-  <!-- Plan chip — filled by JS -->
+  <!-- Plan chip &mdash; filled by JS -->
   <div class="ty-plan-chip" id="plan-chip" style="display:none">
     <div class="ty-plan-icon" id="plan-icon">📚</div>
     <div class="ty-plan-label">
@@ -317,18 +317,18 @@ body {
       <span>✨</span> What's now unlocked
     </div>
     <ul class="ty-unlocked-list" id="feature-list">
-      <li><div class="ty-check">✓</div> Full CBT practice engine — all subjects</li>
-      <li><div class="ty-check">✓</div> Video lessons across 7 subjects</li>
-      <li><div class="ty-check">✓</div> Adaptive Skill Chamber — 3-tier video routing</li>
-      <li><div class="ty-check">✓</div> JAMB, WAEC & NECO past-paper question banks</li>
-      <li><div class="ty-check">✓</div> Smart score predictions & progress tracking</li>
+      <li><div class="ty-check">&#x2713;</div> Full CBT practice engine &mdash; all subjects</li>
+      <li><div class="ty-check">&#x2713;</div> Video lessons across 7 subjects</li>
+      <li><div class="ty-check">&#x2713;</div> Adaptive Skill Chamber &mdash; 3-tier video routing</li>
+      <li><div class="ty-check">&#x2713;</div> JAMB, WAEC & NECO past-paper question banks</li>
+      <li><div class="ty-check">&#x2713;</div> Smart score predictions & progress tracking</li>
     </ul>
   </div>
 
   <!-- CTA buttons -->
   <div class="ty-btns">
     <a href="classroom.html" class="btn-start">
-      Start Studying →
+      Start Studying &rarr;
     </a>
     <a href="dashboard.html" class="btn-dash">
       View my Dashboard
@@ -348,14 +348,14 @@ body {
 <script>
 /* ── 1. Plan chip ────────────────────────────────────────── */
 const PLAN_META = {
-  monthly:   { name: 'Basic Plan',     icon: '📘', period: '1 month',   emoji: '🎉' },
-  quarterly: { name: 'Pro Plan',       icon: '🚀', period: '3 months',  emoji: '🏆' },
+  monthly:   { name: 'Basic Plan',     icon: '📘', period: '1 month',   emoji: '\uD83C\uDF89' },
+  quarterly: { name: 'Pro Plan',       icon: '🚀', period: '3 months',  emoji: '\uD83C\uDFC6' },
   yearly:    { name: 'Elite Plan',     icon: '💎', period: '1 year',    emoji: '👑' },
 };
 
 const EXTRA_FEATURES = {
   quarterly: ['Priority support', 'Mock exam mode (40-question timed)'],
-  yearly:    ['Priority support', 'Mock exam mode', '1-on-1 tutor sessions (×2)', 'Printed study guide'],
+  yearly:    ['Priority support', 'Mock exam mode', '1-on-1 tutor sessions (\u00D72)', 'Printed study guide'],
 };
 
 (function initPlanChip() {
@@ -387,7 +387,7 @@ const EXTRA_FEATURES = {
     const list = document.getElementById('feature-list');
     extras.forEach(text => {
       const li = document.createElement('li');
-      li.innerHTML = '<div class="ty-check">✓</div> ' + text;
+      li.innerHTML = '<div class="ty-check">\u2713</div> ' + text;
       list.appendChild(li);
     });
   }
