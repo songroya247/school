@@ -24,8 +24,8 @@ const CLASSROOM = (function () {
               'Addition and subtraction can be performed directly in any base without converting first.'
             ],
             formulas: [
-              { label: 'Base 10 → Base n', formula: 'Divide by n, read remainders upward' },
-              { label: 'Base n → Base 10', formula: 'Σ (digit × nᵖᵒˢⁱᵗⁱᵒⁿ)' }
+              { label: 'Base 10 \u2192 Base n', formula: 'Divide by n, read remainders upward' },
+              { label: 'Base n \u2192 Base 10', formula: 'Σ (digit × nᵖᵒˢⁱᵗⁱᵒⁿ)' }
             ]
           },
           quiz: [
@@ -320,14 +320,14 @@ const CLASSROOM = (function () {
             points: [
               'Acids have pH < 7; bases have pH > 7; neutral solutions have pH = 7.',
               'Strong acids (HCl, H₂SO₄) fully dissociate; weak acids only partially dissociate.',
-              'Neutralisation: acid + base → salt + water.',
+              'Neutralisation: acid + base \u2192 salt + water.',
               'Indicators (litmus, phenolphthalein) show whether a solution is acid or base.'
             ],
             formulas: [
-              { label: 'Neutralisation', formula: 'Acid + Base → Salt + H₂O' },
+              { label: 'Neutralisation', formula: 'Acid + Base \u2192 Salt + H₂O' },
               { label: 'pH scale', formula: 'Acid: <7 | Neutral: 7 | Base: >7' },
-              { label: 'HCl dissociation', formula: 'HCl → H⁺ + Cl⁻' },
-              { label: 'NaOH dissociation', formula: 'NaOH → Na⁺ + OH⁻' }
+              { label: 'HCl dissociation', formula: 'HCl \u2192 H⁺ + Cl⁻' },
+              { label: 'NaOH dissociation', formula: 'NaOH \u2192 Na⁺ + OH⁻' }
             ]
           },
           quiz: [
@@ -373,12 +373,12 @@ const CLASSROOM = (function () {
               'The mitochondria is the powerhouse of the cell — site of aerobic respiration.',
               'The nucleus controls cell activities and contains DNA.',
               'Osmosis is the movement of water from low to high solute concentration across a semi-permeable membrane.',
-              'Photosynthesis occurs in chloroplasts: 6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂.'
+              'Photosynthesis occurs in chloroplasts: 6CO₂ + 6H₂O + light \u2192 C₆H₁₂O₆ + 6O₂.'
             ],
             formulas: [
-              { label: 'Photosynthesis', formula: '6CO₂+6H₂O → C₆H₁₂O₆+6O₂' },
-              { label: 'Aerobic respiration', formula: 'C₆H₁₂O₆+6O₂ → 6CO₂+6H₂O+ATP' },
-              { label: 'Osmosis direction', formula: 'Low → High solute concentration' },
+              { label: 'Photosynthesis', formula: '6CO₂+6H₂O \u2192 C₆H₁₂O₆+6O₂' },
+              { label: 'Aerobic respiration', formula: 'C₆H₁₂O₆+6O₂ \u2192 6CO₂+6H₂O+ATP' },
+              { label: 'Osmosis direction', formula: 'Low \u2192 High solute concentration' },
               { label: 'Cell wall composition', formula: 'Cellulose (plants)' }
             ]
           },
@@ -702,7 +702,7 @@ const CLASSROOM = (function () {
           <div style="font-size:2.5rem;margin-bottom:14px">&#x1F512;</div>
           <h3 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Premium Content</h3>
           <p style="color:rgba(15,28,63,.55);margin-bottom:22px">Upgrade your plan to unlock this lesson and all premium topics.</p>
-          <a href="pricing.html" class="btn btn-primary btn-lg">Unlock Premium →</a>
+          <a href="pricing.html" class="btn btn-primary btn-lg">Unlock Premium \u2192</a>
         </div>`;
     }
 
@@ -815,7 +815,7 @@ const CLASSROOM = (function () {
         const pct = Math.round((quizState.correct / quizState.questions.length) * 100);
         if (fb) {
           fb.style.cssText = 'display:block;background:rgba(79,142,255,.1);color:#3b82f6;border:1px solid rgba(79,142,255,.25);padding:12px 16px;border-radius:10px;font-weight:600;margin-top:12px';
-          fb.innerHTML = `&#x1F389; Quiz complete! You scored <strong>${pct}%</strong>. <a href="${document.getElementById('practice-btn')?.href || 'cbt.html'}" style="color:var(--accent);text-decoration:underline">Take full practice →</a>`;
+          fb.innerHTML = `&#x1F389; Quiz complete! You scored <strong>${pct}%</strong>. <a href="${document.getElementById('practice-btn')?.href || 'cbt.html'}" style="color:var(--accent);text-decoration:underline">Take full practice \u2192</a>`;
         }
         if (document.getElementById('quiz-options')) document.getElementById('quiz-options').innerHTML = '';
       }
