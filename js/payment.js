@@ -160,10 +160,20 @@ const PAYMENT = (function () {
   /* ── 5. SERVER-SIDE VERIFICATION ──────────────────────────────── */
   async function verifyWithServer(reference, planKey) {
     try {
-      // Prefer auth token from UE_USER (seeded by head-gatekeeper / auth-guard)
-      const accessToken =
-        (window.UE_USER && window.UE_USER.access_token) ||
-        ((await window.sb.auth.getSession()).data.session?.access_token);
+      // ALWAYS pull a fresh access token from the SDK. The cached
+      // token on UE_USER may be stale (rotated by silent refresh)
+      // and an expired bearer makes the Edge Function reply 401.
+      let accessToken = null;
+      if (window.sb && window.sb.auth) {
+        const { data } = await window.sb.auth.getSession();
+        accessToken = data.session?.access_token || null;
+      }
+      if (!accessToken && window.UE_USER) {
+        accessToken = window.UE_USER.access_token;
+      }
+      if (!accessToken) {
+        return { success: false, message: 'Not signed in. Please log in and try again.' };
+      }
 
       const res = await fetch(getVerifyUrl(), {
         method:  'POST',
