@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mastery Report — UE School</title>
+<title>Mastery Report &mdash; UE School</title>
 
 <!-- ╔══════════════════════════════════════════════════════╗
-     ║  SECURITY BLOCK — must be first in <head>           ║
+     ║  SECURITY BLOCK &mdash; must be first in <head>           ║
      ║  NOTE: report.html allows public token-based access ║
      ║  The gatekeeper skips redirect when ?token= present ║
      ╚══════════════════════════════════════════════════════╝ -->
 <script>
 // Inline micro-gatekeeper for report.html:
-// If no ?token= param AND no localStorage session → redirect to login.
+// If no ?token= param AND no localStorage session \u2192 redirect to login.
 // This runs synchronously before any CSS or body renders.
 (function(){
   var params = new URLSearchParams(window.location.search);
-  if (params.get('token')) return; // public share link — allow through
+  if (params.get('token')) return; // public share link \u2014 allow through
   // Load config.js values inline (config.js may not be loaded yet)
   var sessionFound = false;
   try {
@@ -70,6 +70,12 @@ thead tr{background:var(--bg)}
 </style>
 </head>
 <body>
+<noscript>
+  <div style="padding:40px;text-align:center;font-family:system-ui">
+    <h2>JavaScript is required</h2>
+    <p>Please enable JavaScript or <a href="login.html">click here to log in</a>.</p>
+  </div>
+</noscript>
 <div class="report-wrap">
 
   <div id="loading-state" class="loading-wrap">
@@ -78,7 +84,7 @@ thead tr{background:var(--bg)}
   </div>
 
   <div id="error-state" style="display:none;text-align:center;padding:80px 24px">
-    <div style="font-size:3rem;margin-bottom:16px">⚠️</div>
+    <div style="font-size:3rem;margin-bottom:16px">&#x26A0;</div>
     <h2 style="font-family:var(--font-head);font-size:1.8rem;margin-bottom:8px">Report Not Found</h2>
     <p style="color:var(--muted);margin-bottom:24px">This report link may have expired or is invalid.</p>
     <a href="dashboard.html" class="btn btn-primary">Go to Dashboard</a>
@@ -87,7 +93,7 @@ thead tr{background:var(--bg)}
   <div id="report-content" style="display:none">
 
     <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px">
-      <a href="dashboard.html" class="btn btn-outline">← Back to Dashboard</a>
+      <a href="dashboard.html" class="btn btn-outline">&larr; Back to Dashboard</a>
       <div style="display:flex;gap:10px;align-items:center">
         <button class="btn btn-outline" id="copy-share-btn" onclick="copyShareLink()" style="font-size:.82rem">🔗 Copy Share Link</button>
         <button class="btn btn-primary" onclick="window.print()">🖨 Print / Save PDF</button>
@@ -101,22 +107,22 @@ thead tr{background:var(--bg)}
         <div>
           <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--accent);letter-spacing:.06em;margin-bottom:4px">UE School</div>
           <div style="font-family:var(--font-head);font-size:2.2rem;margin-bottom:4px">Student Mastery Report</div>
-          <div style="font-size:.82rem;color:var(--muted)" id="report-generated-date">Generated: —</div>
+          <div style="font-size:.82rem;color:var(--muted)" id="report-generated-date">Generated: &mdash;</div>
         </div>
         <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px 18px;text-align:right">
           <div style="font-size:.75rem;color:var(--muted);margin-bottom:2px">Report Token</div>
-          <div style="font-family:var(--font-mono);font-size:.82rem;color:var(--text)" id="report-token">—</div>
+          <div style="font-family:var(--font-mono);font-size:.82rem;color:var(--text)" id="report-token">&mdash;</div>
         </div>
       </div>
 
       <!-- Student Info -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:36px" class="info-grid">
-        <div><div class="stat-label">Student Name</div><div class="stat-value" id="info-name">—</div></div>
-        <div><div class="stat-label">Exam Type</div><div class="stat-value" id="info-exams">—</div></div>
-        <div><div class="stat-label">Exam Date</div><div class="stat-value" id="info-exam-date">—</div></div>
-        <div><div class="stat-label">Target Score</div><div class="stat-value" id="info-target">—</div></div>
-        <div><div class="stat-label">Study Mode</div><div class="stat-value" id="info-mode">—</div></div>
-        <div><div class="stat-label">Total XP</div><div class="stat-value" id="info-xp">—</div></div>
+        <div><div class="stat-label">Student Name</div><div class="stat-value" id="info-name">&mdash;</div></div>
+        <div><div class="stat-label">Exam Type</div><div class="stat-value" id="info-exams">&mdash;</div></div>
+        <div><div class="stat-label">Exam Date</div><div class="stat-value" id="info-exam-date">&mdash;</div></div>
+        <div><div class="stat-label">Target Score</div><div class="stat-value" id="info-target">&mdash;</div></div>
+        <div><div class="stat-label">Study Mode</div><div class="stat-value" id="info-mode">&mdash;</div></div>
+        <div><div class="stat-label">Total XP</div><div class="stat-value" id="info-xp">&mdash;</div></div>
       </div>
 
       <!-- Predictions (each column hidden if not relevant to user's exam mix) -->
@@ -141,7 +147,7 @@ thead tr{background:var(--bg)}
         <table>
           <thead><tr><th>Topic</th><th>Subject</th><th>Mastery</th><th>Status</th></tr></thead>
           <tbody id="weakness-table-body">
-            <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:32px">No topic data yet — complete CBT sessions to populate this.</td></tr>
+            <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:32px">No topic data yet &mdash; complete CBT sessions to populate this.</td></tr>
           </tbody>
         </table>
       </div>
@@ -176,26 +182,26 @@ thead tr{background:var(--bg)}
 const SB = window.sb;
 const SUBJ_LABELS={mathematics:'Mathematics',english:'English Language',physics:'Physics',chemistry:'Chemistry',biology:'Biology',economics:'Economics',government:'Government',literature:'Literature',geography:'Geography',commerce:'Commerce',accounts:'Accounts',crk:'CRK'};
 function setEl(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
-function fmtDate(ts){if(!ts)return'—';return new Date(ts).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'});}
+function fmtDate(ts){if(!ts)return'\u2014';return new Date(ts).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'});}
 function masteryToGrade(m){if(m===null||m===undefined)return{label:'NIL',cls:'grade-nil'};const p=m*100;if(p>=75)return{label:'A1',cls:'grade-A1'};if(p>=65)return{label:'B2',cls:'grade-B2'};if(p>=60)return{label:'B3',cls:'grade-B3'};if(p>=55)return{label:'C4',cls:'grade-C4'};if(p>=50)return{label:'C5',cls:'grade-C5'};if(p>=45)return{label:'C6',cls:'grade-C6'};if(p>=40)return{label:'D7',cls:'grade-D7'};return{label:'F9',cls:'grade-F9'};}
 function pColor(p){if(!p)return'fill-grey';if(p>=70)return'fill-green';if(p>=40)return'fill-orange';return'fill-blue';}
-function statusBadge(c){const m={'On Track':'<span class="status-good">On Track</span>','Building Up':'<span class="status-warn">Building Up</span>','Needs Attention':'<span class="status-danger">Needs Attention</span>','Not Started':'<span class="status-nil">Not Started</span>'};return m[c]||'<span class="status-nil">—</span>';}
+function statusBadge(c){const m={'On Track':'<span class="status-good">On Track</span>','Building Up':'<span class="status-warn">Building Up</span>','Needs Attention':'<span class="status-danger">Needs Attention</span>','Not Started':'<span class="status-nil">Not Started</span>'};return m[c]||'<span class="status-nil">\u2014</span>';}
 
 function renderReport(profile,masteryRows,sessions){
   const examTypes=profile.exam_types||[];
   const hasJAMB = examTypes.includes('JAMB') || examTypes.includes('Post-UTME');
   const hasGrade= examTypes.includes('WAEC') || examTypes.includes('NECO');
 
-  setEl('info-name',profile.full_name||'—');
-  setEl('info-exams',examTypes.join(' / ')||'—');
-  setEl('info-exam-date',profile.exam_date?fmtDate(profile.exam_date+'-01'):'—');
+  setEl('info-name',profile.full_name||'\u2014');
+  setEl('info-exams',examTypes.join(' / ')||'\u2014');
+  setEl('info-exam-date',profile.exam_date?fmtDate(profile.exam_date+'-01'):'\u2014');
   // Target line: JAMB users see "/ 400", WAEC-only users see the grade letter
   if (hasJAMB && profile.target_score) {
     setEl('info-target', profile.target_score + ' / 400');
   } else if (!hasJAMB && hasGrade && profile.target_grade) {
     setEl('info-target', 'Grade ' + profile.target_grade);
   } else {
-    setEl('info-target', '—');
+    setEl('info-target', '\u2014');
   }
 
   // Show / hide the right prediction column for this user
@@ -213,7 +219,7 @@ function renderReport(profile,masteryRows,sessions){
   const rows=(masteryRows||[]).filter(r=>r.mastery_level!==null);
   if(hasJAMB){
     const pred=SMARTPATH.predictJAMBScore(profile,rows);
-    if(pred){setEl('pred-jamb',`${pred.low}–${pred.high} / 400`);setEl('pred-jamb-sub',`Based on ${rows.length} topic${rows.length!==1?'s':''} practiced`);}
+    if(pred){setEl('pred-jamb',`${pred.low}\u2013${pred.high} / 400`);setEl('pred-jamb-sub',`Based on ${rows.length} topic${rows.length!==1?'s':''} practiced`);}
   }
 
   const subjMap={};
@@ -237,7 +243,7 @@ function renderReport(profile,masteryRows,sessions){
   }
 
   if(sessions&&sessions.length>0){
-    document.getElementById('sessions-table-body').innerHTML=sessions.map(s=>`<tr><td>${fmtDate(s.created_at)}</td><td>${s.exam_type}</td><td style="font-weight:700">${s.score}/${s.total_questions}</td><td>${Math.round(s.accuracy*100)}%</td><td>${s.avg_time_per_q?s.avg_time_per_q.toFixed(1)+'s':'—'}</td></tr>`).join('');
+    document.getElementById('sessions-table-body').innerHTML=sessions.map(s=>`<tr><td>${fmtDate(s.created_at)}</td><td>${s.exam_type}</td><td style="font-weight:700">${s.score}/${s.total_questions}</td><td>${Math.round(s.accuracy*100)}%</td><td>${s.avg_time_per_q?s.avg_time_per_q.toFixed(1)+'s':'\u2014'}</td></tr>`).join('');
   }
 
   window._shareToken=profile.report_share_token;
@@ -247,7 +253,7 @@ function renderReport(profile,masteryRows,sessions){
 
 function copyShareLink(){
   const url=`${window.location.origin}/report.html?token=${window._shareToken}`;
-  navigator.clipboard.writeText(url).then(()=>{toast('Share link copied!');const b=document.getElementById('copy-share-btn');if(b){b.textContent='✓ Copied!';setTimeout(()=>b.textContent='🔗 Copy Share Link',2000);}}).catch(()=>prompt('Copy this link:',url));
+  navigator.clipboard.writeText(url).then(()=>{toast('Share link copied!');const b=document.getElementById('copy-share-btn');if(b){b.textContent='\u2713 Copied!';setTimeout(()=>b.textContent='🔗 Copy Share Link',2000);}}).catch(()=>prompt('Copy this link:',url));
 }
 
 (async()=>{
@@ -258,7 +264,7 @@ function copyShareLink(){
     const{data}=await SB.from('profiles').select('*').eq('report_share_token',token).single();
     if(!data){document.getElementById('loading-state').style.display='none';document.getElementById('error-state').style.display='block';return;}
     profile=data;userId=data.id;
-    document.querySelector('.no-print').innerHTML='<div style="text-align:center;width:100%"><a href="index.html" class="btn btn-outline">← UE School</a></div>';
+    document.querySelector('.no-print').innerHTML='<div style="text-align:center;width:100%"><a href="index.html" class="btn btn-outline">\u2190 UE School</a></div>';
   } else {
     const{data:{session}}=await SB.auth.getSession();
     if(!session){window.location.href='login.html?next=report.html';return;}
