@@ -1,51 +1,73 @@
 /* ═══════════════════════════════════════════════════════════════════
-   UE School — js/config.js
+   UE School — js/config.js  (v3 — Admin + Google Drive/Sheets)
    Single source of truth for all environment-level constants.
    Frozen at runtime — no script may overwrite these values.
-
-   HOW TO USE:
-     All other scripts read  window.UE_CONFIG.SUPABASE_URL  etc.
-     Replace the two placeholder strings below with your real values.
-     Never put these strings anywhere else in the codebase.
 ═══════════════════════════════════════════════════════════════════ */
 
 (function () {
   'use strict';
 
-  // ── 1. Guard against double-initialisation ──────────────────────
   if (window.UE_CONFIG) return;
 
-  // ── 2. Define the config ────────────────────────────────────────
-  //
-  //  NOTE ON THE ANON KEY:
-  //  The Supabase anon key is intentionally *public* — it is safe to
-  //  ship in client-side code AS LONG AS Row-Level Security (RLS) is
-  //  enabled on every table (see schema.sql).  The key alone cannot
-  //  bypass RLS; what matters is that auth.uid() is enforced in your
-  //  policies, which it is.  Never put your SERVICE ROLE key here.
-  //
   const _config = {
+    // ── Supabase ──────────────────────────────────────────────────
     SUPABASE_URL:  'https://hazwqyvnolgdkokehjhr.supabase.co',
     SUPABASE_ANON: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhendxeXZub2xnZGtva2VoamhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDUwNzYsImV4cCI6MjA5MTY4MTA3Nn0.V7TsNcfpib2HtJRjTASyJPavQ8qUR2R4KXYuWdZB4gE',
 
-    // ── App-level settings ─────────────────────────────────────────
+    // ── App ───────────────────────────────────────────────────────
     APP_NAME:      'UE School',
     LOGIN_PAGE:    'login.html',
     PRICING_PAGE:  'pricing.html',
 
-    // ── Pages that require a valid Supabase session ────────────────
     PROTECTED_PAGES: ['dashboard.html', 'classroom.html', 'cbt.html', 'report.html'],
-
-    // ── Pages that additionally require an active premium sub ─────
     PREMIUM_PAGES:   ['classroom.html', 'cbt.html'],
+
+    // ── Admin pass-through ────────────────────────────────────────
+    // Any account whose `is_admin` column is TRUE in `profiles` is
+    // automatically treated as PREMIUM by auth-guard.js — no separate
+    // login, no duplicate account. They sign up like a normal user
+    // and then a single SQL UPDATE flips the flag.
+    //
+    // The list below is an OPTIONAL fallback "allow-list" by email
+    // for the very first bootstrap, before the column exists in
+    // their profile row. Leave empty in production.
+    ADMIN_EMAILS: [
+      // 'founder@ueschool.com',
+    ],
+
+    // ── Google Drive — videos ─────────────────────────────────────
+    // Each lesson topic in classroom.js can already declare a
+    //   { driveId: 'FILE_ID' }
+    // and the player auto-embeds:
+    //   https://drive.google.com/file/d/FILE_ID/preview
+    //
+    // To use a SHARED FOLDER as your video library, drop the folder
+    // ID here and use GDRIVE_VIDEO.embedUrl(fileId) helper.
+    // Make every video file "Anyone with the link → Viewer".
+    GOOGLE_DRIVE_VIDEO_FOLDER_ID: '',  // e.g. '1AbCdEfGhIjKlMnOpQrStUvWxYz'
+
+    // ── Google Sheets — questions bank ────────────────────────────
+    // 1. Build a Google Sheet with these columns (header row required):
+    //      id | subject | topic | exam_type | year | text | opt_a | opt_b | opt_c | opt_d | ans | explanation | image_url
+    //    `ans` is 0..3 (index of the correct option). `image_url`
+    //    is OPTIONAL — paste a public Drive image URL or any https
+    //    image; the CBT player will render it above the question.
+    // 2. File → Share → "Anyone with the link" → Viewer.
+    // 3. File → Publish to web → Sheet1 → CSV → copy the URL.
+    // 4. Paste that CSV URL below.
+    //
+    // Leaving this blank disables the Sheets path; questions.js then
+    // falls back to the Supabase RPC + local bank as before.
+    GOOGLE_SHEET_QUESTIONS_CSV_URL: '',
+
+    // Cache the parsed sheet in memory for this many minutes
+    GS_QUESTIONS_CACHE_MIN: 30,
   };
 
-  // ── 3. Freeze — prevents any script from mutating config values ─
   Object.defineProperty(window, 'UE_CONFIG', {
     value:        Object.freeze(_config),
     writable:     false,
     configurable: false,
     enumerable:   true,
   });
-
 })();
