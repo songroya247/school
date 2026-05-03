@@ -1,6 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+(function(){
+  var LOGIN = 'login.html';
+  var page  = window.location.pathname.split('/').pop() || '';
+  var h = window.location.hash || '', s = window.location.search || '';
+  if (h.indexOf('access_token=') !== -1 || h.indexOf('type=') !== -1 ||
+      /[?&](code|token_hash|token)=/.test(s)) return;
+  var hasSession = false;
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1) {
+        var val = localStorage.getItem(k);
+        if (val && val.length > 10) { hasSession = true; break; }
+      }
+    }
+  } catch(e) {}
+  if (!hasSession) {
+    window.location.replace(LOGIN + '?next=' + encodeURIComponent(page));
+  }
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Classroom &mdash; UE School</title>
@@ -9,7 +31,7 @@
      ║  SECURITY BLOCK &mdash; must be first in <head>           ║
      ╚══════════════════════════════════════════════════════╝ -->
 <script src="js/config.js"></script>
-<script src="js/head-gatekeeper.js"></script>
+<script src="js/head-gatekeeper.js?v=3"></script>
 <!-- END SECURITY BLOCK -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -166,7 +188,7 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;ba
 }
 </style>
 </head>
-<body>
+<body style="visibility:hidden">
 <noscript>
   <div style="padding:40px;text-align:center;font-family:system-ui">
     <h2>JavaScript is required</h2>
@@ -252,13 +274,16 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;ba
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/auth-guard.js"></script>
+<script src="js/auth-guard.js?v=3"></script>
 
 <!-- Skill Chamber dependencies (load order matters) -->
 <script src="js/storage.js"></script>
 <script src="js/skill_questions.js"></script>
 <script src="js/curriculum.js"></script>
 <script src="js/intervention_modal.js"></script>
+
+<!-- Google Sheets curriculum loader (must load BEFORE classroom.js) -->
+<script src="js/gsheet-curriculum.js"></script>
 
 <!-- Main classroom engine (must come after skill chamber deps) -->
 <script src="js/gdrive-video.js"></script>
@@ -281,6 +306,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const authData = await AUTH_GUARD.init();
   if (!authData) return; // redirect in progress (no session or not premium)
 
+  await GSHEET_CURRICULUM.init();   // load WAEC curriculum from Google Sheet
   await CLASSROOM.init();
 });
 </script>
